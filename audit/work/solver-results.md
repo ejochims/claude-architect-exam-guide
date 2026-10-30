@@ -54,6 +54,23 @@ So, in the bank's current form:
 3. **Acceptance test for every rewritten or new item:** an options-only solver panel must score ≤ 35% across the bank, and no single item may be correctly guessed at confidence ≥ 4 by 2 of 3 options-only runs.
 4. **Holdout items must pass the same gate before you see them.**
 
-## Blueprint-only solver
+## Blueprint-only solver (exam guide and official docs only; no curriculum) — 2026-10-30
 
-Pending.
+| Metric | Result |
+|---|---|
+| Agreement with the key | **120 / 120**. 119 items at confidence 4–5. |
+| Too close to an official sample question | **9**: `b1-1`, `b5-1`, `q00-1`, `q02-1`, `q04-3`, `q06-5`, `q08-7`, `q10-1`, `q11-3` |
+| Exam-vs-today gaps | 5: `b2-3`, `q02-7`, `q06-1`, `q11-4`, `q11-6`. In each, the key is still right for the exam. |
+| Ambiguous | 2: `b1-2`, `b5-4` |
+
+The raw answers, with governing bullet IDs per item, are in `solver-blueprint-answers.json`.
+
+### What this means
+
+1. **Three independent solvers found no wrong keys.** The blind, options-only and blueprint-only solvers together found zero. What remains are the ambiguity flags.
+2. **9 items paraphrase official sample questions too closely.** Each copies a sample's structure and option set, changing only the topic. This breaks the originality rule. It also inflates practice scores, because a learner who has read the official guide recognizes the pattern. → **REWRITE** all 9, keeping the task statement but changing the decision being tested.
+3. **The ambiguity flags corroborate each other:**
+   - `b1-2`: the blueprint treats timeouts as transient and retryable, while the key relies on non-idempotent refund safety, which no bullet covers.
+   - `b5-4`: blueprint bullet 4.5-K2 names nightly test generation as a good fit for batch, which is in tension with the synchronous key.
+   - Together with the blind solver's 4 flags, there are **6 AMB candidates** for Phase 3b.
+4. **`q11-6` and `argument-hint`:** the blueprint's own wording treats `argument-hint` as prompting for required parameters. So the key is correct *for the exam*, and D3's S1 finding is reclassified as EXAM-FRAMING-UNFLAGGED. The fix is a "Real world today" note, not a key change.

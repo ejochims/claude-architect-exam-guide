@@ -46,7 +46,7 @@ Key D1 S2 items, kept here so they aren't lost:
 | ID | Sev | Item | Locations | Fix |
 |---|---|---|---|---|
 | C-D3-1 | S1 (TERM) | The exam's TS 3.2 wording makes "restrict" the exam answer for skill `allowed-tools`. Today the field only pre-approves tools. b2-3 keys the exam framing but has no note. | bank.js:28 b2-3 (D3-125) | Keep the key. Add a "Real world today" line to the `why`. The m11:61 callout already exists; link it from b2-3. |
-| C-D3-2 | S1 (TERM) | `argument-hint` is described as "prompting for missing parameters". It is only an autocomplete hint. This matches the blind solver's flag on `q11-6`. | m11.js:58 (D3-029), guide:1508 (D3-177), q11-6 | Reword to "shows an argument hint in autocomplete". If the exam blueprint frames it differently, flag the difference. |
+| C-D3-2 | S1 → EXAM-FRAMING-UNFLAGGED (the blueprint's own wording supports "prompts") | `argument-hint` is described as "prompting for missing parameters". It is only an autocomplete hint. This matches the blind solver's flag on `q11-6`. | m11.js:58 (D3-029), guide:1508 (D3-177), q11-6 | Reword to "shows an argument hint in autocomplete". If the exam blueprint frames it differently, flag the difference. |
 | C-D3-3 | S1 | A sorter marks `/release-notes` as belonging in `.claude/commands/`. A project skill in `.claude/skills/` is equally valid today, so a learner who knows the current product is marked wrong. | m11.js:74 (D3-036) | Accept both answers, or reword the item so only one is correct, and add a note that commands have merged into skills. |
 
 Key D3 S2 items:
@@ -60,7 +60,8 @@ Key D3 S2 items:
 | ID | Sev | Item | Evidence | Fix |
 |---|---|---|---|---|
 | Q1 | **S1, blocks any readiness claim** | **The bank can be answered without reading the questions.** An options-only solver scores 119/120, and pick-longest scores 81%. A well-informed blind solver scores 120/120, all at confidence 4–5. So the readiness score, drills and mock exams carry almost no information about how you'd do on the exam. | `audit/work/solver-results.md`, `audit/SUMMARY.md` | Rewrite the distractors in all 120 items to the "equally expert" standard in solver-results.md. Re-balance which kinds of option are keyed (about 25–35% keyed to the softer option). Gate every item on the options-only panel scoring ≤ 35%. **Until this is done, don't use app scores to decide on booking.** |
-| Q2 | S2 | 4 items flagged ambiguous by the blind solver | `b2-5`, `q09-4`, `q11-4`, `q13-1` | Send them to the domain reviewers in Phase 3b, then rewrite them. |
+| Q2 | S2 | 6 items flagged ambiguous (AMB) by the solvers | blind solver: `b2-5`, `q09-4`, `q11-4`, `q13-1`; blueprint-only solver: `b1-2` (the blueprint treats timeouts as retryable), `b5-4` (bullet 4.5-K2 favors batch for nightly jobs) | Send them to the domain reviewers in Phase 3b, then rewrite them. |
+| Q5 | S1 | **9 items paraphrase official sample questions** (same structure and option set, new topic). This breaks the originality rule and inflates scores for learners who have read the guide. | `b1-1`, `b5-1`, `q00-1`, `q02-1`, `q04-3`, `q06-5`, `q08-7`, `q10-1`, `q11-3` (solver-results.md) | REWRITE all 9 so they test a different decision within the same task statement. |
 | Q3 | S2 | `q11-6` treats `argument-hint` as enforcing an argument, but it is only an autocomplete hint | blind solver; cross-check D3 claims | Fix the stem or option wording. |
 | Q4 | S2 | Trap definitions T1–T9 describe obviously weak options, which teaches you to spot weak options rather than to tell good ones apart | solver-results.md | Rewrite each trap as a *plausible expert mistake*, and add the T4 fix from C-D1-3. |
 

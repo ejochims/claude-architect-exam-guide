@@ -1,0 +1,1476 @@
+[
+ {
+  "id": "q04-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.3-S1",
+   "5.3-K4",
+   "2.2-S3"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Same structure as sample Q8 (structured context vs suppress-as-success vs generic status vs terminate); only failure type changed."
+ },
+ {
+  "id": "q11-8",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.5-K1",
+   "3.5-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.4-S1",
+   "3.4-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-K1",
+   "3.6-S1"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Near-restatement of sample Q10 (pipeline hangs without -p; distractors are fake env var/flag)."
+ },
+ {
+  "id": "q01-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.1-K2",
+   "1.1-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b6-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.4-S4",
+   "4.4-K4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-K4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.3-S4",
+   "4.3-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-K4",
+   "2.4-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.5-K2",
+   "1.5-S2",
+   "1.5-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.4-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.5-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-4",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "4.4-K1",
+   "4.4-S1",
+   "4.4-S2"
+  ],
+  "flags": [],
+  "note": "A (code-side date normalization) is defensible in practice, but blueprint frames retry-with-error-feedback as the fix for format errors."
+ },
+ {
+  "id": "q10-6",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.3-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.3-K2",
+   "2.3-S1",
+   "2.3-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-2",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "4.2-S3",
+   "4.1-K2"
+  ],
+  "flags": [],
+  "note": "D echoes 4.1-S2 (temporarily disabling high-FP categories), but disabling security 'entirely' is not temporary; C matches 4.2-S3."
+ },
+ {
+  "id": "q01-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.1-K4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.5-K4",
+   "3.5-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.1-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.1-S1",
+   "5.1-K1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-K1",
+   "2.4-K2",
+   "2.4-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.5-S2",
+   "1.5-S3",
+   "1.4-K2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.2-S1",
+   "1.2-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b1-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.4-S1",
+   "1.4-K2"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Essentially sample Q1 with tools renamed (verify_identity/update_payment_method vs get_customer/process_refund)."
+ },
+ {
+  "id": "b2-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.3-K2",
+   "3.3-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.1-S4",
+   "5.1-K2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.2-S4",
+   "5.2-K1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.1-S1",
+   "3.1-K2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.4-K3",
+   "1.4-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-6",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "3.2-K2",
+   "3.2-S4"
+  ],
+  "flags": [
+   "exam-vs-today-gap"
+  ],
+  "note": "Blueprint says argument-hint prompts for required parameters; current docs describe it only as an autocomplete hint, which does not block argument-less invocation."
+ },
+ {
+  "id": "b4-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.3-K3",
+   "2.3-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-4",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "4.5-K1",
+   "4.5-K2",
+   "4.5-S1",
+   "4.5-S2"
+  ],
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "4.5-K2 lists nightly test generation as batch-appropriate; A relies on 15h window < 24h worst case. Defensible, but in tension with that bullet."
+ },
+ {
+  "id": "q06-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.2-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-K4",
+   "4.6-K1",
+   "4.6-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.4-K1",
+   "5.4-K2",
+   "5.4-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.5-K2",
+   "5.5-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-K4",
+   "4.3-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.2-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.2-K1",
+   "2.2-K2",
+   "2.2-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.1-K1",
+   "2.1-K2",
+   "2.1-S1"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Mirrors sample Q2: minimal descriptions on two similar tools; distractors are classifier/routing, consolidation; key is expand descriptions."
+ },
+ {
+  "id": "q13-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.5-K1",
+   "5.5-K4",
+   "5.5-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.1-K3",
+   "3.1-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.4-K4",
+   "3.4-S3",
+   "5.4-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.4-K2",
+   "4.4-S2",
+   "4.3-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-6",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.6-K1",
+   "4.6-K2",
+   "4.6-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-K2",
+   "3.6-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-10",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.6-K4",
+   "5.6-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.4-K4",
+   "5.4-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.3-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-9",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.5-K3",
+   "3.5-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.2-K3",
+   "3.2-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.2-K4"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Same as sample Q7: narrow coordinator decomposition, distractors blame synthesis/search; topic swapped to urban mobility."
+ },
+ {
+  "id": "q08-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.1-K2",
+   "4.1-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-K1",
+   "4.3-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.1-K3",
+   "5.1-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-K1",
+   "3.6-S1",
+   "2.4-K2",
+   "3.3-K1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-8",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.3-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.3-S5",
+   "4.3-K3",
+   "4.3-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-7",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "2.4-K4",
+   "2.4-S5"
+  ],
+  "flags": [],
+  "note": "Blueprint has no explicit 'one MCP server reused across many clients' bullet; nearest support is exposing catalogs via MCP resources (2.4-K4/S5)."
+ },
+ {
+  "id": "b3-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.3-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.1-K3",
+   "2.1-S2"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Option set mirrors sample Q2 (routing layer, merge tools, few-shot, fix descriptions); stem is the blueprint's own analyze_content/analyze_document example."
+ },
+ {
+  "id": "q02-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.1-K4",
+   "2.1-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.5-K2",
+   "2.5-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.2-S4",
+   "5.3-K2",
+   "5.3-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.1-K3",
+   "4.1-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.2-K2",
+   "4.2-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-8",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.5-S3",
+   "5.5-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.3-K1"
+  ],
+  "flags": [
+   "exam-vs-today-gap"
+  ],
+  "note": "Blueprint names the Task tool; current Agent SDK/Claude Code docs call the subagent tool Agent (Task kept as alias). Answer as exam."
+ },
+ {
+  "id": "q12-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.7-K1",
+   "1.7-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.2-K1",
+   "5.2-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-9",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.6-K3",
+   "5.6-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b6-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-S5",
+   "5.5-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.3-K2",
+   "1.3-S1",
+   "1.3-S2",
+   "5.6-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.6-S3",
+   "5.5-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.2-K2",
+   "3.2-S3"
+  ],
+  "flags": [
+   "exam-vs-today-gap"
+  ],
+  "note": "Blueprint treats skill allowed-tools as a restriction; current docs describe it as pre-approving tools without prompts, not blocking others. Answer as exam."
+ },
+ {
+  "id": "q01-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.1-S1",
+   "1.1-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.3-S2",
+   "3.3-S3"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Same as sample Q6: files spread across directories, rules glob vs root CLAUDE.md vs per-dir CLAUDE.md vs skill; only file type changed."
+ },
+ {
+  "id": "q12-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.6-S4",
+   "3.6-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.2-K1",
+   "4.2-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.2-K2",
+   "5.2-K3",
+   "5.2-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.4-K3",
+   "4.4-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.5-K1",
+   "1.5-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.1-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.2-K2",
+   "5.2-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.1-K1",
+   "1.1-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "3.2-K4"
+  ],
+  "flags": [
+   "exam-vs-today-gap"
+  ],
+  "note": "Current docs: a same-name personal skill overrides the project one only for you, so B wouldn't affect teammates either but hides the team version. C matches blueprint."
+ },
+ {
+  "id": "q08-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.2-K4",
+   "4.2-S4",
+   "4.2-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.1-K1",
+   "4.1-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.5-K4",
+   "2.5-S3"
+  ],
+  "flags": [
+   "exam-vs-today-gap"
+  ],
+  "note": "Blueprint fallback is Read+Write; today's usual fix is a longer unique old_string or replace_all (not offered). C remains the exam answer."
+ },
+ {
+  "id": "q02-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.5-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.4-K1",
+   "1.4-K2",
+   "1.5-K3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.2-K4",
+   "5.2-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.2-S3",
+   "5.3-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "3.5-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.3-K1",
+   "2.3-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-8",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "bullets": [
+   "1.6-K1",
+   "1.6-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-S4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.6-K3",
+   "1.6-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.2-K3",
+   "2.2-K4",
+   "2.2-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-K3",
+   "4.4-K4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.7-K4",
+   "1.7-S3"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.5-K1",
+   "1.5-S1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-S3",
+   "2.1-K1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b3-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.6-S5"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.5-K2",
+   "4.5-S1"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Mirrors sample Q11: one latency-tolerant and one blocking workload; distractors are both+fallback, both+polling, neither-due-to-ordering."
+ },
+ {
+  "id": "q05-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "2.4-K1",
+   "2.4-S2"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-7",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.6-K3",
+   "4.6-S2",
+   "1.6-S2"
+  ],
+  "flags": [
+   "too-close-to-official-sample"
+  ],
+  "note": "Mirrors sample Q12: per-file + integration pass vs bigger single pass, 2-of-3 consensus, split PRs."
+ },
+ {
+  "id": "q07-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "5.1-S5",
+   "5.1-S6"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-7",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-S6"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.7-K2",
+   "1.7-S2",
+   "1.3-K4"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b1-2",
+  "answer": "B",
+  "confidence": 3,
+  "second": "A",
+  "bullets": [
+   "2.2-K2",
+   "2.2-K4",
+   "2.2-S1"
+  ],
+  "flags": [
+   "ambiguous",
+   "blueprint-contradicts-an-option"
+  ],
+  "note": "Blueprint classes timeouts as transient/retryable, which supports A; non-idempotent refund safety supports B but isn't in any bullet."
+ },
+ {
+  "id": "q01-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "1.1-K3",
+   "1.4-K1"
+  ],
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "bullets": [
+   "4.3-S4"
+  ],
+  "flags": [],
+  "note": ""
+ }
+]
