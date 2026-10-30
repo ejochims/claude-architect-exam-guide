@@ -41,6 +41,20 @@ Key D1 S2 items, kept here so they aren't lost:
 - **D1-059:** In the m03 hook example, `matcher="process_refund"` would never match, because SDK custom tools are named `mcp__<server>__<tool>`.
 - **D1-198 and D1-211:** The guide says subagents can't be resumed, but they can. The guide also names the AgentDefinition field `allowedTools`; the real field is `tools`.
 
+### Domain 3: 4 S1 claims from `audit/work/claims-D3.csv` (221 claims: 168 correct, 23 exam-framing-unflagged, 6 wrong, 3 outdated)
+
+| ID | Sev | Item | Locations | Fix |
+|---|---|---|---|---|
+| C-D3-1 | S1 (TERM) | The exam's TS 3.2 wording makes "restrict" the exam answer for skill `allowed-tools`. Today the field only pre-approves tools. b2-3 keys the exam framing but has no note. | bank.js:28 b2-3 (D3-125) | Keep the key. Add a "Real world today" line to the `why`. The m11:61 callout already exists; link it from b2-3. |
+| C-D3-2 | S1 (TERM) | `argument-hint` is described as "prompting for missing parameters". It is only an autocomplete hint. This matches the blind solver's flag on `q11-6`. | m11.js:58 (D3-029), guide:1508 (D3-177), q11-6 | Reword to "shows an argument hint in autocomplete". If the exam blueprint frames it differently, flag the difference. |
+| C-D3-3 | S1 | A sorter marks `/release-notes` as belonging in `.claude/commands/`. A project skill in `.claude/skills/` is equally valid today, so a learner who knows the current product is marked wrong. | m11.js:74 (D3-036) | Accept both answers, or reword the item so only one is correct, and add a note that commands have merged into skills. |
+
+Key D3 S2 items:
+- **`/memory` is taught as "shows loaded memory files".** Today `/context` shows what's loaded and `/memory` opens files for editing.
+- **Guide:1547:** the description of the `PreToolUse` "defer" decision is wrong.
+- **Guide:1549:** `UserPromptSubmit` can't modify the prompt; it can only block it or add context.
+- **Guide:1582:** the CLAUDE.md default for subagents is backwards. Subagents load it by default; only the built-in Explore and Plan agents skip it.
+
 ## Q: Question quality (Phase 3)
 
 | ID | Sev | Item | Evidence | Fix |
