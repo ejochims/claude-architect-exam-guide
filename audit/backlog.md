@@ -27,6 +27,20 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 
 The other 28 D2 S2 items and 23 D2 S3 items: to be triaged after all the domain claim checks report.
 
+### Domain 1: 10 S1 claims from `audit/work/claims-D1.csv`
+
+| ID | Sev | Item | Locations | Fix |
+|---|---|---|---|---|
+| C-D1-1 | S1 (TERM) | **The rule that a coordinator's `allowedTools` must include `"Task"` has no flag.** This is exam framing (TS 1.2/1.3), so keep it as the exam answer. In today's Agent SDK, `allowedTools` only pre-approves tools and the Agent tool needs no approval, so a coordinator can delegate without it. The m06 "Real world today" note covers only the rename and nesting. | m06 card c0, m06:19, q06-1 key, m06 recap (D1-079/089/102/116); guide:1133, 1157, 1855, 1887 (D1-202/210/225/235) | Extend the m06 callout. Add a one-line real-world note to the card, q06-1's `why` and the guide lines. |
+| C-D1-2 | S1 | q06-1, option A: the `why` says a vague subagent description can't stop delegation. The SDK troubleshooting docs say a vague description is exactly why Claude answers directly instead of delegating. | q06-1 (D1-101) | Rewrite the `why`. Check whether option A becomes defensible, and if so send the item to Phase 3 as AMB. |
+| C-D1-3 | S1 | **Trap T4 treats any routing on self-rated confidence as a trap.** This conflicts with TS 5.5 (and 4.6): confidence calibrated on labeled data is valid for routing work to human review. Baseline finding F8. | curriculum.js:78 (D1-157) | Reword T4 so it covers *uncalibrated self-confidence as an escalation or complexity proxy*, and explicitly allows calibrated confidence for prioritizing review. Re-tag any questions that use T4. |
+
+Key D1 S2 items, kept here so they aren't lost:
+- **D1-091:** "One Task call per turn runs them sequentially" is outdated. Subagents now run in the background by default.
+- **D1-085:** A subagent no longer starts with an "empty conversation". It also gets CLAUDE.md, and fork subagents inherit the parent conversation.
+- **D1-059:** In the m03 hook example, `matcher="process_refund"` would never match, because SDK custom tools are named `mcp__<server>__<tool>`.
+- **D1-198 and D1-211:** The guide says subagents can't be resumed, but they can. The guide also names the AgentDefinition field `allowedTools`; the real field is `tools`.
+
 ## Q: Question quality (Phase 3)
 
 Pending.
