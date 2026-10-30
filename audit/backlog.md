@@ -43,7 +43,12 @@ Key D1 S2 items, kept here so they aren't lost:
 
 ## Q: Question quality (Phase 3)
 
-Pending.
+| ID | Sev | Item | Evidence | Fix |
+|---|---|---|---|---|
+| Q1 | **S1, blocks any readiness claim** | **The bank can be answered without reading the questions.** An options-only solver scores 119/120, and pick-longest scores 81%. A well-informed blind solver scores 120/120, all at confidence 4–5. So the readiness score, drills and mock exams carry almost no information about how you'd do on the exam. | `audit/work/solver-results.md`, `audit/SUMMARY.md` | Rewrite the distractors in all 120 items to the "equally expert" standard in solver-results.md. Re-balance which kinds of option are keyed (about 25–35% keyed to the softer option). Gate every item on the options-only panel scoring ≤ 35%. **Until this is done, don't use app scores to decide on booking.** |
+| Q2 | S2 | 4 items flagged ambiguous by the blind solver | `b2-5`, `q09-4`, `q11-4`, `q13-1` | Send them to the domain reviewers in Phase 3b, then rewrite them. |
+| Q3 | S2 | `q11-6` treats `argument-hint` as enforcing an argument, but it is only an autocomplete hint | blind solver; cross-check D3 claims | Fix the stem or option wording. |
+| Q4 | S2 | Trap definitions T1–T9 describe obviously weak options, which teaches you to spot weak options rather than to tell good ones apart | solver-results.md | Rewrite each trap as a *plausible expert mistake*, and add the T4 fix from C-D1-3. |
 
 ## P: Pedagogy and the one-stop shop (Phases 4 and 4b)
 

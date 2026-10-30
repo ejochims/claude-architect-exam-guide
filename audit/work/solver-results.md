@@ -24,9 +24,35 @@ The raw answers are in `solver-blind-answers.json`.
 
    The holdout set should be written to that harder standard. Its pass bar: the blind solver's confidence should average ≤ 4, and items should be at least moderately hard for a solver given only the lessons.
 
-## Options-only solver
+## Options-only solver (stems hidden; options only) — 2026-10-30
 
-Pending.
+| Metric | Result |
+|---|---|
+| Agreement with the key | **119 / 120 (99.2%)**. Chance is 25%; the pass target for this test is ≤ 35%. |
+| The one miss | `q10-2`: a numeric-only option set, a pure guess |
+| At confidence ≥ 4 | 100 / 100 correct |
+| Cues reported, with hits/uses | specificity 76/76 · best-practice tone 44/44 · length 24/24 · odd-one-out 4/4 · absolute words in the other options 4/4 · hedging 2/2 |
+
+The raw answers are in `solver-options-only-answers.json`.
+
+### What this means: the most serious finding of the audit so far
+
+**Almost every item can be answered without reading the question.** The keyed option is reliably:
+- the most specific option, naming real flags, fields or a structured process;
+- the one that sounds most like expert best practice, often enforcing a rule in code;
+- the longest.
+
+The distractors are reliably vague prompt tweaks, "use a bigger model", or options with absolute words.
+
+So, in the bank's current form:
+- **Every score the app reports is uninformative about exam readiness:** lessons, drills, mock exams and the readiness score.
+- The trap catalog (T1–T9) partly *causes* the problem. Each trap is written as an obviously weak option, so learning the trap names teaches you how to spot a bad option, not how to choose between good ones.
+
+**Required changes to Phase 7 (item writing):**
+1. **Every distractor must look as expert as the key.** It should be specific, technically real and plausibly best practice, but wrong for *this* scenario. Examples: the wrong scope, the wrong order, overkill for this risk level, a fix to the wrong component, a correct mechanism applied at the wrong layer.
+2. **Prompt-based options are sometimes correct.** About 25–35% of keys should be the "softer" option (a prompt or few-shot fix, the cheaper first step), so that "always pick the option that enforces in code" stops working as a heuristic.
+3. **Acceptance test for every rewritten or new item:** an options-only solver panel must score ≤ 35% across the bank, and no single item may be correctly guessed at confidence ≥ 4 by 2 of 3 options-only runs.
+4. **Holdout items must pass the same gate before you see them.**
 
 ## Blueprint-only solver
 
