@@ -71,3 +71,33 @@ q09-7,4.3,HOLDS,-,4.3-S6 verbatim.,-,-,-,4.3-S6
 q10-1,4.5,HOLDS,-,4.5-K2 and 4.5-S1.,-,-,Already flagged as too close to an official sample (Q5).,4.5-S1
 q10-2,4.5,HOLDS,-,"Worst case is interval + 24 + 2 ≤ 36, so the interval can be at most 10 h. Only 8 h qualifies. The arithmetic checks out (4.5-S2).",-,-,The options-only solver missed this item because the options are bare numbers. That's fine.,4.5-S2
 q10-3,4.5,HOLDS,-,4.5-S3 verbatim.,-,-,-,4.5-S3
+q10-4,4.5,HOLDS,-,"4.5-K3. The batch docs list tool use (including server tools) as supported, but a client tool like lookup_vendor can't be executed mid-request, so B holds.",A's why ('nothing executes them') should say 'client tools'. Server tools such as web search do run in batch.,-,"A's why: 'Client tools can be defined, but nothing executes them mid-request (server tools are different).'",4.5-K3; https://platform.claude.com/docs/en/build-with-claude/batch-processing
+q10-5,4.5,HOLDS,-,4.5-K4. The docs say results may not match input order; use custom_id.,-,-,-,4.5-K4
+q10-6,4.5,HOLDS,-,4.5-S4 verbatim.,-,-,-,4.5-S4
+q11-1,3.1,HOLDS,-,3.1-K2 and 3.1-S1 verbatim.,-,-,-,3.1-S1
+q11-2,3.1,HOLDS,-,"3.1-K3 and 3.1-S2. Path-scoped .claude/rules/ per package would be a strong modern alternative, but it isn't offered.",-,-,-,3.1-S2
+q11-3,3.3,HOLDS,-,3.3-S2 and 3.3-S3.,-,-,Already flagged as too close to an official sample (Q5).,3.3-S2; 3.3-S3
+q11-5,3.2,HOLDS,-,3.2-K3 and 3.2-S2. context: fork is real and current.,-,-,-,3.2-S2
+q11-7,3.4,HOLDS,-,3.4-S1 (45+ file migration) and 3.4-S4 verbatim.,-,-,-,3.4-S1; 3.4-S4
+q11-8,3.5,HOLDS,-,3.5-K1 and 3.5-S1 verbatim.,-,-,-,3.5-S1
+q11-9,3.5,HOLDS,-,3.5-S3 verbatim.,-,-,-,3.5-S3
+q12-1,3.6,HOLDS,-,3.6-S2. --output-format json and --json-schema are real flags; --format strict isn't.,-,-,-,3.6-S2; https://code.claude.com/docs/en/cli-reference
+q12-2,3.6,HOLDS,-,3.6-S3 verbatim.,-,-,-,3.6-S3
+q12-3,3.6,HOLDS,-,3.6-S4 and 3.6-S5.,-,-,-,3.6-S4; 3.6-S5
+q12-4,3.6,HOLDS,-,"3.6-K3. D (a prompt string, or --append-system-prompt) works but drifts.",-,-,-,3.6-K3
+q12-5,1.7,HOLDS,-,1.7-K1. The CLI docs confirm that --resume accepts a session ID or name.,-,"C (--session) is T8, but the real flag --session-id (UUID only) is close. Acceptable, but the why could name it.","C's why: 'Not a flag; --session-id exists but takes a UUID, not a name.'",1.7-K1; https://code.claude.com/docs/en/cli-reference
+q12-6,1.7,HOLDS,-,1.7-K2 and 1.7-S2. fork_session (CLI: --fork-session) is real.,-,-,-,1.7-S2
+q12-7,1.7,HOLDS,-,1.7-K4 and 1.7-S3. 'Most of the module refactored' rules out targeted re-analysis (1.7-S4).,-,-,-,1.7-S3
+q13-2,5.2,HOLDS,-,5.2-S3 verbatim.,-,-,-,5.2-S3
+q13-3,5.2,HOLDS,-,5.2-S4 verbatim.,-,-,-,5.2-S4
+q13-4,5.2,HOLDS,-,5.2-K4 and 5.2-S5 verbatim.,-,-,-,5.2-S5
+q13-5,5.2,HOLDS,-,5.2-K1 and 5.2-K3.,-,-,-,5.2-K1; 5.2-K3
+q13-6,5.5,HOLDS,-,5.5-K1 and 5.5-S2 verbatim.,"C's why ('This is uncalibrated') presumes the confidence is uncalibrated, but the stem doesn't say so. The stronger point is that it skips the segment check.",C (route on a confidence threshold) is untagged; T4 arguably applies.,C's why: 'Tightening a threshold still doesn't check per-type or per-field accuracy.',5.5-S2
+q13-7,5.5,HOLDS,-,5.5-S1 verbatim.,-,-,-,5.5-S1
+q13-8,5.5,HOLDS,-,5.5-S3 and 5.5-S4. The key correctly uses calibrated confidence.,-,"D's T4 is consistent, but the T4 definition itself condemns all self-confidence routing, which contradicts this key (backlog C-D1-3).",Reword T4 so it covers only uncalibrated confidence (per C-D1-3).,5.5-S3; 5.5-S4
+q13-9,5.6,HOLDS,-,5.6-K3 and 5.6-S3.,-,-,-,5.6-K3
+q13-10,5.6,HOLDS,-,5.6-K4 and 5.6-S4 verbatim.,-,-,-,5.6-S4
+b2-1,3.1,HOLDS,-,"3.1-S4 keys /memory. Per the docs, /memory lists memory locations (including files that don't exist) for editing, while /context shows which files actually loaded. /context isn't offered, so the key holds.",A's why says /memory shows which files are 'actually loaded'. Today that is /context's job.,-,"A's why: 'On the exam, /memory verifies loaded files. Today use /context (Memory files) to see what loaded and /memory to open them.'",3.1-S4; https://code.claude.com/docs/en/memory
+b2-2,3.3,HOLDS,-,3.3-K2 and 3.3-S1.,-,"B and C are tagged T8, but they're misconceptions about a real feature, not invented mechanisms. A loose fit.",-,3.3-K2
+b2-4,3.2,HOLDS,-,3.2-S5 verbatim.,-,-,-,3.2-S5
+b2-6,3.5,HOLDS,-,3.5-S4 verbatim.,-,-,-,3.5-S4
