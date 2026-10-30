@@ -12,6 +12,32 @@ The most important habit is to ask: where should responsibility live?
 
 This guide avoids exam-question content. The examples are original teaching examples that illustrate the underlying concepts.
 
+### Exam Blueprint at a Glance
+
+The exam has 60 multiple-choice questions in 120 minutes, each with one best answer and three plausible distractors. The scaled score runs 100–1000, and **720 passes**. Every question sits inside a production scenario; each sitting draws **4 of these 6**: Customer Support Resolution Agent · Code Generation with Claude Code · Multi-Agent Research System · Developer Productivity with Claude · Claude Code for CI · Structured Data Extraction.
+
+| Domain | Weight | Task statements | Where this guide covers it |
+|---|---|---|---|
+| 1. Agentic Architecture & Orchestration | 27% | 1.1 agentic loops · 1.2 coordinator–subagent · 1.3 subagent invocation & context · 1.4 enforcement & handoff · 1.5 hooks · 1.6 decomposition · 1.7 sessions | §8, §9, §10 (Sessions, Hooks, Subagents) |
+| 2. Tool Design & MCP Integration | 18% | 2.1 tool descriptions · 2.2 structured errors · 2.3 tool distribution & `tool_choice` · 2.4 MCP in Claude Code · 2.5 built-in tools | §1, §2, §3, §7, §10 (Built-in Tools) |
+| 3. Claude Code Configuration & Workflows | 20% | 3.1 CLAUDE.md hierarchy · 3.2 commands & skills · 3.3 path-specific rules · 3.4 plan mode · 3.5 iterative refinement · 3.6 CI/CD | §10, §11 |
+| 4. Prompt Engineering & Structured Output | 20% | 4.1 explicit criteria · 4.2 few-shot · 4.3 `tool_use` + JSON Schema · 4.4 validation–retry · 4.5 batch · 4.6 multi-pass review | §1, §4, §6, §11, §12 |
+| 5. Context Management & Reliability | 15% | 5.1 long conversations · 5.2 escalation · 5.3 error propagation · 5.4 codebase exploration · 5.5 human review & calibration · 5.6 provenance | §4, §5, §8, §9, §10 |
+
+**Out of scope** (per the official guide): fine-tuning, auth/billing, hosting MCP servers, model internals, RLHF/Constitutional AI, embeddings/vector DBs, computer use, vision, streaming, rate limits/pricing math, cloud-provider configuration, benchmarks, prompt-caching details, tokenization.
+
+### Exam Terminology vs. Today's Product
+
+The blueprint was written in early 2026, and Claude Code has since evolved. **Answer in the exam's terms**, but know the current reality:
+
+| The exam says | Current Claude Code (late 2026) |
+|---|---|
+| The `Task` tool spawns subagents; `allowedTools` must include `"Task"` | Renamed `Agent` in v2.1.63; `Task` still works as an alias |
+| Slash commands live in `.claude/commands/` | Commands have merged into skills. Both create `/name`; existing command files still work |
+| Skill `allowed-tools` restricts tools during the skill | `allowed-tools` now *pre-approves* tools for the turn; restricting is done with `disallowed-tools` or an agent's `tools` list |
+| Coordinators route all subagent communication (hub-and-spoke) | Still the recommended design, though subagents can now nest up to 3 levels by default |
+| Guaranteed structured output = `tool_use` + JSON Schema + `tool_choice` | Also available: `output_config.format` JSON structured outputs. The exam's canonical answer is still `tool_use` |
+
 ---
 
 ## 1. API Fundamentals and Output Control
@@ -126,6 +152,13 @@ Good tool descriptions explain:
 - Important limitations and safety concerns.
 
 For complex tools, include `input_examples` when supported. Examples are especially helpful for nested objects, date formats, identifiers, and domain-specific enums.
+
+When two tools are being confused, the fix is usually in the descriptions and names, and that is the **first step** before few-shot examples, routing layers, or consolidation:
+
+- Expand each description with input formats, example queries, edge cases, and an explicit "use this instead of X when…" boundary.
+- **Rename** tools whose purposes overlap. For example, `analyze_content` and `analyze_document` with near-identical descriptions become `extract_web_results` and `extract_pdf_tables`.
+- **Split** a generic tool into purpose-specific ones with clear input/output contracts (for example, `analyze_document` becomes `extract_data_points`, `summarize_content`, and `verify_claim_against_source`).
+- **Audit the system prompt for keyword-sensitive instructions.** A line such as "whenever the user mentions an account, look up the customer first" can override a well-written tool description and cause misrouting on order questions.
 
 ### Parameter Design
 
@@ -488,7 +521,8 @@ For fields prone to internal inconsistency (such as line items vs grand total on
   "line_items": [...],
   "calculated_total": 1280.5,
   "stated_total": 1295.0,
-  "totals_match": false
+  "totals_match": false,
+  "conflict_detected": true
 }
 ```
 
@@ -670,6 +704,20 @@ When preferences conflict, do not silently pick one if the decision matters. A u
 
 The same principle applies to multi-issue customer sessions. If a customer raises three separate issues across 45 turns (a refund, a subscription question, a payment update), structured state can track each issue's current status — order ID, amounts, resolution state — independently of the linear conversation, so the agent can reliably answer "what happened with my refund?" later in the session.
 
+### The "Case Facts" Block
+
+Progressive summarization is lossy in a predictable way: it turns "$247.83 refund for order #8812, promised by Friday" into "the customer discussed a refund." Exact transactional facts must not live only inside summarized history.
+
+Extract amounts, dates, order numbers, statuses, and customer-stated expectations into a persistent **case facts** block that is re-sent verbatim in every prompt, **outside** the summarized history. For multi-issue sessions, keep one structured entry per issue (issue ID, order ID, amount, status) so issues do not blur together.
+
+### Lost in the Middle and Position-Aware Ordering
+
+Models reliably use information at the **beginning and end** of a long input but may overlook findings buried in the middle. When you aggregate many results (for example, ten subagent reports into a synthesis prompt):
+
+- Put a **key-findings summary at the top**.
+- Organize detailed results under **explicit section headers**.
+- Don't assume a bigger context window fixes this. More room does not mean even attention.
+
 ### Retrieval and Fact Stores
 
 Summaries lose precision. If users need exact p-values, source quotes, clauses, measurements, transaction IDs, or numeric thresholds, store facts in a structured database or retrieve the relevant source passage when needed.
@@ -681,6 +729,10 @@ For research assistants, combine:
 - Structured fact tables for recurring numerical lookups.
 
 A common pattern: a research assistant summarizes paper discussions after 8 turns to control context, but then users ask follow-up questions requiring precise numerical details (sample sizes, p-values, inclusion criteria) that the summaries blurred. Two design responses both work, but the most direct fix is to **re-inject relevant source sections on demand** when a user's question signals they need precision. A separate structured fact store of every numerical detail is heavier and may not match the variety of follow-ups; "higher fidelity summaries" that preserve all numbers tend to balloon back into the original document. On-demand retrieval scales better.
+
+### Trim Tool Outputs Before They Accumulate
+
+Tool results accumulate in context and consume tokens far out of proportion to their relevance. An order lookup that returns 40+ fields, when the return workflow needs 5, wastes most of its tokens on every later turn. Trim verbose outputs to the relevant fields **before** they enter history (in the tool itself, or with a `PostToolUse` hook). The same principle applies between agents: when a downstream agent has a limited context budget, change the upstream agent to return structured data (key facts, citations, relevance scores) instead of verbose prose and reasoning chains.
 
 ### Tool Result Compression
 
@@ -943,7 +995,26 @@ Claude Code can configure MCP servers at several scopes. The scope determines wh
 | Local | An entry inside `~/.claude.json` keyed to the current project path | Only the current user, only when working in that project | Sensitive credentials for personal accounts, experimental servers under evaluation, project-specific tooling not yet ready to share |
 | User | A separate entry in `~/.claude.json` not tied to a project | Only the current user, in any project they work on | Personal productivity tools — calendar, email, notes, clipboard — that the user wants available everywhere |
 
-When the same server name exists at multiple scopes, the higher-precedence configuration wins. A common convention is project > local > user, so a team-shared `.mcp.json` definition overrides a user's experimental copy of the same server name. Use project scope deliberately because it is shared. Avoid putting personal credentials in project scope — those belong in local or user scope, where they remain on the developer's machine.
+When the same server name is defined at more than one scope, Claude Code connects once, using the whole entry from the highest-precedence source: **local > project > user** (then plugin-provided servers, then claude.ai connectors). Fields are not merged across scopes. A developer's local entry therefore overrides the team's `.mcp.json` copy of the same server name on that developer's machine only. Use project scope deliberately because it is shared.
+
+**Never commit secrets to `.mcp.json`. Use environment variable expansion.** `.mcp.json` supports `${VAR}` and `${VAR:-default}` in `command`, `args`, `env`, `url`, and `headers`. The team shares the configuration; each developer (or CI runner) supplies the secret from their environment:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+    }
+  }
+}
+```
+
+Two more exam-relevant facts:
+
+- **All configured servers are live at once.** Tools from every configured MCP server (project and user scope together) are discovered at connection time and available to the agent simultaneously. Adding a personal server does not hide the team's servers.
+- **Prefer existing community servers for standard integrations.** For Jira, GitHub, Slack, or Postgres, use the maintained community or vendor MCP server instead of writing your own. Reserve custom servers for team-specific workflows that no existing server covers.
 
 A nuance worth remembering for the exam: local and user scopes both live inside `~/.claude.json`, but at different keys. They are not "the same scope with different names" — local entries are scoped to a project path, user entries are global to the user. Selecting the wrong scope for a personal tool can leak credentials into a shared repo or, conversely, hide a tool the developer expected to see in every project.
 
@@ -965,6 +1036,35 @@ MCP prompts surface as slash commands in Claude Code. The slash-command name typ
 Agentic applications run a loop: observe, reason, act, observe again. The model sees current context, chooses a tool or response, incorporates results, and continues until the task is done or blocked.
 
 The architecture question is how much autonomy to give the model and how to structure the work.
+
+### The Agentic Loop and `stop_reason`
+
+Every agent, from a hand-written loop to the Claude Agent SDK, runs the same control flow:
+
+1. Send the request (system prompt, messages, tool definitions) to Claude.
+2. Inspect `stop_reason` on the response.
+3. If `stop_reason` is `"tool_use"`: execute each requested tool, append the assistant message (with its `tool_use` blocks) **and** a user message containing the matching `tool_result` blocks to the conversation history, then go back to step 1.
+4. If `stop_reason` is `"end_turn"`: the model has finished; present the final response.
+
+```python
+while True:
+    response = client.messages.create(model=MODEL, system=SYSTEM, tools=TOOLS, messages=messages)
+    messages.append({"role": "assistant", "content": response.content})
+    if response.stop_reason != "tool_use":
+        break  # "end_turn" (or max_tokens etc.): stop and handle
+    results = [run_tool(block) for block in response.content if block.type == "tool_use"]
+    messages.append({"role": "user", "content": results})  # tool_result blocks
+```
+
+`stop_reason` is the authoritative signal. Appending tool results to history is how the model "sees" what happened and reasons about the next action. It has no other memory of the tool call.
+
+Termination anti-patterns the exam treats as wrong:
+
+- **Parsing natural language** ("I'm done", "Task complete") to decide whether to stop.
+- **An arbitrary iteration cap as the primary stopping mechanism.** A safety ceiling is fine as a backstop, but it is not the termination logic.
+- **Treating the presence of assistant text as completion.** A response can contain text *and* `tool_use` blocks; text does not mean the turn is over.
+
+Know the distinction between **model-driven** decision-making (Claude chooses the next tool from context, as in this loop) and **pre-configured** decision trees or fixed tool sequences (your code decides). Agents use the former; deterministic workflows use the latter.
 
 ### Core Patterns
 
@@ -1024,6 +1124,25 @@ Synthesize the following claim-source records into an executive summary. Preserv
 
 For final report generation, do not pass only a prose summary if citations are required. Pass a structured source index that maps claims to source IDs, URLs, excerpts, dates, and confidence/uncertainty notes.
 
+### Hub-and-Spoke Coordination and Spawning Subagents
+
+The standard multi-agent architecture is **hub-and-spoke**: a coordinator manages *all* communication between subagents, plus error handling and information routing. Subagents do not talk to each other directly. Routing everything through the coordinator gives you observability, consistent error handling, and controlled information flow.
+
+Mechanics in the Claude Agent SDK and Claude Code:
+
+- Subagents are spawned with the **Task tool** (renamed **Agent** in current Claude Code; `Task` still works as an alias). The coordinator's **`allowedTools` must include `"Task"`**, or it can describe a delegation but never perform one.
+- Each subagent type is configured with an **`AgentDefinition`**: a description (used to decide when to invoke it), its own system prompt, and a restricted tool list.
+- **Parallel spawning means multiple Task calls in a single coordinator response.** Emitting one Task call per turn across several turns runs them sequentially.
+- Subagent context is **only what the prompt contains**. Include complete findings from prior agents directly in the prompt (for example, pass the search results and document analyses to the synthesis subagent), using structured formats that separate content from metadata (URL, document name, page number, date).
+- Write coordinator prompts that state **goals and quality criteria**, not step-by-step procedures, so subagents can adapt to what they find.
+
+What a good coordinator does:
+
+- **Selects subagents dynamically** based on query complexity, rather than always running the full pipeline. A simple factual question may not need the document-analysis agent.
+- **Partitions scope to avoid duplication**: distinct subtopics or source types per subagent.
+- **Avoids overly narrow decomposition.** If a broad topic is split only into a few closely related subtopics, every subagent can succeed and the final report is still incomplete. For example, "the future of transportation" decomposed into "EV batteries", "EV charging", and "EV pricing" will miss aviation, rail, and urban planning. When coverage is missing but every subagent did its job, the root cause is the coordinator's decomposition, not the downstream agents.
+- **Runs an iterative refinement loop**: evaluate the synthesis for gaps, re-delegate targeted queries to search and analysis subagents, and re-run synthesis until coverage is sufficient.
+
 ### Tool Distribution Across Agents
 
 More tools are not always better. Giving every subagent every tool increases selection complexity and can lead agents outside their role. Restrict tools to what each subagent needs.
@@ -1079,6 +1198,10 @@ Ask subagents to output:
 - Confidence or uncertainty language from the source.
 - Whether the finding is established, contested, or insufficiently supported.
 
+**Conflicting values from credible sources:** keep both, each with its source attribution, and annotate the conflict. Don't arbitrarily pick one. The analysis subagent should finish its work with the conflict included and flagged (for example, `conflict_detected: true`) and let the coordinator decide how to reconcile before synthesis. Reports should have explicit sections that separate well-established findings from contested ones.
+
+**Coverage annotations:** when a source was unavailable (a subagent timed out, a database was down), the synthesis should say which findings are well supported and which topic areas have gaps. The alternatives are worse: silently presenting partial research as complete, or failing the whole report.
+
 Render different content types appropriately. Financial metrics may belong in tables; qualitative developments may belong in prose; patent categories may belong in grouped lists.
 
 ### Common Pitfalls
@@ -1100,13 +1223,23 @@ Customer service agents combine tool use, policy, state, escalation, and user ex
 
 Escalate when:
 
-- The user explicitly asks for a human and the issue cannot be resolved immediately without overriding their preference.
+- The user **explicitly asks for a human**. Honor it immediately; do not first run an investigation or try to talk them out of it.
 - The issue requires authority the agent does not have.
 - A policy exception, regulated approval, or high-value transaction is involved.
+- **Policy is ambiguous or silent** on the specific request. For example, policy covers refunds for defective items but says nothing about refunds for a price drop a week after purchase. A gap in policy is a reason to escalate, not to improvise.
 - The agent cannot make meaningful progress.
 - Tool results show an uncertain or unsafe state that requires human judgment.
 
 Do not rely on simplistic counters such as "escalate after three failed tools." The category and impact of the failure matter more than the count.
+
+Two popular escalation signals are **unreliable proxies** and usually wrong answers:
+
+- **Sentiment.** An angry customer with a simple shipping question is not a complex case; a calm customer asking for a policy exception is. Sentiment does not correlate with case complexity.
+- **Self-reported confidence** ("rate your confidence 1–10, escalate below 6"). LLM self-confidence is poorly calibrated: an agent that is mishandling hard cases is usually *confidently* wrong.
+
+The proportionate first fix for miscalibrated escalation is **explicit escalation criteria in the system prompt, with few-shot examples** showing when to escalate versus resolve. Try that before building classifiers or sentiment pipelines.
+
+When a lookup returns **multiple matching customers**, ask for an additional identifier (email, order number, postal code). Do not pick one by heuristic such as "most recent account".
 
 When escalating, pass a structured handoff:
 
@@ -1126,7 +1259,12 @@ Do not pass only the user's first complaint. Do not dump the full transcript unl
 
 ### Frustrated Users
 
-When a user is frustrated, acknowledge the frustration and move efficiently. If the issue is straightforward and the user asks for a human, offer the immediate resolution while preserving their choice:
+Distinguish two situations:
+
+- **The customer explicitly demands a human** → escalate immediately.
+- **The customer is frustrated, but the issue is within the agent's capability** → acknowledge the frustration and offer the resolution. Escalate if they reiterate that they want a person.
+
+When offering, keep their choice visible:
 
 ```text
 I can resolve this now, and I can also transfer you if you prefer. The eligible action is ready; would you like me to complete it or connect you to a specialist?
@@ -1192,10 +1330,10 @@ Current docs refer to the product library as the Claude Agent SDK. Older referen
 | Search file contents | Grep |
 | Find files by path/name pattern | Glob |
 | Read a known file | Read |
-| Targeted unique edit | Edit or MultiEdit |
+| Targeted unique edit | Edit (anchor text must be unique) |
 | Full file replacement | Read then Write |
 | Run tests or shell commands | Bash |
-| Delegate broad exploration | Task/subagent |
+| Delegate broad exploration | Subagent via the Task tool (renamed Agent in current Claude Code), e.g. the Explore subagent |
 
 Use Grep for text inside files. Use Glob for filenames and paths. Do not use filename search to find code references inside files.
 
@@ -1242,9 +1380,9 @@ Claude Code organizes work into sessions — each session is a stored conversati
 | Flag | Behavior | Best Use |
 |---|---|---|
 | `--continue` | Resumes the most recent conversation in the current directory without prompting | Returning to the latest in-progress work in a project |
-| `--resume` (`-r`) | Resumes a specific saved session, opening a picker if no identifier is given | Selecting a specific historical session or an explicitly named session |
+| `--resume <session-name>` (`-r`) | Resumes a specific named or saved session, opening a picker if no identifier is given | Continuing a named investigation across work sessions |
 | `--session-id <UUID>` | Uses (or creates) a session with a specific UUID | Programmatic workflows that need a stable, known identifier |
-| `--fork-session` | Creates a new session branched from an existing transcript | Exploring an alternative path without contaminating the original |
+| `--fork-session` (`fork_session` in the Agent SDK) | Creates a new session branched from an existing transcript | Exploring an alternative path from a shared analysis baseline without contaminating the original |
 
 Use a named or specific session when returning to a known investigation. Use `--continue` only when the most recent conversation is definitely the one you want — in a directory where you've worked on multiple unrelated tasks, "the latest" can be the wrong session.
 
@@ -1285,7 +1423,7 @@ This helps when context compacts or when another session must pick up the work.
 - A user-level memory file applies across all projects for that user.
 - Imports using `@path/to/file.md` syntax pull in additional shared content without copy-pasting; this is the right way to reuse a standards document across multiple `CLAUDE.md` files.
 
-When multiple files are loaded, more specific files refine or override more general ones for the area they cover. The user-level memory is for personal preferences (preferred commit message style, preferred test command shortcuts) — not team-wide rules, which belong in repo-tracked `CLAUDE.md` files so all collaborators benefit.
+When multiple files load, they're concatenated into context, not merged or overridden: files higher in the directory tree come first and more specific ones later, so specific guidance sits closest to the work. User-level memory is for personal preferences (preferred commit message style, preferred test command shortcuts), not team-wide rules, which belong in repo-tracked `CLAUDE.md` files so all collaborators benefit. For personal, project-specific notes (sandbox URLs, local test data), use a gitignored `CLAUDE.local.md` at the project root.
 
 Use `/memory` to inspect and edit loaded memory files. This is the first diagnostic step when Claude inconsistently follows project conventions: confirm the expected memory file is loaded before adding more instructions. If the rule is in a memory file that isn't being loaded for the current working directory, no amount of additional prompting will fix the behavior — the problem is the loading scope, not the rule's wording.
 
@@ -1298,7 +1436,40 @@ Prefer scoped memory:
 
 Do not put every occasional workflow into global memory. A code-review checklist belongs in a slash command or review subagent if it is only relevant during reviews. Memory files are read on every turn — bloating them with workflow-specific content costs tokens and dilutes the parts that matter for ordinary work.
 
-The mechanism for project memory is `CLAUDE.md` files plus `@import` references. There is no separate "rules directory with YAML frontmatter" mechanism — proposals that suggest a `.claude/rules/` folder with per-rule frontmatter for path scoping are not the standard model. Path scoping is achieved by placing `CLAUDE.md` files at the appropriate directory level so that work in that subtree picks them up; sharing across files is achieved with `@imports`. If you encounter advice to add YAML-frontmatter rule files, treat it as not how Claude Code's memory system actually loads context.
+Know the exact locations, because the exam tests them:
+
+| Level | Location | Shared via git? |
+|---|---|---|
+| User | `~/.claude/CLAUDE.md` | No. Applies only to you, in every project |
+| Project | `CLAUDE.md` or `.claude/CLAUDE.md` at the repo root | Yes |
+| Directory | `CLAUDE.md` in a subdirectory | Yes. Loads when working in that subtree |
+| Rules | `.claude/rules/*.md` | Yes. Topic files, optionally path-scoped |
+
+A classic diagnosis: a new teammate isn't getting the team's conventions. The usual cause is that the conventions live in someone's user-level `~/.claude/CLAUDE.md`, which is never committed. Move them to project level.
+
+### Path-Specific Rules (`.claude/rules/`)
+
+A large monolithic `CLAUDE.md` can be split into focused topic files in `.claude/rules/` (for example `testing.md`, `api-conventions.md`, `deployment.md`). A rule file can also declare YAML frontmatter with a `paths` field of glob patterns, so it loads **only when Claude is working on matching files**:
+
+```markdown
+---
+paths: ["**/*.test.tsx", "**/*.test.ts"]
+---
+# Testing conventions
+- Use React Testing Library; never test implementation details.
+- Every test file has a describe block named after the component.
+```
+
+Path-scoped rules cut irrelevant context and token usage. More importantly, they solve a problem directory-level `CLAUDE.md` files cannot: **conventions for files spread across many directories**. Test files that live next to their components (`Button.test.tsx` beside `Button.tsx`) appear everywhere, so a single glob such as `**/*.test.tsx` applies the testing conventions wherever they are. A subdirectory `CLAUDE.md` is bound to one directory; a glob rule follows the file type.
+
+Decision rule:
+
+- Universal standards for every task → root `CLAUDE.md`.
+- Conventions for one area of the tree → subdirectory `CLAUDE.md`, or a rule with `paths: ["src/api/**/*"]`.
+- Conventions for a **file type scattered across the tree** → `.claude/rules/` with a glob `paths` pattern.
+- A workflow you invoke on demand → a skill or slash command, not memory.
+
+Do not answer "put every area under headings in the root `CLAUDE.md` and let Claude infer which applies". That relies on inference instead of deterministic path matching.
 
 ### Slash Commands
 
@@ -1308,7 +1479,66 @@ Slash commands are reusable prompts. Use them for explicit workflows that develo
 - `/release-notes` for release note formatting.
 - `/migration-plan` for a standard migration analysis.
 
-Project commands are shared with the repo; user commands are personal. MCP prompts can also appear as slash commands.
+| Scope | Location | Who gets it |
+|---|---|---|
+| Project | `.claude/commands/review.md` | Everyone who clones or pulls the repo (version-controlled) |
+| User | `~/.claude/commands/review.md` | Only you, in every project |
+
+A team-wide command belongs in the project's `.claude/commands/`. It does not go in `CLAUDE.md` (that is context, not command definitions), and there is no `.claude/config.json` "commands array". MCP prompts can also appear as slash commands.
+
+### Skills
+
+Skills are on-demand capabilities: a directory containing a `SKILL.md` file (plus optional supporting files and scripts) in `.claude/skills/<name>/` for the project or `~/.claude/skills/<name>/` for personal use. Frontmatter configures how the skill runs:
+
+```markdown
+---
+name: analyze-codebase
+description: Map the architecture of an unfamiliar codebase and summarize it
+context: fork
+allowed-tools: Read, Grep, Glob
+argument-hint: "[directory-to-analyze]"
+---
+Explore $ARGUMENTS starting from entry points...
+```
+
+| Frontmatter | What it does | Use it when |
+|---|---|---|
+| `context: fork` | Runs the skill in an isolated subagent context; only its result returns to the main conversation | The skill produces verbose output (codebase analysis) or exploratory noise (brainstorming alternatives) that would pollute the main session |
+| `allowed-tools` | Controls tool access while the skill runs | The skill should be limited to safe operations, preventing destructive actions |
+| `argument-hint` | Prompts the developer for required parameters when they invoke the skill without arguments | The skill needs an input such as an issue number or a path |
+
+**Skills vs `CLAUDE.md`:** `CLAUDE.md` is *always loaded*, so it holds universal standards that apply to every task. Skills are *invoked on demand* for task-specific workflows. Putting a long review checklist in `CLAUDE.md` costs tokens on every turn and dilutes the rules that always matter.
+
+To customize a team skill for yourself, create a **personal variant in `~/.claude/skills/` under a different name**, so you don't change the shared one your teammates use.
+
+### Explore Subagent and `/compact`
+
+Two tools manage context during long exploration:
+
+- The **Explore subagent** is a read-only subagent for discovery. It isolates verbose search and read output in its own context and returns a summary, so a multi-phase task does not exhaust the main context window during the discovery phase.
+- **`/compact`** compresses the current conversation when context fills with verbose discovery output during an extended session.
+
+Use them alongside scratchpad files. Persist key findings to a file, summarize one phase before spawning subagents for the next, and inject that summary into their initial context.
+
+### Claude Code in CI/CD
+
+Running Claude Code in a pipeline requires non-interactive, machine-parseable operation:
+
+| Need | Mechanism |
+|---|---|
+| Don't hang waiting for input | `claude -p "<prompt>"` (or `--print`) runs non-interactively, prints the result, and exits |
+| Machine-parseable output | `--output-format json` |
+| Output that matches a schema | `--json-schema <schema>` alongside `--output-format json`, for example structured findings you post as inline PR comments |
+| Project context (testing standards, fixtures, review criteria) | `CLAUDE.md`. CI-invoked Claude Code reads it like an interactive session |
+
+Distractors that don't exist: a `CLAUDE_HEADLESS` environment variable, a `--batch` flag, or redirecting stdin from `/dev/null` as "the" fix.
+
+CI review design:
+
+- **Re-runs after new commits**: include the prior review's findings in context and instruct Claude to report only **new or still-unaddressed** issues, so you don't post duplicate comments.
+- **Test generation**: give Claude the existing test files so it doesn't propose scenarios already covered, and document testing standards, what makes a test valuable, and the available fixtures in `CLAUDE.md`.
+- **Independent review**: the session that generated the code is a poor reviewer of it, because it retains its own reasoning. Use a separate Claude instance for review.
+- **Blocking vs. non-blocking**: a pre-merge check that developers wait on uses the synchronous API. Overnight or weekly analysis can use the Message Batches API.
 
 ### Hooks and Permissions
 
@@ -1357,7 +1587,10 @@ Two practical consequences:
 - **Using plan mode for tiny edits.** It adds overhead.
 - **Using direct execution for broad migrations.** You lose review and architecture planning.
 - **Assuming all session resumes are safe.** Old context may reference changed code.
-- **Using a global `CLAUDE.md` for task-specific checklists.** Use slash commands or subagents.
+- **Using a global `CLAUDE.md` for task-specific checklists.** Use slash commands, skills, or subagents.
+- **Putting team conventions in `~/.claude/CLAUDE.md`.** That file is personal and never shared through version control.
+- **Using subdirectory `CLAUDE.md` files for conventions that span directories.** Use `.claude/rules/` with glob `paths`.
+- **Running `claude "<prompt>"` in CI without `-p`.** The job hangs waiting for interactive input.
 - **Relying on prompt instructions for destructive Bash approval.** Use hooks/permissions.
 
 ---
@@ -1403,6 +1636,12 @@ Document test standards in project memory or a testing guide. Include examples o
 A useful review agent needs explicit report criteria. Tell it which findings matter: bugs, security, correctness, data loss, missing tests, incompatible API changes. Tell it what to skip: minor style preferences, local conventions already accepted, speculative performance advice.
 
 For false positive reduction, few-shot examples are more effective than vague "be conservative" instructions. Show acceptable code patterns next to genuinely problematic ones.
+
+Precision comes from **specific categorical criteria**, not confidence filters. "Only report high-confidence findings" barely moves precision. "Flag a comment only when its claimed behavior contradicts what the code actually does" does. Define severity levels with a concrete code example for each, so classification is consistent.
+
+False positives in one category erode trust in **every** category: developers start ignoring the accurate findings too. If one category is mostly noise, **temporarily disable it** to restore trust while you improve its prompt. Don't keep shipping it.
+
+Use **2–4 targeted few-shot examples** for the ambiguous cases. Each example should show the reasoning for why one choice was made over the plausible alternatives, which lets the model generalize to new patterns rather than pattern-match the examples. Examples are also the most reliable way to get a consistent output format (location, issue, severity, suggested fix).
 
 If developers dismiss findings, capture why. Add fields such as `detected_pattern`, `rule_id`, or `evidence` so you can analyze what the system is over-reporting.
 
@@ -1469,9 +1708,21 @@ Operational details to know:
 
 When documents arrive continuously, choose a batch cadence based on deadline minus worst-case processing window and operational buffer. The arithmetic is mechanical: a record submitted at the next batch run has to wait up to (interval until next run) + (batch processing time, up to 24 hours) + (post-processing) before its result is usable. The slowest record sets the worst case, not the average.
 
-Example: if results must be available within 30 hours and batch processing may take up to 24 hours, leaving a 6-hour buffer for downstream work, the maximum acceptable interval between submissions is six hours. Anything longer means a record that arrives just after a submission can wait long enough that the deadline is missed. With a six-hour cadence, the worst case is a record that arrives one second after submission and must wait six hours to enter the next batch — combined with the 24-hour batch worst case, that totals 30 hours, exactly at the SLA boundary. To leave any margin at all, choose a cadence shorter than (deadline − batch window − processing buffer).
+The formula:
 
-A second example: if the SLA is 36 hours and the batch worst case is 24 hours, the cadence can stretch to roughly 12 hours. If the SLA is 26 hours, the cadence must drop to 2 hours or less, because there is almost no margin. Tightening the cadence costs more API calls and orchestration overhead but is the only way to honor a tight SLA against a 24-hour batch ceiling. Submitting "once a day" is only safe when the SLA is at least 48 hours and you are willing to absorb tail latency.
+```text
+worst-case latency = submission interval + 24h batch window + post-processing buffer
+maximum interval   = SLA − 24h − post-processing buffer
+```
+
+Example: results must be available within **30 hours**. Batch processing may take up to 24 hours, leaving 6 hours for everything else. A record that arrives one second after a submission waits a full interval before it is even submitted. With a **4-hour cadence**, the worst case is 4h waiting + 24h processing = 28h, leaving about 2 hours for post-processing and slack. A 6-hour cadence would consume all 30 hours with zero margin, so any post-processing at all breaks the SLA. Choose a cadence strictly shorter than (SLA − 24h − post-processing).
+
+More examples: a 36-hour SLA with a 2-hour post-processing buffer allows roughly a 10-hour cadence. A 26-hour SLA leaves under 2 hours, so you must submit almost continuously; question whether batch is the right tool at all. Submitting "once a day" is only safe when the SLA is at least about 48 hours plus your post-processing time.
+
+Two more batch facts the exam uses:
+
+- **No multi-turn tool calling inside a batch request.** Each batch request is a single Messages call. Claude can emit a `tool_use` block, but nothing executes the tool and returns the result mid-request. Agentic loops that need tool round-trips belong on the synchronous API.
+- **Refine on a sample first.** Before batching 10,000 documents, iterate the prompt and schema on a representative sample with the synchronous API. A higher first-pass success rate means fewer costly resubmission rounds.
 
 ### Failure Handling
 
@@ -1587,6 +1838,10 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Poor descriptions cause poor tool selection.
 - JSON-RPC errors for protocol-level failures (missing param, unknown method); `isError: true` tool results for execution failures (404, 503, denied).
 - Project MCP config uses `.mcp.json` at the repo root; local and user Claude Code MCP config both live in `~/.claude.json` at different keys.
+- Same server name at several scopes: local > project > user.
+- Put secrets in `.mcp.json` as `${ENV_VAR}` expansion, never as literal values.
+- All configured servers' tools are available simultaneously.
+- Prefer community MCP servers for standard integrations (Jira, GitHub); build custom servers only for team-specific workflows.
 - Progressive availability and `list_changed` notifications keep large tool surfaces tractable.
 
 ### Agentic Patterns
@@ -1607,7 +1862,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Grep searches file contents.
 - Glob finds file paths.
 - Read known files.
-- Edit/MultiEdit for targeted changes.
+- Edit for targeted changes; if the anchor text is not unique, Read + Write as the fallback.
 - Write for full-file replacement after reading.
 - Bash for commands and tests.
 - Plan mode for broad or risky changes.
@@ -1622,6 +1877,14 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Use slash commands for task-specific reusable workflows.
 - Hooks: `PreToolUse` (deny/allow/ask/defer/modify-input/inject-context), `PostToolUse`, `UserPromptSubmit`, `SessionStart`.
 - Subagents start fresh — they do not inherit the parent's conversation; the parent must include all needed context.
+- `.claude/rules/*.md` with `paths: ["**/*.test.tsx"]` frontmatter loads conventions only for matching files. Use it for file types spread across directories.
+- `~/.claude/CLAUDE.md` is personal and never shared. Team rules go in the project `CLAUDE.md`.
+- Commands: `.claude/commands/` (team, version-controlled) vs `~/.claude/commands/` (personal).
+- Skills: `.claude/skills/<name>/SKILL.md`; `context: fork` isolates verbose output, `allowed-tools` controls tools, `argument-hint` prompts for parameters. Skills are on demand; `CLAUDE.md` is always loaded.
+- The Explore subagent isolates verbose discovery; `/compact` shrinks a bloated context.
+- CI: `claude -p` (non-interactive), `--output-format json`, `--json-schema`. Re-reviews report only new or unaddressed issues.
+- Agentic loop: continue on `stop_reason: "tool_use"`, stop on `"end_turn"`. Never parse text to decide, and never rely on iteration caps as the primary stop.
+- Spawn parallel subagents with multiple Task calls in **one** response; the coordinator's `allowedTools` must include `"Task"`.
 
 ### Batch Processing
 

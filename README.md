@@ -30,7 +30,9 @@ Plus a **Study Strategy**, **Quick Reference Cheat Sheet**, and **Recommended Re
 
 ## Read the Guide
 
-**[exam-preparation-guide.md](exam-preparation-guide.md)**
+**[exam-preparation-guide.md](exam-preparation-guide.md)** begins with a map of the official exam blueprint (5 domains, 30 task statements, 6 scenarios) to the guide's sections, and a table of where exam terminology differs from today's Claude Code.
+
+An interactive study app is in progress; see [docs/STUDY-APP-PLAN.md](docs/STUDY-APP-PLAN.md).
 
 ## Disclaimer
 
