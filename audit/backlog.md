@@ -13,7 +13,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | R2 | S1 | Exam content may be updated. Pearson VUE announces updated content from 2026-12-07 for the other Claude exams, and there are unconfirmed mentions of updated guides on 2026-11-17. The audit uses Guide v0.1, dated Feb 2025. | `coverage-A1-notes.md` §4 (FMT-2) | **You:** check the current CCAR-F exam guide version on the Partner Academy after Nov 17, and before booking. If it changed, re-parse it and re-run Phase 1 coverage against the diff. |
 | R3 | S2 | "60 questions" is stated only on third-party sites. The 120-minute limit is official. | `coverage-A1-notes.md` §4 | Show the question count in the app as "about 60 (unofficial)" until it's confirmed. Keep the 60-item mock, which costs nothing if the real count differs. |
 | R4 | S2 | The app doesn't mention the 4-attempts-per-12-months limit, the retake waiting periods, or the 12-month validity. | FAQ | Add these to the in-app logistics page (the Foundations track). |
-| R5 | S1 | The mock exam can't meet the domain quotas in any of the 15 possible draws. Readiness uses the latest answer, not the first attempt, and there's no holdout set. | `audit/SUMMARY.md` | Phase 5 and Phase 7 step 5. |
+| R5 | S1 | The readiness signal is inflated in several ways. "Try again" deletes the earlier answer, so readiness can reach 100% by retrying. Every answer overwrites the stored one. There's no holdout set. The mock can't meet its domain quotas in any of the 15 draws. The mock shows task-statement chips. The scaled score shows false precision. | `audit/readiness-review.md` (E1–E10) | Implement the design and booking rule in readiness-review.md (Phase 7, step 5). |
 
 ## C: Factual claims (Phase 2)
 
