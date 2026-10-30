@@ -1,0 +1,672 @@
+<title>CCA Foundations Study Path</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>
+/* Layout: a calm reading column for lessons, a two-tier dashboard for the path; ivory paper, clay accent, one domain color per exam domain. */
+:root {
+  --bg: #FAF9F5; --surface: #FFFFFF; --sunk: #F1EEE6; --fg: #1A1916; --muted: #5F5C55; --faint: #8C887E; --line: #E4DFD3;
+  --accent: #C6613F; --accent-ink: #A44E2F; --accent-soft: #F5E4DA; --on-accent: #FFFFFF;
+  --good: #3F7A3A; --good-soft: #B7CDA8; --good-bg: #E8F0E1; --bad: #B23B2E; --bad-bg: #F7E1DC;
+  --d1: #C6613F; --d2: #5F8448; --d3: #3F76AC; --d4: #7D63AE; --d5: #A87B2E;
+  --sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px; --shadow: 0 1px 2px rgba(40, 30, 20, .05), 0 4px 16px rgba(40, 30, 20, .05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1E1D1B; --surface: #282724; --sunk: #191816; --fg: #EEEAE0; --muted: #ABA79C; --faint: #7F7B72; --line: #3A3834;
+    --accent: #E07B58; --accent-ink: #EE9475; --accent-soft: #3B2A22; --on-accent: #1E1D1B;
+    --good: #93BF78; --good-soft: #42583A; --good-bg: #24301F; --bad: #EC7F72; --bad-bg: #3D2420;
+    --d1: #E07B58; --d2: #93B47A; --d3: #79A7D6; --d4: #A893D6; --d5: #D2A659;
+    --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1E1D1B; --surface: #282724; --sunk: #191816; --fg: #EEEAE0; --muted: #ABA79C; --faint: #7F7B72; --line: #3A3834;
+  --accent: #E07B58; --accent-ink: #EE9475; --accent-soft: #3B2A22; --on-accent: #1E1D1B;
+  --good: #93BF78; --good-soft: #42583A; --good-bg: #24301F; --bad: #EC7F72; --bad-bg: #3D2420;
+  --d1: #E07B58; --d2: #93B47A; --d3: #79A7D6; --d4: #A893D6; --d5: #D2A659;
+  --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: var(--accent-ink); }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.read { max-width: 760px; }
+.eyebrow { font: 600 11.5px/1.2 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.small { font-size: 13.5px; color: var(--muted); }
+
+/* Top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top-in { display: flex; align-items: center; gap: 20px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); font-weight: 650; letter-spacing: -.01em; }
+.brand-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--fg); display: grid; place-items: center; }
+.brand-mark svg { width: 16px; height: 16px; }
+.brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; letter-spacing: 0; }
+.nav { display: flex; gap: 4px; margin-left: auto; }
+.nav a { text-decoration: none; color: var(--muted); padding: 6px 10px; border-radius: 8px; font-weight: 550; }
+.nav a.on { color: var(--fg); background: var(--sunk); }
+.sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+.sync.synced i { background: var(--good); }
+.sync.saving i { background: var(--accent); }
+@media (max-width: 560px) { .brand small, .sync span { display: none; } .top-in { gap: 10px; } }
+
+main { padding-block: 32px 96px; }
+.foot { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var(--muted); font-size: 13px; }
+
+/* Buttons */
+.btn { font: 600 14.5px/1 var(--sans); background: var(--fg); color: var(--bg); border: 0; border-radius: 9px; padding: 11px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.btn:hover { background: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--fg); background: transparent; color: var(--fg); }
+.btn.accent { background: var(--accent); color: var(--on-accent); }
+.btn.accent:hover { background: var(--accent-ink); }
+.btn:disabled { opacity: .4; cursor: default; }
+.small-btn { padding: 8px 12px; font-size: 13.5px; margin-left: 10px; }
+.chip { display: inline-block; font: 600 11px/1 var(--mono); padding: 4px 6px; border-radius: 5px; background: var(--sunk); color: var(--muted); }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.dom-d1 { color: var(--d1); background: color-mix(in srgb, var(--d1) 13%, transparent); }
+.dom-d2 { color: var(--d2); background: color-mix(in srgb, var(--d2) 13%, transparent); }
+.dom-d3 { color: var(--d3); background: color-mix(in srgb, var(--d3) 13%, transparent); }
+.dom-d4 { color: var(--d4); background: color-mix(in srgb, var(--d4) 13%, transparent); }
+.dom-d5 { color: var(--d5); background: color-mix(in srgb, var(--d5) 13%, transparent); }
+.dom-bg-d1 { background: var(--d1); } .dom-bg-d2 { background: var(--d2); } .dom-bg-d3 { background: var(--d3); } .dom-bg-d4 { background: var(--d4); } .dom-bg-d5 { background: var(--d5); }
+
+/* Home */
+.hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: end; margin-bottom: 34px; }
+.hero h1 { font: 600 clamp(34px, 5.4vw, 54px)/1.02 var(--sans); letter-spacing: -.03em; margin: 10px 0 14px; }
+.hero h1 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--accent-ink); letter-spacing: -.01em; }
+.hero p { font: 400 19px/1.5 var(--serif); color: var(--muted); max-width: 54ch; margin: 0; }
+.goal { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; box-shadow: var(--shadow); }
+.ring { width: 96px; height: 96px; }
+.ring circle { fill: none; stroke-width: 9; }
+.ring .track { stroke: var(--sunk); }
+.ring .val { stroke: var(--accent); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset .6s ease; }
+.ring text { font: 700 22px var(--sans); fill: var(--fg); }
+.goal-k { font-size: 13px; color: var(--muted); }
+.goal-v { font: 650 22px/1.2 var(--sans); font-variant-numeric: tabular-nums; }
+.goal-v + .goal-k { margin-bottom: 8px; }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+
+.cont { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--fg); color: var(--bg); border-radius: 14px; padding: 20px 22px; margin-bottom: 40px; }
+.cont .eyebrow { color: color-mix(in srgb, var(--bg) 65%, transparent); }
+.cont h2 { font-size: 21px; margin-top: 6px; }
+.cont p { margin: 4px 0 0; color: color-mix(in srgb, var(--bg) 75%, transparent); font-family: var(--serif); font-size: 16px; }
+.cont .btn { background: var(--accent); color: var(--on-accent); }
+.cont .btn:hover { background: var(--bg); color: var(--fg); }
+
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
+.sec-head h2 { font-size: 20px; }
+.domains { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 44px; }
+.dom { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.dom-top { display: flex; justify-content: space-between; align-items: baseline; }
+.dom-n { font: 600 12px var(--mono); }
+.dom-w { font: 600 12px var(--mono); color: var(--muted); }
+.dom-name { font-weight: 600; line-height: 1.25; min-height: 2.5em; }
+.bar { height: 6px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: 4px; transition: width .5s ease; }
+.dom-meta { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) { .domains { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .domains { grid-template-columns: 1fr; } .dom-name { min-height: 0; } }
+
+.path { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.mod { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: inherit; }
+a.mod:hover { background: var(--surface); }
+.mod-n { font: 500 26px/1 var(--serif); color: var(--faint); text-align: center; font-variant-numeric: tabular-nums; }
+.mod.ready .mod-n { color: var(--accent-ink); }
+.mod-title { font-weight: 650; font-size: 16.5px; }
+.mod-p { font: 400 15.5px/1.4 var(--serif); color: var(--muted); margin: 2px 0 7px; }
+.mod-side { text-align: right; font-size: 12.5px; color: var(--muted); white-space: nowrap; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.status { font: 600 11px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; padding: 5px 7px; border-radius: 5px; }
+.status.done { background: var(--good-bg); color: var(--good); }
+.status.prog { background: var(--accent-soft); color: var(--accent-ink); }
+.status.new { background: var(--sunk); color: var(--fg); }
+.status.soon { background: transparent; color: var(--faint); box-shadow: inset 0 0 0 1px var(--line); }
+.mod.soon .mod-title, .mod.soon .mod-p { opacity: .62; }
+.mini { width: 72px; height: 4px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.mini span { display: block; height: 100%; background: var(--accent); }
+@media (max-width: 560px) { .mod { grid-template-columns: 34px minmax(0, 1fr); } .mod-side { grid-column: 2; flex-direction: row; align-items: center; justify-content: flex-start; } .mod-n { font-size: 21px; } }
+
+/* Blueprint */
+.bp-dom { margin-bottom: 30px; }
+.bp-dom h2 { font-size: 19px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.bp-rows { margin-top: 10px; border-top: 1px solid var(--line); }
+.bp-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 120px 60px; gap: 12px; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.bp-row .mono { color: var(--muted); }
+.bp-row a { color: var(--fg); text-decoration: none; font-size: 12.5px; }
+.bp-row a:hover { color: var(--accent-ink); }
+.bp-pct { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+@media (max-width: 560px) { .bp-row { grid-template-columns: 38px minmax(0, 1fr) 48px; } .bp-row .bp-mod { display: none; } }
+.oos { columns: 2 260px; color: var(--muted); padding-left: 18px; }
+
+/* Lesson */
+.crumb { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); text-decoration: none; font-weight: 550; margin-bottom: 18px; }
+.crumb:hover { color: var(--fg); }
+.l-head h1 { font: 650 clamp(28px, 4.4vw, 40px)/1.08 var(--sans); letter-spacing: -.025em; margin: 8px 0 10px; }
+.l-principle { font: italic 400 20px/1.45 var(--serif); color: var(--accent-ink); margin: 0 0 14px; }
+.steps { display: flex; gap: 4px; margin: 26px 0 8px; }
+.steps button { flex: 1; height: 6px; border: 0; padding: 0; border-radius: 3px; background: var(--line); cursor: pointer; }
+.steps button.done { background: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.steps button.cur { background: var(--accent); }
+.step-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+.step h2 { font-size: 26px; letter-spacing: -.02em; margin-bottom: 14px; }
+.prose { font: 400 18px/1.62 var(--serif); }
+.prose p, .prose ul, .prose ol { margin: 0 0 16px; }
+.prose li { margin-bottom: 8px; }
+.prose h3 { font-size: 18px; margin: 26px 0 10px; }
+.prose h4 { font-size: 15.5px; margin: 0 0 6px; }
+.prose strong { font-weight: 600; }
+.prose code { background: var(--sunk); padding: 1px 5px; border-radius: 4px; font-size: .78em; }
+.lede { font-size: 20.5px; line-height: 1.5; }
+.moves { padding-left: 22px; }
+.moves li::marker { font-family: var(--sans); font-weight: 700; color: var(--accent-ink); }
+.callout { border-radius: var(--r); padding: 16px 18px; margin: 22px 0; background: var(--sunk); font-size: 16.5px; }
+.callout p { margin: 0; }
+.callout-label { font: 650 12px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 8px; color: var(--muted); }
+.callout.key { background: var(--accent-soft); }
+.callout.key .callout-label { color: var(--accent-ink); }
+.callout.today { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.callout.today .callout-label::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d3); margin-right: 7px; vertical-align: 1px; }
+.code { font: 400 13.2px/1.6 var(--mono); background: var(--sunk); border-radius: var(--r); padding: 14px 16px; overflow-x: auto; margin: 0 0 16px; color: var(--fg); }
+.code code { background: none; padding: 0; font-size: 1em; }
+.code .k { color: var(--d4); } .code .s { color: var(--d2); } .code .c { color: var(--faint); font-style: italic; }
+.table-wrap { overflow-x: auto; margin: 0 0 18px; }
+table { border-collapse: collapse; width: 100%; font: 400 14.5px/1.45 var(--sans); }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.anti, .mech { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 6px 0 20px; font-size: 15.5px; line-height: 1.5; }
+.anti > div, .mech > div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; min-width: 0; }
+.anti > div { border-top: 3px solid var(--bad); }
+.anti p, .mech p { margin: 0; }
+.mech .tag { font: 600 10.5px/1 var(--mono); text-transform: uppercase; color: var(--accent-ink); letter-spacing: .08em; }
+.mech h4 { margin: 6px 0; }
+@media (max-width: 680px) { .anti, .mech { grid-template-columns: 1fr; } }
+
+.widget-intro { font: 400 18px/1.55 var(--serif); margin: 0 0 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+.panel h3 { font-size: 17px; margin: 26px 0 12px; }
+
+/* Diagram */
+.diagram { margin: 4px 0 20px; overflow-x: auto; }
+.diagram svg { width: 100%; min-width: 520px; height: auto; display: block; }
+.svg-box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.svg-accent { fill: var(--accent); }
+.svg-line { stroke: var(--fg); stroke-width: 1.5; fill: none; }
+.svg-dash { stroke: var(--faint); stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; }
+.svg-ink { fill: var(--fg); }
+.svg-label { font: 600 10.5px var(--sans); letter-spacing: .08em; fill: var(--muted); }
+.svg-text { font: 500 14px var(--sans); fill: var(--fg); }
+.svg-mono { font: 500 13px var(--mono); fill: var(--fg); }
+.svg-text-strong { font: 700 17px var(--sans); fill: var(--on-accent); }
+.svg-small { font: 400 12px var(--sans); fill: var(--muted); }
+.svg-accent + text + text { fill: var(--on-accent); opacity: .85; }
+
+/* Exam blueprint embeds */
+.scen-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 20px; font-family: var(--sans); }
+.scen { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; min-width: 0; }
+.scen-n { font: 500 22px/1 var(--serif); color: var(--accent-ink); width: 18px; }
+.scen-name { font-weight: 600; font-size: 15px; line-height: 1.3; margin-bottom: 6px; }
+@media (max-width: 560px) { .scen-grid { grid-template-columns: 1fr; } }
+.weights { display: flex; flex-direction: column; gap: 9px; margin: 0 0 20px; font-family: var(--sans); font-size: 14px; }
+.weight-row { display: grid; grid-template-columns: minmax(0, 210px) minmax(0, 1fr) 40px; gap: 12px; align-items: center; }
+.weight-track { height: 10px; background: var(--sunk); border-radius: 5px; overflow: hidden; }
+.weight-fill { display: block; height: 100%; border-radius: 5px; }
+.weight-val { font: 600 13px var(--mono); text-align: right; }
+@media (max-width: 520px) { .weight-row { grid-template-columns: minmax(0, 1fr) 40px; } .weight-track { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Options (shared by quizzes and widgets) */
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { font: 500 15px/1.4 var(--sans); text-align: left; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; }
+.opt:hover:not(:disabled) { border-color: var(--fg); }
+.opt:disabled { cursor: default; }
+.opt.is-right { border-color: var(--good); background: var(--good-bg); }
+.opt.is-wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt .letter { font: 600 12px/1 var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; flex: none; margin-top: 1px; }
+.opt .opt-body { min-width: 0; }
+.opt .opt-why { display: block; font: 400 15px/1.5 var(--serif); color: var(--muted); margin-top: 6px; }
+.opt.is-right .opt-why, .opt.is-wrong .opt-why { color: var(--fg); }
+.trap-badge { display: inline-block; font: 600 10.5px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--bad); border: 1px solid currentColor; border-radius: 4px; padding: 3px 5px; margin-top: 7px; }
+
+/* Quiz */
+.qs { display: flex; flex-direction: column; gap: 22px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.q-meta { display: flex; gap: 6px 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.q-stem { font: 400 18px/1.5 var(--serif); margin: 0 0 14px; }
+.q-stem code { background: var(--sunk); padding: 1px 4px; border-radius: 4px; font-size: .8em; }
+.q-res { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; font-weight: 600; }
+.q-res.ok { color: var(--good); } .q-res.no { color: var(--bad); }
+.linkbtn { background: none; border: 0; color: var(--muted); font: 500 13.5px var(--sans); text-decoration: underline; cursor: pointer; padding: 4px; }
+
+/* Recap */
+.recap { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; counter-reset: r; }
+.recap li { counter-increment: r; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font: 400 17px/1.45 var(--serif); }
+.recap li::before { content: counter(r); font: 600 13px/1.7 var(--mono); color: var(--accent-ink); }
+
+.l-nav { position: sticky; bottom: 0; display: flex; justify-content: space-between; gap: 10px; padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px)); margin-top: 30px; background: linear-gradient(to top, var(--bg) 70%, transparent); }
+
+/* Trap spotter */
+.trap-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.trap { text-align: left; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; font: 400 13.5px/1.4 var(--sans); min-width: 0; }
+.trap:hover { border-color: var(--fg); }
+.trap-id { font: 600 11px var(--mono); color: var(--bad); }
+.trap-name { font-weight: 650; font-size: 14.5px; }
+.trap-tell { color: var(--muted); }
+.trap-why { display: none; border-top: 1px dashed var(--line); padding-top: 8px; font-family: var(--serif); font-size: 15px; }
+.trap.open { border-color: var(--bad); }
+.trap.open .trap-why { display: block; }
+@media (max-width: 860px) { .trap-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.spot { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.spot-text { font: italic 400 19px/1.5 var(--serif); margin: 10px 0 14px; }
+.spot-feedback { margin-top: 12px; font: 400 16px/1.5 var(--serif); }
+.spot-done, .loop-done { text-align: left; }
+.big-num { font: 650 34px/1.1 var(--sans); letter-spacing: -.02em; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+
+/* Loop stepper */
+.loop-meter { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 12px; align-items: center; margin-bottom: 14px; }
+.loop-count { font: 600 13px var(--mono); color: var(--muted); }
+.loop-bar { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.loop-bar span { display: block; height: 100%; background: var(--accent); transition: width .4s ease; }
+.loop-cols { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 680px) { .loop-cols { grid-template-columns: 1fr; } }
+.loop-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.col-head { font: 600 11.5px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.msg { border-radius: 10px; padding: 10px; border: 1px solid var(--line); background: var(--bg); }
+.msg-assistant { background: color-mix(in srgb, var(--accent) 6%, var(--bg)); }
+.msg.fresh { animation: pop .5s ease; box-shadow: 0 0 0 2px var(--accent-soft); }
+@keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .msg.fresh { animation: none; } * { transition: none !important; } }
+.msg-role { font: 600 11px var(--mono); color: var(--muted); }
+.msg-blocks { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.blk { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: 13.5px; }
+.blk-type { font: 600 10.5px var(--mono); color: var(--accent-ink); }
+.blk-tool_result .blk-type { color: var(--d2); }
+.blk-text .blk-type { color: var(--muted); }
+.blk-body { overflow-wrap: anywhere; }
+.blk-body.mono { font-size: 12px; }
+.stop { display: flex; gap: 10px; align-items: center; font: 600 12px var(--mono); color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+.stop-val { font-size: 14px; padding: 4px 8px; border-radius: 6px; }
+.stop-tool_use { background: var(--accent-soft); color: var(--accent-ink); }
+.stop-end_turn { background: var(--good-bg); color: var(--good); }
+.loop-q { margin-top: 16px; }
+.q-lead { font-weight: 650; margin: 0 0 8px; }
+.loop-fb { margin-top: 10px; font: 400 16px/1.5 var(--serif); }
+
+/* Compliance sim */
+.sim-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.seg { display: inline-flex; background: var(--sunk); border-radius: 9px; padding: 3px; }
+.seg button { border: 0; background: none; color: var(--muted); font: 600 13.5px var(--sans); padding: 8px 12px; border-radius: 7px; cursor: pointer; }
+.seg button.on { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+.sim-frame { background: var(--bg); border-radius: 10px; padding: 8px; }
+.sim-canvas { width: 100%; height: auto; display: block; aspect-ratio: 8 / 5; max-width: 100%; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 10px 0; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.dot-ok { background: var(--good-soft); } .dot-bad { background: var(--bad); } .dot-blocked { background: var(--d3); }
+.sim-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sim-stats:empty { display: none; }
+.sim-stats > div { background: var(--bg); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.stat-n { font: 650 24px/1 var(--sans); color: var(--fg); font-variant-numeric: tabular-nums; }
+.stat-n.bad { color: var(--bad); } .stat-n.good { color: var(--good); } .stat-n.blue { color: var(--d3); }
+@media (max-width: 560px) { .sim-stats { grid-template-columns: 1fr; } }
+
+/* Hook playground */
+.hp-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 22px; align-items: center; margin-bottom: 14px; }
+@media (max-width: 600px) { .hp-controls { grid-template-columns: 1fr; } }
+.hp-field { display: grid; grid-template-columns: auto minmax(0, 1fr) 70px; gap: 12px; align-items: center; font-weight: 600; }
+.hp-field input { accent-color: var(--accent); width: 100%; }
+.hp-amt { font: 650 16px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.hp-check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.hp-check input { accent-color: var(--accent); width: 18px; height: 18px; }
+.pipeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 4px 0 12px; }
+@media (max-width: 600px) { .pipeline { grid-template-columns: 1fr 1fr; } }
+.stage { border-radius: 10px; padding: 10px; border: 1px solid var(--line); background: var(--bg); min-width: 0; position: relative; }
+.stage-title { font-weight: 650; font-size: 13.5px; }
+.stage-note { font: 400 12px var(--mono); color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+.stage.pass { border-color: var(--good); background: var(--good-bg); }
+.stage.fail { border-color: var(--bad); background: var(--bad-bg); }
+.stage.idle { opacity: .5; }
+.hp-result { border-radius: 10px; padding: 12px 14px; font: 400 16px/1.5 var(--serif); }
+.hp-result.ok { background: var(--good-bg); } .hp-result.deny { background: var(--bad-bg); }
+
+/* Prompt or code */
+.poc { display: flex; flex-direction: column; gap: 8px; }
+.poc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.poc-text { margin: 0; font: 400 16.5px/1.4 var(--serif); }
+.poc-btns { display: flex; gap: 6px; }
+.pill-btn { font: 600 13px var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 7px 13px; cursor: pointer; }
+.pill-btn:hover { border-color: var(--fg); }
+.pill-btn.is-right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.pill-btn.is-wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.poc-fb { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
+.poc-fb:empty { display: none; }
+.poc-score { margin-top: 12px; font-weight: 650; }
+@media (max-width: 520px) { .poc-row { grid-template-columns: 1fr; } }
+
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; z-index: 20; }
+</style>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#path">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 1.5 9.6 6.4 14.5 8 9.6 9.6 8 14.5 6.4 9.6 1.5 8 6.4 6.4Z" fill="var(--accent)"/></svg></span>
+      <span>CCA Foundations<small>Independent study path</small></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#path" data-nav="path">Path</a>
+      <a href="#blueprint" data-nav="blueprint">Blueprint</a>
+    </nav>
+    <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
+  </div>
+</header>
+<main id="app" class="wrap"></main>
+<footer class="foot"><div class="wrap">Independent study guide built on the published exam blueprint. Not affiliated with or endorsed by Anthropic. All practice questions are original.</div></footer>
+
+<script src="content/curriculum.js"></script>
+<script src="widgets.js"></script>
+<script src="content/m00.js"></script>
+<script src="content/m01.js"></script>
+<script src="content/m03.js"></script>
+<script>
+(function () {
+  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS;
+  const app = document.getElementById("app");
+  const KEY = "cca-study-progress-v1";
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, widgets: {}, last: null });
+
+  // ---------- State and sync ----------
+  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+
+  const syncEl = document.getElementById("sync");
+  const setSync = (cls, label) => { syncEl.className = `sync ${cls}`; syncEl.querySelector("span").textContent = label; };
+
+  function touch() {
+    state.updatedAt = Date.now();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    if (remoteRef) { dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 1200); }
+  }
+  async function flush() {
+    if (!remoteRef || saving || !dirty) return;
+    saving = true; dirty = false; setSync("saving", "Saving…");
+    try { await remoteRef.set(JSON.parse(JSON.stringify(state))); setSync("synced", "Synced"); }
+    catch (e) { setSync("", "This device"); }
+    saving = false;
+    if (dirty) flush();
+  }
+  function merge(a, b) {
+    const out = blank();
+    out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
+    for (const k of ["steps", "widgets"]) out[k] = Object.assign({}, b[k] || {}, a[k] || {});
+    const ans = Object.assign({}, b.answers || {});
+    for (const [q, v] of Object.entries(a.answers || {})) if (!ans[q] || (v.at || 0) >= (ans[q].at || 0)) ans[q] = v;
+    out.answers = ans;
+    const la = a.last, lb = b.last;
+    out.last = !la ? lb : !lb ? la : (la.at || 0) >= (lb.at || 0) ? la : lb;
+    return out;
+  }
+  async function initSync() {
+    if (!window.claude || !window.claude.use) return;
+    try {
+      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!db || !user) return;
+      const uid = await user.id();
+      if (!uid) return;
+      remoteRef = db.doc(`data/users/${uid}/progress`);
+      remoteRef.onSnapshot(snap => {
+        const remote = snap.exists ? snap.data() : null;
+        const merged = remote ? merge(state, remote) : state;
+        const changedLocal = JSON.stringify(merged) !== JSON.stringify(state);
+        const needsPush = !remote || JSON.stringify(merged) !== JSON.stringify(merge(blank(), remote));
+        state = merged;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        if (needsPush && (state.updatedAt || Object.keys(state.answers).length)) { dirty = true; flush(); }
+        else if (!saving) setSync("synced", "Synced");
+        if (changedLocal && !route().lesson) render();
+      }, () => { remoteRef = null; setSync("", "This device"); });
+    } catch (e) { remoteRef = null; }
+  }
+
+  // ---------- Derived progress ----------
+  const ready = id => !!L[id];
+  const allQuestions = () => {
+    const qs = [];
+    for (const m of MODS) if (L[m.id]) L[m.id].steps.forEach(s => (s.questions || []).forEach(q => qs.push(q)));
+    return qs;
+  };
+  function taskMastery() {
+    const per = {};
+    for (const q of allQuestions()) {
+      const t = (per[q.ts] = per[q.ts] || { total: 0, right: 0, tried: 0 });
+      t.total++;
+      const a = state.answers[q.id];
+      if (a) { t.tried++; if (a.ok) t.right++; }
+    }
+    return per;
+  }
+  function domainStats() {
+    const tm = taskMastery();
+    return B.domains.map(d => {
+      const tasks = Object.keys(B.tasks).filter(t => t.startsWith(String(d.n) + "."));
+      const scores = tasks.map(t => tm[t] ? tm[t].right / tm[t].total : 0);
+      const covered = tasks.filter(t => tm[t]).length;
+      const started = tasks.filter(t => tm[t] && tm[t].tried).length;
+      return { ...d, tasks, mastery: scores.reduce((a, b) => a + b, 0) / tasks.length, covered, started };
+    });
+  }
+  const readiness = () => domainStats().reduce((s, d) => s + d.weight * d.mastery, 0) / 100;
+  const modProgress = id => {
+    if (!L[id]) return 0;
+    const n = L[id].steps.length;
+    return L[id].steps.filter((_, i) => state.steps[`${id}:${i}`]).length / n;
+  };
+  function nextUp() {
+    if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
+    for (const m of MODS) if (L[m.id] && modProgress(m.id) < 1) {
+      const s = L[m.id].steps.findIndex((_, i) => !state.steps[`${m.id}:${i}`]);
+      return { m: m.id, s: Math.max(0, s) };
+    }
+    return null;
+  }
+
+  // ---------- Helpers ----------
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const domOfTask = t => B.domains.find(d => t.startsWith(d.n + "."));
+  const taskChip = t => `<span class="chip dom-${domOfTask(t).id}" title="${esc(B.tasks[t])}">${t}</span>`;
+  const daysLeft = () => Math.max(0, Math.ceil((new Date(B.examDate + "T23:59:59") - new Date()) / 86400000));
+  function toast(msg) {
+    const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+    document.body.append(t); setTimeout(() => t.remove(), 2400);
+  }
+
+  // ---------- Views ----------
+  function viewPath() {
+    const r = readiness(), pct = Math.round(r * 100), C = 2 * Math.PI * 40;
+    const next = nextUp();
+    const nm = next && MODS.find(m => m.id === next.m);
+    const dstats = domainStats();
+    const readyCount = MODS.filter(m => ready(m.id)).length;
+    app.innerHTML = `
+<section class="hero">
+  <div>
+    <div class="eyebrow">Claude Certified Architect – Foundations</div>
+    <h1>Exam-ready by <em>December 31</em></h1>
+    <p>Fourteen short modules that build from first principles to exam judgment, mapped to every task statement in the official blueprint.</p>
+  </div>
+  <div class="goal">
+    <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
+    <div>
+      <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your Dec 31 goal</div>
+      <div class="goal-v">${pct}% ready</div><div class="goal-k">Estimated from your practice answers, weighted by domain. Pass is 72%.</div>
+    </div>
+  </div>
+</section>
+${nm ? `<section class="cont">
+  <div><div class="eyebrow">${modProgress(nm.id) > 0 ? "Continue" : "Start here"} · Module ${nm.n}</div><h2>${esc(nm.title)}</h2><p>${esc(L[nm.id].steps[next.s].title)}</p></div>
+  <a class="btn" href="#${nm.id}-${next.s + 1}">${modProgress(nm.id) > 0 ? "Resume" : "Begin"} →</a>
+</section>` : `<section class="cont"><div><div class="eyebrow">All available modules complete</div><h2>New modules are on the way</h2><p>Review any module, or check your gaps on the Blueprint page.</p></div><a class="btn" href="#blueprint">Open blueprint →</a></section>`}
+<div class="sec-head"><h2>Domains</h2><span class="small">mastery across all task statements</span></div>
+<section class="domains">
+  ${dstats.map(d => `<div class="dom">
+    <div class="dom-top"><span class="dom-n chip dom-${d.id}">D${d.n}</span><span class="dom-w">${d.weight}%</span></div>
+    <div class="dom-name">${esc(d.short)}</div>
+    <div class="bar"><span class="dom-bg-${d.id}" style="width:${Math.round(d.mastery * 100)}%"></span></div>
+    <div class="dom-meta">${Math.round(d.mastery * 100)}% · ${d.started}/${d.tasks.length} tasks practiced</div>
+  </div>`).join("")}
+</section>
+<div class="sec-head"><h2>Study path</h2><span class="small">${readyCount} of ${MODS.length} modules available</span></div>
+<section class="path">
+  ${MODS.map(m => {
+    const p = modProgress(m.id), isReady = ready(m.id);
+    const status = !isReady ? `<span class="status soon">Coming soon</span>` : p >= 1 ? `<span class="status done">Done</span>` : p > 0 ? `<span class="status prog">In progress</span>` : `<span class="status new">Start</span>`;
+    const inner = `<span class="mod-n">${m.n}</span>
+      <span><span class="mod-title">${esc(m.title)}</span><p class="mod-p">${esc(m.principle)}</p><span class="chips">${m.tasks.map(taskChip).join("") || '<span class="chip">exam strategy</span>'}</span></span>
+      <span class="mod-side">${status}<span>${m.minutes} min</span>${isReady && p > 0 && p < 1 ? `<span class="mini"><span style="width:${p * 100}%"></span></span>` : ""}</span>`;
+    return isReady ? `<a class="mod ready" href="#${m.id}">${inner}</a>` : `<div class="mod soon">${inner}</div>`;
+  }).join("")}
+</section>`;
+  }
+
+  function viewBlueprint() {
+    const tm = taskMastery();
+    const modFor = t => MODS.filter(m => m.tasks.includes(t));
+    app.innerHTML = `
+<a class="crumb" href="#path">← Study path</a>
+<div class="read" style="margin-bottom:26px">
+  <div class="eyebrow">Official exam blueprint</div>
+  <h1 style="font:650 clamp(28px,4.4vw,40px)/1.08 var(--sans);letter-spacing:-.025em;margin:8px 0 10px">30 task statements</h1>
+  <p style="font:400 18px/1.5 var(--serif);color:var(--muted);margin:0">Everything the exam can ask about. Each percentage is your share of correct answers on that task's practice questions. Tasks whose modules haven't been released yet show a dash.</p>
+</div>
+${B.domains.map(d => `<section class="bp-dom">
+  <h2><span class="chip dom-${d.id}">D${d.n}</span>${esc(d.name)} <span class="small">${d.weight}% of the exam</span></h2>
+  <div class="bp-rows">
+  ${Object.keys(B.tasks).filter(t => t.startsWith(d.n + ".")).map(t => {
+    const s = tm[t], mods = modFor(t);
+    const pct = s ? Math.round(s.right / s.total * 100) + "%" : "–";
+    return `<div class="bp-row"><span class="mono">${t}</span><span>${esc(B.tasks[t])}</span>
+      <span class="bp-mod">${mods.map(m => ready(m.id) ? `<a href="#${m.id}">Module ${m.n} →</a>` : `<span class="small">Module ${m.n} (soon)</span>`).join("<br>")}</span>
+      <span class="bp-pct">${pct}</span></div>`;
+  }).join("")}
+  </div></section>`).join("")}
+<section class="read" style="margin-top:34px">
+  <h2 style="font-size:19px;margin-bottom:8px">Out of scope</h2>
+  <p class="small">The official guide says these will not appear. Don't spend study time on them.</p>
+  <ul class="oos"><li>Fine-tuning or training models</li><li>API auth, billing, account management</li><li>Deploying or hosting MCP servers</li><li>Model internals, training, weights</li><li>Constitutional AI, RLHF, safety training</li><li>Embeddings and vector databases</li><li>Computer use</li><li>Vision</li><li>Streaming and server-sent events</li><li>Rate limits, quotas, pricing math</li><li>OAuth and key rotation</li><li>Cloud-provider configuration</li><li>Benchmarks and model comparisons</li><li>Prompt-caching details</li><li>Tokenization specifics</li></ul>
+</section>`;
+  }
+
+  function viewLesson(id, stepIdx) {
+    const mod = MODS.find(m => m.id === id), lesson = L[id];
+    const steps = lesson.steps;
+    const i = Math.min(Math.max(stepIdx, 0), steps.length - 1);
+    const step = steps[i];
+    state.last = { m: id, s: i, at: Date.now() }; touch();
+    app.innerHTML = `
+<div class="read">
+  <a class="crumb" href="#path">← Study path</a>
+  <header class="l-head">
+    <div class="eyebrow">Module ${mod.n} · ${mod.minutes} min</div>
+    <h1>${esc(mod.title)}</h1>
+    <p class="l-principle">${esc(mod.principle)}</p>
+    <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
+  </header>
+  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : state.steps[`${id}:${k}`] ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
+  <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
+  <article class="step" id="step"></article>
+  <nav class="l-nav" aria-label="Step navigation">
+    <button class="btn ghost" type="button" id="prev" ${i === 0 ? "disabled" : ""}>← Back</button>
+    <button class="btn accent" type="button" id="next">${i === steps.length - 1 ? "Finish module" : "Continue →"}</button>
+  </nav>
+</div>`;
+    const el = document.getElementById("step");
+    el.append(Object.assign(document.createElement("h2"), { textContent: step.title }));
+    if (step.kind === "read") {
+      const p = document.createElement("div"); p.className = "prose"; p.innerHTML = step.html; el.append(p);
+      p.querySelectorAll("[data-embed]").forEach(n => window.EMBEDS[n.dataset.embed] && window.EMBEDS[n.dataset.embed](n));
+    } else if (step.kind === "widget") {
+      const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
+      const panel = document.createElement("div"); panel.className = "panel";
+      el.append(intro, panel);
+      window.WIDGETS[step.widget](panel, { done: () => { const k = `${id}:${i}`; if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } });
+    } else if (step.kind === "quiz") {
+      el.append(renderQuiz(step.questions));
+    } else if (step.kind === "recap") {
+      const ol = document.createElement("ol"); ol.className = "recap";
+      ol.innerHTML = step.points.map(p => `<li>${esc(p)}</li>`).join("");
+      el.append(ol);
+    }
+    const go = k => { location.hash = `#${id}-${k + 1}`; };
+    app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
+    document.getElementById("prev").addEventListener("click", () => go(i - 1));
+    document.getElementById("next").addEventListener("click", () => {
+      state.steps[`${id}:${i}`] = Date.now(); touch();
+      if (i < steps.length - 1) go(i + 1);
+      else { location.hash = "#path"; toast(`Module ${mod.n} complete`); }
+    });
+  }
+
+  function renderQuiz(questions) {
+    const wrap = document.createElement("div"); wrap.className = "qs";
+    questions.forEach((q, n) => {
+      const card = document.createElement("div"); card.className = "q";
+      const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
+      const draw = () => {
+        const a = state.answers[q.id];
+        card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n + 1} of ${questions.length}</span>${taskChip(q.ts)}${scen ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
+          <p class="q-stem">${q.stem}</p><div class="opts"></div>`;
+        const opts = card.querySelector(".opts");
+        q.options.forEach((o, k) => {
+          const b = document.createElement("button"); b.type = "button"; b.className = "opt";
+          const revealed = !!a;
+          if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (a.choice === k) b.classList.add("is-wrong"); }
+          b.innerHTML = `<span class="letter">${"ABCD"[k]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
+          b.addEventListener("click", () => {
+            if (state.answers[q.id]) return;
+            state.answers[q.id] = { ok: !!o.ok, choice: k, at: Date.now() }; touch(); draw();
+          });
+          opts.append(b);
+        });
+        if (a) {
+          const res = document.createElement("div"); res.className = `q-res ${a.ok ? "ok" : "no"}`;
+          res.innerHTML = `<span>${a.ok ? "Correct" : "Not this time. The explanations show why."}</span>`;
+          const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
+          again.addEventListener("click", () => { delete state.answers[q.id]; touch(); draw(); });
+          res.append(again); card.append(res);
+        }
+      };
+      draw(); wrap.append(card);
+    });
+    return wrap;
+  }
+
+  // ---------- Router ----------
+  function route() {
+    const h = location.hash.replace(/^#/, "");
+    const m = h.match(/^(m\d\d)(?:-(\d+))?$/);
+    if (m && L[m[1]]) {
+      let s;
+      if (m[2]) s = Number(m[2]) - 1;
+      else { const steps = L[m[1]].steps; s = steps.findIndex((_, i) => !state.steps[`${m[1]}:${i}`]); if (s < 0) s = 0; }
+      return { lesson: m[1], step: s };
+    }
+    return { page: h === "blueprint" ? "blueprint" : "path" };
+  }
+  function render() {
+    const r = route();
+    document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", !r.lesson && a.dataset.nav === r.page));
+    if (r.lesson) viewLesson(r.lesson, r.step);
+    else if (r.page === "blueprint") viewBlueprint();
+    else viewPath();
+  }
+  window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+  render();
+  if (window.claude && window.claude.use) initSync(); else window.addEventListener("load", initSync, { once: true });
+})();
+</script>

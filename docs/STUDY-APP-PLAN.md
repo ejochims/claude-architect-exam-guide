@@ -106,10 +106,10 @@ Every lesson uses the same shape: **First principle → Mechanism (diagram) → 
 An Anthropic-*inspired* design language: warm ivory/cream backgrounds, clay/terracotta accent, deep slate text, serif display headings with a clean sans for body, generous whitespace, subtle motion, and a full dark mode. **No Anthropic logo or wordmark, and the site is clearly labeled as an independent study guide**, because it's unofficial and shouldn't look official.
 
 ### Technical approach
-- **Stack:** Vite + React + TypeScript; content stored as typed data (lessons, questions, and flashcards in `/content`) so the content can be edited without touching UI code. Inline SVG diagrams; no backend.
+- **Stack:** no build step. Plain HTML/CSS/JS; lessons, questions and widgets live in `/app/content/*.js` and `/app/widgets.js`, so content can be edited without touching the engine. Inline SVG and canvas for diagrams; no backend.
 - **Location:** a new `/app` folder in this repo; the markdown guide stays as the long-form companion.
 - **Hosting:** publish as a private claude.ai Artifact (opens on phone and laptop, no infra) and optionally GitHub Pages.
-- **Progress:** stored in the browser by default. Optional upgrade: cross-device sync (phone ↔ laptop) using the artifact's shared storage.
+- **Progress:** synced across devices through the artifact's private per-user store, with a local browser copy as a fallback.
 
 ---
 
@@ -117,8 +117,8 @@ An Anthropic-*inspired* design language: warm ivory/cream backgrounds, clay/terr
 
 | Phase | Deliverable | Review checkpoint |
 |---|---|---|
-| **P1: Fix and map** | Fix E1–E4 in the guide; add the missing content from §2b; add a task-statement coverage matrix; add the "exam vs today" table | You skim the diff |
-| **P2: Shell + 3 pilot lessons** | App shell, design system, progress tracking, Modules 0, 1, and 3 with widgets and questions | **You try it on your phone** and give feedback on tone, depth, and design before scaling |
+| **P1: Fix and map** ✅ | Fix E1–E4 in the guide; add the missing content from §2b; add a task-statement coverage matrix; add the "exam vs today" table | You skim the diff |
+| **P2: Shell + 3 pilot lessons** ✅ | App shell, design system, progress tracking, Modules 0, 1, and 3 with widgets and questions | **You try it on your phone** and give feedback on tone, depth, and design before scaling |
 | **P3: Full curriculum** | Modules 2 and 4–13 with all widgets | Spot-check 2 modules |
 | **P4: Practice engine** | Question bank (~180), scenario drills, mock exam, flashcards, readiness dashboard | Take one mock exam |
 | **P5: Verify and ship** | Fact-check every claim against current docs and the blueprint; check mobile, accessibility, and dark mode; publish | Final link |
