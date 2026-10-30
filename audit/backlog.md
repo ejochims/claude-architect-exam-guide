@@ -111,7 +111,20 @@ Key D5 S2 items:
 | Q2 | S2 | 6 items flagged ambiguous (AMB) by the solvers | blind solver: `b2-5`, `q09-4`, `q11-4`, `q13-1`; blueprint-only solver: `b1-2` (the blueprint treats timeouts as retryable), `b5-4` (bullet 4.5-K2 favors batch for nightly jobs) | Send them to the domain reviewers in Phase 3b, then rewrite them. |
 | Q5 | S1 | **9 items paraphrase official sample questions** (same structure and option set, new topic). This breaks the originality rule and inflates scores for learners who have read the guide. | `b1-1`, `b5-1`, `q00-1`, `q02-1`, `q04-3`, `q06-5`, `q08-7`, `q10-1`, `q11-3` (solver-results.md) | REWRITE all 9 so they test a different decision within the same task statement. |
 | Q3 | S2 | `q11-6` treats `argument-hint` as enforcing an argument, but it is only an autocomplete hint | blind solver; cross-check D3 claims | Fix the stem or option wording. |
+| Q6 | S1 | **`b5-4` is BROKEN.** Blueprint bullet 4.5-K2 and the official sample both favor batch for overnight work, but the key says synchronous. | `audit/work/adversarial-review.csv` | Rewrite so the deadline makes batch truly unsafe, for example an SLA shorter than the worst-case batch window, stated explicitly. |
+| Q7 | S2 | **The adversarial review found 22 `why` problems and 23 trap-tag problems.** Examples: b4-4 D should be T9, not T1; q04-1 B should be T7, not T9; q04-4 B has no tag. q11-4's `why` contradicts the docs: a personal skill with the same name takes precedence over the project one. | adversarial-review.csv (`why_issues`, `trap_issues`) | Apply the fixes during the item rewrite. |
 | Q4 | S2 | Trap definitions T1–T9 describe obviously weak options, which teaches you to spot weak options rather than to tell good ones apart | solver-results.md | Rewrite each trap as a *plausible expert mistake*, and add the T4 fix from C-D1-3. |
+
+### Phase 3 per-item verdicts (`audit/question-review.csv`, built by `scripts/audit/build-question-review.mjs`)
+
+| Verdict | Items | Meaning |
+|---|---|---|
+| REWRITE | 14 | KEY (1), SAMPLE-CLOSE (9) or non-terminology AMB. Change the decision being tested. |
+| REWRITE-DISTRACTORS | 98 | The stem and key are sound, but the options give the answer away. Replace the distractors to the equally-expert standard. |
+| EDIT-MINOR | 6 | Terminology notes, `why` text or trap tags only |
+| KEEP | 2 | |
+
+Defect counts: CUE-PATTERN 100 · CUE-LEN 98 · CUE-ABS 55 · TRAP 23 · WHY 22 · AMB 10 · SAMPLE-CLOSE 9 · TERM 8 · STEM 6 (no scenario) · KEY 1.
 
 ## P: Pedagogy and the one-stop shop (Phases 4 and 4b)
 
