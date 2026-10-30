@@ -71,6 +71,38 @@ Key D4 S2 and S3 items:
 - **`context_length_exceeded` is an invented error name** (q10-3, guide:1733). The real error message is "prompt is too long".
 - **Explanations claim temperature 0 is deterministic.** It isn't.
 
+### Domain 5: 1 S1 claim from `audit/work/claims-D5.csv` (158 claims: 126 correct, 17 wrong)
+
+| ID | Sev | Item | Locations | Fix |
+|---|---|---|---|---|
+| C-D5-1 | S1 | Trap T4 condemns all routing on model confidence. This duplicates **C-D1-3** (finding F8): fix them once. | curriculum.js:78 (D5-094), T4 why (D5-095) | See C-D1-3. Narrow T4 to "raw self-confidence as a proxy for case complexity in escalation". |
+
+Key D5 S2 items:
+- **The confidence nuance is overstated in four places.** m13.js:27 says the agent is "usually confident"; the research is mixed (overconfident in some studies, reasonably calibrated in others). m13.js:16 says "not when the agent feels uneasy", which reads as rejecting 5.5-S4's low-confidence routing. The guide repeats this at 1238, contradicting its own line 556. **Rewrite them all around one precise rule:** raw self-confidence is a poor proxy for *case complexity* when deciding escalation (5.2), while field-level confidence *calibrated on labeled data* is a good way to *prioritize human review* (5.5).
+- **m07 card c4 has no "Real world today" note.** Today Claude Code compacts context automatically, and its best-practices guidance on subagents for protecting context has changed.
+- **The `segmentReveal` widget's numbers don't add up.** The weighted average is 97.33% but the display shows 97.0%, and the field rates average 92.75%. Nothing is labeled illustrative (F11 confirmed). Fix the arithmetic and add a label.
+- **m04's crash example and q04-3 retry permission errors** (`access_denied`, 403), contradicting the module's own rule against retrying them.
+
+## Phase 2 totals (`audit/claims-log.csv`, 991 claims, all with a source URL)
+
+| Verdict | Count |
+|---|---|
+| CORRECT | 750 |
+| EXAM-FRAMING-UNFLAGGED | 121 |
+| WRONG | 48 |
+| UNVERIFIABLE | 36 |
+| OUTDATED | 18 |
+| EXAM-FRAMING (flagged) | 11 |
+| ILLUSTRATIVE-UNLABELED | 7 |
+
+| Severity | Total | D1 | D2 | D3 | D4 | D5 |
+|---|---|---|---|---|---|---|
+| S1 | 28 | 10 | 10 | 4 | 3 | 1 |
+| S2 | 104 | 24 | 28 | 21 | 24 | 7 |
+| S3 | 109 | 11 | 23 | 28 | 23 | 24 |
+
+**The dominant pattern is unflagged exam framing (121 claims).** The blueprint's view of the product has drifted from what ships today. Affected areas: forced `tool_choice`, `allowedTools`/Task, skill `allowed-tools` and `argument-hint`, commands vs. skills, prefill, `/memory`, and subagent context. A single **"Exam vs. today" reference page in the app**, linked from short per-item notes, fixes most of them at once and teaches the gap explicitly.
+
 ## Q: Question quality (Phase 3)
 
 | ID | Sev | Item | Evidence | Fix |
