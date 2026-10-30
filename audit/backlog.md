@@ -21,7 +21,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 
 | ID | Sev | Item | Locations | Fix |
 |---|---|---|---|---|
-| C-D2-1 | S1 (TERM) | `tool_choice` `any` and `{type:"tool"}` are taught as guaranteeing a tool call, with no "Real world today" note. The D2 auditor reports that current top-tier models reject forced tool choice. **This is a surprising claim. Re-verify it against the tool-use docs before acting on it.** | m02.js:54-55 (D2-017), q02-4 (D2-033), q02-5 (D2-036) | Keep the exam framing, which is still correct for the exam. Add a "Real world today" callout in m02 and in the `why` text of q02-4 and q02-5, worded exactly as the official docs state it. |
+| C-D2-1 | S1 (TERM) | `tool_choice` `any` and `{type:"tool"}` are taught as guaranteeing a tool call, with no "Real world today" note. The D2 auditor reports that current top-tier models reject forced tool choice. **Verified 2026-10-30** on https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use: `any` and `tool` return 400 on Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and with manual extended thinking. The docs recommend `auto` + `strict: true`, or structured outputs. This also covers D4-038 (m09.js:17). | m02.js:54-55 (D2-017), q02-4 (D2-033), q02-5 (D2-036) | Keep the exam framing, which is still correct for the exam. Add a "Real world today" callout in m02 and in the `why` text of q02-4 and q02-5, worded exactly as the official docs state it. |
 | C-D2-2 | S1 (TERM) | b4-1 keys Glob as the right tool for file-pattern search. The `why` on the Bash option conflicts with current Claude Code behavior. | bank.js:67-74 (D2-100) | Keep the key. Reword that option's `why` and add a real-world note. |
 | C-D2-3 | S1 | **The markdown guide teaches the old MCP error split.** Since MCP spec 2025-11-25 (SEP-1303), invalid or missing tool *arguments* are returned as tool execution errors (`isError: true`), not as JSON-RPC protocol errors. The guide still says missing parameters produce a protocol error. | exam-preparation-guide.md:366, 369-371, 972, 975, 1785, 1839 (D2-133/135/154/156/178/180) | Rewrite these to match the current specification. Then check that the exam framing (TS 2.2) doesn't depend on the old split; if it does, flag it as exam-framing. Cross-check m04 for the same error. |
 
@@ -54,6 +54,22 @@ Key D3 S2 items:
 - **Guide:1547:** the description of the `PreToolUse` "defer" decision is wrong.
 - **Guide:1549:** `UserPromptSubmit` can't modify the prompt; it can only block it or add context.
 - **Guide:1582:** the CLAUDE.md default for subagents is backwards. Subagents load it by default; only the built-in Explore and Plan agents skip it.
+
+### Domain 4: 3 S1 claims from `audit/work/claims-D4.csv` (192 claims: 142 correct, 30 exam-framing-unflagged, 8 wrong, 6 outdated; m08–m10 have no "Real world today" callouts)
+
+| ID | Sev | Item | Locations | Fix |
+|---|---|---|---|---|
+| C-D4-1 | S1 (TERM) | Forced `tool_choice` is taught as the way to guarantee structure, and plain `tool_use` as "the most reliable path". Today only `strict: true` or `output_config.format` *guarantees* schema-valid output, and forced tool choice returns 400 on current top models (verified; see C-D2-1). | m09.js:17 (D4-038); m09 (D4-031/039/049) | Keep the exam answer (TS 4.3: tool_use + JSON Schema + tool_choice). Add a shared "Real world today" callout to m02 and m09 covering forced tool use, strict tools and structured outputs. |
+| C-D4-2 | S1 (TERM) | "Batch has no multi-turn tool calling inside a request" is true only for client tools. Server tools (web search, code execution) do run inside batch requests. | m10.js:23 (D4-068) | Keep the exam rule for client tools and add the server-tool nuance as a real-world note. |
+| C-D4-3 | S1 | **The guide contradicts the blueprint, the app and itself.** It says to submit everything to the batch first and treat sampling as minor. The blueprint, q10-6 and guide:1725 all say to refine prompts on a sample first. | guide:607 (D4-145) | Rewrite guide:607 to say: refine on a sample, then batch. |
+
+Key D4 S2 and S3 items:
+- **guide:460:** calls second-call verification "generally inferior", which conflicts with blueprint 4.6.
+- **The guide recommends assistant prefill,** which returns 400 on Claude 4.6 and later models (D4-120/160/161/185).
+- **m08 teaches "2–4" few-shot examples.** That count comes from the blueprint, but current docs say 3–5. Keep the blueprint's number for the exam and add a real-world note.
+- **q08-4 and trap T5 vs. current docs.** q08-4's explanation says merging tools loses the distinction between them. The current tool docs recommend *consolidating related operations into one tool with an `action` parameter*. Clarify that the blueprint warns against consolidating *distinct-purpose* tools behind vague descriptions, and add a real-world note to T5.
+- **`context_length_exceeded` is an invented error name** (q10-3, guide:1733). The real error message is "prompt is too long".
+- **Explanations claim temperature 0 is deterministic.** It isn't.
 
 ## Q: Question quality (Phase 3)
 
