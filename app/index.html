@@ -58,7 +58,8 @@ h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; margin: 0; letter
 .sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
 .sync.synced i { background: var(--good); }
 .sync.saving i { background: var(--accent); }
-@media (max-width: 560px) { .brand small, .sync span { display: none; } .top-in { gap: 10px; } }
+@media (max-width: 560px) { .brand small, .sync span { display: none; } .top-in { gap: 8px; } .nav { gap: 0; } .nav a { padding: 6px 7px; font-size: 14px; } }
+@media (max-width: 440px) { .brand > span:last-child { display: none; } }
 
 main { padding-block: 32px 96px; }
 .foot { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var(--muted); font-size: 13px; }
@@ -254,7 +255,7 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 .l-nav { position: sticky; bottom: 0; display: flex; justify-content: space-between; gap: 10px; padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px)); margin-top: 30px; background: linear-gradient(to top, var(--bg) 70%, transparent); }
 
 /* Trap spotter */
-.trap-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.trap-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
 .trap { text-align: left; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; font: 400 13.5px/1.4 var(--sans); min-width: 0; }
 .trap:hover { border-color: var(--fg); }
 .trap-id { font: 600 11px var(--mono); color: var(--bad); }
@@ -338,7 +339,10 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 
 /* Prompt or code */
 .poc { display: flex; flex-direction: column; gap: 8px; }
+.poc-btns { flex-wrap: wrap; justify-content: flex-end; }
 .poc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.poc-row.stacked { grid-template-columns: 1fr; }
+.poc-row.stacked .poc-btns { justify-content: flex-start; }
 .poc-text { margin: 0; font: 400 16.5px/1.4 var(--serif); }
 .poc-btns { display: flex; gap: 6px; }
 .pill-btn { font: 600 13px var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 7px 13px; cursor: pointer; }
@@ -351,6 +355,104 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 @media (max-width: 520px) { .poc-row { grid-template-columns: 1fr; } }
 
 .toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; z-index: 20; }
+
+/* Shared page header */
+.page-head { margin-bottom: 26px; }
+.page-head h1 { font: 650 clamp(28px, 4.4vw, 40px)/1.08 var(--sans); letter-spacing: -.025em; margin: 8px 0 10px; }
+.page-head p { font: 400 18px/1.5 var(--serif); color: var(--muted); margin: 0; }
+.score-of { font-size: .5em; color: var(--muted); font-weight: 500; }
+.pass { color: var(--good); } .fail { color: var(--bad); }
+.row-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+/* Home quick stats */
+.quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: -16px 0 40px; }
+.qk { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-decoration: none; color: var(--fg); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.qk:hover { border-color: var(--fg); }
+.qk-n { font: 650 24px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+.qk-n small { font-size: 14px; color: var(--muted); font-weight: 500; }
+.qk-l { font-size: 13px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Practice */
+.mock-card { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 20px 22px; margin-bottom: 30px; box-shadow: var(--shadow); }
+.mock-card h2 { font-size: 20px; margin: 6px 0 4px; }
+.mock-card p { margin: 0; font: 400 16px/1.45 var(--serif); color: var(--muted); max-width: 60ch; }
+.hist { border-top: 1px solid var(--line); }
+.hist-row { display: grid; grid-template-columns: 80px 70px minmax(0, 1fr) 52px; gap: 12px; align-items: center; padding: 9px 2px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.hist-s { font-weight: 700; text-align: right; }
+.hist-s.pass { color: var(--good); } .hist-s.fail { color: var(--bad); }
+.drills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.drill { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-decoration: none; color: var(--fg); min-width: 0; }
+.drill:hover { border-color: var(--fg); }
+.drill-n { font: 500 26px/1 var(--serif); color: var(--accent-ink); }
+.drill-name { font-weight: 650; font-size: 15.5px; line-height: 1.3; min-height: 2.6em; }
+@media (max-width: 860px) { .drills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .drills { grid-template-columns: 1fr; } .drill-name { min-height: 0; } }
+.drill-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; margin-bottom: 14px; }
+
+/* Mock exam */
+.exam-bar { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 57px); z-index: 4; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg); border-bottom: 1px solid var(--line); padding-block: 10px; margin-bottom: 18px; }
+.timer { font: 650 15px var(--mono); font-variant-numeric: tabular-nums; background: var(--sunk); padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.timer.low { background: var(--bad-bg); color: var(--bad); }
+.opt.is-sel { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.opt.is-sel .letter { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.exam-nav { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; margin: 18px 0; }
+.palette button { font: 600 12.5px var(--mono); height: 34px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; position: relative; }
+.palette button.ans { background: var(--sunk); color: var(--fg); }
+.palette button.cur { border-color: var(--accent); color: var(--fg); box-shadow: inset 0 0 0 1px var(--accent); }
+.palette button.flag::after { content: ""; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--d5); }
+.submit-box { border-top: 1px solid var(--line); padding-top: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.submit-box p { margin: 0; }
+.rules { font: 400 16.5px/1.55 var(--serif); padding-left: 20px; margin: 0 0 16px; }
+
+/* Flashcards */
+.sel { display: block; width: 100%; max-width: 420px; margin: 6px 0 18px; font: 500 14.5px var(--sans); padding: 9px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.flash { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-height: 240px; display: flex; flex-direction: column; gap: 16px; cursor: pointer; box-shadow: var(--shadow); }
+.flash.flipped { cursor: default; }
+.flash-meta { display: flex; justify-content: space-between; gap: 10px; }
+.flash-f { font: 500 clamp(20px, 3vw, 24px)/1.35 var(--serif); }
+.flash-b { font: 400 18px/1.55 var(--serif); border-top: 1px dashed var(--line); padding-top: 16px; color: var(--fg); }
+.flash-hint { margin-top: auto; }
+.flash-btns { justify-content: flex-end; }
+kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius: 4px; padding: 1px 4px; opacity: .6; margin-left: 4px; }
+
+/* Widgets: tool_choice, context viewer, budget, SLA, CI, segments */
+.tc-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.tc-desc { font: 400 16.5px/1.5 var(--serif); margin: 0 0 14px; }
+.seg { flex-wrap: wrap; }
+.cv-toggles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.cv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.cv-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--bg); min-width: 0; }
+.cv-name { font-weight: 650; font-size: 14px; }
+.cv-label { font: 600 10.5px var(--mono); color: var(--muted); text-transform: uppercase; margin: 6px 0 4px; }
+.cv-ctx { list-style: none; padding: 0; margin: 0 0 8px; display: flex; flex-direction: column; gap: 4px; }
+.cv-ctx li { font: 400 12px/1.4 var(--mono); background: var(--sunk); border-radius: 5px; padding: 4px 6px; overflow-wrap: anywhere; }
+.cv-note { font: 400 14px/1.4 var(--serif); color: var(--muted); }
+.cb-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); margin: 14px 0 8px; }
+.cb-bar span { display: block; height: 100%; min-width: 2px; }
+.hp-field + .cv-toggles { margin-top: 12px; }
+.sla-track { position: relative; display: flex; height: 34px; margin: 22px 0 12px; border-radius: 8px; overflow: visible; background: var(--sunk); }
+.sla-seg { display: flex; align-items: center; justify-content: center; font: 600 11.5px var(--sans); white-space: nowrap; overflow: hidden; color: var(--fg); }
+.sla-seg.wait { background: color-mix(in srgb, var(--d5) 35%, transparent); border-radius: 8px 0 0 8px; }
+.sla-seg.batch { background: color-mix(in srgb, var(--d3) 35%, transparent); }
+.sla-seg.post { background: color-mix(in srgb, var(--d4) 35%, transparent); }
+.sla-line { position: absolute; top: -18px; bottom: -4px; border-left: 2px dashed var(--fg); }
+.sla-line span { position: absolute; top: 0; left: 4px; font: 600 11px var(--mono); white-space: nowrap; transform: translateX(-100%) translateX(-8px); }
+.ci-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ci-list li { font: 400 15px/1.4 var(--serif); padding-left: 24px; position: relative; }
+.ci-list li::before { position: absolute; left: 0; font: 700 14px var(--sans); }
+.ci-list li.ok::before { content: "\2713"; color: var(--good); }
+.ci-list li.no::before { content: "\2715"; color: var(--bad); }
+.ci-list li.no { color: var(--muted); }
+.seg-body h4 { margin: 18px 0 8px; font-size: 15px; }
+.seg-table { display: flex; flex-direction: column; gap: 6px; }
+.seg-r { display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 56px 80px; gap: 10px; align-items: center; font-size: 14px; }
+.seg-v { font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+.seg-v.bad { color: var(--bad); }
+.seg-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.seg-body .hp-result { margin-top: 14px; }
+@media (max-width: 520px) { .seg-r { grid-template-columns: minmax(0, 1fr) 56px; } .seg-r .bar, .seg-r .small { display: none; } }
 </style>
 
 <header class="top">
@@ -361,6 +463,8 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
     </a>
     <nav class="nav" aria-label="Main">
       <a href="#path" data-nav="path">Path</a>
+      <a href="#practice" data-nav="practice">Practice</a>
+      <a href="#cards" data-nav="cards">Cards</a>
       <a href="#blueprint" data-nav="blueprint">Blueprint</a>
     </nav>
     <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
@@ -371,302 +475,20 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 
 <script src="content/curriculum.js"></script>
 <script src="widgets.js"></script>
+<script src="widgets2.js"></script>
 <script src="content/m00.js"></script>
 <script src="content/m01.js"></script>
+<script src="content/m02.js"></script>
 <script src="content/m03.js"></script>
-<script>
-(function () {
-  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS;
-  const app = document.getElementById("app");
-  const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, widgets: {}, last: null });
-
-  // ---------- State and sync ----------
-  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
-  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
-
-  const syncEl = document.getElementById("sync");
-  const setSync = (cls, label) => { syncEl.className = `sync ${cls}`; syncEl.querySelector("span").textContent = label; };
-
-  function touch() {
-    state.updatedAt = Date.now();
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-    if (remoteRef) { dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 1200); }
-  }
-  async function flush() {
-    if (!remoteRef || saving || !dirty) return;
-    saving = true; dirty = false; setSync("saving", "Saving…");
-    try { await remoteRef.set(JSON.parse(JSON.stringify(state))); setSync("synced", "Synced"); }
-    catch (e) { setSync("", "This device"); }
-    saving = false;
-    if (dirty) flush();
-  }
-  function merge(a, b) {
-    const out = blank();
-    out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
-    for (const k of ["steps", "widgets"]) out[k] = Object.assign({}, b[k] || {}, a[k] || {});
-    const ans = Object.assign({}, b.answers || {});
-    for (const [q, v] of Object.entries(a.answers || {})) if (!ans[q] || (v.at || 0) >= (ans[q].at || 0)) ans[q] = v;
-    out.answers = ans;
-    const la = a.last, lb = b.last;
-    out.last = !la ? lb : !lb ? la : (la.at || 0) >= (lb.at || 0) ? la : lb;
-    return out;
-  }
-  async function initSync() {
-    if (!window.claude || !window.claude.use) return;
-    try {
-      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
-      if (!db || !user) return;
-      const uid = await user.id();
-      if (!uid) return;
-      remoteRef = db.doc(`data/users/${uid}/progress`);
-      remoteRef.onSnapshot(snap => {
-        const remote = snap.exists ? snap.data() : null;
-        const merged = remote ? merge(state, remote) : state;
-        const changedLocal = JSON.stringify(merged) !== JSON.stringify(state);
-        const needsPush = !remote || JSON.stringify(merged) !== JSON.stringify(merge(blank(), remote));
-        state = merged;
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-        if (needsPush && (state.updatedAt || Object.keys(state.answers).length)) { dirty = true; flush(); }
-        else if (!saving) setSync("synced", "Synced");
-        if (changedLocal && !route().lesson) render();
-      }, () => { remoteRef = null; setSync("", "This device"); });
-    } catch (e) { remoteRef = null; }
-  }
-
-  // ---------- Derived progress ----------
-  const ready = id => !!L[id];
-  const allQuestions = () => {
-    const qs = [];
-    for (const m of MODS) if (L[m.id]) L[m.id].steps.forEach(s => (s.questions || []).forEach(q => qs.push(q)));
-    return qs;
-  };
-  function taskMastery() {
-    const per = {};
-    for (const q of allQuestions()) {
-      const t = (per[q.ts] = per[q.ts] || { total: 0, right: 0, tried: 0 });
-      t.total++;
-      const a = state.answers[q.id];
-      if (a) { t.tried++; if (a.ok) t.right++; }
-    }
-    return per;
-  }
-  function domainStats() {
-    const tm = taskMastery();
-    return B.domains.map(d => {
-      const tasks = Object.keys(B.tasks).filter(t => t.startsWith(String(d.n) + "."));
-      const scores = tasks.map(t => tm[t] ? tm[t].right / tm[t].total : 0);
-      const covered = tasks.filter(t => tm[t]).length;
-      const started = tasks.filter(t => tm[t] && tm[t].tried).length;
-      return { ...d, tasks, mastery: scores.reduce((a, b) => a + b, 0) / tasks.length, covered, started };
-    });
-  }
-  const readiness = () => domainStats().reduce((s, d) => s + d.weight * d.mastery, 0) / 100;
-  const modProgress = id => {
-    if (!L[id]) return 0;
-    const n = L[id].steps.length;
-    return L[id].steps.filter((_, i) => state.steps[`${id}:${i}`]).length / n;
-  };
-  function nextUp() {
-    if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
-    for (const m of MODS) if (L[m.id] && modProgress(m.id) < 1) {
-      const s = L[m.id].steps.findIndex((_, i) => !state.steps[`${m.id}:${i}`]);
-      return { m: m.id, s: Math.max(0, s) };
-    }
-    return null;
-  }
-
-  // ---------- Helpers ----------
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const domOfTask = t => B.domains.find(d => t.startsWith(d.n + "."));
-  const taskChip = t => `<span class="chip dom-${domOfTask(t).id}" title="${esc(B.tasks[t])}">${t}</span>`;
-  const daysLeft = () => Math.max(0, Math.ceil((new Date(B.examDate + "T23:59:59") - new Date()) / 86400000));
-  function toast(msg) {
-    const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
-    document.body.append(t); setTimeout(() => t.remove(), 2400);
-  }
-
-  // ---------- Views ----------
-  function viewPath() {
-    const r = readiness(), pct = Math.round(r * 100), C = 2 * Math.PI * 40;
-    const next = nextUp();
-    const nm = next && MODS.find(m => m.id === next.m);
-    const dstats = domainStats();
-    const readyCount = MODS.filter(m => ready(m.id)).length;
-    app.innerHTML = `
-<section class="hero">
-  <div>
-    <div class="eyebrow">Claude Certified Architect – Foundations</div>
-    <h1>Exam-ready by <em>December 31</em></h1>
-    <p>Fourteen short modules that build from first principles to exam judgment, mapped to every task statement in the official blueprint.</p>
-  </div>
-  <div class="goal">
-    <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
-    <div>
-      <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your Dec 31 goal</div>
-      <div class="goal-v">${pct}% ready</div><div class="goal-k">Estimated from your practice answers, weighted by domain. Pass is 72%.</div>
-    </div>
-  </div>
-</section>
-${nm ? `<section class="cont">
-  <div><div class="eyebrow">${modProgress(nm.id) > 0 ? "Continue" : "Start here"} · Module ${nm.n}</div><h2>${esc(nm.title)}</h2><p>${esc(L[nm.id].steps[next.s].title)}</p></div>
-  <a class="btn" href="#${nm.id}-${next.s + 1}">${modProgress(nm.id) > 0 ? "Resume" : "Begin"} →</a>
-</section>` : `<section class="cont"><div><div class="eyebrow">All available modules complete</div><h2>New modules are on the way</h2><p>Review any module, or check your gaps on the Blueprint page.</p></div><a class="btn" href="#blueprint">Open blueprint →</a></section>`}
-<div class="sec-head"><h2>Domains</h2><span class="small">mastery across all task statements</span></div>
-<section class="domains">
-  ${dstats.map(d => `<div class="dom">
-    <div class="dom-top"><span class="dom-n chip dom-${d.id}">D${d.n}</span><span class="dom-w">${d.weight}%</span></div>
-    <div class="dom-name">${esc(d.short)}</div>
-    <div class="bar"><span class="dom-bg-${d.id}" style="width:${Math.round(d.mastery * 100)}%"></span></div>
-    <div class="dom-meta">${Math.round(d.mastery * 100)}% · ${d.started}/${d.tasks.length} tasks practiced</div>
-  </div>`).join("")}
-</section>
-<div class="sec-head"><h2>Study path</h2><span class="small">${readyCount} of ${MODS.length} modules available</span></div>
-<section class="path">
-  ${MODS.map(m => {
-    const p = modProgress(m.id), isReady = ready(m.id);
-    const status = !isReady ? `<span class="status soon">Coming soon</span>` : p >= 1 ? `<span class="status done">Done</span>` : p > 0 ? `<span class="status prog">In progress</span>` : `<span class="status new">Start</span>`;
-    const inner = `<span class="mod-n">${m.n}</span>
-      <span><span class="mod-title">${esc(m.title)}</span><p class="mod-p">${esc(m.principle)}</p><span class="chips">${m.tasks.map(taskChip).join("") || '<span class="chip">exam strategy</span>'}</span></span>
-      <span class="mod-side">${status}<span>${m.minutes} min</span>${isReady && p > 0 && p < 1 ? `<span class="mini"><span style="width:${p * 100}%"></span></span>` : ""}</span>`;
-    return isReady ? `<a class="mod ready" href="#${m.id}">${inner}</a>` : `<div class="mod soon">${inner}</div>`;
-  }).join("")}
-</section>`;
-  }
-
-  function viewBlueprint() {
-    const tm = taskMastery();
-    const modFor = t => MODS.filter(m => m.tasks.includes(t));
-    app.innerHTML = `
-<a class="crumb" href="#path">← Study path</a>
-<div class="read" style="margin-bottom:26px">
-  <div class="eyebrow">Official exam blueprint</div>
-  <h1 style="font:650 clamp(28px,4.4vw,40px)/1.08 var(--sans);letter-spacing:-.025em;margin:8px 0 10px">30 task statements</h1>
-  <p style="font:400 18px/1.5 var(--serif);color:var(--muted);margin:0">Everything the exam can ask about. Each percentage is your share of correct answers on that task's practice questions. Tasks whose modules haven't been released yet show a dash.</p>
-</div>
-${B.domains.map(d => `<section class="bp-dom">
-  <h2><span class="chip dom-${d.id}">D${d.n}</span>${esc(d.name)} <span class="small">${d.weight}% of the exam</span></h2>
-  <div class="bp-rows">
-  ${Object.keys(B.tasks).filter(t => t.startsWith(d.n + ".")).map(t => {
-    const s = tm[t], mods = modFor(t);
-    const pct = s ? Math.round(s.right / s.total * 100) + "%" : "–";
-    return `<div class="bp-row"><span class="mono">${t}</span><span>${esc(B.tasks[t])}</span>
-      <span class="bp-mod">${mods.map(m => ready(m.id) ? `<a href="#${m.id}">Module ${m.n} →</a>` : `<span class="small">Module ${m.n} (soon)</span>`).join("<br>")}</span>
-      <span class="bp-pct">${pct}</span></div>`;
-  }).join("")}
-  </div></section>`).join("")}
-<section class="read" style="margin-top:34px">
-  <h2 style="font-size:19px;margin-bottom:8px">Out of scope</h2>
-  <p class="small">The official guide says these will not appear. Don't spend study time on them.</p>
-  <ul class="oos"><li>Fine-tuning or training models</li><li>API auth, billing, account management</li><li>Deploying or hosting MCP servers</li><li>Model internals, training, weights</li><li>Constitutional AI, RLHF, safety training</li><li>Embeddings and vector databases</li><li>Computer use</li><li>Vision</li><li>Streaming and server-sent events</li><li>Rate limits, quotas, pricing math</li><li>OAuth and key rotation</li><li>Cloud-provider configuration</li><li>Benchmarks and model comparisons</li><li>Prompt-caching details</li><li>Tokenization specifics</li></ul>
-</section>`;
-  }
-
-  function viewLesson(id, stepIdx) {
-    const mod = MODS.find(m => m.id === id), lesson = L[id];
-    const steps = lesson.steps;
-    const i = Math.min(Math.max(stepIdx, 0), steps.length - 1);
-    const step = steps[i];
-    state.last = { m: id, s: i, at: Date.now() }; touch();
-    app.innerHTML = `
-<div class="read">
-  <a class="crumb" href="#path">← Study path</a>
-  <header class="l-head">
-    <div class="eyebrow">Module ${mod.n} · ${mod.minutes} min</div>
-    <h1>${esc(mod.title)}</h1>
-    <p class="l-principle">${esc(mod.principle)}</p>
-    <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
-  </header>
-  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : state.steps[`${id}:${k}`] ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
-  <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
-  <article class="step" id="step"></article>
-  <nav class="l-nav" aria-label="Step navigation">
-    <button class="btn ghost" type="button" id="prev" ${i === 0 ? "disabled" : ""}>← Back</button>
-    <button class="btn accent" type="button" id="next">${i === steps.length - 1 ? "Finish module" : "Continue →"}</button>
-  </nav>
-</div>`;
-    const el = document.getElementById("step");
-    el.append(Object.assign(document.createElement("h2"), { textContent: step.title }));
-    if (step.kind === "read") {
-      const p = document.createElement("div"); p.className = "prose"; p.innerHTML = step.html; el.append(p);
-      p.querySelectorAll("[data-embed]").forEach(n => window.EMBEDS[n.dataset.embed] && window.EMBEDS[n.dataset.embed](n));
-    } else if (step.kind === "widget") {
-      const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
-      const panel = document.createElement("div"); panel.className = "panel";
-      el.append(intro, panel);
-      window.WIDGETS[step.widget](panel, { done: () => { const k = `${id}:${i}`; if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } });
-    } else if (step.kind === "quiz") {
-      el.append(renderQuiz(step.questions));
-    } else if (step.kind === "recap") {
-      const ol = document.createElement("ol"); ol.className = "recap";
-      ol.innerHTML = step.points.map(p => `<li>${esc(p)}</li>`).join("");
-      el.append(ol);
-    }
-    const go = k => { location.hash = `#${id}-${k + 1}`; };
-    app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
-    document.getElementById("prev").addEventListener("click", () => go(i - 1));
-    document.getElementById("next").addEventListener("click", () => {
-      state.steps[`${id}:${i}`] = Date.now(); touch();
-      if (i < steps.length - 1) go(i + 1);
-      else { location.hash = "#path"; toast(`Module ${mod.n} complete`); }
-    });
-  }
-
-  function renderQuiz(questions) {
-    const wrap = document.createElement("div"); wrap.className = "qs";
-    questions.forEach((q, n) => {
-      const card = document.createElement("div"); card.className = "q";
-      const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
-      const draw = () => {
-        const a = state.answers[q.id];
-        card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n + 1} of ${questions.length}</span>${taskChip(q.ts)}${scen ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
-          <p class="q-stem">${q.stem}</p><div class="opts"></div>`;
-        const opts = card.querySelector(".opts");
-        q.options.forEach((o, k) => {
-          const b = document.createElement("button"); b.type = "button"; b.className = "opt";
-          const revealed = !!a;
-          if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (a.choice === k) b.classList.add("is-wrong"); }
-          b.innerHTML = `<span class="letter">${"ABCD"[k]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
-          b.addEventListener("click", () => {
-            if (state.answers[q.id]) return;
-            state.answers[q.id] = { ok: !!o.ok, choice: k, at: Date.now() }; touch(); draw();
-          });
-          opts.append(b);
-        });
-        if (a) {
-          const res = document.createElement("div"); res.className = `q-res ${a.ok ? "ok" : "no"}`;
-          res.innerHTML = `<span>${a.ok ? "Correct" : "Not this time. The explanations show why."}</span>`;
-          const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
-          again.addEventListener("click", () => { delete state.answers[q.id]; touch(); draw(); });
-          res.append(again); card.append(res);
-        }
-      };
-      draw(); wrap.append(card);
-    });
-    return wrap;
-  }
-
-  // ---------- Router ----------
-  function route() {
-    const h = location.hash.replace(/^#/, "");
-    const m = h.match(/^(m\d\d)(?:-(\d+))?$/);
-    if (m && L[m[1]]) {
-      let s;
-      if (m[2]) s = Number(m[2]) - 1;
-      else { const steps = L[m[1]].steps; s = steps.findIndex((_, i) => !state.steps[`${m[1]}:${i}`]); if (s < 0) s = 0; }
-      return { lesson: m[1], step: s };
-    }
-    return { page: h === "blueprint" ? "blueprint" : "path" };
-  }
-  function render() {
-    const r = route();
-    document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", !r.lesson && a.dataset.nav === r.page));
-    if (r.lesson) viewLesson(r.lesson, r.step);
-    else if (r.page === "blueprint") viewBlueprint();
-    else viewPath();
-  }
-  window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
-  render();
-  if (window.claude && window.claude.use) initSync(); else window.addEventListener("load", initSync, { once: true });
-})();
-</script>
+<script src="content/m04.js"></script>
+<script src="content/m05.js"></script>
+<script src="content/m06.js"></script>
+<script src="content/m07.js"></script>
+<script src="content/m08.js"></script>
+<script src="content/m09.js"></script>
+<script src="content/m10.js"></script>
+<script src="content/m11.js"></script>
+<script src="content/m12.js"></script>
+<script src="content/m13.js"></script>
+<script src="content/bank.js"></script>
+<script src="app.js"></script>

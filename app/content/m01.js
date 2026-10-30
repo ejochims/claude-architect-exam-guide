@@ -1,4 +1,11 @@
 window.LESSONS.m01 = {
+  cards: [
+    { f: "What does Claude know on a given API call?", b: "Only what's in that request: system prompt, messages and tool definitions. The API is stateless." },
+    { f: "Agentic loop: when to continue, when to stop?", b: "Continue while stop_reason is \"tool_use\"; stop on \"end_turn\". \"max_tokens\" means truncated, not done." },
+    { f: "What gets appended each iteration?", b: "The assistant message with its tool_use blocks, then a user message with matching tool_result blocks." },
+    { f: "Three loop-termination anti-patterns?", b: "Parsing natural language (\u201cdone\u201d), iteration caps as the primary stop, and treating assistant text as completion." },
+    { f: "Model-driven vs pre-configured flow?", b: "Model-driven: Claude picks the next tool from context (open-ended work). Pre-configured: code fixes the sequence. Use code only for must-happen steps." }
+  ],
   steps: [
     {
       kind: "read",
@@ -80,9 +87,9 @@ window.LESSONS.m01 = {
           stem: "A developer's loop executes requested tools correctly, but each iteration rebuilds <code>messages</code> from just the original user question. Claude keeps requesting the same <code>search_kb</code> call over and over. Most likely cause?",
           options: [
             { t: "The tool results never reach the conversation history, so Claude never sees that the search already ran.", ok: true, why: "The model only knows what's in the request. Without the assistant <code>tool_use</code> turn and the user <code>tool_result</code> turn, each call looks like the first." },
-            { t: "<code>search_kb</code>'s description doesn't say it should be called only once.", trap: "T7", why: "The description is fine. Claude is reacting rationally to a history that never shows the result." },
-            { t: "Temperature is too high, causing repetitive behavior.", why: "Sampling settings don't explain a deterministic repeat. The missing history does." },
-            { t: "The system prompt should forbid calling the same tool twice.", trap: "T1", why: "This patches a symptom with a prompt rule, and it would block legitimate repeat searches too." }
+            { t: "<code>search_kb</code>'s description doesn't say it should be called only once per question, so Claude keeps calling it.", trap: "T7", why: "The description is fine. Claude is reacting rationally to a history that never shows the result." },
+            { t: "Temperature is set too high, which pushes the model into repetitive tool-calling behavior.", why: "Sampling settings don't explain a deterministic repeat. The missing history does." },
+            { t: "The system prompt needs a rule forbidding Claude from calling the same tool twice in one task.", trap: "T1", why: "This patches a symptom with a prompt rule, and it would block legitimate repeat searches too." }
           ]
         },
         {
@@ -90,29 +97,29 @@ window.LESSONS.m01 = {
           stem: "In a 6-turn support chat, the assistant asks again for the order number the customer gave in turn 2. Logs show each API request contains the system prompt and the latest user message. What should you change?",
           options: [
             { t: "Enable the API's persistent memory setting for the session.", trap: "T8", why: "No such setting exists. The Messages API is stateless; history is the application's job." },
-            { t: "Move to a model with a larger context window.", trap: "T3", why: "Six turns fit easily. The window was never the limit, because the earlier turns weren't sent." },
+            { t: "Move to a model with a larger context window so earlier details aren't dropped.", trap: "T3", why: "Six turns fit easily. The window was never the limit, because the earlier turns weren't sent." },
             { t: "Send the full conversation history (or a managed form of it) on every request.", ok: true, why: "Claude only sees what the request contains. Coherence across turns requires the prior turns." },
-            { t: "Add “remember the customer's details” to the system prompt.", trap: "T1", why: "The model can't remember what it was never shown." }
+            { t: "Add “remember the customer's details” to the system prompt.", trap: "T9", why: "The model can't remember what it was never shown." }
           ]
         },
         {
           id: "q01-4", ts: "1.1",
           stem: "A response returns with <code>stop_reason: \"max_tokens\"</code> partway through a long answer. Your loop treats anything that isn't <code>\"tool_use\"</code> as finished and shows the text to the user. What's the problem?",
           options: [
-            { t: "Nothing. Anything other than <code>tool_use</code> means Claude is done.", why: "<code>max_tokens</code> means the output was truncated by your limit, not that Claude finished." },
+            { t: "Nothing is wrong. Any stop_reason other than <code>tool_use</code> means Claude has finished, so showing the text is correct.", why: "<code>max_tokens</code> means the output was truncated by your limit, not that Claude finished." },
             { t: "The user sees a truncated answer as if it were complete. Handle <code>max_tokens</code> explicitly, e.g. raise the limit or continue the response.", ok: true, why: "Branch on each <code>stop_reason</code> deliberately: <code>end_turn</code> is the completion signal, and <code>max_tokens</code> is a cutoff." },
-            { t: "Retry the identical request until <code>end_turn</code> appears.", trap: "T6", why: "The same request with the same limit truncates again. Blind retry wastes calls." },
-            { t: "Switch to the Message Batches API, which has no token limit.", trap: "T8", why: "Batch requests have the same per-request limits, and batch is about cost and latency, not length." }
+            { t: "Automatically retry the identical request until a response comes back with <code>end_turn</code>.", trap: "T6", why: "The same request with the same limit truncates again. Blind retry wastes calls." },
+            { t: "Send long answers through the Message Batches API instead, which has no per-request token limit.", trap: "T8", why: "Batch requests have the same per-request limits, and batch is about cost and latency, not length." }
           ]
         },
         {
           id: "q01-5", ts: "1.1", scenario: 1,
           stem: "A retailer's support agent receives requests that mix returns, billing questions and address changes in one message. An architect proposes hard-coding a decision tree of tool sequences per request type. What's the better design?",
           options: [
-            { t: "Keep the decision tree but add more branches for each combination of request types.", why: "Combinations multiply quickly. A fixed tree keeps failing on mixes nobody anticipated." },
+            { t: "Keep the decision tree, and add branches for each combination of request types as they appear in production logs.", why: "Combinations multiply quickly. A fixed tree keeps failing on mixes nobody anticipated." },
             { t: "Let Claude choose the next tool from context in an agentic loop, and enforce only the must-happen steps (such as identity verification) in code.", ok: true, why: "Model-driven selection handles open-ended mixes. Programmatic gates make sure the few hard rules can't be skipped." },
-            { t: "Set <code>tool_choice: \"any\"</code> on every turn so Claude always acts.", why: "This forces a tool call even when Claude should answer or ask a question, and it doesn't address ordering." },
-            { t: "Route each message through a separate classifier model that picks the sequence.", trap: "T2", why: "Extra infrastructure that recreates the rigid-tree problem one layer up." }
+            { t: "Set <code>tool_choice: \"any\"</code> on every turn so Claude is always forced to act through a tool instead of guessing.", why: "This forces a tool call even when Claude should answer or ask a question, and it doesn't address ordering." },
+            { t: "Route each message through a separate classifier model that picks the right tool sequence before Claude starts.", trap: "T2", why: "Extra infrastructure that recreates the rigid-tree problem one layer up." }
           ]
         }
       ]

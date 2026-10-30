@@ -1,4 +1,10 @@
 window.LESSONS.m00 = {
+  cards: [
+    { f: "Exam format?", b: "60 multiple-choice questions, 120 minutes, scaled 100–1000, pass at 720. 4 of 6 scenarios drawn. No penalty for guessing." },
+    { f: "Four moves for reading a question?", b: "Find the evidence → name the root cause → classify the constraint (guarantee vs judgment) → pick the proportionate fix." },
+    { f: "What does \u201cmost effective first step\u201d signal?", b: "The cheap, targeted fix for the root cause, not new infrastructure." },
+    { f: "Name the nine traps.", b: "Prompt where code is needed; over-built first step; bigger model or window; unreliable proxy; consolidate everything; hide or hammer the error; fix the wrong component; feature that doesn't exist; just tell it to try harder." }
+  ],
   steps: [
     {
       kind: "read",
@@ -26,8 +32,8 @@ window.LESSONS.m00 = {
     },
     {
       kind: "widget",
-      title: "Know the eight traps",
-      intro: "Distractors aren't random. Nearly all of them fall into eight recurring patterns. Learn to name the pattern and you can eliminate options in seconds.",
+      title: "Know the nine traps",
+      intro: "Distractors aren't random. Nearly all of them fall into nine recurring patterns. Learn to name the pattern and you can eliminate options in seconds.",
       widget: "trapSpotter"
     },
     {
@@ -40,8 +46,8 @@ window.LESSONS.m00 = {
           options: [
             { t: "Train a lightweight intent classifier on past tickets that selects the tool before Claude sees the request.", trap: "T2", why: "This might work eventually, but it builds infrastructure before trying the cheap fix that targets the cause: thin descriptions." },
             { t: "Rewrite both descriptions to state what each does, the inputs it expects, example requests, and when to use it instead of the other.", ok: true, why: "Descriptions are the model's main signal for choosing a tool. Two one-liners give it nothing to tell the tools apart. This is the proportionate root-cause fix." },
-            { t: "Merge both into one <code>manage_account_access</code> tool with an <code>action</code> parameter.", trap: "T5", why: "Consolidation just moves the same ambiguity into a parameter, and it's a bigger change than a first step warrants." },
-            { t: "Upgrade to the most capable model so it infers the right tool from the names.", trap: "T3", why: "A stronger model still has nothing to go on when the interface doesn't distinguish the tools." }
+            { t: "Merge both into a single <code>manage_account_access</code> tool with an <code>action</code> parameter so Claude no longer has to choose between them.", trap: "T5", why: "Consolidation just moves the same ambiguity into a parameter, and it's a bigger change than a first step warrants." },
+            { t: "Upgrade to the most capable model available so it can infer the right tool from the tool names and the user's wording.", trap: "T3", why: "A stronger model still has nothing to go on when the interface doesn't distinguish the tools." }
           ]
         },
         {
@@ -75,7 +81,7 @@ window.LESSONS.m00 = {
         "Read the stem as an incident report: evidence → root cause → constraint type → proportionate fix.",
         "Guarantees go in code; judgment goes in prompts, descriptions and examples.",
         "“First step” means the cheap fix that targets the root cause, not new infrastructure.",
-        "Eight traps: prompt-for-guarantee, over-built, bigger model, unreliable proxy, consolidate, hide/hammer errors, wrong component, invented feature."
+        "Nine traps: prompt-for-guarantee, over-built, bigger model, unreliable proxy, consolidate, hide/hammer errors, wrong component, invented feature, try-harder exhortations."
       ]
     }
   ]

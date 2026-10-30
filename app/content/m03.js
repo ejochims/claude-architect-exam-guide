@@ -1,4 +1,11 @@
 window.LESSONS.m03 = {
+  cards: [
+    { f: "Prompt vs code: the decision rule?", b: "If one miss has financial, legal, safety or irreversible consequences, enforce it in code. Otherwise guide it with the prompt." },
+    { f: "Prerequisite gate?", b: "Code that blocks a downstream tool (process_refund) until an upstream step (get_customer verified) has succeeded." },
+    { f: "Tool-call interception hook?", b: "e.g. PreToolUse: inspect outgoing calls and deny or redirect policy violations (refund > $500 → escalate_to_human)." },
+    { f: "PostToolUse hook use case?", b: "Normalize tool results (Unix epoch, ISO 8601, status codes) before the model processes them." },
+    { f: "What goes into a human handoff?", b: "Customer ID, verification status, root cause, amounts, actions taken and recommended action. The human lacks the transcript." }
+  ],
   steps: [
     {
       kind: "read",
@@ -51,7 +58,20 @@ options = ClaudeAgentOptions(hooks={
       kind: "widget",
       title: "Prompt or code?",
       intro: "Sort each requirement. Ask one question: what happens when the model gets it wrong once?",
-      widget: "promptOrCode"
+      widget: "sorter",
+      config: {
+        cats: [{ id: "prompt", label: "Prompt" }, { id: "code", label: "Code" }],
+        items: [
+          ["Refunds over $500 require a manager's approval.", "code", "Financial limit. Enforce it with a tool-call hook or inside the tool itself."],
+          ["Keep replies warm and under about 120 words.", "prompt", "Style. An occasional long reply costs little."],
+          ["Verify identity before changing the email on an account.", "code", "Account takeover risk. A prerequisite gate blocks update_email until verification succeeds."],
+          ["Ask one clarifying question when a request is ambiguous.", "prompt", "Judgment about language. Prompts and examples are the right tool."],
+          ["Never show a full card number in a reply.", "code", "Compliance. Mask it in the tool result (PostToolUse) so the model never has it to repeat."],
+          ["Suggest the loyalty program to repeat customers when relevant.", "prompt", "A missed upsell is a small cost. Guidance is enough."],
+          ["Block DROP TABLE and rm -rf in the agent's shell tool.", "code", "Irreversible. A PreToolUse hook denies matching commands every time."],
+          ["Map three backends' status codes to one enum before the agent reads them.", "code", "Mechanical transformation. PostToolUse normalization is deterministic and free."]
+        ]
+      }
     },
     {
       kind: "read",
@@ -80,9 +100,9 @@ options = ClaudeAgentOptions(hooks={
           stem: "An airline-rebooking agent may only cancel non-refundable fares with a supervisor override code. Audit logs show about 2% of such cancellations happen without one. What change is most reliable?",
           options: [
             { t: "Rewrite the system prompt to state the override requirement first, in bold, with consequences.", trap: "T1", why: "Better wording lowers the rate but can't make it zero, and the stakes here are financial." },
-            { t: "Add few-shot examples where the agent asks for the override code before cancelling.", trap: "T1", why: "Examples are still probabilistic guidance. Good for judgment calls, not for a rule that must hold." },
+            { t: "Add few-shot examples to the prompt where the agent asks for the override code before cancelling a non-refundable fare.", trap: "T1", why: "Examples are still probabilistic guidance. Good for judgment calls, not for a rule that must hold." },
             { t: "Intercept <code>cancel_booking</code> calls with a hook that denies non-refundable cancellations lacking a valid override and directs the agent to escalate.", ok: true, why: "A tool-call interception hook makes the violation impossible and redirects to the allowed path." },
-            { t: "Train a classifier to flag risky cancellations for weekly audit.", trap: "T2", why: "This detects violations after the fact instead of preventing them, and it adds infrastructure." }
+            { t: "Train a classifier on past bookings that flags risky cancellations so supervisors can audit them each week.", trap: "T2", why: "This detects violations after the fact instead of preventing them, and it adds infrastructure." }
           ]
         },
         {
@@ -99,10 +119,10 @@ options = ClaudeAgentOptions(hooks={
           id: "q03-3", ts: "1.4", scenario: 1,
           stem: "Escalated cases reach human agents as “Customer escalated: billing issue.” Humans spend about 8 minutes re-asking questions. They can't see the AI conversation. What's the best change?",
           options: [
-            { t: "Escalate earlier so less context is lost.", why: "The timing isn't the problem. The handoff content is." },
+            { t: "Escalate earlier in the conversation so less context has built up and less is lost in the handoff.", why: "The timing isn't the problem. The handoff content is." },
             { t: "Have the agent compile a structured handoff: customer ID, verification status, root cause, amounts, actions taken and recommended action.", ok: true, why: "A human without the transcript needs the facts and a recommendation in a scannable structure." },
-            { t: "Attach a link to the full transcript.", why: "The stem says humans can't access it. Even if they could, raw transcripts are slow to read." },
-            { t: "Tell the agent to apologize and set expectations before escalating.", why: "Fine for tone, but it doesn't give the human anything to act on." }
+            { t: "Attach a link to the full AI conversation transcript to every escalated case.", why: "The stem says humans can't access it. Even if they could, raw transcripts are slow to read." },
+            { t: "Have the agent apologize and set clear expectations about wait times before it escalates.", why: "Fine for tone, but it doesn't give the human anything to act on." }
           ]
         },
         {
@@ -120,7 +140,7 @@ options = ClaudeAgentOptions(hooks={
           stem: "A customer writes: “I was charged twice for March <em>and</em> the replacement headphones you promised never shipped.” How should the agent proceed?",
           options: [
             { t: "Resolve the billing issue and ask the customer to open a separate ticket for shipping.", why: "This pushes work back onto the customer and abandons half the request." },
-            { t: "Escalate immediately, because multi-issue requests are complex.", trap: "T4", why: "Having two issues doesn't make a case complex. Both may be routine." },
+            { t: "Escalate immediately, because requests with more than one issue are too complex for the agent.", trap: "T4", why: "Having two issues doesn't make a case complex. Both may be routine." },
             { t: "Split it into two items, investigate each with the shared customer context, then reply with one unified resolution.", ok: true, why: "Decompose, investigate (in parallel when independent), then synthesize one answer." },
             { t: "Handle whichever issue is worth more money and mention the other will be followed up.", why: "This silently drops part of the request." }
           ]

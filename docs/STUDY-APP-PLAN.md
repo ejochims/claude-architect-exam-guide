@@ -119,9 +119,9 @@ An Anthropic-*inspired* design language: warm ivory/cream backgrounds, clay/terr
 |---|---|---|
 | **P1: Fix and map** ✅ | Fix E1–E4 in the guide; add the missing content from §2b; add a task-statement coverage matrix; add the "exam vs today" table | You skim the diff |
 | **P2: Shell + 3 pilot lessons** ✅ | App shell, design system, progress tracking, Modules 0, 1, and 3 with widgets and questions | **You try it on your phone** and give feedback on tone, depth, and design before scaling |
-| **P3: Full curriculum** | Modules 2 and 4–13 with all widgets | Spot-check 2 modules |
-| **P4: Practice engine** | Question bank (~180), scenario drills, mock exam, flashcards, readiness dashboard | Take one mock exam |
-| **P5: Verify and ship** | Fact-check every claim against current docs and the blueprint; check mobile, accessibility, and dark mode; publish | Final link |
+| **P3: Full curriculum** ✅ | Modules 2 and 4–13 with all widgets | Spot-check 2 modules |
+| **P4: Practice engine** ✅ | Question bank (~180), scenario drills, mock exam, flashcards, readiness dashboard | Take one mock exam |
+| **P5: Verify and ship** ✅ | Fact-check every claim against current docs and the blueprint; check mobile, accessibility, and dark mode; publish | Final link |
 
 ## 5. Suggested study schedule (Nov 1 – Dec 31)
 
@@ -135,3 +135,25 @@ An Anthropic-*inspired* design language: warm ivory/cream backgrounds, clay/terr
 | 9 | Buffer and sit the exam | — |
 
 Optional but high-value: a 2–3 hour hands-on weekend. Configure a toy repo with CLAUDE.md, `.claude/rules/`, a skill, and `.mcp.json`, and run `claude -p --output-format json`. Domain 3 is 20% of the exam, and hands-on recall beats reading.
+
+---
+
+## 6. Build status (2026-10-30)
+
+All phases are complete.
+
+- **14 modules**, 92 lesson steps, 12 interactive widgets.
+- **120 original questions**, each tagged with a task statement (all 30 covered) and a scenario (18–20 per scenario). Wrong options are tagged with one of 9 distractor patterns. Option order is shuffled per question.
+- **Bias checks:**
+  - The correct answer's display position is randomized.
+  - No correct answer is more than 1.5× the length of its longest distractor. About a quarter are not the longest option at all.
+- **Practice engine:**
+  - Scenario drills with instant feedback.
+  - A 60-question, 120-minute mock exam that draws 4 random scenarios and is balanced toward the blueprint's domain weights. It reports an estimated scaled score.
+  - 84 spaced-repetition flashcards (Leitner boxes at 1/3/7/14/30 days).
+  - A readiness score weighted by domain.
+- **Verification:** product claims were re-checked against the current Claude Code docs (CLI flags, memory and rules, hooks, skills, subagents, MCP scopes). The app was exercised headlessly at 1280px (light) and 390px (dark) with no script errors or horizontal overflow.
+- **Known limits:**
+  - The scaled-score mapping is an estimate, because Anthropic doesn't publish it.
+  - Cross-device sync activates only inside claude.ai.
+  - The question bank is original and has not been validated against the real exam.

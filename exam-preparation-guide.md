@@ -1423,7 +1423,7 @@ This helps when context compacts or when another session must pick up the work.
 - A user-level memory file applies across all projects for that user.
 - Imports using `@path/to/file.md` syntax pull in additional shared content without copy-pasting; this is the right way to reuse a standards document across multiple `CLAUDE.md` files.
 
-When multiple files are loaded, more specific files refine or override more general ones for the area they cover. The user-level memory is for personal preferences (preferred commit message style, preferred test command shortcuts) — not team-wide rules, which belong in repo-tracked `CLAUDE.md` files so all collaborators benefit.
+When multiple files load, they're concatenated into context, not merged or overridden: files higher in the directory tree come first and more specific ones later, so specific guidance sits closest to the work. User-level memory is for personal preferences (preferred commit message style, preferred test command shortcuts), not team-wide rules, which belong in repo-tracked `CLAUDE.md` files so all collaborators benefit. For personal, project-specific notes (sandbox URLs, local test data), use a gitignored `CLAUDE.local.md` at the project root.
 
 Use `/memory` to inspect and edit loaded memory files. This is the first diagnostic step when Claude inconsistently follows project conventions: confirm the expected memory file is loaded before adding more instructions. If the rule is in a memory file that isn't being loaded for the current working directory, no amount of additional prompting will fix the behavior — the problem is the loading scope, not the rule's wording.
 

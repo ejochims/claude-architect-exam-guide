@@ -88,7 +88,8 @@
       ["Have the subagent catch the timeout and return an empty result list marked as successful.", "T6"],
       ["Add the --batch flag so Claude Code runs without waiting for input.", "T8"],
       ["Give the synthesis agent every web-search tool so it never has to go back to the coordinator.", "T5"],
-      ["The report skips whole subtopics, though every subagent succeeded, so improve the search agent's queries.", "T7"]
+      ["The report skips whole subtopics, though every subagent succeeded, so improve the search agent's queries.", "T7"],
+      ["Add \u201cbe extremely careful and consistent\u201d to the reviewer prompt to fix contradictory findings.", "T9"]
     ];
     const ids = Object.keys(traps);
     const quiz = h("div", { class: "spot" });
@@ -98,7 +99,7 @@
       if (idx >= items.length) {
         quiz.append(h("div", { class: "spot-done" },
           h("div", { class: "big-num" }, `${score}/${items.length}`),
-          h("p", {}, score >= 6 ? "You can spot the patterns. They'll eliminate options fast on exam day." : "Review the cards above. You'll see these patterns again in every module."),
+          h("p", {}, score >= 7 ? "You can spot the patterns. They'll eliminate options fast on exam day." : "Review the cards above. You'll see these patterns again in every module."),
           h("button", { class: "btn ghost", type: "button", onclick: () => { idx = 0; score = 0; render(); } }, "Try again")));
         ctx.done();
         return;
@@ -320,41 +321,31 @@
     render();
   };
 
-  WIDGETS.promptOrCode = function (el, ctx) {
-    const items = [
-      ["Refunds over $500 require a manager's approval.", "code", "Financial limit. Enforce it with a tool-call hook or inside the tool itself."],
-      ["Keep replies warm and under about 120 words.", "prompt", "Style. An occasional long reply costs little."],
-      ["Verify identity before changing the email on an account.", "code", "Account takeover risk. A prerequisite gate blocks update_email until verification succeeds."],
-      ["Ask one clarifying question when a request is ambiguous.", "prompt", "Judgment about language. Prompts and examples are the right tool."],
-      ["Never show a full card number in a reply.", "code", "Compliance. Mask it in the tool result (PostToolUse) so the model never has it to repeat."],
-      ["Suggest the loyalty program to repeat customers when relevant.", "prompt", "A missed upsell is a small cost. Guidance is enough."],
-      ["Block DROP TABLE and rm -rf in the agent's shell tool.", "code", "Irreversible. A PreToolUse hook denies matching commands every time."],
-      ["Map three backends' status codes to one enum before the agent reads them.", "code", "Mechanical transformation. PostToolUse normalization is deterministic and free."]
-    ];
+  // Generic sorter: config = { cats: [{ id, label }], items: [[text, catId, why], ...] }
+  WIDGETS.sorter = function (el, ctx, cfg) {
     let correct = 0, answered = 0;
     const list = h("div", { class: "poc" });
     const score = h("div", { class: "poc-score", "aria-live": "polite" });
-    items.forEach(([text, ans, why]) => {
+    const label = id => cfg.cats.find(c => c.id === id).label;
+    cfg.items.forEach(([text, ans, why]) => {
       const fb = h("div", { class: "poc-fb" });
-      const row = h("div", { class: "poc-row" });
-      const pick = (choice, btn) => {
+      const row = h("div", { class: cfg.cats.length > 2 ? "poc-row stacked" : "poc-row" });
+      const btns = cfg.cats.map(c => h("button", { class: "pill-btn", type: "button" }, c.label));
+      btns.forEach((btn, k) => btn.addEventListener("click", () => {
         if (row.classList.contains("done")) return;
         row.classList.add("done");
-        const ok = choice === ans;
+        const ok = cfg.cats[k].id === ans;
         if (ok) correct++;
         answered++;
         btn.classList.add(ok ? "is-right" : "is-wrong");
-        fb.innerHTML = `<strong>${ans === "code" ? "Code" : "Prompt"}.</strong> ${why}`;
-        if (answered === items.length) {
-          score.textContent = `${correct} of ${items.length} sorted correctly.`;
+        if (!ok) btns[cfg.cats.findIndex(c => c.id === ans)].classList.add("is-right");
+        fb.innerHTML = `<strong>${label(ans)}.</strong> ${why}`;
+        if (answered === cfg.items.length) {
+          score.textContent = `${correct} of ${cfg.items.length} sorted correctly.`;
           ctx.done();
         }
-      };
-      const bp = h("button", { class: "pill-btn", type: "button" }, "Prompt");
-      const bc = h("button", { class: "pill-btn", type: "button" }, "Code");
-      bp.addEventListener("click", () => pick("prompt", bp));
-      bc.addEventListener("click", () => pick("code", bc));
-      row.append(h("p", { class: "poc-text" }, text), h("div", { class: "poc-btns" }, bp, bc), fb);
+      }));
+      row.append(h("p", { class: "poc-text" }, text), h("div", { class: "poc-btns" }, btns), fb);
       list.append(row);
     });
     el.append(list, score);
