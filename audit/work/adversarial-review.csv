@@ -41,3 +41,33 @@ q05-3,2.4,HOLDS,-,2.4-S3 verbatim.,-,-,-,2.4-S3
 q05-4,2.4,HOLDS,-,2.4-K4 and 2.4-S5.,-,"D is tagged T3 (bigger model or window), but it bloats the prompt rather than changing the model. A loose fit.",-,2.4-S5
 q05-5,2.4,HOLDS,-,2.4-S4.,-,-,-,2.4-S4
 q05-6,2.4,HOLDS,-,2.4-K3. Scopes merge; precedence applies only to a server name defined twice.,-,-,-,2.4-K3
+q06-2,1.3,HOLDS,-,"1.3-S3 verbatim. Today subagents run in the background by default, which reinforces rather than contests the key.",-,-,-,1.3-S3
+q06-3,1.3,HOLDS,-,"1.3-S1, 1.3-S2 and 1.2-K2.",D's why ('Subagents don't get the coordinator's history automatically') is true of non-fork subagents only. Today fork subagents inherit the parent conversation.,"D is tagged T8, but conversation inheritance exists today (fork subagents). It's a misconception for exam-style subagents, not an invented feature.",D's why: 'Exam-style subagents start fresh (today only forks inherit history).' Consider dropping T8.,1.2-K2; 1.3-S1; https://code.claude.com/docs/en/agent-sdk/subagents#what-subagents-inherit
+q06-4,1.2,HOLDS,-,1.2-S1 verbatim.,-,-,-,1.2-S1
+q06-5,1.2,HOLDS,-,"1.2-K4. Every subagent succeeded, so the decomposition is at fault.",-,-,Already flagged as too close to an official sample (Q5).,1.2-K4
+q06-6,1.2,HOLDS,-,1.2-S3 verbatim.,-,-,-,1.2-S3
+q06-7,1.6,HOLDS,-,1.6-S3 verbatim.,-,-,-,1.6-S3
+q06-8,1.3,HOLDS,-,1.3-S4 verbatim.,-,-,-,1.3-S4
+q07-1,5.1,HOLDS,-,5.1-K1 and 5.1-S1.,-,"A is tagged T3, but sending the full transcript is not a bigger model or window. A loose fit.",-,5.1-S1
+q07-2,5.1,HOLDS,-,5.1-K3 and 5.1-S3 verbatim.,-,-,-,5.1-S3
+q07-3,5.1,HOLDS,-,5.1-K2 and 5.1-S4.,-,-,-,5.1-S4
+q07-4,5.4,HOLDS,-,5.4-K1 and 5.4-S2. /compact (5.4-S5) isn't offered.,-,-,-,5.4-S2
+q07-5,5.4,HOLDS,-,3.4-S3 and 5.4-K3. C's '/compact before starting' misuses 5.4-S5.,-,-,-,3.4-S3; 5.4-S5
+q07-6,5.4,HOLDS,-,5.4-S4 verbatim.,-,-,-,5.4-S4
+q07-7,5.1,HOLDS,-,5.1-S6 verbatim.,-,"D (longer narratives) is tagged T3, which is about model or window size. A misfit; D could be left untagged.",-,5.1-S6
+q08-1,4.1,HOLDS,-,4.1-K2 and 4.1-S1.,-,-,-,4.1-S1
+q08-2,4.1,HOLDS,-,4.1-S2 verbatim.,-,-,-,4.1-S2
+q08-3,4.1,HOLDS,-,4.1-S3 verbatim.,-,-,-,4.1-S3
+q08-4,4.2,HOLDS,-,4.2-K2 and 4.2-S1 verbatim.,-,-,-,4.2-S1
+q08-5,4.2,HOLDS,-,4.2-S4 and 4.2-S5.,-,-,-,4.2-S5
+q08-6,4.6,HOLDS,-,4.6-K2 and 4.6-S1. Extended thinking is explicitly named as inferior.,-,-,-,4.6-K2
+q08-7,4.6,HOLDS,-,4.6-S2 and 1.6-S2.,-,-,Already flagged as too close to an official sample (Q5).,4.6-S2
+q09-1,4.3,HOLDS,-,"4.3-K1 and 4.3-S1. Today, forced tool_choice is rejected on 5.5-class models and the docs point to structured outputs. That isn't offered, so A still beats the prompt, regex and retry options.",A's why needs the same forced-tool-use model caveat as q02-4. Schema guarantees today also need strict: true.,B is tagged T1 (a high-stakes rule left in a prompt). A loose fit; the point is a prompt used where an API guarantee exists.,Add the shared 'Real world today' note on forced tool use and structured outputs.,4.3-K1; 4.3-S1; https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use
+q09-2,4.3,HOLDS,-,4.3-K3 verbatim.,-,-,-,4.3-K3
+q09-3,4.3,HOLDS,-,4.3-K4 and 4.3-S5.,-,-,-,4.3-S5
+q09-5,4.4,HOLDS,-,4.4-K2 and 4.4-S2 verbatim.,-,-,-,4.4-S2
+q09-6,4.4,HOLDS,-,4.4-K3 and 4.4-S3 verbatim.,-,-,-,4.4-S3
+q09-7,4.3,HOLDS,-,4.3-S6 verbatim.,-,-,-,4.3-S6
+q10-1,4.5,HOLDS,-,4.5-K2 and 4.5-S1.,-,-,Already flagged as too close to an official sample (Q5).,4.5-S1
+q10-2,4.5,HOLDS,-,"Worst case is interval + 24 + 2 ≤ 36, so the interval can be at most 10 h. Only 8 h qualifies. The arithmetic checks out (4.5-S2).",-,-,The options-only solver missed this item because the options are bare numbers. That's fine.,4.5-S2
+q10-3,4.5,HOLDS,-,4.5-S3 verbatim.,-,-,-,4.5-S3
