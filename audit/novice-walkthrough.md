@@ -8,7 +8,34 @@ Step references are `mNN:i`, using the 0-based index into `window.LESSONS.mNN.st
 
 ## Summary
 
-_(Filled in after the last module.)_
+83 issues (4 blocking, 32 major, 47 minor) and 30 GOOD notes, across 14 modules and 86 steps.
+
+| Type | BLOCKING | MAJOR | MINOR | Total |
+|---|---:|---:|---:|---:|
+| UNDEFINED-TERM | 1 | 10 | 15 | 26 |
+| JUMP | 3 | 10 | 7 | 20 |
+| MISSING-WHY | 0 | 6 | 8 | 14 |
+| QUIZ-UNFAIR | 0 | 3 | 12 | 15 |
+| OVERLOAD | 0 | 2 | 3 | 5 |
+| NEEDS-OUTSIDE | 0 | 1 | 2 | 3 |
+| **Total issues** | **4** | **32** | **47** | **83** |
+| GOOD (keep) | | | | 30 |
+
+**The four blocking issues** (all are missing *orientation*, not missing exam facts):
+
+1. **m01:0, tool use is never shown end to end.** No tool definition, `tool_use` block or `tool_result` block appears as actual JSON, so the loop rests on a metaphor.
+2. **m01:3, the Agent SDK is never defined.** It's mentioned four times (m01, m02, m03, m05) and explained nowhere, so hooks code (m03) and `AgentDefinition` (m06) have no home.
+3. **m05:0, MCP has no runtime picture.** Nothing shows client/host/server, or how a server's tools get into `tools[]` and get executed.
+4. **m11:0, Claude Code is never introduced.** It's used from m00 onward, and even its own module starts with config files instead of saying what the product is.
+
+**Patterns behind the counts:**
+
+- **Terms used before they are defined.** The app has no glossary or tooltips. Concepts are used several modules before the module that teaches them: subagent and coordinator in m02 and m04 (taught in m06); MCP in m03 and m04 (m05); `CLAUDE.md` in m05 (m11); context window in m01 (m07, and never formally defined); few-shot in m02 and m03 (m08, never shown).
+- **m00 tests the whole course on day one.** The trap spotter and all 3 m00 quiz questions need knowledge from m02, m09, m11 and m12.
+- **The best parts are the widgets.** `loopStepper`, `complianceSim`, `hookPlayground`, `contextViewer`, `contextBudget`, `slaCalc` and `segmentReveal` each turn a rule into something I could see working. Keep the "First principle" step that opens every module too: it usually *does* give the why.
+- **The why is strongest for judgment rules and weakest for mechanisms.** Prompt vs code, errors as information, and batch latency are well argued. How tool use, MCP, hooks, skills, `CLAUDE.md` and plan mode actually *work* is mostly missing, so those turn into lookup tables.
+
+Not audited: `content/bank.js` (the drill and mock-exam question bank). It isn't part of the module walk.
 
 ## Issues by module
 
@@ -194,3 +221,69 @@ Steps: 0 read "First principle: human attention is scarce" · 1 widget `sorter` 
 - [MINOR] UNDEFINED-TERM m13:4 — "Provenance" (the step title and an exam task statement) is never defined as a word. — "Provenance = the traceable chain from each claim back to its source, location and date."
 - [MINOR] MISSING-WHY m13:4 — "Render content by type: financial data as tables, news as prose…" doesn't connect to provenance, and no reason is given. — Explain the link (keeping data in tables preserves source figures exactly), or move it.
 - [GOOD] m13:4 — The "34% (2021) vs 61% (2025) is a trend, not a conflict, but only if dates travel with the claims" example shows why metadata must flow through the pipeline. It connects back to m06's structured findings.
+
+## End questions
+
+### 1. Self-assessment after m00–m13 (0 = can't explain, 1 = know the rules but not the mechanism or the neighbor, 2 = can explain what, why and when from first principles)
+
+| Concept | Score | What I can and can't explain |
+|---|:-:|---|
+| The agentic loop | 2 | Statelessness, "your app is the memory and the clock", continue on `tool_use`, stop on `end_turn`, `max_tokens` = truncated. `loopStepper` made this solid. Gap: why tool results go in a `user` message. |
+| Tool use | 1 | I know descriptions drive selection, how to scope tools, and `tool_choice` guarantees. I never saw a whole tool definition or raw `tool_use`/`tool_result` JSON, and "tools used purely as output schemas" was only implied until m09. |
+| MCP, including why it was created | 1 | Scopes, `.mcp.json` vs `~/.claude.json`, env-var secrets, tools vs resources: yes. Why it exists: only "integrate once". How it works (server process, discovery, who executes calls, how resources reach the model): no. |
+| Agent SDK vs Claude Code vs API | 0 | The SDK is never defined, and Claude Code is never introduced as a product. I couldn't tell a customer when to pick each. |
+| Hooks | 1 | PreToolUse = block or redirect a call, PostToolUse = normalize results; hooks give a guarantee where a prompt gives a probability. I can't explain where hooks live, or why I'd use one instead of an `if` in my own tool code, because I don't know who owns the loop. |
+| Subagents | 2 | Isolated context, spawn via Task in `allowedTools`, pass everything explicitly, parallel = several Task calls in one response, decomposition is the coordinator's job. `contextViewer` did the work. Gap: "a subagent is just another loop whose answer comes back as a tool result" is something I had to infer. |
+| CLAUDE.md, rules and skills | 1 | The "who × when" table and the sorter decisions: yes. What `CLAUDE.md` physically does (text added to context), what's inside a skill, and how a skill gets triggered: no. "Memory" contradicts m01. |
+| Plan mode | 1 | When to use it vs direct execution: yes. What it actually does (read-only, produces a plan for approval) and how you enter it: no. |
+| Batch API | 2 | 50% cheaper, ≤24h, no SLA, `custom_id`, no tool loop inside a request (follows from m01), the SLA arithmetic. Well taught. |
+| Structured output | 1 | Rules (tool_use + schema, nullable to stop fabrication, enum + other, validate semantics, retry with feedback): yes. *Why* a tool schema guarantees valid JSON when a prompt doesn't, and JSON Schema basics (`required` vs nullable): no. |
+| Few-shot prompting | 1 | "2–4 examples, ambiguous cases, show reasoning": yes. I've never seen one, so I couldn't write one. |
+| Escalation | 2 | Three valid triggers, demand vs frustration, why sentiment and raw confidence fail, ask for an identifier when there are multiple matches. Clear and argued. |
+| Provenance | 2 | Claim–source mappings, keep conflicts with attribution, dates prevent false contradictions. The word itself is never defined, but the idea is clear. |
+
+Total: 17 / 26. The three 2s that rest on weak foundations (loop, subagents, provenance) would all improve with the foundations module below.
+
+### 2. Foundational lessons missing before m01
+
+The app jumps from "how the exam thinks" (m00) to `client.messages.create(...)` (m01). For someone coming from a chat window, a foundations module (call it m00.5, about 25 min) needs:
+
+1. **What an API call to Claude is.** An HTTP request with an API key, a model id and a JSON body, and a JSON response back. The SDK is a thin client wrapper. The chat apps I've used are themselves applications making these calls, so the "memory" I see there is app code.
+2. **Messages and roles.** The `system` prompt as a separate field. The `messages[]` transcript alternating `user` / `assistant`. Content blocks (`text`, `tool_use`, `tool_result`). Why anything from outside the model, including tool results, arrives as a `user` turn.
+3. **Tokens, `max_tokens` and the context window.** A token ≈ ¾ of a word. `max_tokens` caps the *response*. The context window caps the *whole request*. Cost and latency scale with input tokens, which grow every turn. Temperature in one line.
+4. **JSON and JSON Schema.** Objects, arrays, types, `properties`, `required`, `enum`, nullable via `["string","null"]`. Needed by m00:3, m02, m04, m09 and m12.
+5. **Tool use end to end.** One tool definition → Claude's `tool_use` block → your `tool_result`, linked by id, including parallel calls. The two uses of tools (actions you run vs output schemas you just read). Where `tool_choice` goes.
+6. **The product map: who runs the loop?** Raw Messages API (you write the loop and run the tools), the Agent SDK (a library that runs the loop and the built-in tools, with hooks, subagents and sessions), Claude Code (a terminal coding agent built on the same harness, configured with `CLAUDE.md`, `.claude/` and `.mcp.json`), and MCP (a protocol for plugging external systems' tools and resources into any of them). One diagram, reused as a "you are here" marker in every later module.
+7. **A Claude Code orientation.** Starting a session, permission prompts, built-in tools, what loads at startup, slash commands, `-p` vs interactive.
+8. **A dev-ops glossary.** CI/CD, glob patterns, YAML frontmatter, environment variables, git worktrees, stdio/JSON-RPC. One line each, available as tap-to-define.
+
+### 3. What would make this a true one-stop shop
+
+1. **Add the m00.5 foundations module above,** and change the home-screen claim "build from first principles" to match it. Right now the first principles start one layer too high.
+2. **Add a glossary with tap-to-define on first use,** plus a build-time lint that flags any glossary term appearing in a step before its defining step. This would remove most of the 26 UNDEFINED-TERM issues mechanically.
+3. **Fix the ordering:**
+   - put a 3-sentence multi-agent preview in m02, or keep m02 and m04 examples single-agent until m06;
+   - move m07's "what is context, and why it is finite" ahead of m06;
+   - put the Claude Code orientation before m02:3 and m05;
+   - spread m00's quiz questions and trap-spotter items across the modules that teach them, and keep the trap gallery in m00 as a preview only.
+4. **Show the real artifact for every mechanism,** not just its effect:
+   - a raw request/response;
+   - a full tool definition;
+   - an MCP handshake sequence;
+   - a `CLAUDE.md` and a `SKILL.md` body;
+   - a few-shot block;
+   - a calibration table;
+   - a batch submission.
+
+   Most MAJOR "memorize instead of understand" issues come from seeing the config, but not the thing it configures.
+5. **Add a "versus its neighbor" box for each concept,** because the exam's distractors are mostly neighbors:
+   - hook vs in-tool check vs prompt;
+   - skill vs `CLAUDE.md` vs rule vs command;
+   - subagent vs `context: fork` vs prompt chaining;
+   - `tool_use` schema vs prompt JSON vs `--json-schema`;
+   - batch vs sync;
+   - API vs SDK vs Claude Code;
+   - resume vs fork vs fresh.
+6. **Keep and extend the simulation widgets,** the app's real strength. Add an MCP-host simulator (discover tools → model calls one → host forwards it to the server), a "Claude Code session" simulator (what loads at startup, a plan-mode run, a hook firing) and a JSON Schema playground (toggle required/nullable and watch a lease extraction fabricate or return null).
+7. **Make exam-vs-product drift a first-class list,** not scattered "Real world today" callouts: Task/Agent, commands merged into skills, `allowed-tools` restrict vs pre-approve. Then the learner knows exactly which terms to answer in.
+8. **Add a capstone "explain it back" checkpoint** after m13 covering the 13 concepts above, each as a short free-recall prompt with a model answer. It would catch the 1-scores before the mock exam does.
