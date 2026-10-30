@@ -115,4 +115,15 @@ Key D5 S2 items:
 
 ## P: Pedagogy and the one-stop shop (Phases 4 and 4b)
 
-Pending.
+### Novice walkthrough (`audit/novice-walkthrough.md`)
+
+83 issues: 4 blocking, 32 major, 47 minor. There are also 30 GOOD notes; keep those explanations. The persona's self-score after m00–m13 was **17 / 26**. "Agent SDK vs Claude Code vs API" scored **0**.
+
+| ID | Sev | Item | Fix |
+|---|---|---|---|
+| P1 | BLOCKING | **m01:0** never shows tool use end to end: no tool definition, `tool_use` block or `tool_result` block as real JSON. | Foundations module F2: walk through one full request/response round trip using annotated JSON. |
+| P2 | BLOCKING | **m01:3** names the Agent SDK four times without ever defining it. | F3, a product map: the API vs the Agent SDK vs Claude Code vs MCP, showing who runs the loop, with one diagram. |
+| P3 | BLOCKING | **m05:0** has no runtime picture of MCP: host, client, server, tool discovery, and who executes the tool. | Add an MCP architecture diagram, plus the "why MCP exists" origin (pending the primitives audit). |
+| P4 | BLOCKING | **m11:0** never introduces Claude Code as a product, even in its own module. | F3, plus a Claude Code orientation step at the start of m11. |
+| P5 | MAJOR | **m00 tests material from m02–m12 on day one.** The quiz and the trap spotter both do this. | Move them to the end of the course as a capstone. Keep m00 to the exam format and how to read questions. |
+| P6 | MAJOR | **There's no foundations layer.** Missing: API calls (key, model, SDK), messages and roles, the system prompt, tokens, `max_tokens`, the context window, JSON and JSON Schema, a glossary (CI, glob, frontmatter…), and 26 terms used before they're defined. | Add a Foundations track (F1–F4) and a searchable glossary, per plan Phase 7 step 2b. |
