@@ -121,6 +121,32 @@ Two things follow:
 
 The official sample questions use the same distractor families (prompt-only fixes, bigger model, routing classifier, tool consolidation), so the real exam probably leans the same way. Whether it does is unverified until you take the official practice exam.
 
+## Option families (2026-10-31, follow-up to the options-only result)
+
+**The problem.** In most questions the keyed option was simply the generic best practice, so a model could pick the key from the options alone 92% of the time without reading the question.
+
+**The fix.** All 60 Readiness Check questions were rewritten as **option families**. Each family is two questions that share the same four options but key different ones:
+- one question is in the Readiness Check and its twin is a new practice question (`p*`);
+- every option is a technique the curriculum endorses in some situation;
+- one constraint in the question decides which option is right;
+- each explanation says when that option *would* be right.
+
+Memorizing a practice answer therefore points you to the wrong answer on its Readiness Check twin. `content-check.mjs` enforces the family rules, `startMock()` never puts two members of one family in a single sitting, and the source files are in `audit/work/families/`.
+
+| Metric | Before | After |
+|---|---|---|
+| Options-only model on the Readiness Check (Haiku, question hidden) | 93.3% | **28.3%** (chance is 25%) |
+| Options-only model on the practice twins | — | 33.3% |
+| Highest options-only score possible across both twins in a family | — | 50% by construction |
+| Blind solver agreement with the key (Sonnet, sees the question) | — | **120/120**. Flagged 6 items as having a second defensible option; 3 were reworded to make the deciding constraint explicit (`p3-4`, `p5-5`, `h2-8`), and 3 were already decided by stated facts. |
+| Best stem-blind heuristic on the Readiness Check | 31.1% | 31.0% |
+| Questions | 218 | **278** (218 practice, 60 holdout) |
+
+**What it means for you.**
+- **The Readiness Check now measures scenario judgment.** It's probably harder than the real exam, whose official sample questions look more recognition-based, so treat a pass as conservative.
+- **Keep the 80% bar, but recalibrate it once you take the official practice exam.** If the two scores differ by more than 10 points, trust the official one.
+- **The 158 original practice questions are unchanged.** They still mostly test recognition, so the mock exams draw mainly on them and may read higher than the Readiness Check.
+
 ## Completion checklist
 
 `docs/AUDIT-PLAN.md`, "Definition of audit complete":
@@ -140,7 +166,7 @@ The official sample questions use the same distractor families (prompt-only fixe
 ## Residual risks
 
 1. **Every reviewer and author is an AI model.** The same model family wrote, rewrote and checked these items, and the holdout and practice rewrites had the same author in efficiency mode. No human who has passed the exam has reviewed them. Calibrate against the **official practice exam** (backlog R0) before trusting any score.
-2. **Questions test recognition more than scenario judgment.** See "What the options-only result means" above.
+2. **Practice questions test recognition more than scenario judgment.** This was fixed for the Readiness Check and the 60 practice twins (see "Option families"). The 158 original practice questions, and therefore most mock-exam questions, are unchanged. Expect mock scores to run higher than the Readiness Check.
 3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
 4. **Some open items remain:**
    - 52 S3 wording items in the secondary markdown guide;

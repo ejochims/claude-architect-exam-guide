@@ -174,7 +174,7 @@ window.BANK.push(
   },
   {
     id: "h2-8", ts: "5.4", scenario: 2, holdout: true, family: "F55",
-    stem: "Hours into a refactoring session, Claude starts referring to “typical patterns” instead of the specific classes it found earlier. It will need those exact findings for several more hours of work. What fits best?",
+    stem: "Hours into a refactoring session, Claude starts referring to “typical patterns” instead of the specific classes it found earlier. It will need those exact findings for several more hours, and the rest of the session's context is still relevant. What fits best?",
     options: [
       { t: "Delegate the exploration to a subagent and keep only its summary.", why: "Right before a big exploration. The findings already exist; they're fading." },
       { t: "Have Claude write key findings to a scratchpad file it can reread later.", ok: true, why: "Writing findings to a file preserves them exactly, beyond what the context holds." },

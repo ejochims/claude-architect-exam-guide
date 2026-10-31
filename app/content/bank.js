@@ -764,7 +764,7 @@ window.BANK = [
   },
   {
     id: "p3-4", ts: "1.2", scenario: 3, family: "F11",
-    stem: "When a search subagent finds nothing for one subtopic, the coordinator quietly drops it, and the report has a hole nobody notices. What change fits best?",
+    stem: "When a search subagent finds nothing for one subtopic, the coordinator quietly drops it, and the report has a hole nobody notices. A narrower search usually does find sources for these subtopics. What change fits best?",
     options: [
       { t: "Have subagents report to the coordinator, which decides what to pass on.", why: "Right when subagents bypass the coordinator. Here the coordinator receives the result and drops it." },
       { t: "Have the coordinator check each claim's source before including it.", why: "Right when claims lack support. Here a subtopic has no claims at all." },
@@ -954,7 +954,7 @@ window.BANK = [
   },
   {
     id: "p5-5", ts: "4.1", scenario: 5, family: "F30",
-    stem: "The reviewer reports style nits, possible bugs and security holes with the same urgency. Developers can't tell what must be fixed before merging. What's the best step?",
+    stem: "The reviewer reports style nits, possible bugs and security holes with the same urgency. The team wants all three kinds of finding, but developers can't tell what must be fixed before merging. What's the best step?",
     options: [
       { t: "Define which issue categories to report and which to skip, with an example of each.", why: "Right when unwanted categories are reported. All of these are wanted; their priority is unclear." },
       { t: "Turn off the noisiest category for now while its criteria are rewritten.", why: "Right when one category is unreliable. Here they all lack priority." },
