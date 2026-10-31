@@ -51,6 +51,8 @@ async function run(viewport, colorScheme) {
   if (!(await page.evaluate(() => location.hash === "#mock-result"))) problems.push(`${tag}: mock submit didn't reach the result page`);
   const mockIds = await page.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")).mocks[0].wrong.map(w => w[0]));
   if (mockIds.some(id => id.startsWith("h"))) problems.push(`${tag}: mock exam contains holdout items`);
+  const mockTotal = await page.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")).mocks[0].total);
+  if (mockTotal !== 60) problems.push(`${tag}: mock exam should have 60 questions, got ${mockTotal}`);
 
   // Readiness Check: begin, submit, confirm it's recorded once and covers every holdout item.
   await visit("#readiness"); await page.locator("#rbegin").click(); await page.waitForTimeout(80);
