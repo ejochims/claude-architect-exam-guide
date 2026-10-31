@@ -34,7 +34,7 @@ async function run(viewport, colorScheme) {
     const opt = page.locator("#app .q .opt").first();
     if (await opt.count()) await opt.click();
   }
-  for (const h of ["#", "#practice", "#blueprint", "#today", "#glossary", "#principles", "#cards"]) await visit(h);
+  for (const h of ["#", "#plan", "#practice", "#blueprint", "#today", "#glossary", "#principles", "#exam-day", "#cards"]) await visit(h);
   // Principles: every entry renders, search narrows, rules-only hides the detail.
   await visit("#principles");
   const pn = await page.evaluate(() => [document.querySelectorAll(".pr-card").length, window.PRINCIPLES.length]);
@@ -45,6 +45,8 @@ async function run(viewport, colorScheme) {
   await page.locator("#pq").fill(""); await page.locator("#pc").check(); await page.waitForTimeout(40);
   if (await page.locator(".pr-why").first().isVisible()) problems.push(`${tag}: rules-only didn't hide explanations`);
   checks++;
+
+  await studyChecks(page, tag, visit);
 
   // Each scenario drill: answer the first question and advance. A multiple-response item needs its full set, then "Check answer".
   const answerCard = async () => {
@@ -124,6 +126,45 @@ async function multiChecks(page, tag, visit) {
   await page.locator("#msubmit").click(); await page.waitForTimeout(100);
   const r = await page.evaluate(KEY => JSON.parse(localStorage.getItem(KEY)).mocks[0], KEY);
   if (!r || r.correct !== 1 || !r.multi || r.multi[0] !== 1 || r.multi[1] !== 2) problems.push(`${tag}: mock multi scoring wrong: ${JSON.stringify(r && { correct: r.correct, multi: r.multi })}`);
+  await page.evaluate(KEY => localStorage.removeItem(KEY), KEY);
+}
+
+// Study plan, exam-day playbook, misses drill with review links, and progress export/import.
+async function studyChecks(page, tag, visit) {
+  const KEY = "cca-study-progress-v1";
+  await visit("#exam-day");
+  if ((await page.locator(".ed-sec").count()) < 5) problems.push(`${tag}: exam-day playbook sections missing`);
+  // A first-attempt miss lands in the misses drill; a wrong answer links to its module; a right answer clears it.
+  const q = await page.evaluate(KEY => {
+    const q = window.BANK.find(x => !x.holdout && x.type !== "multi");
+    localStorage.setItem(KEY, JSON.stringify({ v: 1, answers: {}, first: { [q.id]: { ok: false, at: 1 } } }));
+    return { id: q.id, right: q.options.findIndex(o => o.ok), wrong: q.options.findIndex(o => !o.ok) };
+  }, KEY);
+  const optPos = i => page.evaluate(({ id, i }) => { const q = window.BANK.find(x => x.id === id); return [...document.querySelectorAll(".q .opt .opt-body")].findIndex(b => b.innerHTML === q.options[i].t); }, { id: q.id, i });
+  await page.goto(URL + "#drill-misses"); await page.reload(); await page.waitForTimeout(80); checks++;
+  if ((await page.locator(".q").count()) !== 1) problems.push(`${tag}: misses drill should show the 1 missed question`);
+  await page.locator(".q .opt").nth(await optPos(q.wrong)).click();
+  if (!(await page.locator(".q .review-link").count())) problems.push(`${tag}: wrong answer has no review link to its module`);
+  await page.goto(URL + "#drill-misses"); await page.reload(); await page.waitForTimeout(80);
+  await page.locator(".q .opt").nth(await optPos(q.right)).click();
+  await page.goto(URL + "#practice"); await page.reload(); await page.waitForTimeout(80); checks++;
+  if (!(await page.getByText("Nothing to retry yet").count())) problems.push(`${tag}: a corrected miss stayed in the misses list`);
+  // Plan: save an exam date; the home page follows it.
+  await visit("#plan");
+  await page.locator("#exd").fill("2026-12-10"); await page.locator("#exsave").click(); await page.waitForTimeout(60); checks++;
+  const ex = await page.evaluate(KEY => (JSON.parse(localStorage.getItem(KEY)).plan || {}).examDate, KEY);
+  if (ex !== "2026-12-10") problems.push(`${tag}: exam date not saved (${ex})`);
+  await page.goto(URL + "#path"); await page.reload(); await page.waitForTimeout(60);
+  if (!(await page.locator(".hero h1").textContent()).includes("10")) problems.push(`${tag}: home page doesn't show the saved exam date`);
+  // Export, then import the same file: it must merge without an error.
+  await page.goto(URL + "#plan"); await page.reload(); await page.waitForTimeout(60);
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.locator("#pexport").click()]);
+  const file = await dl.path(); checks++;
+  if (!file) problems.push(`${tag}: progress download failed`);
+  else {
+    await page.locator("#pimport").setInputFiles(file); await page.waitForTimeout(200);
+    if (((await page.locator("#pmsg").textContent()) || "").includes("isn't")) problems.push(`${tag}: importing an exported backup failed`);
+  }
   await page.evaluate(KEY => localStorage.removeItem(KEY), KEY);
 }
 

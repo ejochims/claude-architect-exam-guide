@@ -1,6 +1,6 @@
 # Claude Certified Architect - Foundations: Exam Preparation Guide
 
-> **The study app is the primary study path.** It covers everything in this guide plus foundations lessons, a glossary, an "Exam vs. today" page, 144 practice questions and a one-time Readiness Check. This guide is kept as a consistent long-form companion. See `app/README.md` and `audit/SUMMARY.md`.
+> **The study app is the primary study path.** It covers everything in this guide plus foundations lessons, a glossary, an "Exam vs. today" page, a Principles page, a study plan, an exam-day playbook, 233 practice questions (15 multiple-response) and a one-time Readiness Check. This guide is kept as a consistent long-form companion. See `app/README.md` and `audit/SUMMARY.md`.
 
 ## Overview
 
