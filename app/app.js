@@ -3,11 +3,14 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
   try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+  // First attempts drive readiness. Older saves only kept the latest answer, so seed from it once.
+  const seedFirst = s => { if (!Object.keys(s.first || {}).length) s.first = Object.fromEntries(Object.entries(s.answers || {}).map(([id, a]) => [id, { ok: a.ok, at: a.at, seeded: true }])); return s; };
+  seedFirst(state);
 
   const syncEl = document.getElementById("sync");
   const setSync = (cls, label) => { syncEl.className = `sync ${cls}`; syncEl.querySelector("span").textContent = label; };
@@ -35,6 +38,9 @@
       for (const [id, v] of Object.entries(a[k] || {})) m[id] = later(v, m[id]);
       out[k] = m;
     }
+    const fm = Object.assign({}, b.first || {});
+    for (const [id, v] of Object.entries(a.first || {})) fm[id] = !fm[id] || (v.at || 0) < (fm[id].at || 0) ? v : fm[id];
+    out.first = fm;
     out.last = later(a.last, b.last);
     const seen = new Map();
     for (const r of [...(a.mocks || []), ...(b.mocks || [])]) seen.set(r.startedAt, r);
@@ -67,10 +73,12 @@
   }
 
   // ---------- Content index ----------
-  const QUESTIONS = [];
-  for (const m of MODS) if (L[m.id]) L[m.id].steps.forEach(s => (s.questions || []).forEach(q => QUESTIONS.push(Object.assign({ module: m.id }, q))));
-  for (const q of BANK) QUESTIONS.push(Object.assign({ module: (MODS.find(m => m.tasks.includes(q.ts)) || {}).id }, q));
-  const QBYID = Object.fromEntries(QUESTIONS.map(q => [q.id, q]));
+  const ALLQ = [];
+  for (const m of MODS) if (L[m.id]) L[m.id].steps.forEach(s => (s.questions || []).forEach(q => ALLQ.push(Object.assign({ module: m.id }, q))));
+  for (const q of BANK) ALLQ.push(Object.assign({ module: (MODS.find(m => m.tasks.includes(q.ts)) || {}).id }, q));
+  // Holdout items are sequestered from lessons, drills, mocks and readiness; they're for a one-time Readiness Check.
+  const QUESTIONS = ALLQ.filter(q => !q.holdout), HOLDOUT = ALLQ.filter(q => q.holdout);
+  const QBYID = Object.fromEntries(ALLQ.map(q => [q.id, q]));
   const CARDS = [];
   for (const m of MODS) if (L[m.id]) (L[m.id].cards || []).forEach((c, i) => CARDS.push({ id: `${m.id}:${i}`, module: m, f: c.f, b: c.b }));
 
@@ -89,8 +97,10 @@
     document.body.append(t); setTimeout(() => t.remove(), 2400);
   }
   const fmtDate = ts => new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  // Anthropic doesn't publish the raw-to-scaled mapping; this anchors 72% raw at the 720 pass mark.
-  const scaled = pct => Math.round(pct <= 0.72 ? 100 + 620 * (pct / 0.72) : 720 + 280 * ((pct - 0.72) / 0.28));
+  // Anthropic doesn't publish its raw-to-scaled mapping, so scores are shown as percentages with a 95% Wilson interval.
+  const wilson = (k, n) => { if (!n) return [0, 0]; const z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d; return [Math.max(0, c - h), Math.min(1, c + h)]; };
+  const BAR = 0.8; // practice bar from audit/readiness-review.md, not an official cut score
+  const recordFirst = (id, ok) => { if (!state.first[id]) state.first[id] = { ok, at: Date.now() }; };
 
   // ---------- Derived progress ----------
   function taskMastery() {
@@ -98,7 +108,7 @@
     for (const q of QUESTIONS) {
       const t = (per[q.ts] = per[q.ts] || { total: 0, right: 0, tried: 0 });
       t.total++;
-      const a = state.answers[q.id];
+      const a = state.first[q.id];
       if (a) { t.tried++; if (a.ok) t.right++; }
     }
     return per;
@@ -107,12 +117,13 @@
     const tm = taskMastery();
     return B.domains.map(d => {
       const tasks = Object.keys(B.tasks).filter(t => t.startsWith(d.n + "."));
-      const scores = tasks.map(t => tm[t] ? tm[t].right / tm[t].total : 0);
+      const right = tasks.reduce((a, t) => a + (tm[t] ? tm[t].right : 0), 0), tried = tasks.reduce((a, t) => a + (tm[t] ? tm[t].tried : 0), 0);
       const started = tasks.filter(t => tm[t] && tm[t].tried).length;
-      return { ...d, tasks, mastery: scores.reduce((a, b) => a + b, 0) / tasks.length, started };
+      return { ...d, tasks, right, tried, mastery: tried ? right / tried : 0, started };
     });
   }
-  const readiness = () => domainStats().reduce((s, d) => s + d.weight * d.mastery, 0) / 100;
+  // Domain-weighted first-attempt accuracy over the domains you've practiced.
+  const readiness = () => { const ds = domainStats().filter(d => d.tried), w = ds.reduce((a, d) => a + d.weight, 0); return w ? ds.reduce((a, d) => a + d.weight * d.mastery, 0) / w : 0; };
   const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => state.steps[`${id}:${i}`]).length / L[id].steps.length;
   function nextUp() {
     if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
@@ -126,7 +137,7 @@
     const tm = taskMastery();
     return Object.keys(B.tasks).filter(t => tm[t] && tm[t].tried).map(t => {
       const d = domOfTask(t), s = tm[t];
-      return { t, d, pct: s.right / s.total, gap: d.weight * (1 - s.right / s.total), mod: MODS.find(m => m.tasks.includes(t)) };
+      return { t, d, pct: s.right / s.tried, gap: d.weight * (1 - s.right / s.tried), mod: MODS.find(m => m.tasks.includes(t)) };
     }).sort((a, b) => b.gap - a.gap).slice(0, n);
   }
   const DAY = 86400000, BOX_DAYS = [0, 1, 3, 7, 14, 30];
@@ -142,7 +153,7 @@
     let local = null;
     const draw = () => {
       const a = mode === "learn" ? state.answers[q.id] : mode === "drill" ? local : null;
-      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${taskChip(q.ts)}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
+      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
         <p class="q-stem">${q.stem}</p><div class="opts" role="${mode === "exam" ? "radiogroup" : "group"}"></div>`;
       const opts = card.querySelector(".opts");
       order.forEach((k, pos) => {
@@ -157,7 +168,7 @@
           if (mode === "learn" && state.answers[q.id]) return;
           if (mode === "drill" && local) return;
           const rec = { ok: !!o.ok, choice: k, at: Date.now() };
-          state.answers[q.id] = rec; if (mode === "drill") local = rec;
+          state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
           touch(); draw(); onAnswered && onAnswered(rec);
         });
         opts.append(b);
@@ -182,7 +193,7 @@
     const r = readiness(), pct = Math.round(r * 100), C = 2 * Math.PI * 40;
     const next = nextUp(), nm = next && MODS.find(m => m.id === next.m);
     const dstats = domainStats();
-    const answered = QUESTIONS.filter(q => state.answers[q.id]).length;
+    const answered = QUESTIONS.filter(q => state.first[q.id]).length;
     const weak = weakest(1)[0];
     const lastMock = state.mocks[0];
     app.innerHTML = `
@@ -196,7 +207,7 @@
     <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
     <div>
       <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your Dec 31 goal</div>
-      <div class="goal-v">${pct}% ready</div><div class="goal-k">Share of all ${QUESTIONS.length} practice questions you've answered correctly, weighted by domain. Aim for 80%+ before booking.</div>
+      <div class="goal-v">${pct}% ready</div><div class="goal-k">First-attempt accuracy on the ${answered} practice questions you've tried, weighted by domain. Retries don't count. Practice scores alone don't justify booking: book when a cold Readiness Check and the official practice exam both clear 80%.</div>
     </div>
   </div>
 </section>
@@ -207,7 +218,7 @@ ${nm ? `<section class="cont">
 <section class="quick">
   <a class="qk" href="#practice"><span class="qk-n">${answered}<small>/${QUESTIONS.length}</small></span><span class="qk-l">practice questions answered</span></a>
   <a class="qk" href="#cards"><span class="qk-n">${dueCount()}</span><span class="qk-l">flashcards due today</span></a>
-  <a class="qk" href="${lastMock ? "#mock-result" : "#mock"}"><span class="qk-n">${lastMock ? lastMock.scaled : "–"}</span><span class="qk-l">${lastMock ? `last mock score (${fmtDate(lastMock.at)})` : "no mock exam yet"}</span></a>
+  <a class="qk" href="${lastMock ? "#mock-result" : "#mock"}"><span class="qk-n">${lastMock ? Math.round((lastMock.wpct ?? lastMock.pct) * 100) + "%" : "–"}</span><span class="qk-l">${lastMock ? `last mock score (${fmtDate(lastMock.at)})` : "no mock exam yet"}</span></a>
   ${weak ? `<a class="qk" href="#${weak.mod.id}"><span class="qk-n">${weak.t}</span><span class="qk-l">weakest area: ${esc(B.tasks[weak.t])} (${Math.round(weak.pct * 100)}%)</span></a>` : `<a class="qk" href="#blueprint"><span class="qk-n">30</span><span class="qk-l">task statements on the blueprint</span></a>`}
 </section>
 <div class="sec-head"><h2>Domains</h2><span class="small">mastery across all task statements</span></div>
@@ -331,12 +342,12 @@ ${B.domains.map(d => `<section class="bp-dom">
   <div>
     <div class="eyebrow">Full mock exam</div>
     <h2>${running ? "Exam in progress" : "60 questions · 120 minutes · 4 random scenarios"}</h2>
-    <p>${running ? `${Object.keys(running.ans).length} of ${running.qids.length} answered. The timer keeps running while you're away.` : "Questions are grouped by scenario as on the real exam. You'll see your estimated scaled score and every explanation at the end."}</p>
+    <p>${running ? `${Object.keys(running.ans).length} of ${running.qids.length} answered. The timer keeps running while you're away.` : "Questions are grouped by scenario as on the real exam. At the end you'll see a domain-weighted score with its 95% range, and every explanation."}</p>
   </div>
   <a class="btn" href="#mock">${running ? "Resume exam" : "Start mock exam"} →</a>
 </section>
 ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="small" href="#mock-result">Latest review →</a></div>
-<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.scaled - 100) / 9}%;background:${m.scaled >= 720 ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${m.scaled >= 720 ? "pass" : "fail"}">${m.scaled}</span></div>`).join("")}</div>` : ""}
+<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span></div>`).join("")}</div>` : ""}
 <div class="sec-head" style="margin-top:34px"><h2>Scenario drills</h2><span class="small">the exam draws 4 of these 6</span></div>
 <section class="drills">
   ${B.scenarios.map(s => {
@@ -400,18 +411,21 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
       const c = m.ans[id];
       const ok = c != null && !!q.options[c].ok;
       if (ok) { correct++; dom[d][0]++; } else wrong.push([id, c == null ? -1 : c]);
-      if (c != null) state.answers[id] = { ok, choice: c, at: Date.now() };
+      if (c != null) { state.answers[id] = { ok, choice: c, at: Date.now() }; recordFirst(id, ok); }
     }
     const total = m.qids.length, pct = correct / total;
-    state.mocks = [{ at: Date.now(), startedAt: m.startedAt, correct, total, pct, scaled: scaled(pct), scen: m.scen, dom, wrong, mins: Math.round((Date.now() - m.startedAt) / 60000) }, ...state.mocks].slice(0, 10);
+    // Weight each domain's accuracy by its blueprint share, so scores compare across scenario draws.
+    const present = B.domains.filter(d => dom[d.id]), wsum = present.reduce((a, d) => a + d.weight, 0);
+    const wpct = wsum ? present.reduce((a, d) => a + d.weight * dom[d.id][0] / dom[d.id][1], 0) / wsum : 0;
+    state.mocks = [{ at: Date.now(), startedAt: m.startedAt, correct, total, pct, wpct, ci: wilson(correct, total), scen: m.scen, dom, wrong, mins: Math.round((Date.now() - m.startedAt) / 60000) }, ...state.mocks].slice(0, 10);
     state.mock = null; touch();
     location.hash = "#mock-result";
   }
   function viewMock() {
     if (!state.mock) {
-      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Like the real exam: 60 multiple-choice questions, 120 minutes, 4 of the 6 scenarios chosen at random, one best answer each, no feedback until you submit.")}
+      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, one best answer each, no feedback until you submit.")}
 <div class="read"><div class="panel">
-<ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>The score is a rough scaled estimate. Anthropic doesn't publish its raw-to-scaled mapping, so treat 720 as “about 72% correct.”</li></ul>
+<ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
 <button class="btn accent" type="button" id="begin">Begin the exam</button></div></div>`;
       document.getElementById("begin").addEventListener("click", () => { startMock(); viewMock(); });
       return;
@@ -452,8 +466,8 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
   function viewMockResult() {
     const r = state.mocks[0];
     if (!r) { location.hash = "#mock"; return; }
-    const pass = r.scaled >= 720;
-    app.innerHTML = `${pageHead(`Mock exam · ${fmtDate(r.at)}`, `${r.scaled} <span class="score-of">/ 1000</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}%) in ${r.mins} minutes. <strong class="${pass ? "pass" : "fail"}">${pass ? "Above" : "Below"} the 720 pass mark</strong> on this rough scale.`)}
+    const w = r.wpct ?? r.pct, ci = r.ci || wilson(r.correct, r.total), pass = w >= BAR;
+    app.innerHTML = `${pageHead(`Mock exam · ${fmtDate(r.at)}`, `${Math.round(w * 100)}% <span class="score-of">domain-weighted</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}% raw, 95% range ${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%) in ${r.mins} minutes. <strong class="${pass ? "pass" : "fail"}">${pass ? "At or above" : "Below"} the 80% practice bar.</strong> Mock questions overlap with ones you've practiced, so treat this as an upper bound.`)}
 <div class="sec-head"><h2>By domain</h2></div>
 <div class="bp-rows">${B.domains.map(d => { const v = r.dom[d.id]; if (!v) return ""; return `<div class="bp-row"><span class="chip dom-${d.id}">D${d.n}</span><span>${esc(d.name)}</span><span class="bar"><span class="dom-bg-${d.id}" style="width:${v[0] / v[1] * 100}%"></span></span><span class="bp-pct">${v[0]}/${v[1]}</span></div>`; }).join("")}</div>
 <div class="sec-head" style="margin-top:30px"><h2>Review missed questions</h2><span class="small">${r.wrong.length} to review</span></div>

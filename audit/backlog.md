@@ -24,6 +24,18 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | Q6 | Fixed: b5-4 is rewritten, with an unambiguous deadline and equally expert distractors |
 | New | **`#today` "Exam vs. today" page**: 16 rows, each with a source. Linked from the blueprint page and every new callout |
 
+### Batch 2 (2026-10-31): readiness engine (`app/app.js`)
+
+| Readiness finding | Status |
+|---|---|
+| E2 / E3 | Fixed: first attempts are stored in `state.first`, written once and merged across devices by earliest time. Readiness, mastery and weakest areas use them. Older saves are seeded once from their latest answers. Verified headlessly: a wrong answer, then "Try again", then a right answer leaves the first attempt wrong. |
+| E4 | Partly fixed: the engine supports `holdout: true`, so items are sequestered from every practice path. The Readiness Check view and the 60 holdout items come in batch 5. |
+| E5 / E6 | Fixed: the mock reports a domain-weighted % (blueprint weights, renormalized over the domains drawn) plus the raw % and a 95% Wilson range. The scaled-score function is removed. The history and home tiles show %. |
+| E7 | Fixed: the home copy no longer says "Aim for 80%+ before booking". It says practice scores alone don't justify booking, and states the real rule. |
+| E8 | Fixed: the task chip is hidden in exam mode (verified: 0 chips). |
+| R3 | Fixed: the mock intro says "about 60 questions (the count is unofficial)". |
+| Still open | Mock domain quotas remain infeasible for some draws. Weighted scoring makes scores comparable; a feasible bank comes with batches 4–5. |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |
