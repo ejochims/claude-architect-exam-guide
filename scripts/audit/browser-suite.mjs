@@ -36,8 +36,13 @@ async function run(viewport, colorScheme) {
   }
   for (const h of ["#", "#practice", "#blueprint", "#today", "#glossary", "#cards"]) await visit(h);
 
-  // Each scenario drill: answer the first question and advance.
-  for (let s = 1; s <= 6; s++) { await visit(`#drill-${s}`); await page.locator(".q .opt").first().click(); await page.locator("#dnext").click(); checks++; }
+  // Each scenario drill: answer the first question and advance. A multiple-response item needs its full set, then "Check answer".
+  const answerCard = async () => {
+    const opts = page.locator(".q .opt"); await opts.first().click();
+    if (await page.locator(".q .multi-bar").count()) { await opts.nth(1).click(); await page.locator(".q .multi-bar .btn").click(); }
+  };
+  for (let s = 1; s <= 6; s++) { await visit(`#drill-${s}`); await answerCard(); await page.locator("#dnext").click(); checks++; }
+  await multiChecks(page, tag, visit);
 
   // Flashcards: flip and grade one card.
   await visit("#cards");
@@ -73,6 +78,43 @@ async function run(viewport, colorScheme) {
   await page2.goto(URL + "#m01-5"); await page2.waitForTimeout(60);
   await rings(page2, tag);
   await b2.close();
+}
+
+// Multiple response (type "multi"): rendered with "Select k", Check answer enabled only at k picks,
+// a wrong set scored wrong, the keyed set right, and the mock scoring all-or-nothing.
+async function multiChecks(page, tag, visit) {
+  const KEY = "cca-study-progress-v1";
+  const items = await page.evaluate(() => window.BANK.filter(q => q.type === "multi").map(q => ({ id: q.id, s: q.scenario, keys: q.options.map((o, i) => o.ok ? i : -1).filter(i => i >= 0), other: q.options.map((o, i) => o.ok ? -1 : i).filter(i => i >= 0) })));
+  if (!items.length) return;
+  const m = items[0];
+  // Preload every other scenario question as answered, so the multi item is the drill's first question.
+  const preload = () => page.evaluate(({ id, s, KEY }) => {
+    const all = [...Object.values(window.LESSONS).flatMap(l => l.steps.flatMap(st => st.questions || [])), ...window.BANK];
+    const answers = {}; for (const q of all) if (q.scenario === s && q.id !== id && !q.holdout) answers[q.id] = { ok: true, choice: 0, at: 1 };
+    localStorage.setItem(KEY, JSON.stringify({ v: 1, answers, first: { _seed: { ok: true, at: 1 } } }));
+  }, { ...m, KEY });
+  // Button positions for given option indices, matched by text (the display order is shuffled).
+  const pos = idx => page.evaluate(({ id, idx }) => { const q = window.BANK.find(x => x.id === id); return [...document.querySelectorAll(".q .opt .opt-body")].map((b, p) => idx.some(i => b.innerHTML === q.options[i].t) ? p : -1).filter(p => p >= 0); }, { id: m.id, idx });
+  for (const [pick, wantOk] of [[[m.keys[0], m.other[0]], false], [m.keys, true]]) {
+    await preload(); await page.goto(URL + `#drill-${m.s}`); await page.reload(); await page.waitForTimeout(80); checks++;
+    if (!(await page.locator(".q .multi-chip").count())) { problems.push(`${tag}: multi item ${m.id} not first in drill or missing its Select chip`); return; }
+    const ps = await pos(pick), opts = page.locator(".q .opt"), check = page.locator(".q .multi-bar .btn");
+    await opts.nth(ps[0]).click();
+    if (!(await check.isDisabled())) problems.push(`${tag}: multi Check answer enabled before k picks`);
+    await opts.nth(ps[1]).click(); await check.click();
+    const got = await page.locator(`.q .q-res.${wantOk ? "ok" : "no"}`).count();
+    const first = await page.evaluate(({ id, KEY }) => JSON.parse(localStorage.getItem(KEY)).first[id], { id: m.id, KEY });
+    if (!got || !first || first.ok !== wantOk) problems.push(`${tag}: multi ${wantOk ? "keyed" : "wrong"} set not scored ${wantOk ? "right" : "wrong"}`);
+  }
+  // Mock scoring: one multi item with the keyed set, one with a partial set; expect 1 of 2.
+  const [a, b] = [items[0], items[1] || items[0]];
+  await page.evaluate(({ a, b, KEY }) => localStorage.setItem(KEY, JSON.stringify({ v: 1, mock: { startedAt: Date.now(), qids: [a.id, b.id], ans: { [a.id]: a.keys, [b.id]: [b.keys[0], b.other[0]] }, flags: {}, scen: [1, 2, 3, 4], cur: 0 } })), { a, b, KEY });
+  await page.goto(URL + "#mock"); await page.reload(); await page.waitForTimeout(80); checks++;
+  if (!(await page.locator(".q .multi-chip").count())) problems.push(`${tag}: multi chip missing in exam mode`);
+  await page.locator("#msubmit").click(); await page.waitForTimeout(100);
+  const r = await page.evaluate(KEY => JSON.parse(localStorage.getItem(KEY)).mocks[0], KEY);
+  if (!r || r.correct !== 1 || !r.multi || r.multi[0] !== 1 || r.multi[1] !== 2) problems.push(`${tag}: mock multi scoring wrong: ${JSON.stringify(r && { correct: r.correct, multi: r.multi })}`);
+  await page.evaluate(KEY => localStorage.removeItem(KEY), KEY);
 }
 
 async function rings(page, tag) {

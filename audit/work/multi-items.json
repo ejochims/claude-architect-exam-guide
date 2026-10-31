@@ -1,0 +1,543 @@
+[
+  {
+    "id": "mr-01",
+    "ts": "1.1",
+    "scenario": 1,
+    "type": "multi",
+    "bl": [
+      "1.1-S1",
+      "1.1-S2",
+      "1.1-S3"
+    ],
+    "stem": "A support agent's loop sometimes stops halfway through a task. The code exits as soon as the model's text contains the word \"done\", and after a call to <code>lookup_order</code> the model's next turn sometimes never sees the order data. Which two changes fix the loop? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Loop while <code>stop_reason</code> is <code>\"tool_use\"</code>; stop on <code>\"end_turn\"</code>, not on text.",
+        "ok": true,
+        "why": "Right. <code>stop_reason</code> is the loop's termination signal. Looking for a word in the text is a known anti-pattern."
+      },
+      {
+        "t": "Append each <code>tool_result</code>, matched by <code>tool_use_id</code>, to the history before the next request.",
+        "ok": true,
+        "why": "Right. The model only knows what is in the messages you send. If the result isn't appended, the next turn can't see the order."
+      },
+      {
+        "t": "Raise the iteration cap from 5 to 25 so that long multi-step tasks have enough room to finish.",
+        "why": "A cap is a safety net, not the way a loop should end. It fixes neither bug: the text check still exits early, and the results are still missing."
+      },
+      {
+        "t": "Tell the model in the system prompt to say \"done\" only when every tool call has finished.",
+        "why": "This is still text-as-done termination, and prompt compliance is probabilistic. The structured <code>stop_reason</code> already gives you the signal."
+      },
+      {
+        "t": "Replace the loop with a fixed sequence: look up the order, check the policy, then reply.",
+        "why": "A hard-coded sequence is right only when the workflow never varies. Support requests vary, so the model should choose the tools."
+      }
+    ]
+  },
+  {
+    "id": "mr-02",
+    "ts": "1.2",
+    "scenario": 3,
+    "type": "multi",
+    "bl": [
+      "1.2-K4",
+      "1.2-S2",
+      "1.2-S3"
+    ],
+    "stem": "A coordinator researching \"the impact of AI on creative industries\" sends the whole topic to three search subagents. Their results overlap heavily, and the final report covers only visual art: music, writing and film are missing. Which two changes address the cause? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Split the topic into distinct subtopics (visual art, music, writing, film), one per subagent.",
+        "ok": true,
+        "why": "Right. Partitioning the scope removes the duplication, and naming each subtopic keeps the broad topic from collapsing into one area."
+      },
+      {
+        "t": "Have the coordinator check the draft for gaps and re-delegate what's missing.",
+        "ok": true,
+        "why": "Right. Evaluate, re-delegate, re-synthesize: the coordinator catches the gaps that the first decomposition left."
+      },
+      {
+        "t": "Run the synthesis step on a larger model so it can infer what the searches missed.",
+        "why": "A bigger model can't cite sources nobody retrieved. The gap comes from the decomposition, not from synthesis quality."
+      },
+      {
+        "t": "Let the three subagents share a single conversation history so each one can see what the others have already found.",
+        "why": "Subagents have isolated contexts by design. The coordinator passes context explicitly, and partitioning prevents the overlap in the first place."
+      },
+      {
+        "t": "Route every subagent's output through the coordinator rather than between subagents.",
+        "why": "Good practice for observability and control, and this design already does it. It doesn't change what gets searched."
+      }
+    ]
+  },
+  {
+    "id": "mr-03",
+    "ts": "1.4",
+    "scenario": 1,
+    "type": "multi",
+    "bl": [
+      "1.4-S1",
+      "1.4-K2",
+      "1.4-S3"
+    ],
+    "stem": "Policy says a refund may be issued only after <code>verify_customer</code> succeeds. The system prompt states the rule in capitals, but logs show the agent occasionally calls <code>process_refund</code> first. Refunds over $500 go to a human, who currently receives only a link to the transcript. Which two changes should the architect make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Block <code>process_refund</code> in code until <code>verify_customer</code> has succeeded in this session.",
+        "ok": true,
+        "why": "Right. A programmatic prerequisite gate makes the ordering deterministic. Prompt-only rules fail at a non-zero rate."
+      },
+      {
+        "t": "On handoff, send a structured summary: customer, verification status, order, amount, what was tried, and why it's escalating.",
+        "ok": true,
+        "why": "Right. The human may not read the transcript, so the handoff carries the facts they need to act."
+      },
+      {
+        "t": "Add three few-shot examples that show verification happening before every refund.",
+        "why": "Examples improve the odds, but this is still prompt guidance. A rule that must always hold needs enforcement in code."
+      },
+      {
+        "t": "Lower the temperature to 0 so the model follows the stated order consistently.",
+        "why": "Temperature changes sampling, not whether a tool can be called. The agent can still call the refund first."
+      },
+      {
+        "t": "Ask the human reviewer to read the full transcript before acting, so no context is lost.",
+        "why": "That pushes the work onto the human and assumes they have the transcript. A structured handoff is the protocol."
+      }
+    ]
+  },
+  {
+    "id": "mr-04",
+    "ts": "1.5",
+    "scenario": 1,
+    "type": "multi",
+    "bl": [
+      "1.5-S1",
+      "1.5-S2",
+      "1.5-K1"
+    ],
+    "stem": "Three MCP tools return dates as Unix timestamps, ISO strings and \"MM/DD/YY\", and the agent sometimes compares them wrongly. Separately, compliance requires that <code>close_account</code> never runs without a supervisor approval ID. Which two hooks should be added? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "A PostToolUse hook that converts every date in tool results to ISO 8601 before the model sees them.",
+        "ok": true,
+        "why": "Right. PostToolUse runs on the result before the model reads it, so normalization is deterministic."
+      },
+      {
+        "t": "A PreToolUse hook that blocks <code>close_account</code> without an approval ID and routes the case to escalation.",
+        "ok": true,
+        "why": "Right. Interception before the call is the only point at which a violation can be prevented, not just detected."
+      },
+      {
+        "t": "A PostToolUse hook on <code>close_account</code> that flags any closure missing an approval ID for the compliance team's review.",
+        "why": "Too late: the account is already closed when PostToolUse runs. Blocking has to happen before the call."
+      },
+      {
+        "t": "A system-prompt section listing all three date formats with conversion rules.",
+        "why": "Prompt guidance is probabilistic. Normalizing in code removes the problem before the model ever sees it."
+      },
+      {
+        "t": "A UserPromptSubmit hook that injects a reminder of the approval rule into the context on every single turn.",
+        "why": "A reminder is still guidance the model can ignore. Compliance that must hold needs a block on the tool call."
+      }
+    ]
+  },
+  {
+    "id": "mr-05",
+    "ts": "1.3",
+    "scenario": 3,
+    "type": "multi",
+    "bl": [
+      "1.3-S1",
+      "1.3-K2",
+      "1.3-S2"
+    ],
+    "stem": "A coordinator spawns a synthesis subagent with the prompt \"Write the final report on the topic.\" The report has no citations and ignores most of what the search subagents found. Which two changes fix it? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Include the search subagents' complete findings in the synthesis subagent's prompt.",
+        "ok": true,
+        "why": "Right. A subagent starts with an empty context. It sees only what the coordinator passes to it."
+      },
+      {
+        "t": "Pass the findings in a structured format that keeps each claim with its source URL and date.",
+        "ok": true,
+        "why": "Right. Separating content from metadata lets the synthesizer attribute each claim, so the citations survive."
+      },
+      {
+        "t": "Rely on the synthesis subagent inheriting the coordinator's conversation, which already has the findings.",
+        "why": "Subagents don't inherit the parent's history. That assumption is the bug."
+      },
+      {
+        "t": "Give the synthesis subagent the Task tool so it can query the search subagents itself.",
+        "why": "Subagents can't reach their siblings. Communication goes through the coordinator, which already holds the findings."
+      },
+      {
+        "t": "Write a step-by-step procedure for each section of the report into the subagent's prompt.",
+        "why": "Coordinator prompts should state goals and quality criteria, not procedures. And a procedure doesn't supply the missing findings."
+      }
+    ]
+  },
+  {
+    "id": "mr-06",
+    "ts": "2.1",
+    "scenario": 4,
+    "type": "multi",
+    "bl": [
+      "2.1-S1",
+      "2.1-K2",
+      "2.1-S4"
+    ],
+    "stem": "An internal developer assistant has two tools: <code>search</code> (\"Searches for information\") and <code>lookup</code> (\"Looks up records\"). It often calls <code>search</code> when it should fetch a ticket by its ID. The system prompt also says \"Always search thoroughly before answering.\" Which two changes are most likely to fix the misrouting? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Rewrite both descriptions to say what each does, its input with an example, its output, and when to prefer it.",
+        "ok": true,
+        "why": "Right. The description is the model's main signal for choosing a tool. These two say almost nothing that tells them apart."
+      },
+      {
+        "t": "Reword the system prompt's \"always search\" line, which pulls the model toward the tool named <code>search</code>.",
+        "ok": true,
+        "why": "Right. A keyword in the system prompt can create an unintended association with a tool of the same name."
+      },
+      {
+        "t": "Merge them into one <code>find</code> tool with a <code>mode</code> parameter.",
+        "why": "This creates a more generic tool and hides the distinction inside a parameter. Purpose-specific tools with clear boundaries route better."
+      },
+      {
+        "t": "Put a small routing classifier in front of the agent that picks the right tool for each incoming request.",
+        "why": "This is extra infrastructure for a problem the descriptions should solve. Fix the tool contract first."
+      },
+      {
+        "t": "Switch to a larger, more capable model that can infer the user's intent even from short tool descriptions.",
+        "why": "A bigger model guesses better but is still guessing. The missing information belongs in the descriptions."
+      }
+    ]
+  },
+  {
+    "id": "mr-07",
+    "ts": "2.2",
+    "scenario": 5,
+    "type": "multi",
+    "bl": [
+      "2.2-S1",
+      "2.2-K4",
+      "2.2-S4"
+    ],
+    "stem": "In a CI pipeline, an MCP tool <code>get_test_results</code> returns <code>{\"status\": \"error\", \"message\": \"Operation failed\"}</code> as a normal result for every failure: timeouts, an unknown build ID, and permission denials. The agent retries everything three times, and twice it reported \"no failing tests\" while the results service was down. Which two changes should the tool make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Set <code>isError</code> and return an error category, whether it's retryable, and a readable description.",
+        "ok": true,
+        "why": "Right. With structured error metadata, the agent retries only transient failures and stops wasting retries on an unknown ID or a permission denial."
+      },
+      {
+        "t": "Return an empty result only when the query ran and found nothing, and report an outage as an error.",
+        "ok": true,
+        "why": "Right. An access failure must never look like a valid empty result. That confusion produced the false \"no failing tests\"."
+      },
+      {
+        "t": "Retry every failure up to five times with exponential backoff and jitter, so outages have time to clear.",
+        "why": "Backoff suits transient errors. An unknown ID or a permission denial will fail on every retry."
+      },
+      {
+        "t": "Treat any failure as \"no failing tests\" so the pipeline keeps moving.",
+        "why": "That silently suppresses the error and turns an outage into a false pass."
+      },
+      {
+        "t": "Raise an exception that aborts the whole CI job whenever the tool fails, so no result is ever trusted blindly.",
+        "why": "Aborting everything is the opposite mistake. Transient errors can be retried, and the rest should reach the agent with context."
+      }
+    ]
+  },
+  {
+    "id": "mr-08",
+    "ts": "2.4",
+    "scenario": 4,
+    "type": "multi",
+    "bl": [
+      "2.4-S1",
+      "2.4-K2",
+      "2.4-S2"
+    ],
+    "stem": "A team wants every developer to get the shared Jira MCP server when they clone the repo, without committing the API token. One developer also wants to try an experimental personal server without affecting teammates. Which two configurations meet both needs? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Define Jira in the project's <code>.mcp.json</code>, referencing the token as <code>${JIRA_TOKEN}</code>.",
+        "ok": true,
+        "why": "Right. Project scope is shared through git, and environment-variable expansion keeps the secret out of the repo."
+      },
+      {
+        "t": "Add the experimental server at user scope, in <code>~/.claude.json</code>.",
+        "ok": true,
+        "why": "Right. User scope is personal, so teammates never see it."
+      },
+      {
+        "t": "Put the token directly in <code>.mcp.json</code> and add that file to <code>.gitignore</code>.",
+        "why": "An ignored file isn't shared, which defeats the purpose. The team would also lose the shared configuration."
+      },
+      {
+        "t": "Add both servers to the project <code>.mcp.json</code> and ask teammates to disable the experimental one.",
+        "why": "Project scope affects everyone who clones the repo. Personal experiments belong at user scope."
+      },
+      {
+        "t": "Build a custom MCP server that wraps the Jira API for the team.",
+        "why": "Prefer an existing community server for a standard integration. Build a custom one only for needs specific to your team."
+      }
+    ]
+  },
+  {
+    "id": "mr-09",
+    "ts": "3.1",
+    "scenario": 2,
+    "type": "multi",
+    "bl": [
+      "3.1-S1",
+      "3.1-K2",
+      "3.1-S3"
+    ],
+    "stem": "A new team member says Claude Code ignores the team's testing conventions, which a senior engineer wrote into <code>~/.claude/CLAUDE.md</code> months ago. The repo's root CLAUDE.md has also grown to 1,500 lines covering every package. Which two changes should the team make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Move the conventions into project memory, such as the repo's CLAUDE.md, which git shares.",
+        "ok": true,
+        "why": "Right. User-level memory lives on one machine and isn't in the repo. That's why only the senior engineer gets these conventions."
+      },
+      {
+        "t": "Split the root file into topic rule files, and have packages import only the standards they need.",
+        "ok": true,
+        "why": "Right. Modular files with <code>@import</code> or <code>.claude/rules/</code> keep each context relevant and easier to maintain."
+      },
+      {
+        "t": "Have the new member copy the senior engineer's <code>~/.claude/CLAUDE.md</code> file onto their own machine.",
+        "why": "This fixes one person, and the copies drift apart. Team conventions belong in the repo."
+      },
+      {
+        "t": "Run <code>/memory</code> so the conventions load for the new member.",
+        "why": "<code>/memory</code> shows which memory files loaded, so it's useful for diagnosing this. It doesn't make a file on someone else's machine load."
+      },
+      {
+        "t": "Pass the whole 1,500-line file with <code>--append-system-prompt</code> on each run.",
+        "why": "It's applied per invocation, isn't shared, and still loads everything. Splitting the file into topics solves the size problem."
+      }
+    ]
+  },
+  {
+    "id": "mr-10",
+    "ts": "3.6",
+    "scenario": 5,
+    "type": "multi",
+    "bl": [
+      "3.6-S1",
+      "3.6-K1",
+      "3.6-S2"
+    ],
+    "stem": "A CI job runs Claude Code to review each pull request. The job sometimes hangs until it times out, and the team wants findings posted as inline comments on specific lines. Which two changes are needed? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Run Claude Code with <code>-p</code>, so it handles the prompt once and exits.",
+        "ok": true,
+        "why": "Right. Without <code>-p</code>, Claude Code waits for interactive input, which is why the job hangs."
+      },
+      {
+        "t": "Use <code>--output-format json</code> with <code>--json-schema</code> so each finding has a file, a line and a message.",
+        "ok": true,
+        "why": "Right. Schema-shaped JSON can be parsed reliably into inline PR comments."
+      },
+      {
+        "t": "Ask for \"a markdown table of findings\" in a specific layout and parse it with a regular expression.",
+        "why": "Free-text formats drift between runs, so the parser breaks. Use structured output."
+      },
+      {
+        "t": "Pipe <code>yes</code> into the process before it starts, so any prompt for input gets answered.",
+        "why": "It's a fragile workaround that may approve actions you didn't intend. Non-interactive mode is the supported way to run it."
+      },
+      {
+        "t": "Have the session that generated the changes review them too, so it already has the context.",
+        "why": "A generating session reviews its own work poorly. Use an independent review, and either way it fixes neither problem."
+      }
+    ]
+  },
+  {
+    "id": "mr-11",
+    "ts": "3.4",
+    "scenario": 4,
+    "type": "multi",
+    "bl": [
+      "3.4-S1",
+      "3.4-S2",
+      "3.4-K1",
+      "3.4-K2"
+    ],
+    "stem": "Two tasks arrive the same morning. First, migrate 40 services from REST to gRPC; the approach isn't settled. Second, fix an off-by-one error in one function, where the stack trace names the line. Which two choices are right? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Use plan mode for the migration, so Claude explores and proposes an approach before editing anything.",
+        "ok": true,
+        "why": "Right. A large, multi-approach architectural change is what plan mode is for. It prevents costly rework."
+      },
+      {
+        "t": "Fix the off-by-one with direct execution.",
+        "ok": true,
+        "why": "Right. A clear, scoped, single-file fix doesn't need a planning phase."
+      },
+      {
+        "t": "Use plan mode for both tasks, to be safe.",
+        "why": "Planning a one-line fix with a known location only adds overhead."
+      },
+      {
+        "t": "Start the migration with direct execution and review each diff as it lands.",
+        "why": "With no settled approach, early edits are likely to be redone. Plan first."
+      },
+      {
+        "t": "Before planning, read all 40 services into the main conversation so Claude has full context.",
+        "why": "That exhausts the context window. An Explore subagent can survey the services and return a summary."
+      }
+    ]
+  },
+  {
+    "id": "mr-12",
+    "ts": "4.4",
+    "scenario": 6,
+    "type": "multi",
+    "bl": [
+      "4.4-S1",
+      "4.4-K2",
+      "4.4-S2"
+    ],
+    "stem": "An invoice extraction pipeline validates each result against a schema and business rules. Two failures keep recurring: line items that don't sum to the stated total, and a missing PO number on invoices that genuinely have none. Every retry resends the original prompt unchanged. Which two changes should the pipeline make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "On retry, send the document, the failed extraction, and the specific validation errors.",
+        "ok": true,
+        "why": "Right. A retry that tells the model exactly what failed can fix the error. Resending the same prompt mostly reproduces it."
+      },
+      {
+        "t": "Don't retry when the field is absent from the source; record it as missing instead.",
+        "ok": true,
+        "why": "Right. Retries can't produce information the document doesn't contain. Tell retry-fixable failures from retry-futile ones."
+      },
+      {
+        "t": "Make the PO number required in the schema so the model must always fill it.",
+        "why": "That forces the model to invent a value for invoices that have none. Make it nullable."
+      },
+      {
+        "t": "Overwrite the stated total with the sum of the line items, so validation passes.",
+        "why": "That hides a real discrepancy. Record both totals and flag the conflict for review."
+      },
+      {
+        "t": "Raise the retry limit from 2 to 5 attempts, keeping the original prompt so results stay comparable.",
+        "why": "More identical retries add cost without adding information. The fix is what goes into the retry."
+      }
+    ]
+  },
+  {
+    "id": "mr-13",
+    "ts": "5.1",
+    "scenario": 1,
+    "type": "multi",
+    "bl": [
+      "5.1-S1",
+      "5.1-K1",
+      "5.1-S3"
+    ],
+    "stem": "To save tokens in long support conversations, the agent summarizes older turns. Customers complain that it later forgets the refund amount and the callback date it promised. Each order lookup also returns 40 fields, so the context fills quickly. Which two changes should the architect make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Keep a case-facts block (amounts, dates, IDs, promises) outside the summarized history; send it every turn.",
+        "ok": true,
+        "why": "Right. Progressive summarization loses exact numbers and dates. A persistent facts block keeps them intact."
+      },
+      {
+        "t": "Trim each lookup result to the fields this task needs before adding it to the context.",
+        "ok": true,
+        "why": "Right. Tool results take up a disproportionate share of tokens. Keep only the relevant fields."
+      },
+      {
+        "t": "Summarize more aggressively instead, so there's more room left for new turns.",
+        "why": "More compression loses more of the facts customers are complaining about."
+      },
+      {
+        "t": "Move the key facts into the middle of the prompt, between the summarized history and the customer's latest turn.",
+        "why": "Models recall the middle of long inputs worst. Put key facts at the start, under clear headers."
+      },
+      {
+        "t": "Switch to a model with a much larger context window instead of summarizing older turns.",
+        "why": "This postpones the problem. The 40-field results still dominate, and recall in very long contexts still degrades."
+      }
+    ]
+  },
+  {
+    "id": "mr-14",
+    "ts": "5.2",
+    "scenario": 1,
+    "type": "multi",
+    "bl": [
+      "5.2-S2",
+      "5.2-K2",
+      "5.2-S4"
+    ],
+    "stem": "One customer writes: \"I want to talk to a human. Now.\" Another, who sounds calm, asks for a refund in a situation the refund policy doesn't address. Which two actions are correct? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Escalate the first customer immediately, without investigating first.",
+        "ok": true,
+        "why": "Right. An explicit request for a human is honored right away."
+      },
+      {
+        "t": "Escalate the second case, because the policy is silent on it.",
+        "ok": true,
+        "why": "Right. A policy gap is a valid escalation trigger, however calm the customer sounds."
+      },
+      {
+        "t": "Ask the first customer for their order number and try to resolve it before escalating.",
+        "why": "That delays an explicit request. Offering to resolve first applies when the customer hasn't asked for a human."
+      },
+      {
+        "t": "Resolve the second case using the agent's best reading of the policy's intent, since the customer is calm.",
+        "why": "Calmness says nothing about whether the policy covers the case. Guessing at intent risks an unauthorized decision."
+      },
+      {
+        "t": "Escalate any conversation whose sentiment score falls below a threshold.",
+        "why": "Sentiment is an unreliable proxy for whether escalation is needed. Use explicit criteria."
+      }
+    ]
+  },
+  {
+    "id": "mr-15",
+    "ts": "5.3",
+    "scenario": 3,
+    "type": "multi",
+    "bl": [
+      "5.3-S1",
+      "5.3-S3",
+      "5.3-S4"
+    ],
+    "stem": "In a research system, one search subagent times out on a database, and another finds no papers on a niche subtopic. Both return \"no results\" to the coordinator, which writes the report as if neither subtopic has any literature. Which two changes should the architect make? <strong>Select TWO.</strong>",
+    "options": [
+      {
+        "t": "Retry the timeout a few times in the subagent; if it still fails, return the failure type, attempts and partial results.",
+        "ok": true,
+        "why": "Right. Recover transient errors locally, and propagate the rest with enough context for the coordinator to decide what to do."
+      },
+      {
+        "t": "Annotate the report to show which subtopics are well supported and which have gaps from failed sources.",
+        "ok": true,
+        "why": "Right. Coverage annotations keep a failed source from reading as an absence of research."
+      },
+      {
+        "t": "Abort the whole research run whenever any subagent fails.",
+        "why": "Aborting everything throws away the good results. Recover or propagate instead."
+      },
+      {
+        "t": "Leave the failed subtopic out of the final report entirely, so the report doesn't look incomplete to readers.",
+        "why": "Silent suppression hides the gap from the reader."
+      },
+      {
+        "t": "Keep returning \"no results\" to the coordinator, but add a generic <code>status: \"error\"</code> field alongside it.",
+        "why": "A generic status still hides what failed and whether a retry could help."
+      }
+    ]
+  }
+]

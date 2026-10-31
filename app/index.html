@@ -395,6 +395,9 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 .timer { font: 650 15px var(--mono); font-variant-numeric: tabular-nums; background: var(--sunk); padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
 .timer.low { background: var(--bad-bg); color: var(--bad); }
 .opt.is-sel { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.opt.is-missed { border-style: dashed; }
+.multi-chip { border-color: var(--accent); color: var(--accent-ink); }
+.multi-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
 .opt.is-sel .letter { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .exam-nav { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
 .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; margin: 18px 0; }

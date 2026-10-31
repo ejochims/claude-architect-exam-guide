@@ -28,11 +28,28 @@ const solvers = {
   "pick-enforce-in-code": o => (plain(o.t).match(/\b(hook|code|programmatic|deterministic|schema|validat\w*|structured|explicit|specific|gate|block|enforce\w*|custom_id|isError|before|instead)\b/gi) || []).length
 };
 
-const results = {};
+// Multiple-response items: the solver picks its top k options (k = keys, stated in the stem).
+// Credit is the chance a random tie-break yields exactly the keyed set. Chance for "choose 2 of 5" is 10%.
+const QM = Q.filter(q => q.type === "multi");
+const binom = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return r; };
+const multiCredit = (q, s) => {
+  const k = q.options.filter(o => o.ok).length, cut = [...s].sort((x, y) => y - x)[k - 1];
+  const above = s.map((v, i) => v > cut ? i : -1).filter(i => i >= 0), tied = s.map((v, i) => v === cut ? i : -1).filter(i => i >= 0);
+  if (above.some(i => !q.options[i].ok)) return 0;
+  const keyedTied = tied.filter(i => q.options[i].ok).length;
+  return keyedTied === k - above.length ? 1 / binom(tied.length, k - above.length) : 0;
+};
+const results = {}, multiResults = {};
+for (const [name, score] of Object.entries(solvers)) {
+  let mr = 0;
+  for (const q of QM) mr += multiCredit(q, q.options.map(score));
+  multiResults[name] = { accuracy: QM.length ? Math.round((1000 * mr) / QM.length) / 10 : 0 };
+}
+const QS = Q.filter(q => q.type !== "multi");
 for (const [name, score] of Object.entries(solvers)) {
   let right = 0;
   const hits = [];
-  for (const q of Q) {
+  for (const q of QS) {
     const s = q.options.map(score);
     const best = Math.max(...s);
     // Split credit across ties so a non-discriminating heuristic scores ~25%.
@@ -41,11 +58,15 @@ for (const [name, score] of Object.entries(solvers)) {
     right += credit;
     if (credit === 1) hits.push(q.id);
   }
-  results[name] = { accuracy: Math.round((1000 * right) / Q.length) / 10, uniqueHits: hits.length, hits };
+  results[name] = { accuracy: Math.round((1000 * right) / QS.length) / 10, uniqueHits: hits.length, hits };
 }
 
-if (process.argv.includes("--json")) console.log(JSON.stringify(results, null, 2));
+if (process.argv.includes("--json")) console.log(JSON.stringify({ single: results, multi: multiResults }, null, 2));
 else {
-  console.log(`Stem-blind heuristic solvers over ${Q.length} questions (chance = 25%, target <= 35%)`);
+  console.log(`Stem-blind heuristic solvers over ${QS.length} single-answer questions (chance = 25%, target <= 35%)`);
   for (const [n, r] of Object.entries(results)) console.log(`  ${n.padEnd(22)} ${String(r.accuracy).padStart(5)}%  ${r.accuracy > 35 ? "FAIL" : "ok"}`);
+  if (QM.length) {
+    console.log(`Multiple-response items: ${QM.length} (top-k picks; chance = 10% for choose 2 of 5, target <= 25%)`);
+    for (const [n, r] of Object.entries(multiResults)) console.log(`  ${n.padEnd(22)} ${String(r.accuracy).padStart(5)}%  ${r.accuracy > 25 ? "FAIL" : "ok"}`);
+  }
 }

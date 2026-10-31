@@ -140,20 +140,22 @@ Optional but high-value: a 2–3 hour hands-on weekend. Configure a toy repo wit
 
 ## 6. Build status (2026-10-30)
 
+> **Superseded.** This section describes the original build. The audit (2026-10-31) found three of its claims false; they are corrected below. For current numbers, see [`audit/SUMMARY.md`](../audit/SUMMARY.md) and the latest batch in [`audit/backlog.md`](../audit/backlog.md).
+
 All phases are complete.
 
 - **14 modules**, 92 lesson steps, 12 interactive widgets.
 - **120 original questions**, each tagged with a task statement (all 30 covered) and a scenario (18–20 per scenario). Wrong options are tagged with one of 9 distractor patterns. Option order is shuffled per question.
 - **Bias checks:**
   - The correct answer's display position is randomized.
-  - No correct answer is more than 1.5× the length of its longest distractor. About a quarter are not the longest option at all.
+  - No correct answer is more than 1.5× the length of its longest distractor. ~~About a quarter are not the longest option at all.~~ *Corrected:* at build time the correct option was the longest in 81.7% of items. After the rewrites it is the longest in 28.8%, with a maximum ratio of 1.44.
 - **Practice engine:**
   - Scenario drills with instant feedback.
-  - A 60-question, 120-minute mock exam that draws 4 random scenarios and is balanced toward the blueprint's domain weights. It reports an estimated scaled score.
+  - A 60-question, 120-minute mock exam that draws 4 random scenarios. ~~It is balanced toward the blueprint's domain weights and reports an estimated scaled score.~~ *Corrected:* at build time no draw could meet the domain quotas. Now all 15 draws meet them exactly. The mock reports a domain-weighted percentage with a 95% Wilson range, not a scaled score, because Anthropic doesn't publish the raw-to-scaled mapping.
   - 84 spaced-repetition flashcards (Leitner boxes at 1/3/7/14/30 days).
   - A readiness score weighted by domain.
 - **Verification:** product claims were re-checked against the current Claude Code docs (CLI flags, memory and rules, hooks, skills, subagents, MCP scopes). The app was exercised headlessly at 1280px (light) and 390px (dark) with no script errors or horizontal overflow.
 - **Known limits:**
-  - The scaled-score mapping is an estimate, because Anthropic doesn't publish it.
+  - ~~The scaled-score mapping is an estimate.~~ Removed: the app no longer shows a scaled score.
   - Cross-device sync activates only inside claude.ai.
   - The question bank is original and has not been validated against the real exam.

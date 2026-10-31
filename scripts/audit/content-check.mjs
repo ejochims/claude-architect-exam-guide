@@ -14,9 +14,22 @@ for (const q of Q) {
   if (ids.has(q.id)) errors.push(`duplicate id ${q.id}`);
   ids.add(q.id);
   if (!B.tasks[q.ts]) errors.push(`${q.id}: unknown task statement ${q.ts}`);
-  if (q.options.length !== 4) errors.push(`${q.id}: ${q.options.length} options`);
   const ok = q.options.filter(o => o.ok).length;
-  if (ok !== 1) errors.push(`${q.id}: ${ok} correct options`);
+  if (q.type === "multi") {
+    // Multiple response: 5 options, 2 or 3 keyed, all-or-nothing. The stem must say how many to pick.
+    if (q.options.length !== 5) errors.push(`${q.id}: multi item with ${q.options.length} options (want 5)`);
+    if (ok < 2 || ok > 3) errors.push(`${q.id}: multi item with ${ok} correct options (want 2 or 3)`);
+    const word = { 2: "TWO", 3: "THREE" }[ok];
+    if (!new RegExp(`Select ${word}\\b`).test(plain(q.stem))) errors.push(`${q.id}: multi stem must say "Select ${word}"`);
+    if (q.family) errors.push(`${q.id}: multi items can't be in an option family`);
+    if (q.holdout) errors.push(`${q.id}: multi items are practice only (the Readiness Check stays single-answer)`);
+    if (q.scenario == null) errors.push(`${q.id}: multi item needs a scenario`);
+  } else {
+    if (q.type) errors.push(`${q.id}: unknown type ${q.type}`);
+    if (q.options.length !== 4) errors.push(`${q.id}: ${q.options.length} options`);
+    if (ok !== 1) errors.push(`${q.id}: ${ok} correct options`);
+  }
+  for (const b of q.bl || []) if (!/^[1-5]\.[1-7]-[KS]\d+$/.test(b) || !b.startsWith(q.ts + "-")) errors.push(`${q.id}: bad bullet id ${b}`);
   for (const o of q.options) {
     if (!o.why) errors.push(`${q.id}: option without explanation`);
     if (o.trap && !traps[o.trap]) errors.push(`${q.id}: unknown trap ${o.trap}`);
@@ -59,7 +72,9 @@ const lenRank = [0, 0, 0, 0];
 let absOk = 0, absWrong = 0, tagged = 0, distractors = 0;
 const origPos = [0, 0, 0, 0], shownPos = [0, 0, 0, 0];
 const ratios = [];
-for (const q of Q) {
+// Length and position cues are single-answer statistics; multi items are reported by cue-baselines.mjs.
+const QS = Q.filter(q => q.type !== "multi"), QM = Q.filter(q => q.type === "multi");
+for (const q of QS) {
   const lens = q.options.map(o => plain(o.t).length);
   const ci = q.options.findIndex(o => o.ok);
   const c = lens[ci], maxD = Math.max(...lens.filter((_, i) => i !== ci));
@@ -95,16 +110,17 @@ const mock = draws.map(draw => {
 
 const report = {
   totals: { questions: Q.length, cards: cards.length, modules: modules.length, lessonQuestions: Q.filter(q => q.src !== "bank" && q.src !== "holdout").length, bankQuestions: Q.filter(q => q.src === "bank").length, holdoutQuestions: Q.filter(q => q.src === "holdout").length },
+  multi: { n: QM.length, perDomain: count(QM, q => domainOf(q.ts)), ids: QM.map(q => q.id) },
   perTask, tasksBelow5: Object.entries(perTask).filter(([, n]) => n < 5).map(([t, n]) => `${t}:${n}`), tasksUntaught,
   perDomain: Object.fromEntries(Object.entries(perDomain).map(([d, n]) => [d, { n, pct: pct(n, Q.length), target: domainTarget[d] }])),
   perScenario, scenarioByDomain: scenDomain,
   cueing: {
-    correctIsLongestOrTied: { n: longest, pct: pct(longest, Q.length), target: "<=30%" },
-    correctStrictlyLongest: { n: strictlyLongest, pct: pct(strictlyLongest, Q.length) },
+    correctIsLongestOrTied: { n: longest, pct: pct(longest, QS.length), target: "<=30%" },
+    correctStrictlyLongest: { n: strictlyLongest, pct: pct(strictlyLongest, QS.length) },
     correctLengthRank: { longest: lenRank[0], second: lenRank[1], third: lenRank[2], shortest: lenRank[3] },
     ratioOver125: over125, ratioOver15: over15, maxRatio: Math.round(maxRatio * 100) / 100,
     worstRatios: ratios.sort((a, b) => b.ratio - a.ratio).slice(0, 10),
-    absoluteWording: { correctPct: pct(absOk, Q.length), distractorPct: pct(absWrong, distractors), target: "within 5 points" },
+    absoluteWording: { correctPct: pct(absOk, QS.length), distractorPct: pct(absWrong, distractors), target: "within 5 points" },
     authoredPosition: origPos, displayedPosition: shownPos
   },
   traps: { taggedDistractors: tagged, distractors, taggedPct: pct(tagged, distractors), use: trapUse },
@@ -123,7 +139,8 @@ else {
   console.log(`Task statements below 5 questions: ${r.tasksBelow5.length} (${r.tasksBelow5.join(", ")})`);
   console.log(`Per domain (actual% / target%): ${Object.entries(r.perDomain).sort().map(([d, v]) => `${d} ${v.n} (${v.pct}/${v.target})`).join(" · ")}`);
   console.log(`Per scenario: ${JSON.stringify(r.perScenario)}`);
-  console.log(`Correct option longest-or-tied: ${c.correctIsLongestOrTied.n}/${r.totals.questions} (${c.correctIsLongestOrTied.pct}%), strictly longest ${c.correctStrictlyLongest.pct}% · length rank ${JSON.stringify(c.correctLengthRank)}`);
+  console.log(`Multiple-response items: ${r.multi.n} ${JSON.stringify(r.multi.perDomain)}`);
+  console.log(`Correct option longest-or-tied (single-answer only): ${c.correctIsLongestOrTied.n}/${r.totals.questions - r.multi.n} (${c.correctIsLongestOrTied.pct}%), strictly longest ${c.correctStrictlyLongest.pct}% · length rank ${JSON.stringify(c.correctLengthRank)}`);
   console.log(`Correct/longest-distractor ratio: >1.25 in ${c.ratioOver125}, >1.5 in ${c.ratioOver15}, max ${c.maxRatio}`);
   console.log(`Absolute wording: correct ${c.absoluteWording.correctPct}% vs distractors ${c.absoluteWording.distractorPct}%`);
   console.log(`Correct position — authored ${JSON.stringify(c.authoredPosition)}, displayed ${JSON.stringify(c.displayedPosition)}`);

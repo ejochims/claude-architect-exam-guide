@@ -147,40 +147,71 @@
   const dueCount = () => CARDS.filter(isDue).length;
 
   // ---------- Question card ----------
+  // Multiple-response items (type "multi") key several options and are scored all-or-nothing:
+  // the answer is right only if the selected set equals the keyed set. Their choice is an array of option indices.
+  const isMulti = q => q.type === "multi";
+  const keyCount = q => q.options.filter(o => o.ok).length;
+  const isRight = (q, c) => c == null ? false : isMulti(q)
+    ? Array.isArray(c) && c.length === keyCount(q) && c.every(i => q.options[i] && q.options[i].ok)
+    : !!(q.options[c] && q.options[c].ok);
+  const chose = (a, k) => a && (Array.isArray(a.choice) ? a.choice.includes(k) : a.choice === k);
   // mode "learn": reveal on answer, remembers prior answer. "drill": fresh each time, reveal on answer. "exam": select only.
   function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered } = {}) {
     const card = document.createElement("div"); card.className = "q";
     const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
     const order = optionOrder(q);
+    const multi = isMulti(q), need = keyCount(q);
     let local = null;
+    let pick = multi ? (Array.isArray(selected) ? selected.slice() : []) : null;
+    const answer = choice => {
+      const rec = { ok: isRight(q, choice), choice, at: Date.now() };
+      state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
+      touch(); draw(); onAnswered && onAnswered(rec);
+    };
     const draw = () => {
       const a = mode === "learn" ? state.answers[q.id] : mode === "drill" ? local : null;
-      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
-        <p class="q-stem">${q.stem}</p><div class="opts" role="${mode === "exam" ? "radiogroup" : "group"}"></div>`;
+      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${multi ? `<span class="chip multi-chip">Select ${need}</span>` : ""}${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
+        <p class="q-stem">${q.stem}</p><div class="opts" role="${multi ? "group" : mode === "exam" ? "radiogroup" : "group"}"></div>`;
       const opts = card.querySelector(".opts");
       order.forEach((k, pos) => {
         const o = q.options[k];
         const b = document.createElement("button"); b.type = "button"; b.className = "opt";
         const revealed = !!a;
-        if (mode === "exam") { b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(selected === k)); if (selected === k) b.classList.add("is-sel"); }
-        if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (a.choice === k) b.classList.add("is-wrong"); }
-        b.innerHTML = `<span class="letter">${"ABCD"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
+        const on = multi ? pick.includes(k) : mode === "exam" && selected === k;
+        if (multi && !revealed) { b.setAttribute("role", "checkbox"); b.setAttribute("aria-checked", String(on)); if (on) b.classList.add("is-sel"); }
+        else if (mode === "exam") { b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(on)); if (on) b.classList.add("is-sel"); }
+        if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (chose(a, k)) b.classList.add("is-wrong"); if (multi && o.ok && !chose(a, k)) b.classList.add("is-missed"); }
+        b.innerHTML = `<span class="letter">${"ABCDEF"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
         b.addEventListener("click", () => {
-          if (mode === "exam") { selected = k; onSelect && onSelect(k); draw(); return; }
           if (mode === "learn" && state.answers[q.id]) return;
           if (mode === "drill" && local) return;
-          const rec = { ok: !!o.ok, choice: k, at: Date.now() };
-          state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
-          touch(); draw(); onAnswered && onAnswered(rec);
+          if (multi) {
+            pick = pick.includes(k) ? pick.filter(x => x !== k) : pick.length < need ? [...pick, k] : pick;
+            if (mode === "exam") { onSelect && onSelect(pick.length ? pick.slice() : null); }
+            draw(); return;
+          }
+          if (mode === "exam") { selected = k; onSelect && onSelect(k); draw(); return; }
+          answer(k);
         });
         opts.append(b);
       });
+      if (multi && !a) {
+        const bar = document.createElement("div"); bar.className = "multi-bar";
+        bar.innerHTML = `<span class="small">${pick.length} of ${need} selected</span>`;
+        if (mode !== "exam") {
+          const sub = document.createElement("button"); sub.type = "button"; sub.className = "btn"; sub.textContent = "Check answer";
+          sub.disabled = pick.length !== need;
+          sub.addEventListener("click", () => { if (pick.length === need) answer(pick.slice().sort((x, y) => x - y)); });
+          bar.append(sub);
+        }
+        card.append(bar);
+      }
       if (a) {
         const res = document.createElement("div"); res.className = `q-res ${a.ok ? "ok" : "no"}`;
-        res.innerHTML = `<span>${a.ok ? "Correct" : "Not this time. The explanations show why."}</span>`;
+        res.innerHTML = `<span>${a.ok ? "Correct" : multi ? "Not this time. Scoring is all-or-nothing: every keyed option, and only those. The explanations show why." : "Not this time. The explanations show why."}</span>`;
         if (mode === "learn") {
           const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
-          again.addEventListener("click", () => { delete state.answers[q.id]; touch(); draw(); });
+          again.addEventListener("click", () => { delete state.answers[q.id]; pick = multi ? [] : null; touch(); draw(); });
           res.append(again);
         }
         card.append(res);
@@ -441,12 +472,13 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
   }
   function submitMock() {
     const m = state.mock; if (!m) return;
-    let correct = 0; const dom = {}, wrong = [];
+    let correct = 0; const dom = {}, wrong = [], multi = [0, 0];
     for (const id of m.qids) {
       const q = QBYID[id]; if (!q) continue;
       const d = domOfTask(q.ts).id; dom[d] = dom[d] || [0, 0]; dom[d][1]++;
       const c = m.ans[id];
-      const ok = c != null && !!q.options[c].ok;
+      const ok = isRight(q, c);
+      if (isMulti(q)) { multi[1]++; if (ok) multi[0]++; }
       if (ok) { correct++; dom[d][0]++; } else wrong.push([id, c == null ? -1 : c]);
       if (c != null) { state.answers[id] = { ok, choice: c, at: Date.now() }; recordFirst(id, ok); }
     }
@@ -454,7 +486,7 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     // Weight each domain's accuracy by its blueprint share, so scores compare across scenario draws.
     const present = B.domains.filter(d => dom[d.id]), wsum = present.reduce((a, d) => a + d.weight, 0);
     const wpct = wsum ? present.reduce((a, d) => a + d.weight * dom[d.id][0] / dom[d.id][1], 0) / wsum : 0;
-    const rec = { kind: m.kind || "mock", at: Date.now(), startedAt: m.startedAt, correct, total, pct, wpct, ci: wilson(correct, total), scen: m.scen, dom, wrong, mins: Math.round((Date.now() - m.startedAt) / 60000) };
+    const rec = { kind: m.kind || "mock", at: Date.now(), startedAt: m.startedAt, correct, total, pct, wpct, ci: wilson(correct, total), scen: m.scen, dom, wrong, multi, mins: Math.round((Date.now() - m.startedAt) / 60000) };
     if (rec.kind === "readiness") state.readiness = rec; else state.mocks = [rec, ...state.mocks].slice(0, 10);
     state.mock = null; touch();
     location.hash = rec.kind === "readiness" ? "#readiness" : "#mock-result";
@@ -470,7 +502,7 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
   }
   function viewMock() {
     if (!state.mock) {
-      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, one best answer each, no feedback until you submit.")}
+      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, no feedback until you submit. Most questions have one best answer; a few are multiple-response (\"Select 2\"), scored all-or-nothing, as on the real exam.")}
 <div class="read"><div class="panel">
 <ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>The 60 questions always match the blueprint's domain weights. If the four drawn scenarios can't fill a domain's share, a few questions come from another scenario.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
 <button class="btn accent" type="button" id="begin">Begin the exam</button></div></div>`;
@@ -487,7 +519,7 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
 <button class="btn" type="button" id="mnext">${i === m.qids.length - 1 ? "Review and submit" : "Next →"}</button></div>
 <div class="palette" aria-label="Question palette">${m.qids.map((id, k) => `<button type="button" data-k="${k}" class="${k === i ? "cur " : ""}${m.ans[id] != null ? "ans " : ""}${m.flags[id] ? "flag" : ""}" aria-label="Question ${k + 1}${m.ans[id] != null ? ", answered" : ""}${m.flags[id] ? ", flagged" : ""}">${k + 1}</button>`).join("")}</div>
 <div class="submit-box" id="sbox"><p><strong>${Object.keys(m.ans).length} of ${m.qids.length}</strong> answered${Object.keys(m.flags).length ? `, ${Object.keys(m.flags).length} flagged` : ""}.</p><button class="btn accent" type="button" id="msubmit">Submit exam</button><span id="sconfirm"></span></div></div>`;
-    document.getElementById("mq").append(questionCard(q, { n: i + 1, total: m.qids.length, mode: "exam", selected: m.ans[q.id], onSelect: k => { m.ans[q.id] = k; touch(); const pb = app.querySelector(`.palette [data-k="${i}"]`); pb && pb.classList.add("ans"); } }));
+    document.getElementById("mq").append(questionCard(q, { n: i + 1, total: m.qids.length, mode: "exam", selected: m.ans[q.id], onSelect: k => { if (k == null) delete m.ans[q.id]; else m.ans[q.id] = k; touch(); const pb = app.querySelector(`.palette [data-k="${i}"]`); pb && pb.classList.toggle("ans", k != null); } }));
     const go = k => { m.cur = k; touch(); viewMock(); window.scrollTo(0, 0); };
     document.getElementById("mprev").addEventListener("click", () => go(i - 1));
     document.getElementById("mnext").addEventListener("click", () => i < m.qids.length - 1 ? go(i + 1) : document.getElementById("sbox").scrollIntoView({ behavior: "smooth" }));
@@ -517,7 +549,7 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     const verdict = ready
       ? `<strong class="${r.pct >= BAR && domOk ? "pass" : "fail"}">${r.pct >= BAR && domOk ? "Meets" : "Doesn't yet meet"} the app's booking bar</strong> (80% overall and every domain at 70% or more). Before booking, also confirm two mocks at 80% a week apart and the official practice exam.`
       : `<strong class="${pass ? "pass" : "fail"}">${pass ? "At or above" : "Below"} the 80% practice bar.</strong> Mock questions overlap with ones you've practiced, so treat this as an upper bound.`;
-    app.innerHTML = `${pageHead(`${ready ? "Readiness Check" : "Mock exam"} · ${fmtDate(r.at)}`, `${Math.round((ready ? r.pct : w) * 100)}% <span class="score-of">${ready ? "first attempt" : "domain-weighted"}</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}% raw, 95% range ${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%) in ${r.mins} minutes. ${verdict}`)}
+    app.innerHTML = `${pageHead(`${ready ? "Readiness Check" : "Mock exam"} · ${fmtDate(r.at)}`, `${Math.round((ready ? r.pct : w) * 100)}% <span class="score-of">${ready ? "first attempt" : "domain-weighted"}</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}% raw, 95% range ${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%) in ${r.mins} minutes.${r.multi && r.multi[1] ? ` Multiple-response: ${r.multi[0]} of ${r.multi[1]} correct.` : ""} ${verdict}`)}
 <div class="sec-head"><h2>By domain</h2></div>
 <div class="bp-rows">${B.domains.map(d => { const v = r.dom[d.id]; if (!v) return ""; return `<div class="bp-row"><span class="chip dom-${d.id}">D${d.n}</span><span>${esc(d.name)}</span><span class="bar"><span class="dom-bg-${d.id}" style="width:${v[0] / v[1] * 100}%"></span></span><span class="bp-pct">${v[0]}/${v[1]}</span></div>`; }).join("")}</div>
 <div class="sec-head" style="margin-top:30px"><h2>Review missed questions</h2><span class="small">${r.wrong.length} to review</span></div>

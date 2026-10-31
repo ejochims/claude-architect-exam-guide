@@ -1,16 +1,21 @@
 // Appends new questions to the content: practice items into bank.js, holdout items into holdout.js.
 // Usage: node scripts/audit/add-items.mjs <items.json> <bank|holdout>
-// items.json: [{ id, ts, scenario, stem, options: [{ t, ok?, trap?, why }] }]
+// items.json: [{ id, ts, scenario, type?, bl?, stem, options: [{ t, ok?, trap?, why }] }]
+// type "multi" = multiple response: 5 options, 2-3 ok, scored all-or-nothing (practice bank only).
 import fs from "fs";
 import path from "path";
 import { ROOT } from "./lib.mjs";
 
 const [file, target] = process.argv.slice(2);
 const items = JSON.parse(fs.readFileSync(file, "utf8"));
-for (const q of items) if (q.options.length !== 4 || q.options.filter(o => o.ok).length !== 1) throw new Error(`${q.id}: need 4 options, exactly one ok`);
+for (const q of items) {
+  const ok = q.options.filter(o => o.ok).length;
+  if (q.type === "multi" ? q.options.length !== 5 || ok < 2 || ok > 3 || target !== "bank" : q.options.length !== 4 || ok !== 1)
+    throw new Error(`${q.id}: need 4 options with exactly one ok (or type multi: 5 options, 2-3 ok, bank only)`);
+}
 
 const opt = o => `      { t: ${JSON.stringify(o.t)}${o.ok ? ", ok: true" : ""}${o.trap ? `, trap: ${JSON.stringify(o.trap)}` : ""}, why: ${JSON.stringify(o.why)} }`;
-const item = (q, holdout) => `  {\n    id: ${JSON.stringify(q.id)}, ts: ${JSON.stringify(q.ts)}, scenario: ${q.scenario},${holdout ? " holdout: true," : ""}\n    stem: ${JSON.stringify(q.stem)},\n    options: [\n${q.options.map(opt).join(",\n")}\n    ]\n  }`;
+const item = (q, holdout) => `  {\n    id: ${JSON.stringify(q.id)}, ts: ${JSON.stringify(q.ts)}, scenario: ${q.scenario},${holdout ? " holdout: true," : ""}${q.type ? ` type: ${JSON.stringify(q.type)},` : ""}${q.bl ? ` bl: ${JSON.stringify(q.bl)},` : ""}\n    stem: ${JSON.stringify(q.stem)},\n    options: [\n${q.options.map(opt).join(",\n")}\n    ]\n  }`;
 
 if (target === "bank") {
   const p = path.join(ROOT, "app/content/bank.js");

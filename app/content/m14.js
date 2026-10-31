@@ -48,7 +48,7 @@ window.LESSONS.m14 = {
           options: [
             { t: "<code>.claude/rules/</code> files whose <code>paths:</code> frontmatter loads conventions only for matching files", why: "Real. Path-scoped rules are explicitly on the exam (task statement 3.3)." },
             { t: "<code>claude -p</code> for one-shot, non-interactive runs in CI", why: "Real. <code>-p</code> (<code>--print</code>) runs once and exits, so pipelines don't hang." },
-            { t: "Setting <code>CLAUDE_HEADLESS=true</code> so Claude Code stops waiting for input", ok: true, trap: "T8", why: "Invented. The documented mechanism is the <code>-p</code> flag. Invented flags and env vars are a common distractor." },
+            { t: "Setting <code>CLAUDE_HEADLESS=true</code> so Claude Code stops waiting for input", ok: true, why: "Invented. The documented mechanism is the <code>-p</code> flag. Invented flags and env vars are a common distractor." },
             { t: "<code>${GITHUB_TOKEN}</code> expansion inside a committed <code>.mcp.json</code>, keeping secrets out of the repo", why: "Real. It's how teams share MCP configuration without committing secrets." }
           ]
         }
