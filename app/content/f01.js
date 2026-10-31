@@ -69,7 +69,7 @@ window.LESSONS.f01 = {
 <li><strong>The context window</strong> is the most a single request can hold: system prompt, tool definitions, the full message history and the new message together. Long conversations, long documents and verbose tool results all fill it.</li>
 <li><strong><code>max_tokens</code></strong> caps the reply. If the model reaches it mid-answer, the response stops with <code>stop_reason: "max_tokens"</code>. That's truncation, not completion.</li>
 </ul>
-<p>A full window isn't the only risk. Even when everything fits, <strong>more context doesn't mean the model attends to all of it equally</strong>; facts buried in the middle of a long history are easier to miss. That's why later modules teach you to trim tool output and keep key facts in a structured block, rather than reach for a bigger window.</p>
+<p>A full window isn't the only risk. Even when everything fits, <strong>more context doesn't mean the model attends to all of it equally</strong>; facts buried in the middle of a long history are easier to miss. (<em>Attention</em> is how a model weighs which parts of its input matter for each word it writes. Research on long inputs found facts in the middle are recalled less reliably than those at the start or end, an effect called “lost in the middle.”) That's why later modules teach you to trim tool output and keep key facts in a structured block, rather than reach for a bigger window.</p>
 <h3>Roles and the system prompt</h3>
 <ul>
 <li><strong>System prompt:</strong> standing instructions and context for the whole conversation, such as the agent's job, policies and output format.</li>
@@ -79,6 +79,9 @@ window.LESSONS.f01 = {
 </ul>
 <p>A system prompt shapes behavior, but it's still text the model follows <em>probabilistically</em>: Claude writes its reply by choosing likely next words, and instructions make the desired behavior more likely without making it certain. Keep that in mind: when a rule must hold every time, the course will show you how to enforce it in code instead.</p>
 <div class="callout note"><div class="callout-label">Out of scope</div><p>Tokenizer details, pricing math and prompt-caching mechanics are not tested. You only need the concepts above.</p></div>
+
+<!-- panel:f01-why-roles -->
+<div class="callout key"><div class="callout-label">Why it's built this way</div><ul style="margin:0;padding-left:18px"><li><strong>Alternating roles.</strong> models are trained on conversations written as alternating turns, so the API uses the same shape. Because your code sends Claude's earlier turns back, you control exactly what history the model sees.</li><li><strong>A separate system prompt.</strong> standing instructions belong to the whole conversation, not to one message. Keeping them apart from user messages means they don't need repeating each turn, and your instructions stay distinct from content a user typed.</li><li><strong>When you hit <code>max_tokens</code>.</strong> the reply is cut off, not finished. Raise the limit for that kind of task, or ask Claude to continue in the next turn. If the cut happens inside a tool request, that request is incomplete, so retry with a higher limit.</li><li><strong>Window size.</strong> current models accept hundreds of thousands of tokens per request (each model's documentation gives its limit). A bigger window doesn't fix attention: the exam's “use a larger context window” option is usually a trap.</li></ul></div>
 <!-- ex:f01-blocks -->
 <h3>Content blocks at a glance</h3>
 <p>Once tools are involved, <code>content</code> becomes a list of typed blocks. Claude's reply can mix text with a tool request, and your next message carries the result, linked by its <code>id</code>:</p>

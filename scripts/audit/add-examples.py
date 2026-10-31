@@ -154,9 +154,9 @@ claude -p "Find where configuration is loaded and summarize it"
 add("f03", "f03-mcp", ("after", "<!-- ex:f03-cli -->"),
     "<p><strong>MCP.</strong> A minimal server using the official Python SDK. The function's docstring becomes the tool description, and any MCP client (Claude Code, an Agent SDK app, Claude Desktop) can now call <code>get_order</code>:</p>",
     """
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer   # mcp 1.x: from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("orders")
+mcp = MCPServer("orders")
 
 @mcp.tool()
 def get_order(order_number: str) -> str:
@@ -180,9 +180,9 @@ add("m02", "m02-tool-choice", ("end", "Fewer tools per agent, and tool_choice"),
 add("m05", "m05-server", ("end", "First principle: integrate once"),
     "<h3>What a server looks like</h3>\n<p>A server exposes <strong>tools</strong> (actions the model calls) and <strong>resources</strong> (content the client can list and read). With the official Python SDK, each one is a decorated function:</p>",
     """
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer   # mcp 1.x: from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("docs")
+mcp = MCPServer("docs")
 
 @mcp.tool()
 def search_docs(query: str) -> str:

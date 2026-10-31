@@ -17,7 +17,7 @@ window.LESSONS.m01 = {
 <p>Two consequences follow, and much of the exam builds on them:</p>
 <ul>
   <li><strong>Your application is the memory.</strong> If the assistant forgets something said three turns ago in a short chat, the most likely cause is that your app didn't send those turns. Look there before blaming the context window or reaching for a “memory feature.”</li>
-  <li><strong>Your application is the clock.</strong> The model can't execute a client tool (the kind this course focuses on). It can only <em>ask</em> for one. Your code runs the tool, writes the result into history, and calls the model again. That repetition is the agentic loop.</li>
+  <li><strong>Your application is the clock.</strong> The model can't execute a client tool (the kind this course focuses on: it runs in your code). Server tools, such as Anthropic's web search, run on Anthropic's side instead. It can only <em>ask</em> for one. Your code runs the tool, writes the result into history, and calls the model again. That repetition is the agentic loop.</li>
 </ul>
 <div class="callout note"><div class="callout-label">Cost of statelessness</div><p>Each turn resends the whole history, so input tokens, latency and cost grow every turn. That's why context management (Module 7) exists.</p></div>`
     },
@@ -28,7 +28,7 @@ window.LESSONS.m01 = {
 <p class="lede">An agent is a loop that keeps calling the model until the model says it's finished. The only reliable way to know is <code>stop_reason</code>.</p>
 <pre class="code"><code><span class="k">while</span> <span class="k">True</span>:
     response = client.messages.create(
-        model=MODEL, system=SYSTEM, tools=TOOLS, messages=messages)
+        model=MODEL, max_tokens=<span class="k">1024</span>, system=SYSTEM, tools=TOOLS, messages=messages)
     messages.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: response.content})
 
     <span class="k">if</span> response.stop_reason == <span class="s">"tool_use"</span>:

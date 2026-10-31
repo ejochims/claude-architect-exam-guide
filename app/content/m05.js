@@ -65,9 +65,9 @@ window.LESSONS.m05 = {
 <!-- ex:m05-server -->
 <h3>What a server looks like</h3>
 <p>A server exposes <strong>tools</strong> (actions the model calls) and <strong>resources</strong> (content the client can list and read). With the official Python SDK, each one is a decorated function:</p>
-<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+<pre class="code"><code><span class="k">from</span> mcp.server.mcpserver <span class="k">import</span> MCPServer   <span class="c"># mcp 1.x: from mcp.server.fastmcp import FastMCP</span>
 
-mcp = FastMCP(<span class="s">"docs"</span>)
+mcp = MCPServer(<span class="s">"docs"</span>)
 
 @mcp.tool()
 <span class="k">def</span> search_docs(query: str) -&gt; str:
@@ -107,7 +107,16 @@ mcp = FastMCP(<span class="s">"docs"</span>)
     }
   }
 }</code></pre>
-<p><strong>MCP tools compete with built-ins.</strong> If the agent keeps using <code>Grep</code> instead of your dependency-aware code-search tool, the description is usually too thin. Explain what it can do (transitive callers, ranking, cross-repo results) and what it returns, so Claude can see why it's the better choice.</p>`
+<p><strong>MCP tools compete with built-ins.</strong> If the agent keeps using <code>Grep</code> instead of your dependency-aware code-search tool, the description is usually too thin. Explain what it can do (transitive callers, ranking, cross-repo results) and what it returns, so Claude can see why it's the better choice.</p>
+<!-- panel:m05-transports -->
+<div class="callout key"><div class="callout-label">Transports: how a client reaches a server</div><ul style="margin:0;padding-left:18px"><li><strong>stdio.</strong> the client starts the server as a local process and talks to it over standard input and output. It suits tools that run on your machine; each user runs their own copy, and credentials come from local environment variables. In <code>.mcp.json</code> it's an entry with a <code>command</code>.</li><li><strong>HTTP.</strong> the server runs remotely at a URL, and many clients connect to it. It suits shared, hosted services; authentication goes in headers or OAuth. In <code>.mcp.json</code> it's an entry with <code>"type": "http"</code> and a <code>url</code>. (The older SSE transport is deprecated.)</li><li><strong>Why two.</strong> local tools need no network service, while shared services shouldn't be installed on every laptop.</li><li><strong>On the exam.</strong> the transport doesn't change what a tool does. Choose it by where the server runs, and choose the scope (project, user, local) by who should get it.</li></ul></div>
+
+<!-- panel:m05-scopes-notes -->
+<div class="callout key"><div class="callout-label">Reading the configuration</div><ul style="margin:0;padding-left:18px"><li><strong>User vs. local.</strong> both live in <code>~/.claude.json</code>. Local entries are stored under the current project's path, so they apply only there; user entries apply in every project.</li><li><strong><code>npx -y</code>.</strong> runs an npm package without installing it first, answering “yes” to the prompt. It's a common way to launch a community stdio server.</li><li><strong><code>&#36;{VAR:-default}</code>.</strong> uses the environment variable if it's set, otherwise the default after <code>:-</code>.</li></ul></div>
+
+<!-- panel:m05-why-scopes -->
+<div class="callout key"><div class="callout-label">Why three scopes</div><ul style="margin:0;padding-left:18px"><li><strong>Project.</strong> the team needs the server. It's shared through the repository, so it must hold no secrets.</li><li><strong>User.</strong> you want the server in every project you work on.</li><li><strong>Local.</strong> you want it only in this project and private to you, for example an experiment or personal credentials.</li><li><strong>Conflicts.</strong> if the same server name is defined in several scopes, the more specific one wins: local, then project, then user.</li></ul></div>
+`
     },
     {
       kind: "widget",

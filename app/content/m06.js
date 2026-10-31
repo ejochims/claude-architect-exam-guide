@@ -51,6 +51,10 @@ window.LESSONS.m06 = {
 </tbody></table></div>
 <div class="callout key"><div class="callout-label">Why iterate</div><ul style="margin:0;padding-left:18px"><li><strong>Pattern name.</strong> Anthropic calls a generate–evaluate–revise cycle the <em>evaluator-optimizer</em> pattern: one step produces output, another judges it against criteria and sends back what's missing.</li><li><strong>Why it works.</strong> the evaluation is concrete (coverage against the brief), so each extra round targets a known gap instead of redoing everything.</li><li><strong>Use it when.</strong> you have clear criteria for “good enough” and iteration measurably improves the result. Without criteria, loops just cost more.</li></ul></div>
 <div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>allowedTools.</strong> the list of tools an agent may use. It exists for least privilege and for better tool selection: fewer, role-relevant tools.</li><li><strong>Not to confuse.</strong> <code>tools</code> in an AgentDefinition sets a subagent's own tools; a skill's <code>allowed-tools</code> applies while that skill runs; permission modes decide whether calls need approval. (On the exam, the coordinator's <code>allowedTools</code> must include <code>"Task"</code>; see Exam vs. today.)</li></ul></div>
+
+<!-- panel:m06-patterns -->
+<h3>Decomposition patterns at a glance</h3>
+<div class="table-wrap"><table><thead><tr><th>Pattern</th><th>Use when</th><th>Cue in the question</th></tr></thead><tbody><tr><td>Fixed pipeline (prompt chaining)</td><td>The same steps run in the same order every time</td><td>“always follows these steps”, auditors want identical handling</td></tr><tr><td>Per-item pipeline</td><td>Many similar items follow an established pattern</td><td>“30 similar entities”, “every document of this type”</td></tr><tr><td>Sectioned passes, then merge</td><td>One long input whose parts get missed</td><td>“fields deep in the package are missed”, “clauses late in the document”</td></tr><tr><td>Group by root cause</td><td>Many failures that interact</td><td>“a fix in one place breaks another”</td></tr><tr><td>Parallel subagents</td><td>Independent subtopics, when speed matters</td><td>“independent”, “one after another”, “takes four times longer”</td></tr><tr><td>Dynamic (the agent decides)</td><td>The path depends on what turns up</td><td>“nobody knows where the cause is”, “a lead changes what to search”</td></tr><tr><td>Single agent</td><td>The task is small</td><td>“two or three searches answer it”</td></tr></tbody></table></div>
 <!-- ex:m06-agents -->
 <h3>In code: defining subagents</h3>
 <p>In the Agent SDK, each subagent gets a description (how the coordinator decides to use it), its own prompt and its own tools. The coordinator needs the Task tool to spawn them:</p>
@@ -74,7 +78,10 @@ options = ClaudeAgentOptions(
    <span class="s">"subagent_type"</span>: <span class="s">"web-researcher"</span>,
    <span class="s">"description"</span>: <span class="s">"Research EU rules for hospital AI"</span>,
    <span class="s">"prompt"</span>: <span class="s">"Subtopic: EU AI Act obligations for hospitals, 2024-2026.\\nAlready covered: FDA guidance, so skip it.\\nReturn: claim, source URL and publication date for each finding."</span>
- }}</code></pre>`
+ }}</code></pre>
+<!-- panel:m06-stop -->
+<div class="callout key"><div class="callout-label">When the coordinator should stop</div><ul style="margin:0;padding-left:18px"><li><strong>The loop.</strong> evaluate the results against the question, re-delegate the gaps, then synthesize again.</li><li><strong>The stop rule.</strong> stop when coverage is good enough, or when a round limit is reached. Without a limit, a coordinator can keep finding “one more angle” for hours.</li></ul></div>
+`
     },
     {
       kind: "quiz",

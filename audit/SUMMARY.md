@@ -169,4 +169,4 @@ Memorizing a practice answer therefore points you to the wrong answer on its Rea
 2. **Practice questions test recognition more than scenario judgment.** This was fixed for the Readiness Check and the 60 practice twins (see "Option families"). The 158 original practice questions, and therefore most mock-exam questions, are unchanged. Expect mock scores to run higher than the Readiness Check.
 3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
 4. **Some open items remain:**
-   - 52 S3 wording items in the secondary markdown guide;
+   - none in the markdown guide: its 52 S3 wording items were closed on 2026-10-31;

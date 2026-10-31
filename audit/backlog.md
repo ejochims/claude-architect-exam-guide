@@ -254,3 +254,93 @@ Defect counts: CUE-PATTERN 100 · CUE-LEN 98 · CUE-ABS 55 · TRAP 23 · WHY 22 
 ## Batch 11: option families (2026-10-31)
 
 All 60 holdout questions are rewritten as option families, each with a practice twin (`p*`) that shares its options and keys a different one. The options-only model now scores 28.3% on the holdout, down from 93.3%. The blind solver agrees with the key on 120/120. Tooling: `build-families.mjs`, plus family checks in `content-check.mjs` and family exclusion in `startMock()`. **Open:** the 158 original practice questions still test recognition; convert them to families if mock scores and Readiness Check scores diverge by more than 10 points.
+
+## Batch 12: code examples checked against the real libraries (2026-10-31)
+
+`scripts/audit/check-examples.py` runs the lessons' Python examples with anthropic 2.3.0, claude-agent-sdk 0.2.176 and mcp 2.3.0. The Messages API is mocked, since there's no API key, so this checks call shapes and fields, not model behavior. The Claude Code CLI flags were checked against `claude --help` (2.1.316).
+
+Fixed:
+- **Module 1 loop.** `max_tokens` was missing; it's required, so the call fails.
+- **F3 and Module 5 MCP servers.** mcp 2.x renamed `FastMCP` to `MCPServer` (`mcp.server.mcpserver`); the 1.x import is kept as a comment.
+- **Module 3 hook matcher.** A plain string matches a tool name exactly, and SDK custom tools are named `mcp__<server>__<tool>`, so `"process_refund"` never fired. It's now `"mcp__billing__process_refund"`.
+
+Verified unchanged:
+- the F1 and F2 shapes;
+- the lab 1 loop, Module 9 retry, Module 10 and lab 3 Batches calls and result types, and the `tool_choice` types;
+- `AgentDefinition` fields, `query()` and the `PreToolUse` output;
+- the CLI flags `-p`, `--output-format`, `--json-schema`, `--resume`, `--continue` and `--fork-session`.
+
+## Batch 13: practice families, fresh-reviewer recheck, guide wording (2026-10-31)
+
+**Domain 1 practice families.**
+- 16 Domain 1 bank questions are rewritten as 7 practice families (P01–P07, 2–3 members each, distinct keys).
+- `content-check` now allows families with no holdout member.
+- The blind solver (Sonnet) agreed with the key on 16/16. It flagged 4 places where the app hadn't taught the deciding idea; those are fixed by the panels below.
+
+**Fresh-reviewer recheck** (Sonnet, a new agent, reading only the extracted lesson text):
+- **Beginner walkthrough.** 0 blocking, 10 major and 26 minor issues.
+  - 2 of the major issues were false positives: m00's scenario and domain lists and m14's traps are rendered by embeds and widgets that the text extraction leaves out.
+- **Why-test.** The 50 concepts average 9.1 of 12, and 25 score below 10. This reviewer was stricter than the Phase 4b one.
+- **Fixed with 11 panels** (`scripts/audit/add-panels.py`):
+  - F1: why roles alternate, the system prompt, handling `max_tokens`, window size;
+  - Module 2: exam answer vs. what you build, and strict tool use;
+  - Module 3: where each mechanism lives, including `updatedInput`, and blocked vs. pending vs. handoff;
+  - Module 4: which error fields belong to the protocol;
+  - Module 5: stdio vs. HTTP transports;
+  - Module 6: decomposition patterns;
+  - Module 7: the Explore subagent;
+  - Module 10: the SLA arithmetic, worked;
+  - Module 11: why slash commands exist;
+  - Module 13: calibration and stratified sampling, worked.
+- **Not done (lower value):**
+  - restructuring Module 6's exam-vs-today notes;
+  - naming sessions;
+  - defining "glob";
+  - the Module 9 schema-comment nit;
+  - the remaining minor items in `audit/work/novice-fresh-2026-10-31.json`.
+
+**Guide.** The 52 open S3 items are closed: 36 reworded, 16 accepted as guidance.
+
+## Batch 14: remaining walkthrough and Why-test items (2026-10-31)
+
+`scripts/audit/fix-walkthrough.py` applies 16 text edits and 15 panels, and can be re-run safely.
+
+**Edits:**
+- F1: attention and “lost in the middle” explained.
+- F3: domains named, not just numbered.
+- Module 1: client vs. server tools.
+- Module 2: why more tools hurt selection.
+- Module 4: “coordinator” defined where it's first used.
+- Module 8: extended thinking defined.
+- Module 9: the claim that tool use “eliminates” syntax errors made precise; schema comments changed to `#`.
+- Module 13: the frustrated-customer card no longer contradicts “honor a request for a human immediately.”
+- Lab 3: the batch call now forces the tool, and strict mode's `additionalProperties` requirement is noted.
+
+**Panels:**
+- Module 2: the Edit fallback; Grep vs. Glob.
+- Module 3: tool names in hook matchers.
+- Module 4: retry with backoff.
+- Module 5: user vs. local scope, `npx -y`, `${VAR:-default}`; why there are three scopes.
+- Module 6: when a coordinator should stop.
+- Module 7: surviving a crash with a manifest; the cost of `/compact`.
+- Module 8: false positive, precision and severity; how to run an independent reviewer.
+- Module 11: what a glob is; five ways to give Claude standing instructions; iterative refinement compared.
+- Module 12: CI terms; naming sessions (`claude -n`) and worktrees.
+
+**Reviewed, no change:**
+- **m06:0 exam-vs-today notes.** They're already in one “Real world today” box plus one “Not to confuse” bullet.
+- **m00:0 and m14:0.** False positives: the scenario and domain lists and the trap spotter are rendered by embeds and widgets.
+- **l01:2.** The `&quot;` entities are an artifact of the text extraction; browsers render them as quotes.
+
+## Batch 15: Domain 2–5 practice families (2026-10-31)
+
+28 bank questions in Domains 2–5 are rewritten as 12 practice families (P08–P19) within their task statements. The blind solver (Sonnet) agreed with the key on **28/28**. It noted 2 weaker alternatives (better tool descriptions), which the explanations already address.
+
+The other 20 bank questions are unchanged:
+- most are alone in their task statement (2.1, 2.2, 2.4, 5.x);
+- pairing would create two defensible keys (the 4.1 explicit-criteria and 4.2 format few-shot items all share one key idea; 3.3's path-rule diagnostics; b8-12, b8-3 and b8-8 duplicate a family's key).
+
+Totals now:
+- 79 families covering 164 of 278 questions;
+- the correct option is the longest in 28.8% of questions;
+- the best stem-blind heuristic scores 27.1% on practice questions.

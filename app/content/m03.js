@@ -45,9 +45,16 @@ window.LESSONS.m03 = {
     <span class="k">return</span> {}
 
 options = ClaudeAgentOptions(hooks={
-    <span class="s">"PreToolUse"</span>: [HookMatcher(matcher=<span class="s">"process_refund"</span>, hooks=[refund_limit])]
+    <span class="s">"PreToolUse"</span>: [HookMatcher(matcher=<span class="s">"mcp__billing__process_refund"</span>, hooks=[refund_limit])]  <span class="c"># full tool name</span>
 })</code></pre>
-<p>Notice the deny reason <em>redirects</em> Claude toward the right workflow instead of simply failing. A good gate stops the forbidden path and points to the allowed one.</p>`
+<p>Notice the deny reason <em>redirects</em> Claude toward the right workflow instead of simply failing. A good gate stops the forbidden path and points to the allowed one.</p>
+<!-- panel:m03-mechanisms -->
+<h3>Where each mechanism lives</h3>
+<div class="table-wrap"><table><thead><tr><th>Mechanism</th><th>Where it's coded</th><th>What it does</th><th>Use when</th></tr></thead><tbody><tr><td>Prerequisite gate</td><td>Your tool code or loop, checking session state</td><td>Refuses a call until an earlier step succeeded, and says what to do first</td><td>Steps must happen in order (verify, then refund)</td></tr><tr><td><code>PreToolUse</code> hook: deny</td><td>A hook that runs before the call</td><td>Stops the call, with a reason the agent can act on</td><td>An action must never happen (over a limit, a protected branch)</td></tr><tr><td><code>PreToolUse</code> hook: rewrite input</td><td>The same hook, returning <code>updatedInput</code></td><td>Changes the call's input, for example adding a required field</td><td>Every call needs a fixed field or format</td></tr><tr><td><code>PostToolUse</code> hook</td><td>A hook that runs after the call</td><td>Changes the result before the model reasons over it</td><td>Results arrive in mixed formats or contain sensitive data</td></tr><tr><td>Prompt instruction</td><td>System prompt or CLAUDE.md</td><td>Asks; works most of the time</td><td>Soft preferences where an occasional miss is cheap</td></tr></tbody></table></div>
+
+<!-- panel:m03-tool-names -->
+<div class="callout key"><div class="callout-label">Tool names in hooks</div><ul style="margin:0;padding-left:18px"><li><strong>Built-in tools.</strong> use plain names, such as <code>Bash</code> or <code>Edit</code>.</li><li><strong>Your own tools.</strong> in the Agent SDK, custom tools are served through an MCP server, so their names are <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>. A hook's matcher must use that full name, or a pattern that matches it.</li></ul></div>
+`
     },
     {
       kind: "widget",
@@ -90,7 +97,10 @@ options = ClaudeAgentOptions(hooks={
   <span class="s">"recommended_action"</span>: <span class="s">"approve refund of 742.18 to original card"</span>
 }</code></pre>
 <h3>Several problems in one message</h3>
-<p>“I was double-charged <em>and</em> my replacement never shipped.” Split the request into distinct items. Investigate each one (in parallel where they're independent), using the shared customer context, then give a single unified answer. Don't make the customer open a second ticket, and don't silently handle only the bigger issue.</p>`
+<p>“I was double-charged <em>and</em> my replacement never shipped.” Split the request into distinct items. Investigate each one (in parallel where they're independent), using the shared customer context, then give a single unified answer. Don't make the customer open a second ticket, and don't silently handle only the bigger issue.</p>
+<!-- panel:m03-statuses -->
+<div class="callout key"><div class="callout-label">Three results that sound alike</div><ul style="margin:0;padding-left:18px"><li><strong>Blocked, with a reason.</strong> the call was refused and the agent can fix it itself: “identity not verified; call verify_identity first.”</li><li><strong>Pending.</strong> the action was accepted but is waiting on someone, such as a manager's approval. Return an explicit pending status so the agent tells the customer it isn't done yet, instead of reporting a generic success.</li><li><strong>Structured handoff.</strong> the work passes to a person. Include the facts, what was tried and a suggested next step, so the person doesn't start from scratch.</li></ul></div>
+`
     },
     {
       kind: "quiz",

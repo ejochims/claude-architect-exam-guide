@@ -1,0 +1,218 @@
+[
+ {
+  "loc": "m00:0",
+  "severity": "MAJOR",
+  "issue": "The text promises 'six scenarios' and 'five weighted domains' and says 'Here is the list' but no list follows (names, weights and the domain numbering are absent). Later modules say 'Domains 1 and 4' (f03:1) and I cannot decode them.",
+  "fix": "Insert the six scenarios and five numbered domains with weights in text before the 'about two minutes per question' paragraph."
+ },
+ {
+  "loc": "m00:2",
+  "severity": "MAJOR",
+  "issue": "The recap names nine traps ('unreliable proxy', 'consolidate', 'hide/hammer errors', 'wrong component', 'invented feature') as if I know them; none is defined before m14, and m14 only says 'you'll sort them next' with no definitions or examples in the text.",
+  "fix": "Define each of the nine traps in one sentence with a one-line example, in m00 or at the top of m14."
+ },
+ {
+  "loc": "m14:0",
+  "severity": "MAJOR",
+  "issue": "The capstone has no worked material: it says 'the nine traps you'll sort next' but the body contains no questions, traps or explanations, so the section teaches nothing that wasn't already said in m00.",
+  "fix": "Add at least one worked stem per trap showing evidence, root cause, constraint type and why each distractor fails."
+ },
+ {
+  "loc": "f01:0",
+  "severity": "MINOR",
+  "issue": "'tool_use', 'content blocks', 'stop_reason' and 'agent' are used in the response description before they are explained; the agent definition is a parenthetical buried mid-paragraph.",
+  "fix": "Move the one-sentence definition of agent and a pointer 'tool_use is explained in F2' to the first mention."
+ },
+ {
+  "loc": "f01:1",
+  "severity": "MINOR",
+  "issue": "'Attend to context unequally' and 'attention' are used with no explanation of what attention means for a model; the 'facts buried in the middle are easier to miss' claim is asserted without a reason.",
+  "fix": "Add one sentence: the model weighs all tokens but in practice relies more on the start and end of long input."
+ },
+ {
+  "loc": "f03:0",
+  "severity": "MINOR",
+  "issue": "The diagram/table uses 'harness', 'hooks', 'subagents' and 'permissions' before the Key terms that define them, and 'IDE' is not expanded.",
+  "fix": "Put the Key terms block above the table or define each term at first use."
+ },
+ {
+  "loc": "f03:1",
+  "severity": "MINOR",
+  "issue": "References the 'Exam vs. today page' and 'Domain 1/2/3/4/5' but I have no way to see that page and the domain numbers are never mapped (see m00:0).",
+  "fix": "Link or inline the Exam-vs-today page and map domain numbers to names here."
+ },
+ {
+  "loc": "m01:0",
+  "severity": "MINOR",
+  "issue": "'Workflows', 'agents' and 'prompt chaining' are used as if known; prompt chaining is only defined in m06:2. 'Client tool' implies a 'server tool' that is never explained.",
+  "fix": "Define prompt chaining in one clause here and either define server tools or drop the 'client tool' remark."
+ },
+ {
+  "loc": "m02:1",
+  "severity": "MAJOR",
+  "issue": "The course teaches a tool_choice table as 'the exam answer' then says on current models 'any' and a named tool return a 400 error. I cannot tell what to actually build; 'manual extended thinking' is also undefined jargon. The same contradiction repeats in m09 and l03.",
+  "fix": "State once, up front, that this course gives the exam-framing answer and the production answer separately, and give a one-line decision rule for each."
+ },
+ {
+  "loc": "m02:1",
+  "severity": "MINOR",
+  "issue": "'Selection accuracy falls as options grow' (18 tools vs 4-5) is stated as a fact with no because: why would more tools hurt a model?",
+  "fix": "Add the mechanism: more similar descriptions to discriminate and more tools outside the task's role to be tempted by."
+ },
+ {
+  "loc": "m02:0",
+  "severity": "MINOR",
+  "issue": "'plus any input examples' on a tool definition is mentioned once and never shown or explained.",
+  "fix": "Show one tool definition with an input example, or remove the phrase."
+ },
+ {
+  "loc": "m02:3",
+  "severity": "MINOR",
+  "issue": "'Edit fails because anchor isn't unique -> Read the full file, then Write it' and the 're-exported through wrapper modules' advice appear as bare rules with no scenario; strict:true is also used here before it is introduced.",
+  "fix": "Add a one-line scenario for each and defer strict:true until m09."
+ },
+ {
+  "loc": "m03:2",
+  "severity": "MAJOR",
+  "issue": "The text says to enforce in code with 'a hook, a prerequisite gate, or logic inside the tool' and then lists three mechanisms labelled Gate/Pre/Post, but never says whether a gate is a hook or ordinary tool code, or where the state lives. A novice cannot choose between them.",
+  "fix": "Add a short comparison: gate = tool-side/session state check, PreToolUse = interception before execution, PostToolUse = result rewriting, with where each is coded."
+ },
+ {
+  "loc": "m03:2",
+  "severity": "MINOR",
+  "issue": "Hook code uses HookMatcher, hookSpecificOutput and a matcher 'mcp__billing__process_refund' ('full tool name') without explaining the mcp__server__tool naming; PostToolUse normalization has no code at all; and hooks exist only in the Agent SDK/Claude Code, not the raw API, which is not stated.",
+  "fix": "Explain the naming convention, add a 5-line PostToolUse example, and say hooks require the SDK harness (raw API users put the check in run_tool)."
+ },
+ {
+  "loc": "m03:0",
+  "severity": "MINOR",
+  "issue": "Ends 'Next, watch the arithmetic play out' and other steps (m03:1, m03:3) are missing from the text; the flow refers to interactive content I cannot see.",
+  "fix": "Include a text fallback for each interactive step or remove the forward reference."
+ },
+ {
+  "loc": "m04:0",
+  "severity": "MAJOR",
+  "issue": "Three different error vocabularies appear: is_error on tool_result (F2), isError in MCP (m04/m05) and a made-up errorCategory/isRetryable/customerMessage payload (m04), plus 'category/retryable' in l01. I cannot tell which fields are protocol-defined and which are the course's own convention.",
+  "fix": "Say explicitly that isError/is_error is the only protocol flag and the category fields are a recommended convention, and use one set of field names everywhere."
+ },
+ {
+  "loc": "m04:0",
+  "severity": "MINOR",
+  "issue": "'Retry with backoff' is used without definition.",
+  "fix": "Define backoff in a parenthesis (wait longer between each retry)."
+ },
+ {
+  "loc": "m04:2",
+  "severity": "MINOR",
+  "issue": "Coordinators and subagents are discussed two modules before m06 introduces them; the only prior definition is one line in F3.",
+  "fix": "Add a one-sentence recap of coordinator/subagent here or reorder after m06."
+ },
+ {
+  "loc": "m05:0",
+  "severity": "MAJOR",
+  "issue": "stdio vs HTTP transports are named and then the text says '(transports)' as if explained elsewhere, but no step explains them. 'stdio' is never expanded and tools/list, tools/call appear with no context.",
+  "fix": "Add a short transports step: stdio = local subprocess talking over standard input/output, HTTP = remote server, and when to choose each."
+ },
+ {
+  "loc": "m05:2",
+  "severity": "MINOR",
+  "issue": "Scope table is confusing: user and local both live in ~/.claude.json, 'local' is 'keyed to this project'; `npx -y` and the ${VAR:-default} expansion syntax are unexplained; no remote-server (HTTP) config example.",
+  "fix": "Add one sentence on how local differs from user in practice, explain npx -y and :- default, and show an HTTP entry."
+ },
+ {
+  "loc": "m06:0",
+  "severity": "MAJOR",
+  "issue": "The Task tool and allowedTools are explained in the exam's terms, immediately contradicted by a 'real world today' box (Task now called Agent, allowedTools no longer a gate, background by default, nesting), then m06:2 adds three more 'allowed-tools' meanings. I cannot tell which statement to rely on.",
+  "fix": "Present the exam model in one clean paragraph, move all current-behavior notes into a single labelled box, and keep the three allowed-tools meanings in one comparison table."
+ },
+ {
+  "loc": "m06:0",
+  "severity": "MINOR",
+  "issue": "Parallelism is described as 'one call per turn runs sequentially' in the exam model vs 'background by default' today in the same sentence; 'pass prior results in full, structured, content separated from metadata' is a jump with no example of why attribution would otherwise be lost.",
+  "fix": "Split the two models and add a two-line before/after example."
+ },
+ {
+  "loc": "m06:2",
+  "severity": "MINOR",
+  "issue": "Only two decomposition patterns are given (fixed chaining, dynamic). Other patterns I would need to choose between (per-item pipeline, split-process-merge across sections, grouping by root cause, parallel independent subtasks) are never named.",
+  "fix": "Add a short table of the decomposition patterns with when each applies."
+ },
+ {
+  "loc": "m07:0",
+  "severity": "MINOR",
+  "issue": "'Lost in the middle' is only in the recap; the body never names it or says whether it is a measured effect. The 'sliding window' discussion refers to 'turns' without saying who decides what is dropped.",
+  "fix": "Name the effect in the body and give one sentence of evidence or caveat."
+ },
+ {
+  "loc": "m08:0",
+  "severity": "MINOR",
+  "issue": "'Precision', 'false positive' and 'severity' are used as if known, and the review-bot scenario is never set up.",
+  "fix": "Define false positive/precision in one sentence and state the bot's setting before the comparison."
+ },
+ {
+  "loc": "m08:2",
+  "severity": "MINOR",
+  "issue": "'Extended (or adaptive) thinking' is mentioned with no explanation; 'verification pass reports a confidence level' pushes forward to m13 where calibration is only partially explained.",
+  "fix": "Add a one-clause definition of extended thinking and link the confidence remark to m13:2."
+ },
+ {
+  "loc": "m09:0",
+  "severity": "MINOR",
+  "issue": "Says tool_use 'eliminates JSON syntax errors' then in the next box says plain tool use is not guaranteed; the example schema contains // comments that are not valid JSON, and the 'why required fields pressure fabrication' reason is only implied.",
+  "fix": "State the reason (schema demands a value so the model invents one) and mark the schema as annotated pseudo-JSON."
+ },
+ {
+  "loc": "m10:0",
+  "severity": "MAJOR",
+  "issue": "The 'SLA arithmetic' (max interval = SLA - 24h - post-processing) arrives with the word SLA undefined and no worked example; 'interval' (how often you submit batches) is never defined, so the formula cannot be followed.",
+  "fix": "Define SLA and submission interval, then work one numeric example (e.g. 30h SLA, 2h processing, interval = 4h)."
+ },
+ {
+  "loc": "m11:0",
+  "severity": "MINOR",
+  "issue": "'Glob', 'frontmatter paths globs' and 'subtree' are used without defining a glob pattern; several 'Why it exists' headings are misplaced (m11:1 uses it before the skill definition, m11:3 twice).",
+  "fix": "Define glob once with an example and fix heading order."
+ },
+ {
+  "loc": "m11:1",
+  "severity": "MINOR",
+  "issue": "Commands, skills, rules and MCP prompts are four overlapping 'saved instruction' mechanisms; the contrast is scattered and the 'real world today' note says commands merged into skills, leaving unclear whether to learn commands at all.",
+  "fix": "Add a one-table comparison of command vs skill vs rule vs MCP prompt with a 'use it when' column."
+ },
+ {
+  "loc": "m12:0",
+  "severity": "MINOR",
+  "issue": "'CI runner', 'headless' and GitHub Actions context are assumed knowledge; the yaml uses secrets syntax with no explanation.",
+  "fix": "Define CI in one line and annotate the yaml."
+ },
+ {
+  "loc": "m12:2",
+  "severity": "MINOR",
+  "issue": "'Worktrees' and 'named sessions' are used without explanation: the text says --resume <name> but never shows how to name a session.",
+  "fix": "Show how to name a session and define worktree in a clause."
+ },
+ {
+  "loc": "m13:2",
+  "severity": "MAJOR",
+  "issue": "'Calibrated' and 'stratified random sampling' are central but never shown: I am told raw 0.9 is not 90% correct and thresholds come from a labeled set, but not how to do that or what stratified means.",
+  "fix": "Add a small worked example: 200 labeled fields, bucket by confidence, measure accuracy per bucket, pick the threshold; define stratified as sampling inside each segment."
+ },
+ {
+  "loc": "m13:0",
+  "severity": "MINOR",
+  "issue": "Frustrated-but-solvable vs explicit-human-request rule contradicts the 'customer asks for human, honor immediately' wording one paragraph earlier without saying which wins when the customer is both.",
+  "fix": "State the tie-break in one sentence: first explicit request -> escalate; first mention while solvable -> offer to fix, then escalate on repeat."
+ },
+ {
+  "loc": "l01:2",
+  "severity": "MINOR",
+  "issue": "Code is shown HTML-escaped (&quot;), key parts are elided ('...'), SYSTEM and TOOLS are not shown, and error keys (category/retryable, status escalation_required) differ from the m04 vocabulary.",
+  "fix": "Unescape, show the four tool definitions briefly and align field names with m04."
+ },
+ {
+  "loc": "l03:2",
+  "severity": "MINOR",
+  "issue": "additionalProperties:False and strict:True appear with no explanation, and the batch call omits tool_choice though the text says to force the call.",
+  "fix": "Add a comment per line explaining what each flag does and whether tool_choice is needed with strict."
+ }
+]

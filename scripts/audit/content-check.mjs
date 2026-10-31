@@ -37,7 +37,8 @@ for (const [f, qs] of Object.entries(fam)) {
   if (new Set(qs.map(optSet)).size > 1) errors.push(`family ${f}: option texts differ between members`);
   const keys = qs.map(q => plain(q.options.find(o => o.ok)?.t ?? ""));
   if (new Set(keys).size !== keys.length) errors.push(`family ${f}: two members key the same option`);
-  if (qs.filter(q => q.holdout).length !== 1) errors.push(`family ${f}: needs exactly one holdout member`);
+  // Holdout families pair one Readiness Check question with practice twins; practice families have no holdout member.
+  if (qs.filter(q => q.holdout).length > 1) errors.push(`family ${f}: more than one holdout member`);
   if (new Set(qs.map(q => q.ts)).size > 1) errors.push(`family ${f}: members test different task statements`);
 }
 const famQs = Object.values(fam).flat();

@@ -48,10 +48,10 @@ window.LESSONS.f03 = {
       html: `
 <p class="lede">Knowing which product a question is about tells you which mechanisms are available.</p>
 <ul>
-<li><strong>Raw API (Domains 1 and 4).</strong> The agentic loop and <code>stop_reason</code>, tool definitions and <code>tool_choice</code>, structured output with JSON Schema, the Message Batches API. If a question shows request JSON or a loop in your code, you're here.</li>
-<li><strong>Agent SDK (Domain 1).</strong> Coordinators and subagents (<code>AgentDefinition</code>, the Task tool), hooks such as <code>PreToolUse</code> and <code>PostToolUse</code> for enforcement and normalization, and sessions you can resume or fork.</li>
-<li><strong>Claude Code (Domain 3, parts of 2 and 5).</strong> <code>CLAUDE.md</code> memory, path-scoped rules, skills and slash commands, plan mode, the Explore subagent, MCP server configuration, and running non-interactively in CI with <code>claude -p</code>.</li>
-<li><strong>MCP (Domain 2).</strong> Designing tools and resources, structured errors, and where a server is configured.</li>
+<li><strong>Raw API (Domain 1, agentic architecture; Domain 4, prompt engineering and structured output).</strong> The agentic loop and <code>stop_reason</code>, tool definitions and <code>tool_choice</code>, structured output with JSON Schema, the Message Batches API. If a question shows request JSON or a loop in your code, you're here.</li>
+<li><strong>Agent SDK (Domain 1, agentic architecture).</strong> Coordinators and subagents (<code>AgentDefinition</code>, the Task tool), hooks such as <code>PreToolUse</code> and <code>PostToolUse</code> for enforcement and normalization, and sessions you can resume or fork.</li>
+<li><strong>Claude Code (Domain 3, Claude Code configuration; parts of Domain 2, tools and MCP, and Domain 5, context and reliability).</strong> <code>CLAUDE.md</code> memory, path-scoped rules, skills and slash commands, plan mode, the Explore subagent, MCP server configuration, and running non-interactively in CI with <code>claude -p</code>.</li>
+<li><strong>MCP (Domain 2, tool design and MCP).</strong> Designing tools and resources, structured errors, and where a server is configured.</li>
 </ul>
 
 <!-- ex:f03-layers -->
@@ -75,9 +75,9 @@ window.LESSONS.f03 = {
 <pre class="code"><code>claude -p <span class="s">"Find where configuration is loaded and summarize it"</span></code></pre>
 <!-- ex:f03-mcp -->
 <p><strong>MCP.</strong> A minimal server using the official Python SDK. The function's docstring becomes the tool description, and any MCP client (Claude Code, an Agent SDK app, Claude Desktop) can now call <code>get_order</code>:</p>
-<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+<pre class="code"><code><span class="k">from</span> mcp.server.mcpserver <span class="k">import</span> MCPServer   <span class="c"># mcp 1.x: from mcp.server.fastmcp import FastMCP</span>
 
-mcp = FastMCP(<span class="s">"orders"</span>)
+mcp = MCPServer(<span class="s">"orders"</span>)
 
 @mcp.tool()
 <span class="k">def</span> get_order(order_number: str) -&gt; str:
