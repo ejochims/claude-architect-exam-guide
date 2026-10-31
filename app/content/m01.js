@@ -28,7 +28,7 @@ window.LESSONS.m01 = {
 <p class="lede">An agent is a loop that keeps calling the model until the model says it's finished. The only reliable way to know is <code>stop_reason</code>.</p>
 <pre class="code"><code><span class="k">while</span> <span class="k">True</span>:
     response = client.messages.create(
-        model=MODEL, system=SYSTEM, tools=TOOLS, messages=messages)
+        model=MODEL, max_tokens=<span class="k">1024</span>, system=SYSTEM, tools=TOOLS, messages=messages)
     messages.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: response.content})
 
     <span class="k">if</span> response.stop_reason == <span class="s">"tool_use"</span>:

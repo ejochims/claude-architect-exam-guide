@@ -75,9 +75,9 @@ window.LESSONS.f03 = {
 <pre class="code"><code>claude -p <span class="s">"Find where configuration is loaded and summarize it"</span></code></pre>
 <!-- ex:f03-mcp -->
 <p><strong>MCP.</strong> A minimal server using the official Python SDK. The function's docstring becomes the tool description, and any MCP client (Claude Code, an Agent SDK app, Claude Desktop) can now call <code>get_order</code>:</p>
-<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+<pre class="code"><code><span class="k">from</span> mcp.server.mcpserver <span class="k">import</span> MCPServer   <span class="c"># mcp 1.x: from mcp.server.fastmcp import FastMCP</span>
 
-mcp = FastMCP(<span class="s">"orders"</span>)
+mcp = MCPServer(<span class="s">"orders"</span>)
 
 @mcp.tool()
 <span class="k">def</span> get_order(order_number: str) -&gt; str:

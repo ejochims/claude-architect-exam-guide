@@ -65,9 +65,9 @@ window.LESSONS.m05 = {
 <!-- ex:m05-server -->
 <h3>What a server looks like</h3>
 <p>A server exposes <strong>tools</strong> (actions the model calls) and <strong>resources</strong> (content the client can list and read). With the official Python SDK, each one is a decorated function:</p>
-<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+<pre class="code"><code><span class="k">from</span> mcp.server.mcpserver <span class="k">import</span> MCPServer   <span class="c"># mcp 1.x: from mcp.server.fastmcp import FastMCP</span>
 
-mcp = FastMCP(<span class="s">"docs"</span>)
+mcp = MCPServer(<span class="s">"docs"</span>)
 
 @mcp.tool()
 <span class="k">def</span> search_docs(query: str) -&gt; str:

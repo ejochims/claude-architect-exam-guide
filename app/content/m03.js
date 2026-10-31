@@ -45,7 +45,7 @@ window.LESSONS.m03 = {
     <span class="k">return</span> {}
 
 options = ClaudeAgentOptions(hooks={
-    <span class="s">"PreToolUse"</span>: [HookMatcher(matcher=<span class="s">"process_refund"</span>, hooks=[refund_limit])]
+    <span class="s">"PreToolUse"</span>: [HookMatcher(matcher=<span class="s">"mcp__billing__process_refund"</span>, hooks=[refund_limit])]  <span class="c"># full tool name</span>
 })</code></pre>
 <p>Notice the deny reason <em>redirects</em> Claude toward the right workflow instead of simply failing. A good gate stops the forbidden path and points to the allowed one.</p>`
     },
