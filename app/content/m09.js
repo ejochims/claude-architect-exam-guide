@@ -67,70 +67,70 @@ window.LESSONS.m09 = {
           id: "q09-1", ts: "4.3", scenario: 6,
           stem: "A pipeline asks Claude to “respond only with valid JSON matching this schema.” About 1 in 200 responses fail to parse. What is the most reliable fix?",
           options: [
-            { t: "Define an extraction tool with the schema as its input and force the call; read the tool_use input.", ok: true, why: "Schema-backed tool use eliminates syntax errors, while prompt-only JSON can't guarantee validity." },
-            { t: "Add three examples of valid JSON output to the prompt.", trap: "T1", why: "This improves odds without a guarantee." },
-            { t: "Repair broken JSON with a regex-based post-processor before parsing.", trap: "T6", why: "Fragile, and it treats the symptom." },
-            { t: "Automatically retry any response that fails to parse.", trap: "T6", why: "This works eventually, but wastes calls when a guarantee exists." }
+            { t: "Use an extraction tool whose input schema is the target shape, and force the call.", ok: true, why: "Exam framing: schema-shaped tool input eliminates JSON syntax errors. (Today, strict tools or structured outputs guarantee it; see Exam vs. today.)" },
+            { t: "Add three complete examples of valid JSON output to the prompt.", trap: "T1", why: "Lowers the failure rate but can't guarantee parseable output." },
+            { t: "Repair broken responses with a JSON post-processor that fixes quotes, commas and unbalanced brackets before parsing.", trap: "T6", why: "Patches symptoms and can silently produce wrong structures." },
+            { t: "Retry automatically, up to three times, whenever a response fails to parse.", trap: "T6", why: "Usually works eventually, but costs more and still has no guarantee." }
           ]
         },
         {
           id: "q09-2", ts: "4.3", scenario: 6,
           stem: "After switching to strict tool-use extraction, a teammate says “we no longer need validation code.” What's the right response?",
           options: [
-            { t: "Agreed. Strict schemas guarantee the values are correct, so validation is redundant.", why: "They guarantee shape, not truth." },
-            { t: "Syntax errors are gone, but semantic errors (totals that don't sum, values in the wrong field) still need validation.", ok: true, why: "Schema compliance and semantic correctness are different problems." },
-            { t: "Validation is still needed, but only for the optional fields in the schema.", why: "Required fields can be wrong too." },
-            { t: "Keep the validation code only until the team upgrades to a newer model.", trap: "T3", why: "Model capability doesn't change what a schema guarantees." }
+            { t: "Agreed. A strict schema guarantees the values are correct, so validation is redundant.", why: "A schema guarantees shape, not truth." },
+            { t: "Syntax errors are gone, but semantic errors such as totals that don't sum still need validation.", ok: true, why: "Schemas remove syntax errors, not semantic or factual ones." },
+            { t: "Keep validation, but only for optional fields, since required fields are now guaranteed to be filled correctly.", why: "Required fields can be filled with wrong values. They're guaranteed present, not correct." },
+            { t: "Keep the validation until the team upgrades to a newer model, which makes it unnecessary.", trap: "T3", why: "No model makes semantic validation unnecessary." }
           ]
         },
         {
           id: "q09-3", ts: "4.3", scenario: 6,
           stem: "<code>expense_category</code> is an enum of eight values. New expense types keep appearing and get forced into the nearest category. Best schema change?",
           options: [
-            { t: "Add an \"other\" value plus a <code>category_detail</code> string, and \"unclear\" for ambiguous items.", ok: true, why: "This handles new categories without silent misfiling." },
-            { t: "Change the field to free text so any category can be captured.", why: "This loses normalization for the eight known categories." },
-            { t: "Add every category you can think of to the enum.", why: "You can't predict them all, and selection gets harder." },
-            { t: "Make the field required so the model always has to choose a category.", why: "It already always chooses. That's the misfiling problem." }
+            { t: "Add an <code>\"other\"</code> value with a <code>category_detail</code> string, plus <code>\"unclear\"</code>.", ok: true, why: "Enum + other + detail handles new categories without forcing a wrong match." },
+            { t: "Change <code>expense_category</code> to free text so any new category can be captured as written.", why: "Loses the consistency that downstream reporting depends on." },
+            { t: "Add every category you can think of to the enum, reviewing the list each quarter for new expense types.", why: "The list is never complete, and meanwhile new types are still forced into the nearest bucket." },
+            { t: "Make the field required, so the model must always commit to one of the eight categories.", why: "It's already forced to choose, and that's the problem." }
           ]
         },
         {
           id: "q09-4", ts: "4.4", scenario: 6,
-          stem: "Validation finds that 6% of extractions put invoice dates in DD/MM format instead of ISO. Retrying with the same prompt fixes almost none. Best retry design?",
+          stem: "Validation finds that 6% of extractions put invoice dates in a local format instead of ISO 8601. Invoices come from 30 countries, and dates such as 03/04/2026 can't be converted safely without knowing the document's locale. Retrying with the same prompt fixes almost none. What's the best retry design?",
           options: [
-            { t: "Retry with the original document, the failed extraction and the specific validation error.", ok: true, why: "Specific feedback lets the model correct itself." },
-            { t: "Retry up to five times with the same prompt and keep the first valid result.", trap: "T6", why: "Same input, same output." },
-            { t: "Use a different, more capable model for the retries.", trap: "T3", why: "Feedback, not capability, is what's missing." },
-            { t: "Convert the dates in code afterward and stop asking the model for ISO format.", why: "A reasonable complement, but the question asks about retry design, and feedback is the lever." }
+            { t: "Retry with the original document, the failed extraction and the exact validation error that it triggered.", ok: true, why: "Targeted feedback lets the model fix the error using the document's context, which code can't infer." },
+            { t: "Retry up to five times with the same prompt and keep the first result that passes validation.", trap: "T6", why: "The same prompt repeats the same mistake. Retries need new information." },
+            { t: "Convert the dates in code after extraction, assuming DD/MM unless the day exceeds 12.", why: "Guesses the locale, so 03/04 gets silently converted wrong for half the countries." },
+            { t: "Route the retries to a more capable model, keeping the original prompt unchanged.", trap: "T3", why: "Without the error, a different model has no reason to change its answer." }
           ]
         },
         {
           id: "q09-5", ts: "4.4", scenario: 6,
           stem: "<code>cost_center</code> fails validation on 9% of invoices. Investigation shows those invoices reference a cost center defined only in a separate internal allocation sheet that the pipeline doesn't send. What should you do?",
           options: [
-            { t: "Retry the failed records with stronger, more specific error feedback.", why: "The information isn't in the input, so feedback can't create it." },
-            { t: "Accept that retries can't help: return null and flag the record, or supply the allocation sheet.", ok: true, why: "Retries work for format and structure errors, not for absent information." },
-            { t: "Make cost_center a required field so the model must always fill it.", why: "This forces fabrication." },
-            { t: "Lower the validation threshold so these records pass.", why: "This accepts wrong data." }
+            { t: "Retry the failed records with more specific error feedback naming the expected cost-center format.", why: "Retries can't help when the information isn't in the input." },
+            { t: "Accept that retries can't help here: return null and flag the record, or send the allocation sheet along with it.", ok: true, why: "Retries fix format errors, not missing information. Supply the source or flag it." },
+            { t: "Make <code>cost_center</code> a required field so the model always provides a value.", why: "Forces fabrication of values that aren't in the document." },
+            { t: "Relax the validation rule for <code>cost_center</code> so these 9% of records can pass.", why: "Hides the problem and lets bad data downstream." }
           ]
         },
         {
           id: "q09-6", ts: "4.4", scenario: 5,
           stem: "Developers dismiss 40% of automated review findings, and you can't tell why. What change enables systematic analysis?",
           options: [
-            { t: "Add a detected_pattern field naming the code construct behind each finding, then analyze dismissals by pattern.", ok: true, why: "Patterns reveal which constructs generate false positives so you can fix those criteria." },
-            { t: "Require developers to write a free-text reason every time they dismiss a finding.", why: "This adds friction and gives unstructured data." },
-            { t: "Lower the maximum number of findings posted per PR.", why: "Arbitrary caps don't diagnose anything." },
-            { t: "Have the model self-rate each finding so low-rated ones can be hidden.", trap: "T4", why: "This doesn't explain dismissals." }
+            { t: "Add a <code>detected_pattern</code> field to each finding and analyze dismissals by pattern.", ok: true, why: "Structured metadata makes dismissal patterns measurable." },
+            { t: "Require developers to type a free-text reason, in a required field, each time they dismiss a finding.", why: "Adds friction, and free text is hard to analyze at scale." },
+            { t: "Cap the reviewer at five findings per PR so developers see fewer to dismiss.", why: "Reduces volume without telling you which findings are wrong." },
+            { t: "Have the model self-rate each finding so low-rated ones can be hidden from developers.", trap: "T4", why: "Uncalibrated self-ratings don't explain why findings are dismissed." }
           ]
         },
         {
           id: "q09-7", ts: "4.3", scenario: 6,
           stem: "Source PDFs format amounts as “$1,280.50”, “1.280,50 EUR” and “USD 1280.5”. The schema says <code>amount: number</code>. Some values come back wrong by a factor of 1,000. What should you add?",
           options: [
-            { t: "Add explicit normalization rules (decimal separators, currency codes) to the prompt alongside the schema.", ok: true, why: "The schema enforces type. Normalization rules handle inconsistent source formatting." },
-            { t: "Change the amount field's type to a string so every source format is accepted as written.", why: "This pushes the problem downstream." },
-            { t: "Automatically retry any extraction where the amount is over 10,000.", why: "A heuristic that misses errors and flags correct values." },
-            { t: "Use a bigger model that understands international number formats.", trap: "T3", why: "Ambiguous formats need explicit rules." }
+            { t: "Add normalization rules for separators and currency codes to the prompt.", ok: true, why: "The schema enforces the type; the prompt has to specify how to interpret mixed source formats." },
+            { t: "Change <code>amount</code> to a string, so every source format is captured exactly as written and parsed downstream.", why: "Pushes the parsing problem downstream instead of solving it." },
+            { t: "Retry any extraction whose amount exceeds 10,000, with the same prompt.", trap: "T6", why: "An arbitrary threshold misses some errors, and the same prompt repeats them." },
+            { t: "Use a larger model that understands international number formats.", trap: "T3", why: "Without explicit rules, any model can misread “1.280,50”." }
           ]
         }
       ]

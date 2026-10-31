@@ -69,70 +69,70 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
           id: "q08-1", ts: "4.1", scenario: 5,
           stem: "An automated reviewer posts many low-value comments. Adding “Only report issues you are highly confident about” barely changed the volume. What should you do?",
           options: [
-            { t: "List which categories to report (bugs, security, contradicted comments) and which to skip (style, local conventions).", ok: true, why: "Specific criteria improve precision; confidence exhortations don't." },
-            { t: "Strengthen the wording to “only report issues you are extremely confident about.”", trap: "T9", why: "This is still a general instruction." },
-            { t: "Have the model self-rate each finding from 1 to 10 and drop anything below 8.", trap: "T4", why: "Uncalibrated self-ratings don't measure validity." },
-            { t: "Switch to a larger model that can better judge which issues matter.", trap: "T3", why: "The criteria are missing, not the capability." }
+            { t: "Name what to report (bugs, security, stale comments) and what to skip (style, local conventions), with an example of each.", ok: true, why: "Explicit criteria define what counts. Confidence wording doesn't." },
+            { t: "Strengthen the instruction to “report only issues you are extremely confident about.”", trap: "T9", why: "The same vague instruction, louder. It gives the model no criteria." },
+            { t: "Have the model rate each finding from 1 to 10, then post only those rated 8 or higher, dropping the rest.", trap: "T4", why: "Uncalibrated self-ratings don't separate valuable findings from noise." },
+            { t: "Switch the reviewer to a larger model that can judge which issues matter to the team.", trap: "T3", why: "The model doesn't know what the team considers low-value. Tell it." }
           ]
         },
         {
           id: "q08-2", ts: "4.1", scenario: 5,
           stem: "Your CI reviewer has five categories. “Naming suggestions” is wrong 70% of the time, and developers now dismiss even the security findings. Best immediate move?",
           options: [
-            { t: "Temporarily disable the naming category while you refine its prompt.", ok: true, why: "Removing the noise restores trust in the accurate categories right away." },
-            { t: "Keep everything and add a disclaimer to naming comments.", why: "The noise remains and trust keeps eroding." },
-            { t: "Add more few-shot examples to all categories at once.", why: "This doesn't target the category destroying trust, and it's slower." },
-            { t: "Require two reviewer runs to agree before posting anything.", why: "This suppresses true positives and doesn't fix the cause." }
+            { t: "Temporarily disable the naming category while you refine its prompt.", ok: true, why: "Removing the high false-positive category restores trust in the others while you fix it." },
+            { t: "Keep all five categories and prefix naming comments with “low confidence” so developers can skip them.", why: "Developers still wade through the noise, and trust in the other categories keeps eroding." },
+            { t: "Add few-shot examples to all five categories at once, then measure the false-positive rate again.", why: "A broad change that takes time, while the noisy category keeps damaging trust today." },
+            { t: "Require two independent review runs to agree on a finding before it's posted.", why: "A systematic false positive is often reproduced by both runs." }
           ]
         },
         {
           id: "q08-3", ts: "4.1", scenario: 5,
           stem: "The same kind of null-dereference is labeled “critical” in one PR and “minor” in another. How do you make severity consistent?",
           options: [
-            { t: "Define each severity level explicitly, with a concrete code example per level.", ok: true, why: "Explicit criteria plus examples anchor the classification." },
-            { t: "Tell the model to be consistent when assigning severity.", trap: "T9", why: "A general exhortation doesn't define the levels." },
-            { t: "Reduce to two severity levels so there's less room to disagree.", why: "This hides the inconsistency rather than fixing it." },
-            { t: "Run the review three times and average the severity labels.", why: "Averaging noisy labels gives noisy labels." }
+            { t: "Tell the model to be consistent when assigning severity across pull requests.", trap: "T9", why: "An exhortation with no definition of what each level means." },
+            { t: "Define each severity level clearly, with a concrete code example for each.", ok: true, why: "Explicit criteria with examples remove the ambiguity behind the inconsistency." },
+            { t: "Collapse the scale to two levels, blocking and non-blocking, so there's less room for disagreement.", why: "Fewer levels hide the ambiguity; borderline cases still flip between them." },
+            { t: "Run the review three times and assign the median of the three severity labels.", why: "Averages the inconsistency instead of removing its cause, at three times the cost." }
           ]
         },
         {
           id: "q08-4", ts: "4.2", scenario: 1,
           stem: "Tool descriptions are clear, but for borderline requests (“my package says delivered but it isn't here”) the agent alternates between <code>lookup_order</code> and <code>open_claim</code>. What helps most?",
           options: [
-            { t: "Add 2–4 few-shot examples of borderline requests that show the reasoning for choosing one tool over the other.", ok: true, why: "Examples teach judgment on ambiguous cases, and the reasoning helps the model generalize." },
-            { t: "Merge <code>lookup_order</code> and <code>open_claim</code> into one tool that handles both.", trap: "T5", why: "The actions differ, so merging loses that distinction." },
-            { t: "Build a keyword router that sends any message containing “delivered” to open_claim.", trap: "T2", why: "Brittle infrastructure before trying examples." },
-            { t: "Lower the temperature to zero so the agent always makes the same choice.", why: "This makes the behavior deterministic but not correct." }
+            { t: "Add 2–4 few-shot examples of borderline requests, showing why one tool beats the other.", ok: true, why: "Examples that show the reasoning teach the judgment the descriptions can't." },
+            { t: "Merge both into one <code>handle_delivery_issue</code> tool that decides internally whether to look up or open a claim.", trap: "T5", why: "Moves the ambiguity inside the tool without teaching which action fits." },
+            { t: "Route any message containing “delivered” to <code>open_claim</code> with a keyword rule in front of the agent.", trap: "T2", why: "Keyword rules misfire on paraphrases and bypass the agent's judgment." },
+            { t: "Set temperature to 0 so the agent makes the same choice for the same request every time.", why: "Consistent isn't correct. It would pick the same tool, right or wrong." }
           ]
         },
         {
           id: "q08-5", ts: "4.2", scenario: 6,
           stem: "Extraction of <code>study_sample_size</code> returns null for about 20% of papers. Inspection shows the value is present but sits in a methods-section table rather than in the prose. Best fix?",
           options: [
-            { t: "Make the field required so the model has to find a value in every paper.", why: "This forces fabrication when the value is genuinely absent." },
-            { t: "Add few-shot examples of correct extraction from papers with the value in a table and in prose.", ok: true, why: "Examples of varied document structures fix this kind of miss." },
-            { t: "Retry every null extraction using the same prompt.", trap: "T6", why: "The same prompt misses the same way." },
-            { t: "Chunk each paper into single paragraphs so the value is easier to find.", why: "This may split the table from its context." }
+            { t: "Make <code>study_sample_size</code> required, so the model has to find a value in every paper.", why: "Forces values where none exist and creates fabrication pressure." },
+            { t: "Add few-shot examples of correct extraction from papers that give the value in a methods table and in prose.", ok: true, why: "Examples of varied document structures fix the systematic miss." },
+            { t: "Retry every null extraction once, with the same prompt and the full paper.", trap: "T6", why: "The same prompt fails the same way on the same structure." },
+            { t: "Split each paper into single-paragraph chunks so the value is easier to spot in a smaller window.", why: "Tables are what's missed, and chunking can split a table from its caption." }
           ]
         },
         {
           id: "q08-6", ts: "4.6", scenario: 5,
           stem: "In a Claude Code session, Claude implements a feature and then reviews its own diff before you merge. It approves code with a race condition that a teammate later finds. Best change?",
           options: [
-            { t: "Ask the same session to “review critically, as a skeptic.”", trap: "T9", why: "The session still has its generation reasoning." },
-            { t: "Turn on extended thinking for the self-review so it reasons more thoroughly.", why: "More reasoning in the same context still anchors on its earlier choices." },
-            { t: "Review with an independent Claude instance that has the diff and criteria but not the generator's reasoning.", ok: true, why: "Independent review avoids the self-review blind spot." },
-            { t: "Run the same self-review twice and merge the findings.", why: "The same bias, twice." }
+            { t: "Ask the same session to review “critically, as a skeptical senior engineer.”", trap: "T9", why: "The session still holds the reasoning that produced the code, so it shares its blind spots." },
+            { t: "Turn on extended thinking for the self-review, so it reasons through each possible concurrency issue in more depth.", why: "More reasoning in the same context doesn't remove the anchoring on its own decisions." },
+            { t: "Review with an independent instance that gets the diff and criteria but not the generator's reasoning.", ok: true, why: "An independent reviewer isn't anchored on the reasoning that produced the code." },
+            { t: "Run the same self-review twice and merge the two lists of findings.", why: "Two passes from the same context share the same blind spots." }
           ]
         },
         {
           id: "q08-7", ts: "4.6", scenario: 5,
-          stem: "A PR renames <code>customerId</code> to <code>accountId</code> in a producer service but not in two consumers. The single-pass review of all 22 changed files gave detailed local feedback but missed the mismatch. What structure catches it?",
+          stem: "Your review now runs per-file passes and then an integration pass across files. The integration pass keeps repeating the per-file passes' style and naming comments, doubling the noise developers see. What should change?",
           options: [
-            { t: "Per-file passes for local issues, plus a separate integration pass focused on cross-file data flow.", ok: true, why: "Cross-file contracts need their own focused pass." },
-            { t: "One longer single pass over all 22 files with a larger output limit.", trap: "T3", why: "The problem is diluted attention, not output length." },
-            { t: "Require developers to split PRs into batches of fewer than 5 files.", why: "This shifts the burden and still misses cross-PR contracts." },
-            { t: "Only flag issues that appear in at least two of three identical review runs.", why: "Consensus voting suppresses intermittent true positives." }
+            { t: "Drop the integration pass and run longer, more detailed per-file passes instead.", why: "Loses cross-file checks entirely, which per-file passes can't do." },
+            { t: "Scope the integration pass to cross-file concerns and give it the per-file findings.", ok: true, why: "Each pass needs its own focus; passing earlier findings prevents repetition." },
+            { t: "Post only the integration pass's comments, since it sees every file.", why: "Throws away the per-file passes' more detailed local findings." },
+            { t: "Before posting, drop any comment whose text exactly matches one from an earlier pass, keeping the first copy.", why: "Rephrased duplicates slip through. Fix the integration pass's scope." }
           ]
         }
       ]

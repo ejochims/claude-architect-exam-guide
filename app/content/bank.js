@@ -159,29 +159,29 @@ window.BANK = [
     id: "b5-2", ts: "4.2", scenario: 5,
     stem: "The security reviewer flags parameterized queries as SQL injection in about 30% of PRs. Its criteria already say “flag only user input concatenated into SQL.” What helps most next?",
     options: [
-      { t: "Add few-shot examples contrasting safe parameterized queries with real concatenation.", ok: true, why: "Examples of acceptable vs problematic patterns cut false positives and generalize." },
-      { t: "Add “be conservative about SQL injection findings” to the prompt.", trap: "T9", why: "A general exhortation." },
-      { t: "Disable the security review category entirely.", why: "Security findings are the most valuable category. Fix this one pattern instead." },
-      { t: "Only post findings the model rates 9/10 or higher.", trap: "T4", why: "Uncalibrated confidence." }
+      { t: "Add few-shot examples contrasting safe parameterized queries with real concatenation.", ok: true, why: "When criteria are clear but misapplied, examples of acceptable vs genuine patterns fix it." },
+      { t: "Add “be conservative about SQL injection findings” to the security reviewer's prompt.", trap: "T9", why: "Vague caution doesn't teach the distinction." },
+      { t: "Disable the security category until the false-positive rate drops below 10%.", why: "Turns off a high-value category; the fix here is targeted examples." },
+      { t: "Post only findings the model rates 9/10 or higher on its own confidence scale.", trap: "T4", why: "Raw self-ratings are uncalibrated; false positives are often rated confidently." }
     ]
   },
   {
     id: "b5-3", ts: "4.6", scenario: 5,
     stem: "The team wants clear-cut findings posted automatically and borderline ones sent to a human reviewer queue. What design supports this?",
     options: [
-      { t: "Have a verification pass report confidence per finding, with routing thresholds calibrated on labeled reviews.", ok: true, why: "Calibrated confidence per finding enables review routing." },
-      { t: "Post every finding automatically and let developers decide which ones matter.", why: "This erodes trust." },
-      { t: "Route findings to the human queue based only on which category they belong to.", why: "Categories vary in clarity within themselves." },
-      { t: "Use the model's raw self-rated confidence with a 0.5 cutoff to decide.", trap: "T4", why: "Uncalibrated thresholds mis-route." }
+      { t: "Post every finding automatically and let developers decide, tracking which ones they dismiss over time.", why: "No routing at all, and borderline findings erode trust." },
+      { t: "Have a verification pass score each finding's confidence, with thresholds calibrated on labeled reviews.", ok: true, why: "Calibrated confidence is a sound way to route review effort." },
+      { t: "Route findings to the human queue by category, sending all security findings there.", why: "Category isn't certainty; clear-cut security bugs get delayed and borderline style issues get posted." },
+      { t: "Route on the model's raw self-rated confidence, with a 0.5 cutoff.", trap: "T4", why: "Uncalibrated, the cutoff is arbitrary." }
     ]
   },
   {
     id: "b5-4", ts: "4.5", scenario: 5,
     stem: "A job starts at 6 pm and generates test suggestions for the next morning's release. If they aren't ready by 9 am, the release is blocked. Someone proposes the Message Batches API to halve the cost. What's the right call?",
     options: [
-      { t: "Use synchronous calls. The 15-hour window is shorter than the batch API's 24-hour worst case, and a miss blocks the release.", ok: true, why: "Batch fits only when the deadline tolerates the documented worst case, not the typical completion time." },
+      { t: "Use synchronous calls: the 15-hour window is shorter than batch's 24-hour worst case, and a miss blocks the release.", ok: true, why: "Batch fits only when the deadline tolerates the documented worst case, not the typical completion time." },
       { t: "Use batch. Overnight, latency-tolerant work is the textbook batch case, and most batches finish within an hour.", why: "It's the textbook case only when a late result is acceptable. Here a miss blocks the release, so “usually” isn't enough." },
-      { t: "Use batch and give each file a custom_id, so finished suggestions can be published as each request completes.", why: "custom_id correlates results, but it doesn't change the 24-hour worst case for the batch as a whole." },
+      { t: "Use batch and give each file a custom_id, so each finished suggestion can be published as soon as its request completes.", why: "custom_id correlates results, but it doesn't change the 24-hour worst case for the batch as a whole." },
       { t: "Use batch, split into twelve smaller batches so that each one finishes well before 9 am.", trap: "T2", why: "Every batch carries the same 24-hour worst case. Splitting adds work without changing the guarantee." }
     ]
   },
@@ -199,20 +199,20 @@ window.BANK = [
     id: "b5-6", ts: "4.1", scenario: 5,
     stem: "The reviewer's “documentation” category flags any function without a docstring, including one-line private helpers. Developers ignore it. Best prompt change?",
     options: [
-      { t: "Define explicit criteria: flag missing docs only on public APIs and contradicting comments; skip private helpers.", ok: true, why: "Categorical criteria target what matters." },
-      { t: "Tell the reviewer to be less strict about documentation findings from now on.", trap: "T9", why: "Vague." },
-      { t: "Cap documentation findings at 3 per PR so they don't crowd out others.", why: "Arbitrary. It still posts low-value items." },
-      { t: "Have the model rate each doc finding's importance and drop low ones.", trap: "T4", why: "Uncalibrated self-rating." }
+      { t: "Define criteria: flag missing docs only on public APIs and contradicting comments.", ok: true, why: "Explicit criteria fix the false positives at their source." },
+      { t: "Tell the reviewer to be less strict about documentation findings.", trap: "T9", why: "Vague guidance with no criteria." },
+      { t: "Cap documentation findings at three per PR, so they don't crowd out the security and correctness categories.", why: "Caps the noise but keeps the wrong findings." },
+      { t: "Have the model rate each documentation finding's importance and drop those rated below 5.", trap: "T4", why: "Uncalibrated ratings don't fix unclear criteria." }
     ]
   },
   {
     id: "b5-7", ts: "4.2", scenario: 5,
     stem: "CI review findings vary in shape: some include a suggested fix, some lack line numbers, and severity wording differs. Instructions already list the required fields. What most improves consistency?",
     options: [
-      { t: "Add few-shot examples of complete findings in the exact format: location, issue, severity, fix.", ok: true, why: "Examples are the most effective lever for consistent formatting when instructions alone vary." },
-      { t: "Repeat the required field list three times in the prompt for emphasis.", trap: "T9", why: "Repetition isn't demonstration." },
-      { t: "Lower the temperature so the format is consistent.", why: "Consistent isn't the same as correctly formatted." },
-      { t: "Post-process findings with regex to fill in missing fields.", trap: "T6", why: "Fragile. Also consider --json-schema for guaranteed shape." }
+      { t: "Add few-shot examples of complete findings in the exact required format.", ok: true, why: "When instructions alone give inconsistent output, examples of the exact format fix it." },
+      { t: "Repeat the required field list three times in the prompt for emphasis.", trap: "T9", why: "Repetition adds no new information." },
+      { t: "Lower the temperature to 0 so the output format stays the same every run.", why: "Makes each output more repeatable, not more complete. Missing fields stay missing." },
+      { t: "Post-process findings with regular expressions that fill in missing fields with defaults.", trap: "T6", why: "Defaults hide missing information, such as a line number nobody knows." }
     ]
   },
 
@@ -265,20 +265,20 @@ window.BANK = [
     id: "b6-1", ts: "4.4", scenario: 6,
     stem: "Extracted invoices sometimes have line items that don't add up to the stated total, and you can't tell whether the document or the extraction is wrong. What schema change helps most?",
     options: [
-      { t: "Extract calculated_total and stated_total plus a conflict_detected flag, and route conflicts to review.", ok: true, why: "Self-checking fields let code flag discrepancies automatically." },
-      { t: "Extract only the stated total, since that's the figure downstream systems use.", why: "This hides discrepancies." },
-      { t: "Instruct the model to adjust the line items so they match the total.", why: "This forces fabrication." },
-      { t: "Retry the extraction until the totals match.", trap: "T6", why: "If the document is inconsistent, this produces false agreement." }
+      { t: "Extract both <code>calculated_total</code> and <code>stated_total</code>, and flag any mismatch for human review.", ok: true, why: "Extracting both values exposes the discrepancy instead of hiding it." },
+      { t: "Extract only <code>stated_total</code>, since that's the figure the downstream ledger system uses.", why: "Hides the discrepancy you need to see." },
+      { t: "Tell the model to adjust the line items so they add up to the stated total.", why: "Fabricates data to hide a conflict." },
+      { t: "Retry the extraction until the line items match the total.", trap: "T6", why: "If the document itself is inconsistent, retries can only fabricate agreement." }
     ]
   },
   {
     id: "b6-2", ts: "4.3", scenario: 6,
     stem: "Some agreements are genuinely ambiguous between “lease” and “service agreement.” The schema's <code>contract_type</code> enum forces a choice, and those records are often wrong. Best change?",
     options: [
-      { t: "Add an \"unclear\" enum value and route those records to human review.", ok: true, why: "An explicit ambiguity value prevents forced guesses." },
-      { t: "Change contract_type to free text.", why: "This loses normalization for the clear majority." },
-      { t: "Default to whichever contract type is more common.", why: "A systematic bias." },
-      { t: "Ask for a confidence score and keep the guess.", trap: "T4", why: "Still a forced guess." }
+      { t: "Add an <code>\"unclear\"</code> value to the enum and route those records to human review.", ok: true, why: "Ambiguity becomes explicit and goes to a person." },
+      { t: "Change <code>contract_type</code> to free text so the model can describe hybrid agreements in its own words.", why: "Loses the categorization downstream systems depend on." },
+      { t: "Default ambiguous agreements to whichever contract type appears more often in the portfolio.", why: "Systematically mislabels the minority type." },
+      { t: "Ask for a confidence score with each classification and keep the guess either way.", trap: "T4", why: "Records the uncertainty but still keeps a guess as fact." }
     ]
   }
 ];
