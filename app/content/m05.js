@@ -10,6 +10,43 @@ window.LESSONS.m05 = {
   steps: [
     {
       kind: "read",
+      title: "Why MCP exists",
+      html: `
+<p class="lede">Before MCP, every AI application connected to every data source with its own custom code. A support bot, an IDE assistant and an internal research agent that all needed the ticketing system each built and maintained their own integration.</p>
+<p>That doesn't scale. With several AI apps and several systems, the number of integrations grows with <em>apps × systems</em>, and each one breaks separately when an API changes. (That “N×M” framing is our summary; Anthropic's announcement put it as every new data source needing its own custom implementation.)</p>
+<p><strong>Anthropic introduced the Model Context Protocol on November 25, 2024</strong> as an open standard for connecting AI assistants to the systems where data lives. Each system is exposed once, as an <strong>MCP server</strong>, and any MCP-capable application can use it. The integrations needed drop to roughly <em>apps + systems</em> (<a href="https://www.anthropic.com/news/model-context-protocol" target="_blank" rel="noopener">source</a>).</p>
+<p>It's an open protocol rather than a Claude-only plugin format because the value grows with adoption: a server written for one client works with others. In December 2025 Anthropic donated MCP to the Agentic AI Foundation, a fund under the Linux Foundation, to keep it vendor-neutral (<a href="https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation" target="_blank" rel="noopener">source</a>).</p>
+<h3>How it runs</h3>
+<svg viewBox="0 0 640 210" role="img" aria-label="A host application contains MCP clients, each connected to one MCP server that wraps a system" style="width:100%;height:auto;margin:6px 0 14px">
+  <rect x="10" y="20" width="250" height="170" rx="12" style="fill:var(--accent-soft);stroke:var(--accent)"/>
+  <text x="135" y="46" text-anchor="middle" style="fill:var(--accent-ink);font:600 15px var(--sans)">Host</text>
+  <text x="135" y="66" text-anchor="middle" style="fill:var(--accent-ink);font:12.5px var(--sans)">Claude Code, Claude Desktop, your app</text>
+  <rect x="40" y="86" width="190" height="36" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+  <text x="135" y="109" text-anchor="middle" style="fill:var(--fg);font:13px var(--sans)">MCP client → server A</text>
+  <rect x="40" y="134" width="190" height="36" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+  <text x="135" y="157" text-anchor="middle" style="fill:var(--fg);font:13px var(--sans)">MCP client → server B</text>
+  <rect x="330" y="80" width="140" height="48" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+  <text x="400" y="101" text-anchor="middle" style="fill:var(--fg);font:600 13px var(--sans)">Server A</text>
+  <text x="400" y="118" text-anchor="middle" style="fill:var(--muted);font:12px var(--sans)">local process</text>
+  <rect x="330" y="140" width="140" height="48" rx="8" style="fill:var(--surface);stroke:var(--line)"/>
+  <text x="400" y="161" text-anchor="middle" style="fill:var(--fg);font:600 13px var(--sans)">Server B</text>
+  <text x="400" y="178" text-anchor="middle" style="fill:var(--muted);font:12px var(--sans)">remote, over HTTP</text>
+  <rect x="520" y="80" width="110" height="48" rx="8" style="fill:var(--sunk);stroke:var(--line)"/>
+  <text x="575" y="109" text-anchor="middle" style="fill:var(--fg);font:13px var(--sans)">Ticketing</text>
+  <rect x="520" y="140" width="110" height="48" rx="8" style="fill:var(--sunk);stroke:var(--line)"/>
+  <text x="575" y="169" text-anchor="middle" style="fill:var(--fg);font:13px var(--sans)">Database</text>
+  <path d="M230 104 H330 M230 152 L330 164 M470 104 H520 M470 164 H520" style="stroke:var(--fg);stroke-width:2;fill:none"/>
+</svg>
+<ul>
+<li>The <strong>host</strong> is the AI application. It holds one <strong>MCP client</strong> per server it connects to.</li>
+<li>When it connects, the client asks the server what it offers (<code>tools/list</code>), so Claude sees each tool's name, description and input schema, just like the tools in Foundations F2.</li>
+<li>When Claude wants a tool, the host sends <code>tools/call</code> and <strong>the server executes it</strong> against the real system, returning a result or an error marked <code>isError</code>.</li>
+<li>A server runs either as a local process the host starts (the <em>stdio</em> transport) or as a remote service over HTTP (<a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports" target="_blank" rel="noopener">transports</a>). Hosting and deploying servers is out of scope for the exam.</li>
+</ul>
+<div class="callout key"><div class="callout-label">Why three primitives</div><p>The next step introduces tools, resources and prompts. They differ in <em>who decides when they're used</em>: the model picks tools, the application chooses which resources to load, and the user invokes prompts. Splitting them lets each actor keep control of what it should control.</p></div>`
+    },
+    {
+      kind: "read",
       title: "First principle: integrate once",
       html: `
 <p class="lede">The Model Context Protocol is a standard way to expose a system to any AI client. Write an MCP server for your ticketing system once, and Claude Code, an Agent SDK app and Claude Desktop can all use it.</p>

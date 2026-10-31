@@ -1,6 +1,6 @@
 // App engine: state + sync, derived progress, views (path, lessons, practice, drills, mock exam, flashcards, blueprint), router.
 (function () {
-  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [];
+  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
   const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null });
@@ -201,7 +201,7 @@
   <div>
     <div class="eyebrow">Claude Certified Architect – Foundations</div>
     <h1>Exam-ready by <em>December 31</em></h1>
-    <p>Fourteen short modules that build from first principles to exam judgment, mapped to every task statement in the official blueprint.</p>
+    <p>Three foundation lessons, then fourteen modules that build from first principles to exam judgment, mapped to every task statement in the official blueprint. No other material needed.</p>
   </div>
   <div class="goal">
     <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
@@ -248,6 +248,16 @@ ${nm ? `<section class="cont">
 <div class="read page-head"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ""}</div>`;
   }
 
+  function viewGlossary() {
+    const modOf = id => MODS.find(m => m.id === id);
+    app.innerHTML = `${pageHead("Glossary", "Every term in one place", "Each entry links to the lesson that explains it.")}
+<input id="gq" class="sel" type="search" placeholder="Search terms" aria-label="Search terms" style="width:100%;margin-bottom:16px">
+<div class="bp-rows" id="gl"></div>`;
+    const list = document.getElementById("gl");
+    const draw = q => { const t = q.trim().toLowerCase(); list.innerHTML = GLOSS.filter(([k, , d]) => !t || (k + " " + d).toLowerCase().includes(t)).sort((a, b) => a[0].localeCompare(b[0])).map(([k, id, d]) => { const m = modOf(id); return `<div class="bp-row"><span><strong>${esc(k)}</strong><br><span class="small">${esc(d)}</span></span><span class="bp-mod">${m ? `<a href="#${m.id}">Module ${m.n} →</a>` : ""}</span></div>`; }).join("") || `<p class="small">No matching terms.</p>`; };
+    document.getElementById("gq").addEventListener("input", e => draw(e.target.value));
+    draw("");
+  }
   function viewToday() {
     app.innerHTML = `${pageHead("Exam vs. today", "Answer the exam in its own terms", "The exam blueprint was written before some product changes. On the exam, choose the blueprint's answer. At work, use what ships today. Every row links to the official source.")}
 <div class="bp-rows">${TODAY.map(r => `<div class="panel" style="margin-bottom:14px">
@@ -533,7 +543,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
   // ---------- Router ----------
   function route() {
     const h = location.hash.replace(/^#/, "");
-    const m = h.match(/^(m\d\d)(?:-(\d+))?$/);
+    const m = h.match(/^([fm]\d\d)(?:-(\d+))?$/);
     if (m && L[m[1]]) {
       let s;
       if (m[2]) s = Number(m[2]) - 1;
@@ -542,7 +552,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     }
     const d = h.match(/^drill-([1-6])$/);
     if (d) return { drill: Number(d[1]), page: "practice" };
-    if (["blueprint", "today", "practice", "mock", "mock-result", "cards"].includes(h)) return { page: h };
+    if (["blueprint", "today", "glossary", "practice", "mock", "mock-result", "cards"].includes(h)) return { page: h };
     return { page: "path" };
   }
   function render() {
@@ -554,6 +564,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     else if (r.drill) viewDrill(r.drill);
     else if (r.page === "blueprint") viewBlueprint();
     else if (r.page === "today") viewToday();
+    else if (r.page === "glossary") viewGlossary();
     else if (r.page === "practice") viewPractice();
     else if (r.page === "mock") viewMock();
     else if (r.page === "mock-result") viewMockResult();

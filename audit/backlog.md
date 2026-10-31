@@ -36,6 +36,18 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | R3 | Fixed: the mock intro says "about 60 questions (the count is unofficial)". |
 | Still open | Mock domain quotas remain infeasible for some draws. Weighted scoring makes scores comparable; a feasible bank comes with batches 4–5. |
 
+### Batch 3 (2026-10-31): Foundations, MCP's "why", logistics, glossary
+
+| Item | Status |
+|---|---|
+| P1 (BLOCKING) | Fixed: **F2 "Tool use from scratch"**. A tool definition, JSON Schema basics, and the full round trip as annotated JSON (`tool_use` → your code executes → `tool_result`, plus `is_error`), with a sequence diagram. |
+| P2, P4 (BLOCKING) | Fixed: **F3 "The Claude product map"**. API vs Agent SDK vs Claude Code vs MCP: what each is, why it exists, who runs the loop, and which exam domains live where, with a layered diagram and sourced history (Claude Code, Feb 2025; Claude Code SDK renamed Agent SDK, Sep 2025). |
+| P3, P8 (BLOCKING / MAJOR) | Fixed: **new m05 step 0, "Why MCP exists"**. The integration problem before MCP ("N×M" labeled as our gloss), the 2024-11-25 launch, the open-standard rationale, the Dec 2025 donation to the Linux Foundation (all sourced), a host/client/server diagram, `tools/list` and `tools/call`, who executes, the transports (verified against spec 2025-11-25), and why there are three primitives. |
+| P6 (MAJOR) | Fixed: **F1 "What a Claude call really is"**. HTTP/API/SDK, request anatomy, content blocks and `stop_reason`, tokens, the context window, `max_tokens`, roles and the system prompt, with a diagram. Plus a **searchable glossary** (`#glossary`, 50 terms, each linked to its lesson) and a nav link. |
+| R4, F10 | Fixed: m00 opens with verified logistics (120 min, 100–1,000 scale, 720, $125, Partner Network, 4 attempts in 12 months, 12-month validity), the 60-question count labeled unofficial, the multiple-response and guide-update warnings, sources, and the booking rule. |
+| Note | Inserting m05 step 0 shifts m05's step indices by one. Saved step-completion for m05 may be off by one, and older audit references to `m05:i` mean the pre-batch numbering. |
+| Still open | P5: move the m00 quiz and trap spotter to a capstone. P7: "Why it exists" panels for the remaining primitives below 10/12. The 4 preparation exercises as in-app labs. |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |
