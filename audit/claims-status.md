@@ -3,7 +3,7 @@
 Every non-CORRECT row in `claims-log.csv` with its outcome. **Method:** guide rows were fixed one by one (see `consistency.md`). For the app, every row still matching current text was reviewed and patched in batches 1, 4 and 10, and the rest were changed by the item rewrites. App statuses below are assigned by verdict class and were not re-verified row by row by an independent reviewer.
 
 Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and marked with a "Real world today" note, an exam-framing why, or the Exam vs. today page), **accepted** (exam guidance with no official source to contradict it; kept as written), **open**.
-**Totals:** accepted: 10, fixed: 90, flagged: 89, open (S3, guide): 52. The remaining guide items are S3 wording issues in the secondary companion guide; the app, the primary study path, has none open.
+**Totals:** accepted: 26, fixed: 126, flagged: 89, open: 0. The 52 S3 guide items were closed on 2026-10-31: 36 reworded and 16 accepted as design or practice guidance, with no official source to contradict them.
 
 
 | Claim | Sev | Verdict | Location | Status |
@@ -46,8 +46,8 @@ Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and mark
 | D1-205 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1136 §8 | fixed |
 | D1-210 | S1 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1157 §8 | fixed |
 | D1-211 | S2 | WRONG | exam-preparation-guide.md:1157 §8 | fixed |
-| D1-214 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1165 §8 | open (S3, guide) |
-| D1-218 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:1211 §8 | open (S3, guide) |
+| D1-214 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1165 §8 | fixed |
+| D1-218 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:1211 §8 | fixed |
 | D1-224 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1854 §13 | fixed |
 | D1-225 | S1 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1855 §13 | fixed |
 | D1-232 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1879 §13 | fixed |
@@ -91,22 +91,22 @@ Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and mark
 | D2-107 | S3 | WRONG | app/content/bank.js:133 b4-7 | fixed |
 | D2-113 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:156-161 §2 | fixed |
 | D2-116 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:188-190 §2 | fixed |
-| D2-122 | S3 | UNVERIFIABLE | exam-preparation-guide.md:256 §2 | open (S3, guide) |
-| D2-125 | S3 | UNVERIFIABLE | exam-preparation-guide.md:270-285 §2 | open (S3, guide) |
-| D2-126 | S3 | UNVERIFIABLE | exam-preparation-guide.md:289-297 §2 | open (S3, guide) |
-| D2-127 | S3 | UNVERIFIABLE | exam-preparation-guide.md:303 §2 | open (S3, guide) |
+| D2-122 | S3 | UNVERIFIABLE | exam-preparation-guide.md:256 §2 | fixed |
+| D2-125 | S3 | UNVERIFIABLE | exam-preparation-guide.md:270-285 §2 | accepted |
+| D2-126 | S3 | UNVERIFIABLE | exam-preparation-guide.md:289-297 §2 | accepted |
+| D2-127 | S3 | UNVERIFIABLE | exam-preparation-guide.md:303 §2 | accepted |
 | D2-133 | S1 | OUTDATED | exam-preparation-guide.md:366 §3 | fixed |
 | D2-135 | S1 | OUTDATED | exam-preparation-guide.md:369-371 §3 | fixed |
-| D2-138 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:385 §3 | open (S3, guide) |
-| D2-141 | S3 | UNVERIFIABLE | exam-preparation-guide.md:403 §3 | open (S3, guide) |
-| D2-145 | S3 | WRONG | exam-preparation-guide.md:927 §7 | open (S3, guide) |
+| D2-138 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:385 §3 | fixed |
+| D2-141 | S3 | UNVERIFIABLE | exam-preparation-guide.md:403 §3 | fixed |
+| D2-145 | S3 | WRONG | exam-preparation-guide.md:927 §7 | fixed |
 | D2-146 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:931 §7 | fixed |
-| D2-152 | S3 | WRONG | exam-preparation-guide.md:964 §7 | open (S3, guide) |
+| D2-152 | S3 | WRONG | exam-preparation-guide.md:964 §7 | fixed |
 | D2-154 | S1 | OUTDATED | exam-preparation-guide.md:972 §7 | fixed |
 | D2-156 | S1 | OUTDATED | exam-preparation-guide.md:975 §7 | fixed |
-| D2-164 | S3 | OUTDATED | exam-preparation-guide.md:1002-1012 §7 | open (S3, guide) |
+| D2-164 | S3 | OUTDATED | exam-preparation-guide.md:1002-1012 §7 | fixed |
 | D2-165 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1016 §7 | fixed |
-| D2-168 | S3 | OUTDATED | exam-preparation-guide.md:1021 §7 | open (S3, guide) |
+| D2-168 | S3 | OUTDATED | exam-preparation-guide.md:1021 §7 | fixed |
 | D2-171 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1760 §13 | fixed |
 | D2-174 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1769 §13 | fixed |
 | D2-178 | S1 | OUTDATED | exam-preparation-guide.md:1785 §13 | fixed |
@@ -147,24 +147,24 @@ Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and mark
 | D3-144 | S2 | OUTDATED | exam-preparation-guide.md:29-37 | fixed |
 | D3-146 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1328-1336 | fixed |
 | D3-163 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1428 | fixed |
-| D3-170 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1478 | open (S3, guide) |
-| D3-171 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1484-1485 | open (S3, guide) |
-| D3-176 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1507 | open (S3, guide) |
+| D3-170 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1478 | fixed |
+| D3-171 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1484-1485 | fixed |
+| D3-176 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1507 | fixed |
 | D3-177 | S1 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1508 | fixed |
 | D3-179 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1512 | fixed |
 | D3-188 | S2 | WRONG | exam-preparation-guide.md:1547 | fixed |
 | D3-190 | S2 | WRONG | exam-preparation-guide.md:1549 | fixed |
-| D3-191 | S3 | WRONG | exam-preparation-guide.md:1550 | open (S3, guide) |
+| D3-191 | S3 | WRONG | exam-preparation-guide.md:1550 | fixed |
 | D3-195 | S2 | WRONG | exam-preparation-guide.md:1582 | fixed |
-| D3-196 | S3 | OUTDATED | exam-preparation-guide.md:1583 | open (S3, guide) |
-| D3-197 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1593 | open (S3, guide) |
-| D3-201 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1620 | open (S3, guide) |
-| D3-204 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1640 | open (S3, guide) |
-| D3-205 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1642 | open (S3, guide) |
-| D3-206 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1644 | open (S3, guide) |
-| D3-207 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:1660 | open (S3, guide) |
+| D3-196 | S3 | OUTDATED | exam-preparation-guide.md:1583 | fixed |
+| D3-197 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1593 | accepted |
+| D3-201 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1620 | accepted |
+| D3-204 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1640 | accepted |
+| D3-205 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1642 | accepted |
+| D3-206 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1644 | fixed |
+| D3-207 | S3 | ILLUSTRATIVE-UNLABELED | exam-preparation-guide.md:1660 | fixed |
 | D3-211 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1876 | fixed |
-| D3-216 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1882 | open (S3, guide) |
+| D3-216 | S3 | EXAM-FRAMING | exam-preparation-guide.md:1882 | fixed |
 | D3-217 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1883 | fixed |
 | D3-221 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1887 | fixed |
 | D4-003 | S2 | EXAM-FRAMING-UNFLAGGED | app/content/m08.js:5 m08:c2 | flagged |
@@ -194,29 +194,29 @@ Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and mark
 | D4-111 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:71-76 §1 | fixed |
 | D4-112 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:78 §1 | fixed |
 | D4-113 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:80 §1 | fixed |
-| D4-114 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:84-88 §1 | open (S3, guide) |
-| D4-117 | S3 | UNVERIFIABLE | exam-preparation-guide.md:90 §1 | open (S3, guide) |
+| D4-114 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:84-88 §1 | fixed |
+| D4-117 | S3 | UNVERIFIABLE | exam-preparation-guide.md:90 §1 | fixed |
 | D4-119 | S2 | OUTDATED | exam-preparation-guide.md:96 §1 | fixed |
-| D4-120 | S3 | UNVERIFIABLE | exam-preparation-guide.md:103 §1 | open (S3, guide) |
+| D4-120 | S3 | UNVERIFIABLE | exam-preparation-guide.md:103 §1 | fixed |
 | D4-121 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:114 §1 | fixed |
-| D4-122 | S3 | WRONG | exam-preparation-guide.md:135 §1 | open (S3, guide) |
+| D4-122 | S3 | WRONG | exam-preparation-guide.md:135 §1 | fixed |
 | D4-128 | S2 | WRONG | exam-preparation-guide.md:460 §4 | fixed |
-| D4-130 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:464 §4 | open (S3, guide) |
-| D4-134 | S3 | OUTDATED | exam-preparation-guide.md:503 §4 | open (S3, guide) |
-| D4-136 | S3 | WRONG | exam-preparation-guide.md:533-540 §4 | open (S3, guide) |
+| D4-130 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:464 §4 | fixed |
+| D4-134 | S3 | OUTDATED | exam-preparation-guide.md:503 §4 | fixed |
+| D4-136 | S3 | WRONG | exam-preparation-guide.md:533-540 §4 | fixed |
 | D4-145 | S1 | WRONG | exam-preparation-guide.md:607 §4 | fixed |
-| D4-151 | S3 | UNVERIFIABLE | exam-preparation-guide.md:814 §6 | open (S3, guide) |
-| D4-155 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:845 §6 | open (S3, guide) |
-| D4-158 | S3 | UNVERIFIABLE | exam-preparation-guide.md:862 §6 | open (S3, guide) |
-| D4-159 | S3 | UNVERIFIABLE | exam-preparation-guide.md:887-891 §6 | open (S3, guide) |
+| D4-151 | S3 | UNVERIFIABLE | exam-preparation-guide.md:814 §6 | accepted |
+| D4-155 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:845 §6 | fixed |
+| D4-158 | S3 | UNVERIFIABLE | exam-preparation-guide.md:862 §6 | accepted |
+| D4-159 | S3 | UNVERIFIABLE | exam-preparation-guide.md:887-891 §6 | accepted |
 | D4-160 | S2 | OUTDATED | exam-preparation-guide.md:895-900 §6 | fixed |
 | D4-161 | S2 | OUTDATED | exam-preparation-guide.md:902 §6 | fixed |
-| D4-175 | S3 | WRONG | exam-preparation-guide.md:1718 §12 | open (S3, guide) |
+| D4-175 | S3 | WRONG | exam-preparation-guide.md:1718 §12 | fixed |
 | D4-177 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1724 §12 | fixed |
-| D4-179 | S3 | WRONG | exam-preparation-guide.md:1733 §12 | open (S3, guide) |
+| D4-179 | S3 | WRONG | exam-preparation-guide.md:1733 §12 | fixed |
 | D4-184 | S2 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1760 §13 | fixed |
 | D4-185 | S2 | OUTDATED | exam-preparation-guide.md:1761 §13 | fixed |
-| D4-190 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1825-1826 §13 | open (S3, guide) |
+| D4-190 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1825-1826 §13 | accepted |
 | D5-005 | S2 | EXAM-FRAMING-UNFLAGGED | app/content/m07.js:7 m07:c4 | flagged |
 | D5-009 | S3 | ILLUSTRATIVE-UNLABELED | app/content/m07.js:19 m07:0 | fixed |
 | D5-024 | S3 | WRONG | app/content/m07.js:58 q07-1 (opt A, T3) | fixed |
@@ -234,18 +234,18 @@ Statuses: **fixed** (wording corrected), **flagged** (exam framing kept and mark
 | D5-094 | S1 | WRONG | app/content/curriculum.js:78 T4 (tell) | fixed |
 | D5-095 | S2 | WRONG | app/content/curriculum.js:78 T4 (why) | fixed |
 | D5-096 | S2 | WRONG | app/content/m00.js:57 q00-2 (opt, T4) [c | fixed |
-| D5-106 | S3 | UNVERIFIABLE | exam-preparation-guide.md:643 §5 | open (S3, guide) |
-| D5-110 | S3 | UNVERIFIABLE | exam-preparation-guide.md:696-701 §5 | open (S3, guide) |
-| D5-111 | S3 | UNVERIFIABLE | exam-preparation-guide.md:703 §5 | open (S3, guide) |
-| D5-116 | S3 | UNVERIFIABLE | exam-preparation-guide.md:731 §5 | open (S3, guide) |
-| D5-120 | S3 | OUTDATED | exam-preparation-guide.md:759 §5 | open (S3, guide) |
-| D5-122 | S3 | UNVERIFIABLE | exam-preparation-guide.md:771 §5 | open (S3, guide) |
-| D5-127 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1519 §10 | open (S3, guide) |
-| D5-135 | S3 | WRONG | exam-preparation-guide.md:1237 §9 | open (S3, guide) |
+| D5-106 | S3 | UNVERIFIABLE | exam-preparation-guide.md:643 §5 | fixed |
+| D5-110 | S3 | UNVERIFIABLE | exam-preparation-guide.md:696-701 §5 | fixed |
+| D5-111 | S3 | UNVERIFIABLE | exam-preparation-guide.md:703 §5 | accepted |
+| D5-116 | S3 | UNVERIFIABLE | exam-preparation-guide.md:731 §5 | accepted |
+| D5-120 | S3 | OUTDATED | exam-preparation-guide.md:759 §5 | fixed |
+| D5-122 | S3 | UNVERIFIABLE | exam-preparation-guide.md:771 §5 | accepted |
+| D5-127 | S3 | EXAM-FRAMING-UNFLAGGED | exam-preparation-guide.md:1519 §10 | fixed |
+| D5-135 | S3 | WRONG | exam-preparation-guide.md:1237 §9 | fixed |
 | D5-136 | S2 | WRONG | exam-preparation-guide.md:1238 §9 | fixed |
-| D5-143 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1288-1292 §9 | open (S3, guide) |
-| D5-146 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1307 §9 | open (S3, guide) |
-| D5-150 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1808 §13 | open (S3, guide) |
-| D5-152 | S3 | WRONG | exam-preparation-guide.md:1813 §13 | open (S3, guide) |
-| D5-154 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1825 §13 | open (S3, guide) |
-| D5-155 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1826 §13 | open (S3, guide) |
+| D5-143 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1288-1292 §9 | accepted |
+| D5-146 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1307 §9 | fixed |
+| D5-150 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1808 §13 | fixed |
+| D5-152 | S3 | WRONG | exam-preparation-guide.md:1813 §13 | fixed |
+| D5-154 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1825 §13 | fixed |
+| D5-155 | S3 | UNVERIFIABLE | exam-preparation-guide.md:1826 §13 | accepted |
