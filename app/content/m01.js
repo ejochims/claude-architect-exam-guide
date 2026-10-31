@@ -12,6 +12,7 @@ window.LESSONS.m01 = {
       title: "First principle: the model is a function",
       html: `
 <p class="lede">Every call to Claude is a pure function. Input goes in (system prompt, message history, tool definitions) and output comes back (content blocks plus a <code>stop_reason</code>). Nothing carries over between calls.</p>
+<div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> early LLM apps answered one prompt and stopped; multi-step work (look something up, then act on it) needed a person in between.</li><li><strong>What it is.</strong> a loop in your code: call Claude, run any tools it requests, append the results, and call again until it stops asking.</li><li><strong>Why this design.</strong> the model decides the next step from what it just learned, instead of you scripting every path in advance. Anthropic calls fixed, scripted paths <em>workflows</em> and self-directed loops <em>agents</em>.</li><li><strong>Use it when.</strong> the steps depend on what's found along the way. When the steps never vary, a fixed workflow (prompt chaining) is simpler and more predictable.</li></ul></div>
 <div data-embed="statelessDiagram"></div>
 <p>Two consequences follow, and much of the exam builds on them:</p>
 <ul>

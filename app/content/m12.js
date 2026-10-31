@@ -41,6 +41,7 @@ window.LESSONS.m12 = {
       title: "Sessions: resume, fork, or start fresh",
       html: `
 <p class="lede">Sessions store conversation history, not the state of your files. That shapes when it's safe to pick one up again.</p>
+<div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> real tasks span several sittings, and re-explaining context every time is slow and lossy.</li><li><strong>How sessions work.</strong> Claude Code saves each conversation's transcript locally. <code>--resume</code> reloads one (by name or ID) so it continues with full history; forking copies that history into a new session that then diverges.</li><li><strong>The catch.</strong> a resumed session also brings back old tool results, which may describe code that has since changed.</li><li><strong>Which to use.</strong> resume when nothing relevant changed; tell it what changed when a few files did; fork to explore alternatives; start fresh with a summary when most earlier results are stale.</li></ul></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Situation</th><th>Use</th></tr></thead>
 <tbody>

@@ -22,6 +22,7 @@ window.LESSONS.f01 = {
     {<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"Where is order 1042?"</span>}
   ]
 }</code></pre>
+<p>Nothing persists on Anthropic's side between calls: the API processes each request on its own and doesn't store your conversation for the next one. That's what <em>stateless</em> means.</p>
 <p>The response holds the model's output as a list of <strong>content blocks</strong> (text, or a request to use a tool) and a <code>stop_reason</code> that says why it stopped: it finished (<code>"end_turn"</code>), it wants a tool (<code>"tool_use"</code>), or it hit the length cap (<code>"max_tokens"</code>).</p>
 <svg viewBox="0 0 640 170" role="img" aria-label="Request goes into the model, response comes out, nothing is kept" style="width:100%;height:auto;margin:10px 0">
   <rect x="10" y="40" width="190" height="90" rx="12" style="fill:var(--sunk);stroke:var(--line)"/>
@@ -38,7 +39,7 @@ window.LESSONS.f01 = {
   <path d="M200 85 H240 M395 85 H435" style="stroke:var(--fg);stroke-width:2;fill:none"/>
   <path d="M232 79 l8 6 -8 6 M427 79 l8 6 -8 6" style="stroke:var(--fg);stroke-width:2;fill:none"/>
 </svg>
-<div class="callout key"><div class="callout-label">Why this matters</div><p>Because the model keeps nothing, <strong>your code is its memory</strong>. To continue a conversation you resend the whole history, including Claude's earlier replies as <code>"assistant"</code> messages. Every design question about agents, context and multi-agent systems comes back to this.</p></div>`
+<div class="callout key"><div class="callout-label">Why this matters</div><p>Because the model keeps nothing, <strong>your code is its memory</strong>. To continue a conversation you resend the whole history, including Claude's earlier replies as <code>"assistant"</code> messages. Every design question about agents, context and multi-agent systems comes back to this. (An <strong>agent</strong>, in this course, is a program that calls Claude in a loop, lets it choose tools to act with, and stops when Claude says the task is done. F2 builds one.)</p></div>`
     },
     {
       kind: "read",
@@ -55,8 +56,9 @@ window.LESSONS.f01 = {
 <li><strong>System prompt:</strong> standing instructions and context for the whole conversation, such as the agent's job, policies and output format.</li>
 <li><strong><code>user</code> messages:</strong> what the person (or your program) sends each turn.</li>
 <li><strong><code>assistant</code> messages:</strong> Claude's earlier replies, which you resend as history.</li>
+<li>Roles alternate, user then assistant, and each message's <code>content</code> can be plain text or a list of <em>content blocks</em> (text, a tool request, a tool result), which F2 uses.</li>
 </ul>
-<p>A system prompt shapes behavior, but it's still text the model follows <em>probabilistically</em>. Keep that in mind: when a rule must hold every time, the course will show you how to enforce it in code instead.</p>
+<p>A system prompt shapes behavior, but it's still text the model follows <em>probabilistically</em>: Claude writes its reply by choosing likely next words, and instructions make the desired behavior more likely without making it certain. Keep that in mind: when a rule must hold every time, the course will show you how to enforce it in code instead.</p>
 <div class="callout note"><div class="callout-label">Out of scope</div><p>Tokenizer details, pricing math and prompt-caching mechanics are not tested. You only need the concepts above.</p></div>`
     },
     {

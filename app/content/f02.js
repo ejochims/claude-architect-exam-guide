@@ -26,6 +26,7 @@ window.LESSONS.f02 = {
     <span class="s">"required"</span>: [<span class="s">"order_number"</span>]
   }
 }</code></pre>
+<p>You send tool definitions in the request's <code>tools</code> list, next to <code>model</code>, <code>system</code> and <code>messages</code> from F1: <code>"tools": [ { "name": "get_order", … } ]</code>.</p>
 <p>The <strong>description</strong> is how Claude decides <em>when</em> to use the tool, so it matters as much as the code behind it. Module 2 is about writing it well.</p>
 <h3>JSON Schema in two minutes</h3>
 <p><code>input_schema</code> is written in <strong>JSON Schema</strong>, a standard way to describe the shape of JSON data:</p>
@@ -60,6 +61,7 @@ window.LESSONS.f02 = {
   <path d="M320 275 H98" style="stroke:var(--accent);stroke-width:2"/><path d="M106 269 l-8 6 8 6" style="stroke:var(--accent);stroke-width:2;fill:none"/>
   <text x="205" y="267" text-anchor="middle" style="fill:var(--accent-ink);font:12.5px var(--sans)">⑤ “It arrives Friday.” end_turn</text>
 </svg>
+<p>In words: ① your code sends the question plus the tool list. ② Claude replies with a request to call <code>get_order</code>. ③ <strong>Your code</strong>, not Claude, calls the real order system. ④ Your code sends the result back. ⑤ Claude writes the answer and stops with <code>end_turn</code>.</p>
 <p><strong>② Claude's response</strong> ends with <code>stop_reason: "tool_use"</code> and contains a block like this:</p>
 <pre class="code"><code>{<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"name"</span>: <span class="s">"get_order"</span>,
  <span class="s">"input"</span>: {<span class="s">"order_number"</span>: <span class="s">"A-1042"</span>}}</code></pre>

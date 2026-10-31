@@ -109,7 +109,7 @@ The final panel saw items with shuffled options and no keys or explanations.
 | Readiness measure | latest answer, inflatable by retries | **first attempt only** |
 | Holdout | none | **60-item Readiness Check, taken once** |
 | Mock score | invented scaled score | **domain-weighted % with a 95% range** |
-| Browser suite | — | **234 checks, no problems** (1280px light and 390px dark) |
+| Browser suite | — | **274 checks, no problems** (1280px light and 390px dark, labs included) |
 
 ### What the options-only result means
 
@@ -133,7 +133,7 @@ The official sample questions use the same distractor families (prompt-only fixe
 | 4 | About 200 items, domain targets met, about 60 unseen holdout | **Met** (204 items; 60 holdout). |
 | 5 | Readiness uses first attempts with an interval; caveated score; feasible mock | **Mostly met.** 10 of 15 scenario draws still can't meet every domain quota; scoring is domain-weighted to compensate. |
 | 6 | Zero open S1/S2 contradictions between guide and app | **Met** (`consistency.md`). |
-| 6b | One-stop shop: Foundations, Why-test ≥ 10/12, novice walkthrough with zero blocking issues, labs, glossary | **Partly met.** Foundations, glossary and the MCP "why" are done. The four in-app labs and "Why it exists" panels for every primitive are not built. The novice re-check is recorded below. |
+| 6b | One-stop shop: Foundations, Why-test ≥ 10/12, novice walkthrough with zero blocking issues, labs, glossary | **Mostly met.** Foundations F1–F3, glossary, Exam vs. today, the MCP "why", and **four in-app labs** (L1–L4, one per official preparation exercise) are built. **"Why it exists" panels** were added for the primitives that scored below 10/12. The final novice walkthrough of F1–F3, m05 and m11 found 1 blocking issue (CLAUDE.md and memory undefined) and 16 major ones; all are addressed by the panels and Foundations edits. A re-score of the primitives by a new reviewer wasn't run. |
 | 7 | Scripts and browser suite pass; artifact republished; PR up | **Met.** |
 | 8 | Residual risks listed honestly | Below. |
 
@@ -144,7 +144,5 @@ The official sample questions use the same distractor families (prompt-only fixe
 3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
 4. **Some open items remain:**
    - app-side S2 and S3 claims in `claims-log.csv`;
-   - in-app labs for the 4 preparation exercises;
-   - "Why it exists" panels for the remaining primitives below 10/12;
    - moving the m00 quiz to a capstone;
    - mock domain-quota feasibility for 10 of 15 draws.

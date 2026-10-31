@@ -10,7 +10,7 @@ const CONTENT = path.join(ROOT, "app/content");
 export function loadContent() {
   const ctx = { window: {} };
   vm.createContext(ctx);
-  const lessons = fs.readdirSync(CONTENT).filter(f => /^m\d+\.js$/.test(f)).sort();
+  const lessons = fs.readdirSync(CONTENT).filter(f => /^[fml]\d+\.js$/.test(f)).sort();
   const extra = fs.existsSync(path.join(CONTENT, "holdout.js")) ? ["holdout.js"] : [];
   for (const f of ["curriculum.js", ...lessons, "bank.js", ...extra]) vm.runInContext(fs.readFileSync(path.join(CONTENT, f), "utf8"), ctx, { filename: f });
   const w = ctx.window;

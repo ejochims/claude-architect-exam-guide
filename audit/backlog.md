@@ -89,6 +89,15 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 - **Residual risk: the same author wrote the holdout and the practice rewrites.** The plan called for separate author agents; efficiency mode dropped that. Batch 7's blind solver on the holdout is the independence check.
 - **Still open: 10 of 15 mock draws can't meet every domain quota** from the practice pool. Scoring is domain-weighted, so results stay comparable, but some draws under-sample D1 or D3.
 
+### Batch 8 (2026-10-31): labs and "Why it exists" panels
+
+| Item | Status |
+|---|---|
+| P7: "why this design" weakest across primitives | **Panels added** in m01 (agentic loop; workflows vs agents), m02 (built-in tools), m03 (hooks), m05 (tools, resources and prompts), m06 (hub-and-spoke, evaluator-optimizer, allowedTools vs tools vs allowed-tools), m07 (/compact, scratchpad, Explore, manifests), m08 (few-shot), m11 (CLAUDE.md and memory, rules, commands, skills, @import, plan mode, Explore, iterating), m12 (sessions). Each panel covers the problem before, what it is, why this design, and when to use it vs its neighbors. |
+| Final novice walkthrough (`audit/work/novice-final.md`): 1 BLOCKING, 16 MAJOR | **Addressed.** CLAUDE.md and memory are now defined (m11). Also added: agent, statelessness and why the prompt is probabilistic (F1); where the `tools` list goes and the round trip in prose (F2); harness, permissions, which product to pick, hooks and subagents (F3); built-in tools (m02); resources (m05); skill anatomy, plan mode mechanics, Explore (m11). |
+| The 4 official preparation exercises have no in-app home | **Built as labs L1–L4** (`content/l01.js`–`l04.js`): support agent with escalation; Claude Code team configuration; structured extraction pipeline; multi-agent research pipeline. Each lab has a brief with a diagram and done-when criteria, a design-decision sorter, annotated code or config to build and run, a debugging sorter, a recap, and flashcards. |
+| Verification | content-check passes (113 cards, 21 modules); browser suite 274 checks, no problems. |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

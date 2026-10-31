@@ -68,6 +68,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
       title: "The built-in tools",
       html: `
 <p class="lede">Claude Code and the Agent SDK ship with Read, Write, Edit, Bash, Grep and Glob. The exam checks that you match each to its job.</p>
+<div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>What they are.</strong> the tools Claude Code ships with: <strong>Read</strong> (open a file), <strong>Write</strong> (create a file), <strong>Edit</strong> (replace a unique text span), <strong>Bash</strong> (run a shell command), <strong>Grep</strong> (search file contents), <strong>Glob</strong> (find files by name pattern), plus web tools and the subagent tool.</li><li><strong>Why separate tools.</strong> a narrow tool with a clear purpose is easier for the model to choose correctly and easier for you to permit or block than one general shell.</li><li><strong>Neighbors.</strong> MCP tools add capabilities from outside systems and compete with built-ins for selection, which is why their descriptions must say when they're the better choice.</li></ul></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Need</th><th>Tool</th></tr></thead>
 <tbody>

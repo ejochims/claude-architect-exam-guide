@@ -47,6 +47,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
       title: "Few-shot examples and review architecture",
       html: `
 <p class="lede">When detailed instructions still produce inconsistent output, examples are the most effective lever.</p>
+<div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> prose instructions leave format and edge cases open to interpretation, so outputs vary.</li><li><strong>What it looks like.</strong> a few worked examples in the prompt, e.g. <code>&lt;example&gt;</code> input → reasoning → output <code>&lt;/example&gt;</code>, chosen to cover the ambiguous cases.</li><li><strong>Why it works.</strong> examples show the exact format and the judgment behind a choice, which the model generalizes to new cases. More instructions only describe it.</li><li><strong>Use it when.</strong> instructions alone give inconsistent output or the boundary between two choices is subtle. If the criteria themselves are unclear, write the criteria first.</li></ul></div>
 <ul>
 <li><strong>2–4 targeted examples</strong> aimed at the <em>ambiguous</em> cases, not the easy ones.</li>
 <li><strong>Show the reasoning</strong>: why this action and not the plausible alternative. That lets the model generalize to new cases instead of copying the examples.</li>

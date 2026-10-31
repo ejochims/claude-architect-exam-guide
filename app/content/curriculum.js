@@ -70,7 +70,11 @@ window.MODULES = [
   { id: "m10", n: 10, title: "Batch processing", principle: "Latency is a requirement, not a preference.", tasks: ["4.5"], minutes: 15 },
   { id: "m11", n: 11, title: "Configuring Claude Code", principle: "Configuration is code: scope decides who gets it, and when.", tasks: ["3.1", "3.2", "3.3", "3.4", "3.5"], minutes: 35 },
   { id: "m12", n: 12, title: "CI/CD and sessions", principle: "Automation needs non-interactive, machine-readable runs.", tasks: ["3.6", "1.7"], minutes: 25 },
-  { id: "m13", n: 13, title: "Escalation, review, provenance", principle: "Human attention is scarce; route it where it changes outcomes.", tasks: ["5.2", "5.5", "5.6"], minutes: 30 }
+  { id: "m13", n: 13, title: "Escalation, review, provenance", principle: "Human attention is scarce; route it where it changes outcomes.", tasks: ["5.2", "5.5", "5.6"], minutes: 30 },
+  { id: "l01", n: "L1", title: "Lab: support agent with escalation", principle: "Rules that must hold live in the tools; judgment lives in the prompt.", tasks: [], minutes: 30 },
+  { id: "l02", n: "L2", title: "Lab: configure Claude Code for a team", principle: "Scope decides who gets each piece of configuration, and when.", tasks: [], minutes: 30 },
+  { id: "l03", n: "L3", title: "Lab: structured extraction pipeline", principle: "The schema guarantees shape; your code checks meaning.", tasks: [], minutes: 30 },
+  { id: "l04", n: "L4", title: "Lab: multi-agent research pipeline", principle: "The coordinator owns scope, context and recovery.", tasks: [], minutes: 30 }
 ];
 
 // Recurring distractor patterns. Questions tag wrong options with these ids.

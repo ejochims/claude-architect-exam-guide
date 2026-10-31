@@ -203,7 +203,7 @@
   <div>
     <div class="eyebrow">Claude Certified Architect – Foundations</div>
     <h1>Exam-ready by <em>December 31</em></h1>
-    <p>Three foundation lessons, then fourteen modules that build from first principles to exam judgment, mapped to every task statement in the official blueprint. No other material needed.</p>
+    <p>Three foundation lessons, fourteen modules that build from first principles to exam judgment, and four hands-on labs, mapped to every task statement in the official blueprint. No other material needed.</p>
   </div>
   <div class="goal">
     <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
@@ -571,7 +571,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
   // ---------- Router ----------
   function route() {
     const h = location.hash.replace(/^#/, "");
-    const m = h.match(/^([fm]\d\d)(?:-(\d+))?$/);
+    const m = h.match(/^([fml]\d\d)(?:-(\d+))?$/);
     if (m && L[m[1]]) {
       let s;
       if (m[2]) s = Number(m[2]) - 1;

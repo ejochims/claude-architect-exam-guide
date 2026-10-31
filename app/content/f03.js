@@ -11,7 +11,7 @@ window.LESSONS.f03 = {
       kind: "read",
       title: "Four things the exam names, and why each exists",
       html: `
-<p class="lede">The exam assumes you can tell four products apart: the <strong>Claude API</strong>, the <strong>Claude Agent SDK</strong>, <strong>Claude Code</strong> and the <strong>Model Context Protocol (MCP)</strong>. Each exists because the layer below it left work for you to do.</p>
+<p class="lede">All four rest on the same Messages API calls you saw in F1 and F2. The exam assumes you can tell four products apart: the <strong>Claude API</strong>, the <strong>Claude Agent SDK</strong>, <strong>Claude Code</strong> and the <strong>Model Context Protocol (MCP)</strong>. Each exists because the layer below it left work for you to do.</p>
 <svg viewBox="0 0 640 300" role="img" aria-label="Layered map: API at the bottom, Agent SDK above it, Claude Code and your agents on top, MCP connecting tools and data to all of them" style="width:100%;height:auto;margin:6px 0 16px">
   <rect x="20" y="230" width="460" height="54" rx="10" style="fill:var(--sunk);stroke:var(--line)"/>
   <text x="250" y="254" text-anchor="middle" style="fill:var(--fg);font:600 15px var(--sans)">Claude API (Messages API)</text>
@@ -39,7 +39,8 @@ window.LESSONS.f03 = {
 <tr><td><strong>Agent SDK</strong></td><td>Python and TypeScript libraries containing the harness behind Claude Code</td><td>Writing a reliable loop, tool execution, permissions and context management by hand is a lot of work</td><td>The SDK</td></tr>
 <tr><td><strong>Claude Code</strong></td><td>A coding agent for the terminal, IDE, desktop and web</td><td>Developers wanted to hand real engineering tasks to Claude inside their repo</td><td>Claude Code</td></tr>
 <tr><td><strong>MCP</strong></td><td>An open protocol for exposing tools, data and prompts to AI clients</td><td>Every app was wiring every data source by hand (Module 5)</td><td>Not a loop: a connector</td></tr>
-</tbody></table></div>`
+</tbody></table></div>
+<div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>Harness.</strong> the code around the model that runs the loop: it calls Claude, executes the tools Claude asks for, enforces <em>permissions</em> (which tools may run, and which need a person's approval) and manages what's in context.</li><li><strong>Which to pick.</strong> the raw API when you need full control over a simple call or a custom loop; the Agent SDK to build your own agent without writing that harness; Claude Code for coding work in a repository; MCP whenever a tool or data source should be reusable across any of them.</li><li><strong>Hooks.</strong> your own code that the harness runs at fixed points, such as just before or just after a tool call. Unlike instructions in a prompt, a hook runs every time (Module 3).</li><li><strong>Subagents.</strong> separate agents, each with its own context and tools, that a coordinating agent hands focused tasks to (Module 6).</li></ul></div>`
     },
     {
       kind: "read",
