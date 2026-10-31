@@ -34,7 +34,17 @@ async function run(viewport, colorScheme) {
     const opt = page.locator("#app .q .opt").first();
     if (await opt.count()) await opt.click();
   }
-  for (const h of ["#", "#practice", "#blueprint", "#today", "#glossary", "#cards"]) await visit(h);
+  for (const h of ["#", "#practice", "#blueprint", "#today", "#glossary", "#principles", "#cards"]) await visit(h);
+  // Principles: every entry renders, search narrows, rules-only hides the detail.
+  await visit("#principles");
+  const pn = await page.evaluate(() => [document.querySelectorAll(".pr-card").length, window.PRINCIPLES.length]);
+  if (pn[0] !== pn[1]) problems.push(`${tag}: principles page shows ${pn[0]} of ${pn[1]}`);
+  await page.locator("#pq").fill("escalat"); await page.waitForTimeout(40);
+  const pf = await page.locator(".pr-card").count();
+  if (!pf || pf >= pn[1]) problems.push(`${tag}: principles search didn't narrow (${pf})`);
+  await page.locator("#pq").fill(""); await page.locator("#pc").check(); await page.waitForTimeout(40);
+  if (await page.locator(".pr-why").first().isVisible()) problems.push(`${tag}: rules-only didn't hide explanations`);
+  checks++;
 
   // Each scenario drill: answer the first question and advance. A multiple-response item needs its full set, then "Check answer".
   const answerCard = async () => {

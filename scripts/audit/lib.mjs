@@ -11,7 +11,7 @@ export function loadContent() {
   const ctx = { window: {} };
   vm.createContext(ctx);
   const lessons = fs.readdirSync(CONTENT).filter(f => /^[fml]\d+\.js$/.test(f)).sort();
-  const extra = fs.existsSync(path.join(CONTENT, "holdout.js")) ? ["holdout.js"] : [];
+  const extra = ["holdout.js", "principles.js"].filter(f => fs.existsSync(path.join(CONTENT, f)));
   for (const f of ["curriculum.js", ...lessons, "bank.js", ...extra]) vm.runInContext(fs.readFileSync(path.join(CONTENT, f), "utf8"), ctx, { filename: f });
   const w = ctx.window;
   // Same ordering as app/app.js "Content index": lesson questions in module order, then the bank.
@@ -20,7 +20,7 @@ export function loadContent() {
   for (const q of w.BANK || []) questions.push({ ...q, module: (w.MODULES.find(m => m.tasks.includes(q.ts)) || {}).id, src: q.holdout ? "holdout" : "bank" });
   const cards = [];
   for (const m of w.MODULES) if (w.LESSONS[m.id]) (w.LESSONS[m.id].cards || []).forEach((c, i) => cards.push({ id: `${m.id}:${i}`, module: m.id, ...c }));
-  return { blueprint: w.BLUEPRINT, modules: w.MODULES, lessons: w.LESSONS, traps: w.TRAPS, questions, cards };
+  return { blueprint: w.BLUEPRINT, modules: w.MODULES, lessons: w.LESSONS, traps: w.TRAPS, questions, cards, principles: w.PRINCIPLES || [], principleThemes: w.PRINCIPLE_THEMES || [] };
 }
 
 export const domainOf = ts => "d" + String(ts)[0];

@@ -60,6 +60,8 @@ h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; margin: 0; letter
 .sync.saving i { background: var(--accent); }
 @media (max-width: 560px) { .brand small, .sync span { display: none; } .top-in { gap: 8px; } .nav { gap: 0; } .nav a { padding: 6px 7px; font-size: 14px; } }
 @media (max-width: 440px) { .brand > span:last-child { display: none; } }
+/* Narrow screens: the nav scrolls sideways instead of widening the page. */
+@media (max-width: 560px) { .nav { min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; } .nav::-webkit-scrollbar { display: none; } .nav a { flex: none; } }
 
 main { padding-block: 32px 96px; }
 .foot { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var(--muted); font-size: 13px; }
@@ -235,6 +237,23 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 .opt .opt-body { min-width: 0; }
 .opt .opt-why { display: block; font: 400 15px/1.5 var(--serif); color: var(--muted); margin-top: 6px; }
 .opt.is-right .opt-why, .opt.is-wrong .opt-why { color: var(--fg); }
+/* Principles page: one card per rule, grouped by theme; "rules only" collapses to a scan list. */
+.pr-tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 18px; }
+.pr-tools .sel { margin: 0; flex: 1 1 220px; max-width: none; }
+.pr-tools label { font: 500 14px var(--sans); color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.pr-theme { margin: 28px 0 8px; }
+.pr-theme h2 { font-size: 19px; }
+.pr-theme p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.pr-card { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 12px 14px; margin: 8px 0; }
+.pr-rule { font: 600 15.5px/1.4 var(--sans); margin: 0; }
+.pr-why { font: 400 15px/1.5 var(--serif); color: var(--muted); margin: 6px 0 0; }
+.pr-wrong { font: 400 14px/1.45 var(--sans); margin: 8px 0 0; }
+.pr-wrong .pr-label { font: 600 10.5px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--bad); margin-right: 6px; }
+.pr-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; font-size: 13px; }
+.pr-meta a { margin-left: auto; }
+.pr-meta .trap-badge { margin-top: 0; }
+.compact .pr-card { padding: 8px 12px; margin: 4px 0; }
+.compact .pr-why, .compact .pr-wrong, .compact .pr-meta { display: none; }
 .trap-badge { display: inline-block; font: 600 10.5px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--bad); border: 1px solid currentColor; border-radius: 4px; padding: 3px 5px; margin-top: 7px; }
 
 /* Quiz */
@@ -469,6 +488,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
       <a href="#practice" data-nav="practice">Practice</a>
       <a href="#cards" data-nav="cards">Cards</a>
       <a href="#blueprint" data-nav="blueprint">Blueprint</a>
+      <a href="#principles" data-nav="principles">Principles</a>
       <a href="#glossary" data-nav="glossary">Glossary</a>
     </nav>
     <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
@@ -522,6 +542,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
 <script src="content/l02.js"></script>
 <script src="content/l03.js"></script>
 <script src="content/l04.js"></script>
+<script src="content/principles.js"></script>
 <script src="content/bank.js"></script>
 <script src="content/holdout.js"></script>
 <script src="app.js"></script>
