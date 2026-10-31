@@ -9,7 +9,7 @@ window.BANK.push(
       { t: "Decide when to stop by checking <code>stop_reason</code>, not by parsing the reply text.", why: "Right when the loop guesses completion from phrases in the text. This loop already reads <code>stop_reason</code>; it just treats truncation as done." },
       { t: "Return a tool failure to Claude as a <code>tool_result</code> with <code>is_error</code> set, and keep looping.", why: "Right when a tool error ends the loop. No tool failed here; the reply was cut off." },
       { t: "Cap the loop at a set number of iterations and hand off to a human when it's reached.", why: "Right when the agent can loop forever. This agent stops too early, not too late." },
-      { t: "Raise <code>max_tokens</code>, and continue the turn when <code>stop_reason</code> is <code>max_tokens</code>.", ok: true, why: "<code>max_tokens</code> means the reply was truncated, not finished. Give it room and continue instead of returning a partial answer." }
+      { t: "Raise <code>max_tokens</code> and continue the turn when <code>stop_reason</code> is <code>max_tokens</code>.", ok: true, why: "<code>max_tokens</code> means the reply was truncated, not finished. Give it room and continue instead of returning a partial answer." }
     ]
   },
   {
@@ -53,53 +53,53 @@ window.BANK.push(
     ]
   },
   {
-    id: "h1-6", ts: "2.2", scenario: 1, holdout: true,
-    stem: "<code>get_order</code> searches only the EU database. For a US order number it returns <code>{\"status\": \"not_found\"}</code> as a normal result, and the agent tells US customers their order doesn't exist. Best fix?",
+    id: "h1-6", ts: "2.2", scenario: 1, holdout: true, family: "F42",
+    stem: "The order-lookup tool finds no orders for the email a customer gives. It currently returns <code>isError</code>, so the agent tells the customer the system is down. What should the tool return?",
     options: [
-      { t: "Have the agent ask every customer which region they ordered from before looking anything up.", why: "Adds friction for everyone to work around a vague tool result." },
-      { t: "Return a structured error saying which region the ID belongs to.", ok: true, why: "Distinguish “doesn't exist” from “not here”, and give the agent a next step." },
-      { t: "Retry <code>get_order</code> twice before concluding the order doesn't exist.", trap: "T6", why: "The same database gives the same answer." },
-      { t: "Tell the agent that <code>not_found</code> may mean the order is in another region.", trap: "T1", why: "Leaves the agent guessing between two very different situations." }
+      { t: "Return <code>isError</code> with a transient category and <code>isRetryable: true</code>.", why: "Right for timeouts that a retry would fix. Nothing failed here." },
+      { t: "Return <code>isError</code> with a business-rule category and a message the agent can relay.", why: "Right when a policy blocks the action. Nothing was blocked; there are just no matches." },
+      { t: "Return a successful result with an empty list, noting that nothing matched.", ok: true, why: "A search that ran and found nothing succeeded; the agent can then ask for another email." },
+      { t: "Return <code>isError</code> with a permission category so the agent hands off to staff.", why: "Right when access is denied. The search ran fine." }
     ]
   },
   {
-    id: "h1-7", ts: "2.3", scenario: 1, holdout: true,
-    stem: "The support agent connects to the company's CRM MCP server, which exposes 40 tools. The agent needs about 5 of them, and logs show frequent calls to similar-sounding tools it shouldn't use. What should you do?",
+    id: "h1-7", ts: "2.3", scenario: 1, holdout: true, family: "F46",
+    stem: "The support agent often only needs to answer a greeting or a simple policy question, but it's configured so that every response must call a tool, so it invents lookups. What fixes this?",
     options: [
-      { t: "Rewrite all 40 tool descriptions so the agent can tell the similar ones apart.", why: "Better descriptions help, but 35 tools the agent never needs still compete for selection." },
-      { t: "Restrict the agent's available tools to the 5 its role requires.", ok: true, why: "Fewer, role-relevant tools improve selection." },
-      { t: "Add a system-prompt list of the 5 tools the agent should prefer.", trap: "T1", why: "The other 35 remain available and keep getting picked." },
-      { t: "Ask the CRM team to merge their 40 tools into a few broader ones.", trap: "T5", why: "Changes a shared server for one agent, and vaguer tools don't help selection." }
+      { t: "Give each agent only the 4–5 tools its role needs.", why: "Right when too many tools confuse selection. Here a tool call is forced when none is needed." },
+      { t: "Set <code>tool_choice</code> to <code>\"auto\"</code> so Claude can reply in text when no tool is needed.", ok: true, why: "With <code>\"auto\"</code>, Claude calls a tool only when one is needed." },
+      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> so Claude must call one of the tools.", why: "That is the problem: it forces a call on every turn." },
+      { t: "Give the agent one narrow lookup tool from another role, not that role's full toolset.", why: "Right when a role needs one capability from another role. Here no tool is needed at all." }
     ]
   },
   {
-    id: "h1-8", ts: "2.2", scenario: 1, holdout: true,
-    stem: "During a sale, the payment provider returns HTTP 429 (rate limited) with a <code>Retry-After</code> of 20 seconds. <code>process_refund</code> reports “refund failed,” and the agent tells customers to try again tomorrow. Best fix?",
+    id: "h1-8", ts: "2.2", scenario: 1, holdout: true, family: "F43",
+    stem: "The shipping API times out under load about 2% of the time, and a second attempt almost always succeeds. The agent gives up after the first failure. What should the tool return on a timeout?",
     options: [
-      { t: "A transient, retryable error carrying the retry-after time.", ok: true, why: "Classify the failure and pass its recovery details." },
-      { t: "Return a permission error, since the provider refused the request.", why: "Misclassifies a temporary throttle as a lasting denial." },
-      { t: "Return success and queue the refund silently for a later attempt.", trap: "T6", why: "The customer is told it worked when it hasn't yet." },
-      { t: "Escalate every refund that hits a rate limit to a human agent.", why: "Humans can't make the provider respond faster; a short wait fixes it." }
+      { t: "Mark the error as transient and retryable so the agent tries again.", ok: true, why: "Telling the agent the failure is transient and retryable lets it try once more." },
+      { t: "Return a validation error naming the field and the format it expects.", why: "Right when the input is malformed. The input here is fine." },
+      { t: "Return a business-rule error that names the policy blocking the action.", why: "Right when a policy blocks the action. Nothing is blocked." },
+      { t: "Return a permission error so the agent passes the request to staff with access.", why: "Right when access is denied. This is load, not access." }
     ]
   },
   {
-    id: "h1-9", ts: "5.2", scenario: 1, holdout: true,
-    stem: "A customer asks to transfer their loyalty points to their spouse's account. Policy covers points earning, expiry and redemption, but says nothing about transfers. What should the agent do?",
+    id: "h1-9", ts: "5.2", scenario: 1, holdout: true, family: "F53",
+    stem: "A customer asks for compensation for a missed delivery date. The policy covers refunds for late deliveries but says nothing about compensation. What should the agent do?",
     options: [
-      { t: "Decline the transfer, since it isn't listed among the actions the policy allows.", why: "Silence in policy isn't a prohibition; a human should decide." },
-      { t: "Extend the points' expiry instead, which the policy does cover, and explain why.", why: "Answers a different request than the one the customer made." },
-      { t: "Escalate, because policy is silent on this specific request.", ok: true, why: "A policy gap is a valid escalation trigger." },
-      { t: "Make the transfer, since both accounts share a household address.", why: "Improvises policy the agent isn't authorized to set." }
+      { t: "Hand off to a human when the customer explicitly asks for one.", why: "Right when a person is requested. The customer hasn't asked for one." },
+      { t: "Ask a clarifying question when the request matches more than one account.", why: "Right when the account is unclear. Here the account is known; the policy has a gap." },
+      { t: "Escalate when the request falls outside what the documented policy covers.", ok: true, why: "When the policy doesn't cover a request, a person should decide rather than the agent improvising." },
+      { t: "Resolve it directly when it's within policy, even if the customer is upset.", why: "Right for in-policy requests. This one falls outside the policy." }
     ]
   },
   {
-    id: "h1-10", ts: "5.1", scenario: 1, holdout: true,
-    stem: "Early in a long chat, a customer says “email only, please don't call me.” Forty turns later, after the history has been summarized twice, the agent offers to “have someone call you.” Best fix?",
+    id: "h1-10", ts: "5.1", scenario: 1, holdout: true, family: "F54",
+    stem: "Late in a 40-turn chat, the agent misquotes a refund amount agreed early on. The running summary it keeps says only “discussed a refund.” What fixes this?",
     options: [
-      { t: "Instruct the summarizer to keep any contact preferences it finds in each summary.", trap: "T9", why: "Summaries still compress and drift; durable facts need their own place." },
-      { t: "Keep customer preferences in a persistent case-facts section outside the summarized history.", ok: true, why: "Facts outside the summary survive summarization." },
-      { t: "Stop summarizing and send the full 40-turn transcript every turn.", trap: "T3", why: "Costly, and details can still get lost in the middle." },
-      { t: "Ask the customer to restate their contact preference before offering any follow-up.", why: "Makes the customer repeat themselves to work around the agent's memory." }
+      { t: "Keep a case-facts block with amounts, dates and order numbers, re-sent every turn.", ok: true, why: "Exact values need to be stored verbatim; summaries lose them." },
+      { t: "Trim each tool result down to the few fields the agent actually uses.", why: "Right when tool output bloats the context. Here a key value was lost." },
+      { t: "Summarize the earlier part of the conversation once it gets long.", why: "That's the current approach, and it dropped the amount." },
+      { t: "Place the key findings at the start of the input, not buried in the middle.", why: "Right when long inputs bury findings. Here the value isn't in the input anymore." }
     ]
   },
   {
@@ -173,23 +173,23 @@ window.BANK.push(
     ]
   },
   {
-    id: "h2-8", ts: "5.4", scenario: 2, holdout: true,
-    stem: "After reading about 200 files while investigating a large system, Claude's answers become vague and contradict its earlier findings. You still need to implement a change based on that investigation. What helps most?",
+    id: "h2-8", ts: "5.4", scenario: 2, holdout: true, family: "F55",
+    stem: "Hours into a refactoring session, Claude starts referring to “typical patterns” instead of the specific classes it found earlier. It will need those exact findings for several more hours of work. What fits best?",
     options: [
-      { t: "Keep going; Claude can re-read files whenever it needs specifics.", why: "Context keeps degrading, and re-reading adds to it." },
-      { t: "Save key findings to a file and continue in a fresh session.", ok: true, why: "Persist findings outside the conversation, then start clean with them." },
-      { t: "Switch to a model with a larger context window for the rest of the task.", trap: "T3", why: "More room doesn't restore attention to early details." },
-      { t: "Run <code>/compact</code> and ask Claude to be more precise from now on.", why: "Compaction may drop exactly the specifics you need." }
+      { t: "Delegate the exploration to a subagent and keep only its summary.", why: "Right before a big exploration. The findings already exist; they're fading." },
+      { t: "Have Claude write key findings to a scratchpad file it can reread later.", ok: true, why: "Writing findings to a file preserves them exactly, beyond what the context holds." },
+      { t: "Run <code>/compact</code> once the session gets long.", why: "Compaction summarizes, so the specific details it needs may be lost." },
+      { t: "Start a fresh session seeded with a summary of the decisions so far.", why: "Right when earlier context is stale. Here it's accurate but fading." }
     ]
   },
   {
-    id: "h2-9", ts: "5.4", scenario: 2, holdout: true,
-    stem: "You need to know which of 300 services call a deprecated endpoint, with per-service details you'll use later, without filling the main session's context. What should you do?",
+    id: "h2-9", ts: "5.4", scenario: 2, holdout: true, family: "F56",
+    stem: "To fix one bug, Claude reads entire 3,000-line files one after another and runs out of context before it reaches the bug. What fits best?",
     options: [
-      { t: "Grep from the main session and read each match there so the details are at hand.", why: "Floods the main context you need for the follow-up work." },
-      { t: "Delegate discovery to the Explore subagent and have it write a structured list to a file.", ok: true, why: "Isolated discovery plus a persisted, structured result keeps the main context clean." },
-      { t: "Split the 300 services across several sessions and compare notes by hand afterwards.", why: "Manual and lossy; no structured result comes back." },
-      { t: "Ask Claude to keep only the most important services in mind as it searches.", trap: "T9", why: "Every matching file still enters the main context." }
+      { t: "Grep for the symbol first and read only the files that match.", ok: true, why: "Search narrowly first, and read only what's relevant." },
+      { t: "Have Claude record its findings in a scratchpad file as it goes.", why: "Right for keeping findings across a long session. Here the reading is unfocused." },
+      { t: "Delegate the investigation to a subagent and keep only its summary.", why: "Right for a broad survey. This is a targeted bug hunt." },
+      { t: "Run <code>/compact</code> after the investigation to free up space.", why: "Right after a long investigation. It doesn't stop the wasteful reading." }
     ]
   },
   {
@@ -253,103 +253,103 @@ window.BANK.push(
     ]
   },
   {
-    id: "h3-6", ts: "2.2", scenario: 3, holdout: true,
-    stem: "The web search tool returns “No results” both when a query matches nothing and when the search provider blocks it under its content policy. The coordinator records some topics as having no sources. Best fix?",
+    id: "h3-6", ts: "2.2", scenario: 3, holdout: true, family: "F44",
+    stem: "A search subagent hits occasional rate-limit errors that clear within seconds. Each one goes to the coordinator, which re-plans the whole task. What fits best?",
     options: [
-      { t: "Return empty success for no matches and a structured error for policy blocks.", ok: true, why: "An empty result and a refusal mean different things and need different handling." },
-      { t: "Have the coordinator rephrase and re-run every query that returns no results.", why: "Wastes calls on genuine no-matches and never learns which queries were blocked." },
-      { t: "Retry every “No results” twice before accepting it.", trap: "T6", why: "A policy block returns the same answer every time." },
-      { t: "Return a dummy result explaining the topic may be sensitive.", trap: "T6", why: "Mixes a fabricated result into the data." }
+      { t: "Have the subagent retry transient failures itself and report only what it can't resolve.", ok: true, why: "Handle recoverable errors where they happen, and escalate only what the subagent can't fix." },
+      { t: "Return the error to the coordinator with the query, what was tried and any partial results.", why: "Right for failures the subagent can't recover from. These clear in seconds." },
+      { t: "Return an empty result marked as a successful search with no matches.", why: "Right when the search ran and found nothing. Here the search failed." },
+      { t: "Return a permission error so the coordinator stops using that source.", why: "Right when access is denied. Rate limits are temporary." }
     ]
   },
   {
-    id: "h3-7", ts: "2.3", scenario: 3, holdout: true,
-    stem: "The coordinator was given its own <code>web_search</code> tool “for quick checks.” It now does more and more research itself instead of delegating, and its context fills up. Best change?",
+    id: "h3-7", ts: "2.3", scenario: 3, holdout: true, family: "F47",
+    stem: "The synthesis agent often needs to confirm one date or figure. Each check goes back through the coordinator to the search agent, adding minutes per report. What fits best?",
     options: [
-      { t: "Tell the coordinator to use <code>web_search</code> only for checks under a minute.", trap: "T1", why: "The tool stays available and the drift continues." },
-      { t: "Give the coordinator a larger context window to absorb the extra research.", trap: "T3", why: "Treats the symptom; the role confusion remains." },
-      { t: "Remove <code>web_search</code> from the coordinator so research goes through the search subagent.", ok: true, why: "Scope tools to roles; the coordinator orchestrates rather than researches." },
-      { t: "Merge the coordinator and search subagent into one agent.", trap: "T5", why: "Makes the context problem worse." }
+      { t: "Give the synthesis agent a narrow <code>verify_fact</code> tool for quick checks.", ok: true, why: "A scoped tool covers the common, simple check without a full round trip." },
+      { t: "Send verification requests back through the coordinator to the search agent.", why: "That is the slow path here. It's right for larger follow-up research." },
+      { t: "Remove the web-search tools from the document-analysis subagent.", why: "Right when an agent strays outside its role. Here the problem is latency." },
+      { t: "Force the citation-formatting tool on the synthesis agent's final step.", why: "Right when the final output must follow a format. Here the problem is latency." }
     ]
   },
   {
-    id: "h3-8", ts: "2.1", scenario: 3, holdout: true,
-    stem: "<code>fetch_paper</code> returns only abstracts for paywalled papers, but its description says “Fetches a paper by DOI.” Synthesis treats abstracts as full papers and over-states findings. Best fix?",
+    id: "h3-8", ts: "2.1", scenario: 3, holdout: true, family: "F48",
+    stem: "<code>search_web</code> and <code>search_docs</code> both have the description “Searches for information.” The agent picks the wrong one about a third of the time. What fixes this?",
     options: [
-      { t: "Tell the synthesis agent to be cautious about claims drawn from short sources.", trap: "T9", why: "It can't tell which sources are abstracts." },
-      { t: "Document the abstract-only limit and mark it in each result.", ok: true, why: "Describe the tool's limits and mark them in the output, so downstream agents know what they have." },
-      { t: "Remove paywalled papers from the research entirely.", why: "Throws away useful abstracts instead of labeling them." },
-      { t: "Merge <code>fetch_paper</code> with web search so full texts can be found elsewhere.", trap: "T5", why: "Doesn't tell anyone what was actually retrieved." }
+      { t: "State each tool's scope in its description, and when to use the other.", ok: true, why: "The model chooses tools mainly from their descriptions; say what each covers and where each one's scope ends." },
+      { t: "Rename the tools so that each name states what the tool is for.", why: "Right when names mislead. These names are already distinct; the descriptions are identical." },
+      { t: "Add examples of the expected input format to the tool's description.", why: "Right when the input is malformed. Here the wrong tool is chosen." },
+      { t: "Split the generic tool into separate tools, each with one narrow purpose.", why: "Right when one tool does several jobs. These are already separate." }
     ]
   },
   {
-    id: "h3-9", ts: "5.6", scenario: 3, holdout: true,
-    stem: "A report states “AI cuts costs by 30%,” citing a consulting study. The study actually said “up to 30% in pilot projects.” How do you prevent this kind of distortion?",
+    id: "h3-9", ts: "5.6", scenario: 3, holdout: true, family: "F57",
+    stem: "Two recent, reputable studies report different adoption rates. The report silently averages them into one figure. What fits best?",
     options: [
-      { t: "Add a final pass that checks every number in the report against its source.", why: "Checks numbers but misses qualifiers like “up to” and “in pilots.”" },
-      { t: "Tell the synthesis agent to be precise when it quotes statistics.", trap: "T9", why: "It can't keep qualifiers it never received." },
-      { t: "Carry each claim's exact excerpt with its qualifiers through synthesis.", ok: true, why: "Provenance includes the original wording and context, not just a citation." },
-      { t: "Remove statistics from reports and keep only qualitative findings.", why: "Loses valuable information to avoid a fixable problem." }
+      { t: "Keep claim-to-source mappings through synthesis, with each source's date.", why: "Right when attribution is lost. Here the conflict is hidden." },
+      { t: "Report conflicting figures side by side with their sources instead of picking one.", ok: true, why: "Preserve the conflict, with attribution, so readers can see the disagreement." },
+      { t: "Label which findings are well established and which are contested.", why: "Right for the report as a whole. Here a specific conflict needs showing." },
+      { t: "Have the synthesis agent re-check each claim against its cited source.", why: "Right when synthesis introduces errors. Both figures here are accurate." }
     ]
   },
   {
-    id: "h3-10", ts: "5.3", scenario: 3, holdout: true,
-    stem: "A long-running search subagent sometimes crashes halfway through its queries. The coordinator then restarts it from scratch, tripling the cost of those tasks. Best design?",
+    id: "h3-10", ts: "5.3", scenario: 3, holdout: true, family: "F59",
+    stem: "One of five subagents fails for good, because its source is offline all day. The coordinator abandons the whole report. What fits best?",
     options: [
-      { t: "Have the subagent save progress so any retry resumes where it stopped.", ok: true, why: "Preserve partial progress so recovery doesn't repeat finished work." },
-      { t: "Give the subagent a larger timeout so it crashes less often.", why: "Crashes aren't only timeouts, and each one still restarts from zero." },
-      { t: "Have the coordinator skip the subagent's topic whenever it crashes.", trap: "T6", why: "Silently creates coverage gaps." },
-      { t: "Run three copies of the subagent in parallel and keep whichever finishes.", why: "Triples the cost every time to avoid occasional restarts." }
+      { t: "Have the subagent retry transient errors locally before reporting.", why: "Right for brief, transient faults. This source is down all day." },
+      { t: "Report the failure type, the query and any partial results to the coordinator.", why: "Right when the coordinator lacks details. It already knows the source is down." },
+      { t: "Continue with the other subagents and mark the gap in the final report.", ok: true, why: "Deliver what the other four found, and say clearly what's missing." },
+      { t: "Distinguish “no results found” from “search failed” in what subagents return.", why: "Right when two kinds of result look the same. Here the failure is clear." }
     ]
   },
   {
-    id: "h4-1", ts: "2.4", scenario: 4, holdout: true,
-    stem: "An experimental MCP server you're trying out appears in your teammates' Claude Code sessions after they pull. You only wanted it for yourself, in every project. What happened, and what's the fix?",
+    id: "h4-1", ts: "2.4", scenario: 4, holdout: true, family: "F49",
+    stem: "The team's <code>.mcp.json</code> has a personal access token pasted in, so it can't be committed and each developer edits it by hand. What fixes this?",
     options: [
-      { t: "It was added to the project's <code>.mcp.json</code>; move it to user scope in <code>~/.claude.json</code>.", ok: true, why: "Project scope is shared through the repo; user scope is yours across projects." },
-      { t: "It was added at user scope, which syncs to teammates; move it to project scope.", why: "Backwards: user scope is personal, and project scope is the shared one." },
-      { t: "MCP servers always load for everyone in an organization; disable it from the admin console.", trap: "T8", why: "Scope decides who gets a server; there's no automatic org-wide loading." },
-      { t: "It was added to CLAUDE.md; move the definition into <code>.claude/settings.json</code>.", trap: "T8", why: "CLAUDE.md doesn't configure MCP servers." }
+      { t: "Add the server to the project's <code>.mcp.json</code> and commit it.", why: "Right for sharing a server. The token still can't be committed." },
+      { t: "Add the server in user scope so it's available in all of one person's projects.", why: "Right for a personal server. The team still needs a shared configuration." },
+      { t: "Reference the token as <code>${GITHUB_TOKEN}</code> in <code>.mcp.json</code> instead of pasting it in.", ok: true, why: "Environment variable expansion keeps the secret out of the file, so the configuration can be shared." },
+      { t: "Use the maintained community GitHub server rather than building a custom one.", why: "Right when a custom build duplicates an existing server. Here the issue is the secret." }
     ]
   },
   {
-    id: "h4-2", ts: "2.4", scenario: 4, holdout: true,
-    stem: "The team's committed <code>.mcp.json</code> defines a database MCP server. Most developers use a local database, but some point at a shared staging one. How should the connection string be configured?",
+    id: "h4-2", ts: "2.4", scenario: 4, holdout: true, family: "F50",
+    stem: "The team plans to spend two weeks building an MCP server for Jira. A maintained community server already covers everything they need. What fits best?",
     options: [
-      { t: "Commit the local URL; developers on staging edit their copy of the file and don't commit it.", why: "Uncommitted edits drift and eventually get committed." },
-      { t: "Use <code>${DB_URL:-postgres://localhost/dev}</code>, so the default works and anyone can override it.", ok: true, why: "Environment expansion with a default shares the config and keeps per-developer values out of the repo." },
-      { t: "Define two servers, <code>db-local</code> and <code>db-staging</code>, and let the agent choose between them.", why: "Doubles the tools and lets the agent pick the wrong environment." },
-      { t: "Put the staging URL in CLAUDE.md so Claude knows when to use it.", trap: "T8", why: "CLAUDE.md doesn't configure server connections." }
+      { t: "Expose the documentation catalog as MCP resources.", why: "Right when Claude needs to browse what content exists. Here the question is build versus reuse." },
+      { t: "Build a custom MCP server for the team's in-house deployment system.", why: "Right for in-house systems that no existing server covers. Jira is covered." },
+      { t: "Use an existing, maintained community server for the standard integration.", ok: true, why: "Reuse a maintained server for a standard integration; build only what's unique." },
+      { t: "Add the server to the project's <code>.mcp.json</code> so everyone gets it.", why: "Right for sharing a server. It doesn't settle whether to build one." }
     ]
   },
   {
-    id: "h4-3", ts: "2.5", scenario: 4, holdout: true,
-    stem: "The agent needs the definition of class <code>LedgerEntry</code> in a 2,000-file repository. It starts reading files directory by directory. What should it do instead?",
+    id: "h4-3", ts: "2.5", scenario: 4, holdout: true, family: "F52",
+    stem: "An Edit fails because the target text appears in several places in the file. No surrounding text reliably picks out the right occurrence. What should Claude do?",
     options: [
-      { t: "Glob for files with “ledger” in their names, then Read each match.", why: "The class may live in a file with a different name." },
-      { t: "Grep for <code>class LedgerEntry</code>, then Read the file it's in.", ok: true, why: "Search content for the definition, then read only that file." },
-      { t: "Read the project's README and architecture docs to find where models live.", why: "Indirect, and the docs may be out of date." },
-      { t: "Ask the developer where the class is defined.", why: "The agent can find it in one search." }
+      { t: "Use Grep to search file contents for the function name.", why: "Right for finding where text appears across files. Here the problem is editing one file." },
+      { t: "Use Glob to find files by a name pattern such as <code>**/*.test.ts</code>.", why: "Right for finding files by name. Here the problem is editing one file." },
+      { t: "Use Edit with a longer anchor that appears only once in the file.", why: "Right when a unique anchor exists. Here none does." },
+      { t: "Read the whole file and write back the full corrected version.", ok: true, why: "When Edit can't target a unique match, rewriting the whole file is the reliable fallback." }
     ]
   },
   {
-    id: "h4-4", ts: "2.4", scenario: 4, holdout: true,
-    stem: "At the start of nearly every task, the agent calls <code>get_table_schema</code> for the same 30 tables just to see what columns exist. How can you cut those calls?",
+    id: "h4-4", ts: "2.4", scenario: 4, holdout: true, family: "F51",
+    stem: "The team's MCP code-search tool is more accurate than Grep for this repository, but Claude keeps using Grep. The MCP tool's description reads “Search tool.” What fixes this?",
     options: [
-      { t: "Cache <code>get_table_schema</code> results inside the MCP server for an hour.", why: "Faster calls, but the agent still makes 30 of them." },
-      { t: "Add all 30 schemas to the system prompt of every session.", trap: "T3", why: "Bloats every request, including tasks that don't touch the database." },
-      { t: "Expose the schemas as an MCP resource the agent can consult without tool calls.", ok: true, why: "Resources expose catalogs of content without exploratory tool calls." },
-      { t: "Merge <code>get_table_schema</code> into the query tool so schemas come back with every query.", trap: "T5", why: "Adds schema noise to every query result." }
+      { t: "Commit the server configuration to the project's <code>.mcp.json</code>.", why: "Right when teammates don't get the server. They have it; Claude doesn't choose it." },
+      { t: "Keep the server in local scope, for this one developer and this one project.", why: "Right for a personal server. The problem is tool selection." },
+      { t: "Rewrite the MCP tool's description to say when it beats the built-ins.", ok: true, why: "Claude picks tools by their descriptions; a vague one loses to a familiar built-in." },
+      { t: "Expose the read-only reference data as MCP resources rather than tools.", why: "Right when Claude needs to browse content. This is a search tool." }
     ]
   },
   {
-    id: "h4-5", ts: "2.2", scenario: 4, holdout: true,
-    stem: "An MCP tool throws an uncaught exception when called with a malformed date. The client reports a protocol-level failure, and the agent gives up instead of correcting the date. What should the server return?",
+    id: "h4-5", ts: "2.2", scenario: 4, holdout: true, family: "F45",
+    stem: "An internal MCP tool throws an exception when a developer's query returns no tickets, and Claude reports that the tracker is broken. What should the tool do?",
     options: [
-      { t: "A JSON-RPC protocol error with the exception message, so the client knows the call failed.", why: "Under the current MCP spec, bad arguments are tool execution errors the model can act on." },
-      { t: "An <code>isError</code> tool result naming the invalid argument and expected format.", ok: true, why: "Input validation errors belong in the tool result, where the model can self-correct." },
-      { t: "A success result containing the exception text, so the agent can read it.", trap: "T6", why: "Marking a failure as success invites wrong conclusions." },
-      { t: "Nothing; add a system-prompt note on the expected date format instead.", trap: "T1", why: "The model still gets no usable signal when it goes wrong." }
+      { t: "Return a tool result with <code>isError: true</code> and a message saying what to fix.", why: "Right for invalid input. The query was valid and simply matched nothing." },
+      { t: "Return an empty result set as a success when the query matches nothing.", ok: true, why: "No matches is a valid answer, not a failure." },
+      { t: "Mark rate-limit failures as retryable so the client waits and tries again.", why: "Right for rate limits. Nothing was limited." },
+      { t: "Return a JSON-RPC protocol error for a malformed request, such as an unknown tool.", why: "Right for malformed protocol messages. The request was well formed." }
     ]
   },
   {
@@ -516,7 +516,7 @@ window.BANK.push(
     id: "h6-2", ts: "4.3", scenario: 6, holdout: true, family: "F36",
     stem: "The document type isn't known in advance, and there's one extraction tool per type. Sometimes the model replies in plain text instead of calling any of them. What fixes this?",
     options: [
-      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> so the model must call one of the extraction tools.", ok: true, why: "Requiring some tool call guarantees structured output while letting the model pick the right schema. (Exam framing; see Exam vs. today for current model support.)" },
+      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> so a tool call is required.", ok: true, why: "Requiring some tool call guarantees structured output while letting the model pick the right schema. (Exam framing; see Exam vs. today for current model support.)" },
       { t: "Force one tool with <code>tool_choice: {\"type\": \"tool\", \"name\": …}</code>.", why: "Right when one specific tool must run. Here the right tool depends on the document." },
       { t: "Make the fields that may be absent nullable in the schema.", why: "Right when values are invented for absent fields. Here no tool is called." },
       { t: "Add an <code>\"other\"</code> enum value plus a free-text detail field.", why: "Right when real values fall outside the categories. Here no tool is called." }
@@ -583,23 +583,23 @@ window.BANK.push(
     ]
   },
   {
-    id: "h6-9", ts: "5.5", scenario: 6, holdout: true,
-    stem: "Confidence thresholds were calibrated on last quarter's labeled data. A new vendor's invoice layout arrived, and the error rate among auto-approved extractions rose for weeks before anyone noticed. What would have caught it sooner?",
+    id: "h6-9", ts: "5.5", scenario: 6, holdout: true, family: "F60",
+    stem: "Overall accuracy is 97%, so the team plans to stop human review entirely. Nobody has looked at accuracy by document type. What should happen first?",
     options: [
-      { t: "Raise the auto-approval threshold permanently to 0.99.", why: "Reduces automation without detecting the shift." },
-      { t: "Stratified sampling of auto-approved items by vendor and layout.", ok: true, why: "Stratified sampling measures error rates per segment and catches new patterns." },
-      { t: "Ask downstream teams to report extraction errors more quickly.", why: "Still reactive, and depends on someone noticing." },
-      { t: "Retrain the extraction prompt whenever a new vendor is onboarded.", why: "Helps, but nothing measures whether it worked." }
+      { t: "Calibrate the confidence threshold on a labeled sample before relying on it.", why: "Right when confidence scores aren't yet tied to accuracy. The gap here is in how accuracy is measured." },
+      { t: "Keep sampling high-confidence extractions for ongoing spot checks.", why: "Right after automation, to catch drift. First check what the 97% hides." },
+      { t: "Route fields below the confidence threshold to human review.", why: "Right once thresholds are calibrated. First check where the errors are." },
+      { t: "Break accuracy down by document type and field, not just overall.", ok: true, why: "An overall rate can hide document types that fail badly." }
     ]
   },
   {
-    id: "h6-10", ts: "5.6", scenario: 6, holdout: true,
-    stem: "Reviewers spend most of their time hunting through 40-page contracts to verify each extracted value. How can extraction make review faster?",
+    id: "h6-10", ts: "5.6", scenario: 6, holdout: true, family: "F58",
+    stem: "Two invoices for the same order show different totals. The pipeline keeps whichever one it read last. What fits best?",
     options: [
-      { t: "Return a confidence score with each field so reviewers can skip confident ones.", why: "Helps prioritize, but reviewers still have to find each value." },
-      { t: "Return the page number and the exact source excerpt alongside each extracted value.", ok: true, why: "Provenance per field lets reviewers verify in seconds." },
-      { t: "Highlight the whole contract's key sections for the reviewer.", why: "Narrows the search but doesn't tie values to their sources." },
-      { t: "Extract fewer fields so there's less to verify.", why: "Loses data the business needs." }
+      { t: "Store each value with its document, page and the quoted source text.", why: "Right when values can't be traced. Here two traceable values conflict." },
+      { t: "Keep both values and flag the conflict for review, instead of choosing one.", ok: true, why: "Surface the conflict, with both values and their sources, instead of silently choosing." },
+      { t: "Record the document version and date alongside each extracted value.", why: "Right when values change across versions. These are two different documents." },
+      { t: "Route low-confidence values to a person for review.", why: "Right for uncertain values. Both values here were read clearly." }
     ]
   }
 );
