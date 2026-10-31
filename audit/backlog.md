@@ -4,6 +4,26 @@ Items are ordered by severity, then by exam weight. **S1** would change an exam 
 
 The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 domains, plus the question review (Phase 3) and the pedagogy review (Phases 4 and 4b), haven't reported yet.
 
+## Remediation log
+
+### Batch 1 (2026-10-31): S1 claim fixes and the "Exam vs. today" page
+
+| Item | Status |
+|---|---|
+| C-D1-1 | Fixed: the `allowedTools`/Task rule is now flagged (m06 callout, card and q06-1; guide 1133/1157/1855/1887) |
+| C-D1-2 | Fixed: the q06-1 stem now isolates the coordinator's config (the same definitions work under another coordinator), and option A's `why` is corrected |
+| C-D1-3 / C-D5-1 | Fixed: T4 is narrowed to raw confidence as a complexity proxy for escalation, and explicitly allows calibrated confidence for routing review. The m13 lede, the bullet and card c3, and m00 q00 option D are made precise |
+| C-D2-1 / C-D4-1 | Fixed: "Real world today" callouts on forced `tool_choice` in m02 and m09; q02-4/q02-5 `why` say "exam framing" |
+| C-D2-2 | Fixed: b4-1 Bash `why` |
+| C-D2-3 | Fixed: guide MCP error tiers at 366/367/371/972/973/975/1785/1839, per spec 2025-11-25 (verified). m04 was already consistent |
+| C-D3-1 | Fixed: b2-3 `why` adds the exam-framing note |
+| C-D3-2 | Fixed: the m11 callout covers `argument-hint` and same-name precedence; guide 1508 |
+| C-D3-3 | Fixed: the m11 sorter item states it's the exam answer and that skills work today |
+| C-D4-2 | Fixed: the m10 batch server-tool nuance |
+| C-D4-3 | Fixed: guide 607 now says refine on a sample, then batch |
+| Q6 | Fixed: b5-4 is rewritten, with an unambiguous deadline and equally expert distractors |
+| New | **`#today` "Exam vs. today" page**: 16 rows, each with a source. Linked from the blueprint page and every new callout |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

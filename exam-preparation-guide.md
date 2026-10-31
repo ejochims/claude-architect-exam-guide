@@ -363,12 +363,12 @@ A cleaner internal representation might be:
 
 MCP tools have two error mechanisms:
 
-- **Protocol errors**: the request could not be processed as a protocol operation. Examples: unknown tool, malformed JSON-RPC request, invalid arguments at the protocol boundary (such as a missing required parameter that the schema declares mandatory), unsupported method.
-- **Tool execution errors**: the tool was invoked, but the underlying operation failed. Examples: upstream API returned 404 because the requested record does not exist, upstream API returned 503 because the service is temporarily unavailable, business rule violation, permission denial, rate limit.
+- **Protocol errors** (JSON-RPC errors): the request itself is invalid as a protocol message. Examples: unknown tool, a request that doesn't match the `tools/call` request structure, server errors. (MCP spec 2025-11-25, https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling)
+- **Tool execution errors**: the tool was invoked, but the underlying operation failed. Examples: upstream API returned 404 because the requested record does not exist, upstream API returned 503 because the service is temporarily unavailable, input validation failure (missing or invalid arguments, a date in the wrong format), business rule violation, permission denial, rate limit.
 
 Concrete example. An `check_availability(user_email)` tool faces three errors:
 
-1. Caller omits `user_email` entirely, violating the tool's input schema. This is a **protocol error** (JSON-RPC error) — the call was not even structurally well-formed.
+1. Caller omits `user_email`, violating the tool's input schema. Under the current MCP spec this is an **input validation error**, returned as a tool execution error with `isError: true` and a message the model can act on ("user_email is required"), so the model can self-correct and retry. (Older spec versions and some guides treat this as a JSON-RPC protocol error.)
 2. The calendar API returns 404 because the user does not exist. The tool was invoked correctly, the operation simply failed. **Tool execution error** with `isError: true`.
 3. The calendar API returns 503 because the service is down. Again, the tool was invoked correctly. **Tool execution error** with `isError: true`.
 
@@ -604,7 +604,7 @@ Batch requests have `custom_id` values. Results may not arrive in the same order
 
 For mixed urgency, route per-document, not per-batch. Standard documents go to the Batch API for cost savings; urgent ones go to the real-time Messages API to meet tight latency SLAs. Trying to batch everything and then expedite urgent documents inside the batch defeats the purpose — batch processing latency is the main reason urgent items cannot use it.
 
-For one-shot bulk extraction with a deadline (for example, 50,000 documents under a two-week deadline where a meaningful percentage will need prompt iteration), submit everything to the Batch API for the bulk discount, then submit the failures in successive batches with refined prompts. Sequencing 10 sequential batches of 5,000 each costs more in calendar time and does not buy meaningful learning. Sampling first via real-time API can help characterize failure modes, but it is a small slice of the overall workload, not the main strategy.
+For one-shot bulk extraction with a deadline (for example, 50,000 documents under a two-week deadline where a meaningful percentage will need prompt iteration), **refine the prompt on a representative sample first** (synchronous calls give fast feedback), then submit the bulk to the Batch API for the discount, and resubmit only the failed `custom_id`s with targeted fixes. Batching everything before the prompt is stable pays to process thousands of documents with a prompt you already know needs changes. The exam's framing (task 4.5) is the same: refine on a sample, then batch.
 
 ### Common Pitfalls
 
@@ -969,10 +969,10 @@ MCP tool annotations are metadata that servers may include alongside their tool 
 
 MCP distinguishes two error tiers, and using the wrong one is a common bug:
 
-- **JSON-RPC protocol errors** are returned when the request itself is invalid or the tool cannot be invoked at all: missing required parameters, unknown method, malformed JSON, parameter type mismatches. The client treats these as protocol-level failures, not as something to relay to the model as if the tool had run.
-- **Tool result with `isError: true`** is returned when the tool ran but failed semantically: a remote 404, a 503 from an upstream service, a permission denial, a validation rejection from the underlying system. The model sees these as tool results and can adapt — retry, choose a different tool, or surface to the user.
+- **JSON-RPC protocol errors** are returned when the request itself is invalid as a protocol message: unknown tool, a request that doesn't match the `tools/call` structure, or a server error. (MCP spec 2025-11-25, https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling)
+- **Tool result with `isError: true`** is returned when the tool ran but failed semantically: a remote 404, a 503 from an upstream service, a permission denial, invalid or missing arguments, a validation rejection from the underlying system. The model sees these as tool results and can adapt — retry, choose a different tool, or surface to the user.
 
-A useful rule: if the failure happened before the tool's business logic could execute, return a JSON-RPC protocol error. If the tool reached its target system and that system or the operation itself failed, return a tool result with `isError: true` and a useful message. Putting a missing-parameter failure in `isError` confuses the agent into retrying with the same bad call; putting a remote 503 into a JSON-RPC error prevents the agent from trying again later.
+A useful rule: if the failure is in the protocol message itself (unknown tool, malformed request), return a JSON-RPC error. Everything else, including bad arguments, is a tool result with `isError: true` and a useful message, because that is what lets the model correct itself and retry.
 
 For resources, servers should validate URIs and return appropriate JSON-RPC errors for not found or internal failures. For tools that wrap inherently flaky network calls, lean toward `isError: true` with a clear message so the agent can decide whether to retry, switch tools, or escalate.
 
@@ -1130,7 +1130,7 @@ The standard multi-agent architecture is **hub-and-spoke**: a coordinator manage
 
 Mechanics in the Claude Agent SDK and Claude Code:
 
-- Subagents are spawned with the **Task tool** (renamed **Agent** in current Claude Code; `Task` still works as an alias). The coordinator's **`allowedTools` must include `"Task"`**, or it can describe a delegation but never perform one.
+- Subagents are spawned with the **Task tool** (renamed **Agent** in current Claude Code; `Task` still works as an alias). The coordinator's **`allowedTools` must include `"Task"`**, or it can describe a delegation but never perform one. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
 - Each subagent type is configured with an **`AgentDefinition`**: a description (used to decide when to invoke it), its own system prompt, and a restricted tool list.
 - **Parallel spawning means multiple Task calls in a single coordinator response.** Emitting one Task call per turn across several turns runs them sequentially.
 - Subagent context is **only what the prompt contains**. Include complete findings from prior agents directly in the prompt (for example, pass the search results and document analyses to the synthesis subagent), using structured formats that separate content from metadata (URL, document name, page number, date).
@@ -1154,7 +1154,7 @@ Examples:
 - A synthesis subagent may need no external search tools if it should only work from supplied findings.
 - A report generator needs formatting and citation inputs, not raw broad search.
 
-In the Claude Agent SDK, the mechanism for delegating to a subagent is itself a tool — typically named `Task` or `Agent`. For the parent to spawn a subagent, this tool must appear in the parent's `allowedTools` list. Forgetting to allow the Task/Agent tool is a common reason an "orchestrator" cannot delegate at all: the subagent definitions exist, but the parent has no callable interface to launch them. The subagent's own `allowedTools` is configured separately in the AgentDefinition and constrains what the subagent can do once spawned.
+In the Claude Agent SDK, the mechanism for delegating to a subagent is itself a tool — typically named `Task` or `Agent`. For the parent to spawn a subagent, this tool must appear in the parent's `allowedTools` list. Forgetting to allow the Task/Agent tool is a common reason an "orchestrator" cannot delegate at all: the subagent definitions exist, but the parent has no callable interface to launch them. The subagent's own `allowedTools` is configured separately in the AgentDefinition and constrains what the subagent can do once spawned. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
 
 ### Parallel Execution
 
@@ -1505,7 +1505,7 @@ Explore $ARGUMENTS starting from entry points...
 |---|---|---|
 | `context: fork` | Runs the skill in an isolated subagent context; only its result returns to the main conversation | The skill produces verbose output (codebase analysis) or exploratory noise (brainstorming alternatives) that would pollute the main session |
 | `allowed-tools` | Controls tool access while the skill runs | The skill should be limited to safe operations, preventing destructive actions |
-| `argument-hint` | Prompts the developer for required parameters when they invoke the skill without arguments | The skill needs an input such as an issue number or a path |
+| `argument-hint` | Exam framing: prompts the developer for a required parameter. Today it only shows a hint in autocomplete and doesn't block invocation without the argument | The skill needs an input such as an issue number or a path |
 
 **Skills vs `CLAUDE.md`:** `CLAUDE.md` is *always loaded*, so it holds universal standards that apply to every task. Skills are *invoked on demand* for task-specific workflows. Putting a long review checklist in `CLAUDE.md` costs tokens on every turn and dilutes the rules that always matter.
 
@@ -1782,7 +1782,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Return validation and business errors with structured, non-retryable metadata.
 - Treat write timeouts as uncertain state unless idempotency proves otherwise — the side effect may have happened.
 - Distinguish "no rows found" (empty success) from "tool failed" (error) — a missing record is data, not a bug.
-- MCP protocol errors are JSON-RPC errors (missing required parameter, unknown method); tool execution errors return `isError: true` (404, 503, denied).
+- MCP protocol errors are JSON-RPC errors (unknown tool, malformed request, server error); tool execution errors return `isError: true` (404, 503, denied, and invalid or missing arguments).
 - Repeated identical failures with the same input mean switch strategies, not retry harder.
 - Do not use exceptions for expected business failures.
 
@@ -1836,7 +1836,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - MCP does not automatically handle auth, retries, or rate limits.
 - Tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) are untrusted hints, not guarantees.
 - Poor descriptions cause poor tool selection.
-- JSON-RPC errors for protocol-level failures (missing param, unknown method); `isError: true` tool results for execution failures (404, 503, denied).
+- JSON-RPC errors for protocol-level failures (unknown tool, malformed request); `isError: true` tool results for execution failures, including invalid arguments (404, 503, denied, bad input).
 - Project MCP config uses `.mcp.json` at the repo root; local and user Claude Code MCP config both live in `~/.claude.json` at different keys.
 - Same server name at several scopes: local > project > user.
 - Put secrets in `.mcp.json` as `${ENV_VAR}` expansion, never as literal values.
@@ -1852,7 +1852,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Dynamic decomposition: investigative work that changes as facts emerge.
 - Parallel subagents: independent tasks; phase as serial decompose → parallel execute → serial synthesize.
 - Subagents do not inherit parent conversation; the parent must include every needed fact in the prompt.
-- The Task/Agent tool must be in the parent's `allowedTools` for delegation to work.
+- The Task/Agent tool must be in the parent's `allowedTools` for delegation to work. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
 - Pass context explicitly to subagents.
 - Preserve claim-source-date mappings in research.
 - Restrict tools by subagent role.
@@ -1884,7 +1884,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - The Explore subagent isolates verbose discovery; `/compact` shrinks a bloated context.
 - CI: `claude -p` (non-interactive), `--output-format json`, `--json-schema`. Re-reviews report only new or unaddressed issues.
 - Agentic loop: continue on `stop_reason: "tool_use"`, stop on `"end_turn"`. Never parse text to decide, and never rely on iteration caps as the primary stop.
-- Spawn parallel subagents with multiple Task calls in **one** response; the coordinator's `allowedTools` must include `"Task"`.
+- Spawn parallel subagents with multiple Task calls in **one** response; the coordinator's `allowedTools` must include `"Task"`. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
 
 ### Batch Processing
 

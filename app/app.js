@@ -1,6 +1,6 @@
 // App engine: state + sync, derived progress, views (path, lessons, practice, drills, mock exam, flashcards, blueprint), router.
 (function () {
-  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [];
+  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
   const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null });
@@ -237,10 +237,19 @@ ${nm ? `<section class="cont">
 <div class="read page-head"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ""}</div>`;
   }
 
+  function viewToday() {
+    app.innerHTML = `${pageHead("Exam vs. today", "Answer the exam in its own terms", "The exam blueprint was written before some product changes. On the exam, choose the blueprint's answer. At work, use what ships today. Every row links to the official source.")}
+<div class="bp-rows">${TODAY.map(r => `<div class="panel" style="margin-bottom:14px">
+  <h3 style="margin:0 0 6px">${esc(r.topic)} <span class="small mono">${esc(r.ts)}</span></h3>
+  <p><strong>Exam:</strong> ${esc(r.exam)}</p>
+  <p><strong>Today:</strong> ${esc(r.today)}</p>
+  <p class="small"><a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a></p></div>`).join("")}</div>`;
+  }
   function viewBlueprint() {
     const tm = taskMastery();
     const modFor = t => MODS.filter(m => m.tasks.includes(t));
     app.innerHTML = `${pageHead("Official exam blueprint", "30 task statements", "Everything the exam can ask about. Each percentage is your share of correct answers across that task's practice questions; a dash means you haven't practiced it yet.")}
+<p class="small" style="margin-bottom:18px">Some blueprint terms predate current Claude products. See <a href="#today">Exam vs. today</a> for the differences and which answer the exam expects.</p>
 ${B.domains.map(d => `<section class="bp-dom">
   <h2><span class="chip dom-${d.id}">D${d.n}</span>${esc(d.name)} <span class="small">${d.weight}% of the exam</span></h2>
   <div class="bp-rows">
@@ -519,17 +528,18 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     }
     const d = h.match(/^drill-([1-6])$/);
     if (d) return { drill: Number(d[1]), page: "practice" };
-    if (["blueprint", "practice", "mock", "mock-result", "cards"].includes(h)) return { page: h };
+    if (["blueprint", "today", "practice", "mock", "mock-result", "cards"].includes(h)) return { page: h };
     return { page: "path" };
   }
   function render() {
     const r = route();
     clearInterval(ticker); document.onkeydown = null;
-    const navKey = r.page === "mock" || r.page === "mock-result" ? "practice" : r.page;
+    const navKey = r.page === "mock" || r.page === "mock-result" ? "practice" : r.page === "today" ? "blueprint" : r.page;
     document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", !r.lesson && a.dataset.nav === navKey));
     if (r.lesson) viewLesson(r.lesson, r.step);
     else if (r.drill) viewDrill(r.drill);
     else if (r.page === "blueprint") viewBlueprint();
+    else if (r.page === "today") viewToday();
     else if (r.page === "practice") viewPractice();
     else if (r.page === "mock") viewMock();
     else if (r.page === "mock-result") viewMockResult();

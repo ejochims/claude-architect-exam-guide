@@ -25,7 +25,7 @@ window.BANK = [
     id: "b2-3", ts: "3.2", scenario: 2,
     stem: "A <code>/scaffold-component</code> skill should only read templates and write new files. It should never run shell commands. Which frontmatter setting configures this?",
     options: [
-      { t: "<code>allowed-tools</code>, listing only the file tools the skill needs", ok: true, why: "allowed-tools configures tool access while the skill runs." },
+      { t: "<code>allowed-tools</code>, listing only the file tools the skill needs", ok: true, why: "Exam framing: allowed-tools restricts tool access while the skill runs. (Real world today: it pre-approves the listed tools, and restriction is done with disallowed tools or the agent's tool list; see Exam vs. today.)" },
       { t: "<code>context: fork</code>, so the skill runs isolated from the shell", why: "Isolates context; doesn't limit tools." },
       { t: "<code>argument-hint</code>, declaring which tools the skill may use", why: "Prompts for parameters; doesn't limit tools." },
       { t: "<code>sandbox: true</code>, which disables shell access for the skill", trap: "T8", why: "Not a skill frontmatter field." }
@@ -70,7 +70,7 @@ window.BANK = [
       { t: "Glob with a pattern such as <code>**/*.test.tsx</code>", ok: true, why: "Finding files by name pattern is Glob's job." },
       { t: "Grep for “describe(”", why: "This searches contents, slowly, and matches non-component tests too." },
       { t: "Read the root directory listing recursively", why: "Inefficient, and Read isn't a search tool." },
-      { t: "Bash with a long find command", why: "It works, but the built-in Glob is the intended tool." }
+      { t: "Bash with a long find command", why: "Exam framing: Glob is the dedicated file-pattern tool. (Real world today: on macOS and Linux, current Claude Code runs file search through Bash by default; the exam still expects Glob.)" }
     ]
   },
   {
@@ -177,12 +177,12 @@ window.BANK = [
   },
   {
     id: "b5-4", ts: "4.5", scenario: 5,
-    stem: "A nightly job starts at 6 pm and generates test suggestions that must be ready by 9 am. Someone proposes the Message Batches API for the savings. What's the issue?",
+    stem: "A job starts at 6 pm and generates test suggestions for the next morning's release. If they aren't ready by 9 am, the release is blocked. Someone proposes the Message Batches API to halve the cost. What's the right call?",
     options: [
-      { t: "Batches can take up to 24 hours with no guarantee, so a 15-hour window isn't safe. Use synchronous calls.", ok: true, why: "Check the worst case against the deadline, not the typical completion time." },
-      { t: "No issue. Batches usually finish within an hour, well inside the window.", why: "“Usually” isn't a guarantee." },
-      { t: "The batch API can't process source code, so test suggestions won't work.", trap: "T8", why: "Not true." },
-      { t: "Batch results come back in a different order than the requests.", why: "custom_id handles correlation." }
+      { t: "Use synchronous calls. The 15-hour window is shorter than the batch API's 24-hour worst case, and a miss blocks the release.", ok: true, why: "Batch fits only when the deadline tolerates the documented worst case, not the typical completion time." },
+      { t: "Use batch. Overnight, latency-tolerant work is the textbook batch case, and most batches finish within an hour.", why: "It's the textbook case only when a late result is acceptable. Here a miss blocks the release, so “usually” isn't enough." },
+      { t: "Use batch and give each file a custom_id, so finished suggestions can be published as each request completes.", why: "custom_id correlates results, but it doesn't change the 24-hour worst case for the batch as a whole." },
+      { t: "Use batch, split into twelve smaller batches so that each one finishes well before 9 am.", trap: "T2", why: "Every batch carries the same 24-hour worst case. Splitting adds work without changing the guarantee." }
     ]
   },
   {

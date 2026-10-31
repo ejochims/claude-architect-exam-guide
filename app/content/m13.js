@@ -3,7 +3,7 @@ window.LESSONS.m13 = {
     { f: "Three valid escalation triggers?", b: "The customer explicitly asks for a human; policy is ambiguous or silent on the request (or an exception is needed); the agent can't make meaningful progress." },
     { f: "Customer demands a human for a simple issue. What does the agent do?", b: "Escalate immediately. Don't investigate first or try to talk them out of it." },
     { f: "Frustrated customer, simple issue, no request for a human?", b: "Acknowledge the frustration and offer the resolution. Escalate if they reiterate that they want a person." },
-    { f: "Why not escalate on sentiment or self-rated confidence?", b: "Sentiment doesn't measure complexity, and LLM self-confidence is poorly calibrated: wrong answers are often confident." },
+    { f: "Why not escalate on sentiment or self-rated confidence?", b: "Sentiment doesn't measure complexity, and raw self-rated confidence isn't calibrated to case difficulty. (Calibrated field-level confidence is fine for prioritizing human review: task 5.5.)" },
     { f: "Lookup returns three matching customers?", b: "Ask for an additional identifier. Never pick by heuristic." },
     { f: "97% overall accuracy. Safe to cut human review?", b: "Not yet. Check accuracy by document type and field first, then keep stratified random sampling of high-confidence output." },
     { f: "Two credible sources give different statistics?", b: "Keep both with attribution and annotate the conflict. Include dates so time differences aren't mistaken for contradictions." }
@@ -13,7 +13,7 @@ window.LESSONS.m13 = {
       kind: "read",
       title: "First principle: human attention is scarce",
       html: `
-<p class="lede">Humans are the most expensive, most trusted part of the system. Route work to them when it changes the outcome, not when the agent feels uneasy.</p>
+<p class="lede">Humans are the most expensive, most trusted part of the system. Route work to them when it changes the outcome: a customer's request, a policy gap, or a case the agent can't progress. A vague sense of difficulty isn't a trigger.</p>
 <h3>When to escalate</h3>
 <ul>
 <li><strong>The customer explicitly asks for a human.</strong> Honor it immediately, without investigating first or trying to talk them out of it.</li>
@@ -24,7 +24,7 @@ window.LESSONS.m13 = {
 <h3>Signals that don't work</h3>
 <ul>
 <li><strong>Sentiment.</strong> Anger isn't complexity. A furious customer with a tracking question is a simple case.</li>
-<li><strong>Self-reported confidence</strong> (“rate yourself 1–10”). The agent that's mishandling hard cases is usually confident about them.</li>
+<li><strong>Raw self-reported confidence</strong> (“rate yourself 1–10”) as a measure of case complexity. Uncalibrated, it doesn't reliably separate the cases the agent is mishandling from the ones it handles well, so it's a poor escalation trigger.</li>
 </ul>
 <p>The proportionate fix for miscalibrated escalation is <strong>explicit escalation criteria in the system prompt with few-shot examples</strong> of escalate versus resolve. Try that before building classifiers.</p>
 <p>When a lookup returns <strong>several matching customers</strong>, ask for another identifier (email, order number, postal code). Never choose by heuristic.</p>`

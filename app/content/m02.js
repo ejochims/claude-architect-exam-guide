@@ -54,7 +54,8 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
 <tr><td><code>"any"</code></td><td>Some tool is called; Claude picks which</td><td>Several extraction schemas, document type unknown</td></tr>
 <tr><td><code>{"type": "tool", "name": "…"}</code></td><td>That exact tool is called</td><td>A step that must run first (e.g. <code>extract_metadata</code>), with later steps in follow-up turns</td></tr>
 <tr><td><code>"none"</code></td><td>No tool is called</td><td>A text-only step</td></tr>
-</tbody></table></div>`
+</tbody></table></div>
+<div class="callout today"><div class="callout-label">Real world today</div><p>Not every model accepts forced tool use. On Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and with manual extended thinking, <code>"any"</code> and a named tool return a 400 error. The documented alternative is <code>"auto"</code> plus <code>strict: true</code> tool definitions, or structured outputs. The exam's answer is still the table above, so use it on the exam. See <a href="#today">Exam vs. today</a>.</p></div>`
     },
     {
       kind: "widget",
@@ -136,7 +137,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
           stem: "An extraction pipeline must always run <code>extract_metadata</code> before enrichment tools. Sometimes Claude calls <code>enrich_with_crm</code> first. What is the most reliable fix?",
           options: [
             { t: "List <code>extract_metadata</code> first in the tools array so Claude sees it before the enrichment tools.", why: "Tool order isn't a sequencing guarantee." },
-            { t: "Set <code>tool_choice: {\"type\": \"tool\", \"name\": \"extract_metadata\"}</code> on the first request, then run enrichment in follow-up turns.", ok: true, why: "Forced tool choice guarantees that tool is called. Later steps get their own requests." },
+            { t: "Set <code>tool_choice: {\"type\": \"tool\", \"name\": \"extract_metadata\"}</code> on the first request, then run enrichment in follow-up turns.", ok: true, why: "Forced tool choice guarantees that tool is called, on models that support forced tool use, which the exam assumes. Later steps get their own requests." },
             { t: "Set <code>tool_choice: \"any\"</code> on every request so Claude is required to call one of the extraction tools.", why: "This guarantees some tool call, not which one." },
             { t: "Add “ALWAYS call extract_metadata before any enrichment tool” to the system prompt, in bold.", trap: "T1", why: "Probabilistic, when an API setting gives a guarantee." }
           ]
@@ -147,7 +148,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
           options: [
             { t: "Keep <code>tool_choice: \"auto\"</code> and strengthen the instruction to always use a tool.", trap: "T1", why: "\"auto\" permits text. Stronger wording only lowers the rate." },
             { t: "Force <code>extract_invoice</code>; invoices are the most common type.", why: "This applies the wrong schema to receipts and contracts." },
-            { t: "Set <code>tool_choice: \"any\"</code>.", ok: true, why: "A tool call is guaranteed, and Claude still picks the schema that matches the document." },
+            { t: "Set <code>tool_choice: \"any\"</code>.", ok: true, why: "A tool call is guaranteed, and Claude still picks the schema that matches the document. (Exam framing; on models that reject forced tool use, use auto plus strict tools.)" },
             { t: "Parse the prose summaries with regex as a fallback.", trap: "T6", why: "This patches symptoms with fragile parsing instead of using the guarantee the API offers." }
           ]
         },

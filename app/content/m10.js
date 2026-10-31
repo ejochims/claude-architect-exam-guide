@@ -20,7 +20,7 @@ window.LESSONS.m10 = {
 </tbody></table></div>
 <ul>
 <li><strong><code>custom_id</code></strong> on every request is how you correlate results. Don't assume results come back in order.</li>
-<li><strong>No multi-turn tool calling inside a request.</strong> A batch request is one Messages call. If Claude asks for a tool, nothing executes it and continues. Agentic loops stay on the synchronous API, or you pre-fetch the data into the prompt.</li>
+<li><strong>No multi-turn tool calling inside a request.</strong> A batch request is one Messages call. If Claude asks for a tool, nothing executes it and continues. Agentic loops stay on the synchronous API, or you pre-fetch the data into the prompt. (Real world today: Anthropic-run server tools such as web search do execute inside a batch request; the rule holds for your own tools.)</li>
 <li><strong>Poll for completion</strong>, then process results.</li>
 <li><strong>Refine on a sample first.</strong> Tune the prompt and schema on a representative sample with synchronous calls before batching thousands of documents, so fewer need resubmitting.</li>
 <li><strong>Handle failures surgically.</strong> Resubmit only the failed <code>custom_id</code>s, modified as needed (for example, chunk the documents that exceeded the context limit).</li>

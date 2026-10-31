@@ -1,6 +1,6 @@
 window.LESSONS.m06 = {
   cards: [
-    { f: "A coordinator says it is delegating, but no subagent runs. Likely cause?", b: "Its allowedTools doesn't include \"Task\" (the subagent-spawning tool; it's called Agent in current Claude Code)." },
+    { f: "A coordinator says it is delegating, but no subagent runs. Likely cause?", b: "Exam answer: its allowedTools doesn't include \"Task\" (the subagent-spawning tool). Today the tool is called Agent and allowedTools only pre-approves tools, so check the subagent's description too." },
     { f: "How do you run subagents in parallel?", b: "Emit multiple Task calls in a single coordinator response, not one per turn." },
     { f: "What does a subagent know about the coordinator's conversation?", b: "Nothing automatically. Its context is its AgentDefinition plus the prompt the coordinator writes, so include prior findings explicitly." },
     { f: "Every subagent succeeded but the report misses whole subtopics. Root cause?", b: "The coordinator's task decomposition was too narrow." },
@@ -22,7 +22,7 @@ window.LESSONS.m06 = {
 <li>Pass prior results <strong>in full, as structured data</strong> that separates content from metadata (URL, document, page, date), so attribution survives.</li>
 <li>Give subagents <strong>goals and quality criteria</strong>, not step-by-step procedures, so they can adapt to what they find.</li>
 </ul>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Current Claude Code calls the Task tool <code>Agent</code> (<code>Task</code> still works as an alias), and subagents can nest a few levels deep. The exam uses “Task” and hub-and-spoke, so answer in those terms.</p></div>`
+<div class="callout today"><div class="callout-label">Real world today</div><p>Current Claude Code calls the Task tool <code>Agent</code> (<code>Task</code> still works as an alias), and subagents can nest a few levels deep. In today's Agent SDK, <code>allowedTools</code> <em>pre-approves</em> tools rather than gating them, so a coordinator can often delegate without listing <code>"Task"</code>; a vague subagent description is now a common reason Claude answers directly instead of delegating. Subagents also start in the background by default. The exam uses “Task”, an <code>allowedTools</code> gate and hub-and-spoke, so answer in those terms. See <a href="#today">Exam vs. today</a>.</p></div>`
     },
     {
       kind: "widget",
@@ -55,10 +55,10 @@ window.LESSONS.m06 = {
       questions: [
         {
           id: "q06-1", ts: "1.3", scenario: 3,
-          stem: "A coordinator's logs show “Delegating literature search to the search specialist,” but no subagent ever runs, and the coordinator then answers from its own knowledge. What is the most likely cause?",
+          stem: "A coordinator's logs show “Delegating literature search to the search specialist,” but no subagent ever runs, and the coordinator then answers from its own knowledge. The same subagent definitions are delegated to reliably by a second coordinator that was configured separately. What is the most likely cause?",
           options: [
-            { t: "The search subagent's description is too vague.", trap: "T7", why: "A vague description would cause a wrong choice, not a total failure to spawn." },
-            { t: "The coordinator's <code>allowedTools</code> doesn't include <code>\"Task\"</code>.", ok: true, why: "Without the Task tool, the coordinator can only describe delegation." },
+            { t: "The search subagent's description is too vague.", trap: "T7", why: "Vague descriptions do make Claude skip delegation, but the same definitions work under another coordinator, so the difference is in this coordinator's configuration." },
+            { t: "The coordinator's <code>allowedTools</code> doesn't include <code>\"Task\"</code>.", ok: true, why: "Exam framing: without the Task tool, the coordinator can only describe delegation. (Today the tool is named Agent and allowedTools pre-approves rather than gates; see Exam vs. today.)" },
             { t: "Subagents need a larger context window.", trap: "T3", why: "Nothing was spawned, so context size isn't the issue." },
             { t: "The coordinator needs “always delegate” in its prompt.", trap: "T1", why: "It already tried to delegate. It lacks the mechanism." }
           ]

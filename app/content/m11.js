@@ -58,7 +58,7 @@ argument-hint: <span class="s">"[module-path]"</span>
 <li><strong><code>argument-hint</code></strong> prompts the developer for a required parameter when they invoke the skill without one.</li>
 <li>For your own variant of a team skill, create it in <code>~/.claude/skills/</code> <strong>under a different name</strong> so teammates aren't affected.</li>
 </ul>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Claude Code has since merged custom commands into skills (both create <code>/name</code>, and <code>.claude/commands/</code> still works). <code>allowed-tools</code> now <em>pre-approves</em> the listed tools for the turn, rather than restricting. Answer in the exam's terms.</p></div>`
+<div class="callout today"><div class="callout-label">Real world today</div><p>Claude Code has since merged custom commands into skills (both create <code>/name</code>, and <code>.claude/commands/</code> still works). <code>allowed-tools</code> now <em>pre-approves</em> the listed tools for the turn, rather than restricting. <code>argument-hint</code> only shows a hint in autocomplete; it doesn't stop a skill being invoked without the argument. A personal skill with the same name as a project skill now takes precedence for you. Answer in the exam's terms. See <a href="#today">Exam vs. today</a>.</p></div>`
     },
     {
       kind: "widget",
@@ -71,7 +71,7 @@ argument-hint: <span class="s">"[module-path]"</span>
           ["“All services use structured JSON logging.” The whole team needs it on every task.", "proj", "Universal team standard: the project CLAUDE.md, loaded always and shared through git."],
           ["Your preference for terse commit messages.", "user", "Personal, every project, not imposed on teammates."],
           ["Conventions for *.sql migration files found in a dozen service folders.", "rules", "A file type scattered across directories: glob-scoped rule."],
-          ["A /release-notes command every developer should have after pulling.", "cmd", "Project-scoped commands are versioned and shared."],
+          ["A simple /release-notes prompt (one Markdown file, no scripts) every developer should have after pulling.", "cmd", "Exam answer: a project command in .claude/commands/, versioned and shared. Today a project skill in .claude/skills/ works too, since commands merged into skills."],
           ["A verbose dependency-audit workflow with its own scripts, run on demand in an isolated context.", "skill", "A skill with supporting files and context: fork."],
           ["Terraform conventions that matter only when editing infra/**/*.tf.", "rules", "A rule with paths: [\"infra/**/*.tf\"] loads only for those files."]
         ]

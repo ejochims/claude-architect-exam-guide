@@ -54,7 +54,7 @@ window.LESSONS.m00 = {
           id: "q00-2", ts: "4.3",
           stem: "A lease-abstraction pipeline extracts <code>renewal_notice_days</code>. When a lease doesn't mention notice, the output still contains a plausible number such as 60. The schema marks the field as a required integer. Which change fixes the root cause?",
           options: [
-            { t: "Ask the model to add a confidence score for each field and discard values below 0.7.", trap: "T4", why: "Self-reported confidence is poorly calibrated, and the model is under pressure to produce a value at all. That's the actual cause." },
+            { t: "Ask the model to add a confidence score for each field and discard values below 0.7.", trap: "T4", why: "An uncalibrated threshold like 0.7 is arbitrary, and it doesn't touch the actual cause: the schema forces the model to produce a value. (Calibrated confidence for routing review is a later step, not a fix for fabrication.)" },
             { t: "Make the field nullable and instruct the model to return <code>null</code> when the lease doesn't state it.", ok: true, why: "A required field forces the model to fill it. Allowing null removes the pressure to fabricate. This is a schema-design fix at the root cause." },
             { t: "Run each extraction three times and keep the majority value.", trap: "T6", why: "Voting over a fabricated value gives you a consistently fabricated value. Retries can't recover information the document doesn't contain." },
             { t: "Switch to a model with a longer context window so it reads the whole lease.", trap: "T3", why: "The model isn't missing the clause. The clause doesn't exist, and the schema demands a number anyway." }
