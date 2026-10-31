@@ -2,7 +2,7 @@
 // Usage: node scripts/audit/content-check.mjs [--json]
 import { loadContent, domainOf, optionOrder, plain, ABSOLUTE } from "./lib.mjs";
 
-const { blueprint: B, modules, questions: Q, cards, traps } = loadContent();
+const { blueprint: B, modules, questions: Q, cards, traps, principles: P, principleThemes: PT } = loadContent();
 const json = process.argv.includes("--json");
 const errors = [], warnings = [];
 const count = (arr, key) => arr.reduce((a, x) => ((a[key(x)] = (a[key(x)] || 0) + 1), a), {});
@@ -38,6 +38,17 @@ for (const q of Q) {
   }
 }
 for (const m of modules) for (const t of m.tasks) if (!B.tasks[t]) errors.push(`${m.id}: unknown task ${t}`);
+// Principles page: unique ids, known theme, task statement and trap; bullet IDs well formed and on real task statements.
+const pids = new Set(), themeIds = new Set(PT.map(t => t.id));
+for (const p of P) {
+  if (pids.has(p.id)) errors.push(`principle ${p.id}: duplicate id`);
+  pids.add(p.id);
+  if (!themeIds.has(p.theme)) errors.push(`principle ${p.id}: unknown theme ${p.theme}`);
+  if (p.ts != null && !B.tasks[p.ts]) errors.push(`principle ${p.id}: unknown task statement ${p.ts}`);
+  if (p.trap && !traps[p.trap]) errors.push(`principle ${p.id}: unknown trap ${p.trap}`);
+  if (!p.rule || !p.why || !p.wrong) errors.push(`principle ${p.id}: needs rule, why and wrong`);
+  for (const b of p.bl || []) if (!/^[1-5]\.[1-7]-[KS]\d+$/.test(b) || !B.tasks[b.split("-")[0]]) errors.push(`principle ${p.id}: bad bullet id ${b}`);
+}
 
 // ---------- Option families ----------
 // Members share all four option texts and key different options, so a solver that sees only the options
@@ -139,6 +150,7 @@ else {
   console.log(`Task statements below 5 questions: ${r.tasksBelow5.length} (${r.tasksBelow5.join(", ")})`);
   console.log(`Per domain (actual% / target%): ${Object.entries(r.perDomain).sort().map(([d, v]) => `${d} ${v.n} (${v.pct}/${v.target})`).join(" · ")}`);
   console.log(`Per scenario: ${JSON.stringify(r.perScenario)}`);
+  console.log(`Principles: ${P.length} in ${PT.length} themes`);
   console.log(`Multiple-response items: ${r.multi.n} ${JSON.stringify(r.multi.perDomain)}`);
   console.log(`Correct option longest-or-tied (single-answer only): ${c.correctIsLongestOrTied.n}/${r.totals.questions - r.multi.n} (${c.correctIsLongestOrTied.pct}%), strictly longest ${c.correctStrictlyLongest.pct}% · length rank ${JSON.stringify(c.correctLengthRank)}`);
   console.log(`Correct/longest-distractor ratio: >1.25 in ${c.ratioOver125}, >1.5 in ${c.ratioOver15}, max ${c.maxRatio}`);

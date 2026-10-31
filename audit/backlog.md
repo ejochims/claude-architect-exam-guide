@@ -387,3 +387,26 @@ All five are now within ±2 points of target.
 - **`docs/STUDY-APP-PLAN.md` §6:** the three false claims (length bias, mock balance, scaled score) are corrected, with a pointer to SUMMARY.
 
 **Ship check.** Before these changes, the published artifact matched `main` (`96a3bbd`) file by file, including the static cover. The only difference in `index.html` is the platform's document wrapper, so no republish was needed. Republish after this batch merges.
+
+## Batch 17: Principles page (2026-10-31)
+
+**Why.** Many right answers follow from a small set of design beliefs that recur across domains: resolve what the agent is authorized to resolve; put rules that must always hold in code, not prompts; choose the proportionate fix. The app taught these piecemeal, across lessons, the trap list and module one-liners, with no single place to review them.
+
+**What.**
+- **Page:** a new `#principles` page with a nav link. It holds **71 principles in 11 themes**, in `app/content/principles.js`.
+- **Each principle has:**
+  - a one-line rule;
+  - why it holds;
+  - the tempting wrong answer it beats;
+  - its trap pattern (T1–T9) where one applies;
+  - its task statement and blueprint bullet IDs;
+  - a link to the module that teaches it.
+- **Controls:** search, a theme filter, and a "Rules only" mode for a quick pass.
+- **Source:** written from the blueprint bullets and the curriculum. No exam questions were used.
+
+**Checks.**
+- `content-check.mjs` validates principles: unique IDs, known themes, task statements and traps, and well-formed bullet IDs.
+- `browser-suite.mjs` checks that every principle renders, that search narrows the list, and that Rules only hides the detail. Result: 290 checks, no problems.
+
+**Layout fix.** A sixth nav link overflowed the page by 60px at 390px wide. On screens 560px or narrower, the nav now scrolls sideways, and the active link scrolls into view.
+

@@ -1,6 +1,6 @@
 // App engine: state + sync, derived progress, views (path, lessons, practice, drills, mock exam, flashcards, blueprint), router.
 (function () {
-  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [];
+  const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
   const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null });
@@ -290,6 +290,38 @@ ${nm ? `<section class="cont">
     const draw = q => { const t = q.trim().toLowerCase(); list.innerHTML = GLOSS.filter(([k, , d]) => !t || (k + " " + d).toLowerCase().includes(t)).sort((a, b) => a[0].localeCompare(b[0])).map(([k, id, d]) => { const m = modOf(id); return `<div class="bp-row"><span><strong>${esc(k)}</strong><br><span class="small">${esc(d)}</span></span><span class="bp-mod">${m ? `<a href="#${m.id}">Module ${m.n} →</a>` : ""}</span></div>`; }).join("") || `<p class="small">No matching terms.</p>`; };
     document.getElementById("gq").addEventListener("input", e => draw(e.target.value));
     draw("");
+  }
+  // Principles: the design beliefs behind the right answers. Search, filter by theme, or collapse to rules only.
+  let princState = { q: "", theme: "", compact: false };
+  function viewPrinciples() {
+    const modFor = ts => ts ? MODS.find(m => m.tasks.includes(ts)) : null;
+    app.innerHTML = `${pageHead("Principles", "How the exam thinks", `${PRINC.length} design beliefs behind the right answers, in one place. Each says why it holds, the tempting wrong answer it beats, and where it's taught. Collapse to rules only for a quick pass before a mock.`)}
+<div class="read"><div class="pr-tools">
+<input id="pq" class="sel" type="search" placeholder="Search principles" aria-label="Search principles" value="${esc(princState.q)}">
+<select id="pt" class="sel" aria-label="Theme" style="flex:0 1 240px"><option value="">All themes</option>${PTHEMES.map(t => `<option value="${t.id}"${princState.theme === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select>
+<label><input type="checkbox" id="pc"${princState.compact ? " checked" : ""}> Rules only</label></div>
+<div id="pl"></div></div>`;
+    const list = document.getElementById("pl");
+    const draw = () => {
+      const t = princState.q.trim().toLowerCase();
+      const hit = p => (!princState.theme || p.theme === princState.theme) && (!t || [p.rule, p.why, p.wrong, p.ts || "", p.trap ? TRAPS[p.trap].name : ""].join(" ").toLowerCase().includes(t));
+      list.className = princState.compact ? "compact" : "";
+      const html = PTHEMES.map(th => {
+        const ps = PRINC.filter(p => p.theme === th.id && hit(p));
+        if (!ps.length) return "";
+        return `<div class="pr-theme"><h2>${esc(th.name)}</h2><p>${esc(th.blurb)}</p></div>` + ps.map(p => {
+          const m = modFor(p.ts);
+          return `<div class="pr-card" id="pr-${p.id}"><p class="pr-rule">${esc(p.rule)}</p><p class="pr-why">${esc(p.why)}</p>
+<p class="pr-wrong"><span class="pr-label">Beats</span>${esc(p.wrong)}</p>
+<div class="pr-meta">${p.ts ? taskChip(p.ts) : ""}${p.trap ? `<span class="trap-badge" title="${esc(TRAPS[p.trap].tell)}">Trap: ${esc(TRAPS[p.trap].name)}</span>` : ""}${m ? `<a href="#${m.id}">Module ${m.n} →</a>` : ""}</div></div>`;
+        }).join("");
+      }).join("");
+      list.innerHTML = html || `<p class="small">No matching principles.</p>`;
+    };
+    document.getElementById("pq").addEventListener("input", e => { princState.q = e.target.value; draw(); });
+    document.getElementById("pt").addEventListener("change", e => { princState.theme = e.target.value; draw(); });
+    document.getElementById("pc").addEventListener("change", e => { princState.compact = e.target.checked; draw(); });
+    draw();
   }
   function viewToday() {
     app.innerHTML = `${pageHead("Exam vs. today", "Answer the exam in its own terms", "The exam blueprint was written before some product changes. On the exam, choose the blueprint's answer. At work, use what ships today. Every row links to the official source.")}
@@ -624,7 +656,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     }
     const d = h.match(/^drill-([1-6])$/);
     if (d) return { drill: Number(d[1]), page: "practice" };
-    if (["blueprint", "today", "glossary", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
+    if (["blueprint", "today", "glossary", "principles", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
     return { page: "path" };
   }
   function render() {
@@ -632,11 +664,15 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     clearInterval(ticker); document.onkeydown = null;
     const navKey = ["mock", "mock-result", "readiness"].includes(r.page) ? "practice" : r.page === "today" ? "blueprint" : r.page;
     document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", !r.lesson && a.dataset.nav === navKey));
+    // On narrow screens the nav scrolls sideways; keep the active link in view.
+    const onLink = document.querySelector(".nav a.on"), navEl = onLink && onLink.parentElement;
+    if (navEl && navEl.scrollWidth > navEl.clientWidth) navEl.scrollLeft = Math.max(0, onLink.offsetLeft - navEl.offsetLeft - (navEl.clientWidth - onLink.offsetWidth) / 2);
     if (r.lesson) viewLesson(r.lesson, r.step);
     else if (r.drill) viewDrill(r.drill);
     else if (r.page === "blueprint") viewBlueprint();
     else if (r.page === "today") viewToday();
     else if (r.page === "glossary") viewGlossary();
+    else if (r.page === "principles") viewPrinciples();
     else if (r.page === "practice") viewPractice();
     else if (r.page === "mock") viewMock();
     else if (r.page === "mock-result") viewMockResult();
