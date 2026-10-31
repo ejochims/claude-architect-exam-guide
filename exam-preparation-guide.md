@@ -1,5 +1,7 @@
 # Claude Certified Architect - Foundations: Exam Preparation Guide
 
+> **The study app is the primary study path.** It covers everything in this guide plus foundations lessons, a glossary, an "Exam vs. today" page, 144 practice questions and a one-time Readiness Check. This guide is kept as a consistent long-form companion. See `app/README.md` and `audit/SUMMARY.md`.
+
 ## Overview
 
 This guide teaches the architecture knowledge needed to design, build, and operate production systems with Claude, Claude Code, the Claude Agent SDK, tools, and MCP integrations. It is intentionally scenario-oriented: the exam is likely to test trade-offs, not rote definitions.
@@ -37,6 +39,10 @@ The blueprint was written in early 2026, and Claude Code has since evolved. **An
 | Skill `allowed-tools` restricts tools during the skill | `allowed-tools` now *pre-approves* tools for the turn; restricting is done with `disallowed-tools` or an agent's `tools` list |
 | Coordinators route all subagent communication (hub-and-spoke) | Still the recommended design, though subagents can now nest up to 3 levels by default |
 | Guaranteed structured output = `tool_use` + JSON Schema + `tool_choice` | Also available: `output_config.format` JSON structured outputs. The exam's canonical answer is still `tool_use` |
+| `tool_choice: "any"` or a named tool guarantees a call | On Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1 these return 400; use `auto` with `strict: true` tools, or structured outputs |
+| Skill `argument-hint` prompts for a required parameter | It's an autocomplete hint only; it doesn't block invoking the skill without the argument |
+| `/memory` shows which memory files are loaded | `/memory` opens memory files for editing; `/context` shows what's loaded |
+| Missing or invalid MCP tool arguments are JSON-RPC protocol errors (older guides) | Since MCP spec 2025-11-25 they're tool execution errors (`isError: true`) so the model can self-correct |
 
 ---
 
@@ -91,9 +97,9 @@ Tool definitions, tool schemas, output schemas, and tool-use/result blocks count
 
 Structured outputs also have operational implications: the first request for a schema may have additional latency while the grammar is compiled; schemas are cached for reuse; very complex schemas can exceed compilation limits; refusals or max-token stops can still produce nonconforming output. Do not treat schema compliance as a substitute for domain validation.
 
-### Partial Assistant Prefill
+### Partial Assistant Prefill (legacy)
 
-Claude can continue from a partially filled assistant response in some API patterns. This can be useful for response format control, such as starting directly with `{` for text JSON-style output or preventing repetitive greetings by providing a concise opening. Use this carefully: schema-constrained tool use is usually better than relying on text prefill for machine-readable output.
+Older Claude models could continue from a partially filled (prefilled) assistant turn, which some teams used to force a `{` or skip boilerplate openers. **On Claude 4.6 and later models, a prefilled final assistant turn returns a 400 error** (https://platform.claude.com/docs/en/api/errors#prefill-not-supported). For strict data use structured outputs or strict tool use; for openers, give a direct instruction such as "respond without preamble." Prefill isn't an exam topic.
 
 ### Token Growth in Extended Conversations
 
@@ -457,7 +463,7 @@ Use instructions and examples that distinguish extraction from inference:
 
 Schema design also affects fabrication. If a field is required but the source rarely contains the information, the model is structurally pressured to invent values. Make these fields optional or nullable.
 
-A common alternative — running a second LLM call to "verify" extracted values against the source — is generally inferior to fixing the schema. Verification calls add cost and latency, can themselves hallucinate or rationalize the original answer, and do not address the root cause: the model produced a value because the schema demanded one. Allowing `null` (or `unclear`, or `not_stated`) lets the first call signal absence directly, which is both cheaper and more honest. Use a verification pass only as a sampling-based audit on already-good extractions, not as a fix for fabrication caused by overly strict schemas.
+When fabrication comes from a required field, fix the schema first: allow `null`, "unclear" or "not stated." A second LLM call that "verifies" values doesn't remove the pressure to invent a value. Once the schema is right, though, an *independent* verification pass that checks each value against its quoted source is a sound design (task 4.6), and self-review in the same context is the weak version.
 
 Allow `null` rather than empty arrays when the distinction matters semantically. An empty `pros` array often reads as "the reviewer mentioned no pros," which is a real claim. `null` reads as "the document did not address pros," which is closer to the truth for very short reviews. Similarly, an enum like `["positive", "negative", "mixed"]` should grow an `unclear` value when sarcasm or ambiguity is common, so the model has a correct option instead of being forced to pick.
 
@@ -896,10 +902,10 @@ If responses become repetitive, do not only add "never say X" lists. Better opti
 
 - Better examples in the system prompt.
 - A concise style guide.
-- Partial assistant prefill for specific API calls.
+- A direct instruction about the opening ("Respond directly without preamble"), or output inside XML tags. (Prefill no longer works on current models.)
 - Post-processing for purely cosmetic cleanup when safe.
 
-Partial assistant prefill is particularly effective for repetitive openers. If every reply starts with "Great question!" or "I'd be happy to help," prefilling a more neutral first sentence (or a constrained format like a checklist marker) skips the boilerplate without expanding the system prompt. Keep the prefill short — one phrase, not a paragraph — and avoid prefilling content the model needs to reason about.
+Prefill is no longer an option on current models (Claude 4.6 and later return 400 for a prefilled final assistant turn). For repetitive openers, add a direct instruction ("Start with the answer; no greeting or restatement") and one short example of the desired opening.
 
 For strict machine-readable output, prefer structured outputs or tool use over text formatting instructions.
 
@@ -1106,7 +1112,7 @@ Avoid this pattern when units depend on each other's findings (a finding from re
 
 Subagents do not automatically share the parent's conversation state. When the parent agent invokes a subagent (in the Claude Agent SDK, this typically happens through a Task or Agent tool), the subagent starts a fresh conversation. It receives only what the parent explicitly passes — usually the prompt the parent constructed, plus the subagent's own definition (system prompt, allowed tools, model selection). It does not see the parent's prior user turns, prior assistant turns, prior tool results, or memory of earlier subagent runs.
 
-Two consequences follow. First, every piece of context the subagent needs has to be in the prompt the parent constructs: the goal, the relevant findings, the constraints, the expected output shape, the source references. Second, a "resume the previous research subagent" pattern doesn't exist by default — calling the Agent tool again starts a brand-new agent. If you need continuity, the parent must persist an identifier and pass it through, or include the prior summary in the new prompt.
+Two consequences follow. First, every piece of context the subagent needs has to be in the prompt the parent constructs: the goal, the relevant findings, the constraints, the expected output shape, the source references. Second, each Agent call starts a new subagent by default; continuing one requires explicit action (in the current SDK, resuming it by its agent ID within the session), so pass forward whatever the next call needs.
 
 A coordinator must therefore pass the context each subagent needs. Usually that means a concise task, relevant findings, source references, constraints, and expected output shape.
 
@@ -1154,7 +1160,7 @@ Examples:
 - A synthesis subagent may need no external search tools if it should only work from supplied findings.
 - A report generator needs formatting and citation inputs, not raw broad search.
 
-In the Claude Agent SDK, the mechanism for delegating to a subagent is itself a tool — typically named `Task` or `Agent`. For the parent to spawn a subagent, this tool must appear in the parent's `allowedTools` list. Forgetting to allow the Task/Agent tool is a common reason an "orchestrator" cannot delegate at all: the subagent definitions exist, but the parent has no callable interface to launch them. The subagent's own `allowedTools` is configured separately in the AgentDefinition and constrains what the subagent can do once spawned. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
+In the Claude Agent SDK, the mechanism for delegating to a subagent is itself a tool — typically named `Task` or `Agent`. For the parent to spawn a subagent, this tool must appear in the parent's `allowedTools` list (exam framing; today `allowedTools` pre-approves rather than gates). Forgetting to allow the Task/Agent tool is a common reason an "orchestrator" cannot delegate at all: the subagent definitions exist, but the parent has no callable interface to launch them. The subagent's own `allowedTools` is configured separately in the AgentDefinition and constrains what the subagent can do once spawned. *(Exam framing. In today's Agent SDK, `allowedTools` pre-approves tools rather than gating them, so delegation can work without it; a vague subagent description is the more common real-world cause.)*
 
 ### Parallel Execution
 
@@ -1235,7 +1241,7 @@ Do not rely on simplistic counters such as "escalate after three failed tools." 
 Two popular escalation signals are **unreliable proxies** and usually wrong answers:
 
 - **Sentiment.** An angry customer with a simple shipping question is not a complex case; a calm customer asking for a policy exception is. Sentiment does not correlate with case complexity.
-- **Self-reported confidence** ("rate your confidence 1–10, escalate below 6"). LLM self-confidence is poorly calibrated: an agent that is mishandling hard cases is usually *confidently* wrong.
+- **Self-reported confidence** ("rate your confidence 1–10, escalate below 6"). A raw self-rating doesn't measure case complexity, and an agent can be confidently wrong on the hard cases. (This is different from field-level confidence *calibrated on labeled data* to prioritize human review, which is good practice; see task 5.5.)
 
 The proportionate first fix for miscalibrated escalation is **explicit escalation criteria in the system prompt, with few-shot examples** showing when to escalate versus resolve. Try that before building classifiers or sentiment pipelines.
 
@@ -1544,9 +1550,9 @@ CI review design:
 
 Hooks run at lifecycle events. The most common ones to know are:
 
-- **`PreToolUse`** — fires before a tool call. Can deny the call, allow it, ask the user for approval, defer (let normal permission rules decide), inject additional context the model will see, or modify the tool's input. This is the correct class of mechanism for "must always require approval" policies.
+- **`PreToolUse`** — fires before a tool call. Can allow or deny the call, ask the user for approval, defer (in `-p` runs, end the turn so the call can be resumed later), inject additional context the model will see, or modify the tool's input. This is the correct class of mechanism for "must always require approval" policies.
 - **`PostToolUse`** — fires after a tool call. Useful for logging, formatting, secondary checks, or appending follow-up context.
-- **`UserPromptSubmit`** — fires when the user submits a prompt. Can block the submission, modify it, or attach extra context.
+- **`UserPromptSubmit`** — fires when the user submits a prompt. Can block the submission or attach extra context; it can't rewrite the prompt.
 - **`SessionStart`** — fires once when a session begins. Useful for loading project context, setting up environment variables, or running pre-flight checks.
 
 A `PreToolUse` hook is the canonical way to enforce hard rules in Claude Code: matching tool name and parameters against an allow/deny list, requiring confirmation for destructive shell commands, blocking edits to generated files, or refusing writes outside an approved directory. Because hooks run as code in your environment, they cannot be talked around by the model — that is exactly why they are the right place for hard rules.
@@ -1579,7 +1585,7 @@ A subagent does not inherit the parent's conversation. When the parent launches 
 
 Two practical consequences:
 
-- **Don't assume the subagent "remembers" your project.** If the subagent needs the project's coding conventions, paste or reference them in the prompt. CLAUDE.md will not always be loaded into the subagent's context unless its definition does so.
+- **Don't assume the subagent has your project conventions.** Custom subagents load CLAUDE.md by default, but the built-in Explore and Plan subagents skip it, and a definition can opt out. Pass the conventions a subagent's task depends on in its prompt.
 - **Don't expect a "second invocation" of the same subagent to continue where the first left off.** Each call is fresh. If state needs to persist across invocations, the parent persists it (in a file, in a structured note) and re-supplies the relevant slice with each call.
 
 ### Common Pitfalls
@@ -1730,7 +1736,7 @@ Do not rerun the entire batch when a small percentage fails.
 
 Handle by failure type:
 
-- `context_length_exceeded`: chunk only failed inputs, then merge partial extractions.
+- Prompt-too-long errors (“prompt is too long”): chunk only the failed inputs, then merge the partial extractions.
 - Validation failure: resubmit failed records with validation-error feedback.
 - Prompt/schema issue: refine prompt and resubmit affected records.
 - Expired/canceled: resubmit only incomplete `custom_id`s.
@@ -1758,7 +1764,7 @@ Prompt caching can reduce costs for repeated context in some workflows, but it d
 - Use `output_config.format` for schema-backed JSON responses where supported.
 - Use tool use or strict tool use for schema-backed tool calls.
 - `tool_choice: auto` allows tools; `any` requires one; `tool` requires a named tool; `none` disables tools.
-- Partial assistant prefill can control text starts, but structured outputs/tools are better for strict data.
+- Prefill (starting Claude's reply yourself) is unavailable on Claude 4.6 and later; use structured outputs or strict tools for data, and direct instructions for openers.
 
 ### Tool Design
 

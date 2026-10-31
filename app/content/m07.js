@@ -24,6 +24,7 @@ window.LESSONS.m07 = {
 <ul>
 <li><strong>A case-facts block.</strong> Extract amounts, dates, order numbers and statuses into a structured block sent with every prompt, <em>outside</em> the summarized history. For multi-issue sessions, keep one entry per issue.</li>
 <li><strong>Trim at the source.</strong> Keep only relevant fields before results accumulate (in the tool, or with a <code>PostToolUse</code> hook).</li>
+<li><strong>Choose how history shrinks.</strong> A <em>sliding window</em> keeps the last N turns verbatim and drops older ones, which is simple but forgets early commitments. <em>Progressive summarization</em> condenses older turns into a running summary, which keeps the gist but blurs exact numbers and dates. Either way, pair it with a case-facts block so the specifics survive.</li>
 <li><strong>Position-aware ordering.</strong> Put a key-findings summary at the top of aggregated input, and organize detail under explicit section headers.</li>
 <li><strong>Structured handoffs between agents.</strong> If a downstream agent has a tight budget, have upstream agents return key facts, citations and relevance scores, not verbose reasoning. Ask subagents for metadata too (dates, source locations, methodology).</li>
 </ul>`

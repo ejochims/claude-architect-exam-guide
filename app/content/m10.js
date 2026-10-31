@@ -78,7 +78,7 @@ window.LESSONS.m10 = {
         },
         {
           id: "q10-3", ts: "4.5", scenario: 6,
-          stem: "A 10,000-document batch finishes with 280 failures, all <code>context_length_exceeded</code>. What next?",
+          stem: "A 10,000-document batch finishes with 280 failures, all “prompt is too long” errors because the documents exceed the context window. What next?",
           options: [
             { t: "Resubmit the whole batch with a larger <code>max_tokens</code>.", why: "Re-pays for 9,720 successes, and <code>max_tokens</code> limits output, not input." },
             { t: "Resubmit only the 280 failed <code>custom_id</code>s, with those documents chunked.", ok: true, why: "Targeted resubmission with the change that fixes the cause." },

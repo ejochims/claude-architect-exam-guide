@@ -211,7 +211,7 @@ window.BANK = [
     options: [
       { t: "Add few-shot examples of complete findings in the exact required format.", ok: true, why: "When instructions alone give inconsistent output, examples of the exact format fix it." },
       { t: "Repeat the required field list three times in the prompt for emphasis.", trap: "T9", why: "Repetition adds no new information." },
-      { t: "Lower the temperature to 0 so the output format stays the same every run.", why: "Makes each output more repeatable, not more complete. Missing fields stay missing." },
+      { t: "Lower the temperature to 0 so the output format is more consistent from run to run.", why: "Makes each output more repeatable, not more complete. Missing fields stay missing." },
       { t: "Post-process findings with regular expressions that fill in missing fields with defaults.", trap: "T6", why: "Defaults hide missing information, such as a line number nobody knows." }
     ]
   },

@@ -102,7 +102,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
             { t: "Add 2–4 few-shot examples of borderline requests, showing why one tool beats the other.", ok: true, why: "Examples that show the reasoning teach the judgment the descriptions can't." },
             { t: "Merge both into one <code>handle_delivery_issue</code> tool that decides internally whether to look up or open a claim.", trap: "T5", why: "Moves the ambiguity inside the tool without teaching which action fits." },
             { t: "Route any message containing “delivered” to <code>open_claim</code> with a keyword rule in front of the agent.", trap: "T2", why: "Keyword rules misfire on paraphrases and bypass the agent's judgment." },
-            { t: "Set temperature to 0 so the agent makes the same choice for the same request every time.", why: "Consistent isn't correct. It would pick the same tool, right or wrong." }
+            { t: "Set temperature to 0 so the agent's choice is more consistent for the same request.", why: "More consistent isn't more correct. It would tend to pick the same tool, right or wrong." }
           ]
         },
         {
