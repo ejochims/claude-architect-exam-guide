@@ -1,0 +1,150 @@
+bullet_id,ts,kind,paraphrase,lesson_steps,cards,question_ids,rating,notes
+3.1-K1,3.1,K,"CLAUDE.md levels: user, project, directory",m11:0;m11:2,m11:c0;m11:6(recap),q11-1;q12-4;q11-2,COVERED+TESTED,Directory level is one table row ('working in that subtree'); no item keys directory-level loading.
+3.1-K2,3.1,K,User-level memory is not shared through git,m11:0;m11:2,m11:c0;m11:6(recap),q11-1;q12-4;b2-4,COVERED+TESTED,Well covered; reason given (not versioned).
+3.1-K3,3.1,K,@import keeps CLAUDE.md modular,m11:0,m11:6(recap),q11-2,COVERED-NOT-TESTED,One bullet with one example path; no card; import resolution (relative paths) not explained; 1 question.
+3.1-K4,3.1,K,Rules directory as alternative to one big CLAUDE.md,m11:0,m11:6(recap),,COVERED-NOT-TESTED,Directory itself well taught via 3.3; the organisational-split purpose is one clause; no item keys it (q11-2 keys @import instead).
+3.1-S1,3.1,S,Diagnose instructions stuck at user level,m11:0,m11:c0;m11:6(recap),q11-1;q12-4,COVERED+TESTED,q11-1 scenario/judgment; q12-4 is closer to recall.
+3.1-S2,3.1,S,@import only relevant standards per package,m11:0,m11:6(recap),q11-2,COVERED-NOT-TESTED,Only q11-2; no card.
+3.1-S3,3.1,S,Split large CLAUDE.md into topic rule files,m11:0,,,THIN,"One clause listing example filenames; no why (maintainability/ownership), no card, no question."
+3.1-S4,3.1,S,/memory shows which memory files loaded,m11:0,m11:c1;m11:6(recap),b2-1,COVERED-NOT-TESTED,Card is pure recall; 1 question.
+3.2-K1,3.2,K,Project vs user commands directories,m11:0;m11:2,m11:c3;m11:6(recap),,COVERED-NOT-TESTED,Table row + one sorter item; zero questions on commands (the official sample tests exactly this).
+3.2-K2,3.2,K,"Skills dir, SKILL.md, frontmatter options",m11:0;m11:1,m11:c4;m11:6(recap),q11-5;q11-6;b2-3;q11-4,COVERED+TESTED,Good; real-world callout at m11.js:61.
+3.2-K3,3.2,K,context: fork isolates skill in sub-agent,m11:1;m11:2,m11:c4,q11-5,COVERED-NOT-TESTED,Only q11-5 keys it; appears as distractor in q11-6/b2-3 (does not require knowing it).
+3.2-K4,3.2,K,Personal skill variants under different names,m11:1,,q11-4,COVERED-NOT-TESTED,One bullet; no card or recap line; 1 question.
+3.2-S1,3.2,S,Create shared project commands via git,m11:0;m11:2,m11:c3,,COVERED-NOT-TESTED,No question. Sorter item only.
+3.2-S2,3.2,S,Use fork for verbose or exploratory skills,m11:1;m11:2,m11:c4,q11-5,COVERED-NOT-TESTED,Brainstorming case taught but untested; 1 question.
+3.2-S3,3.2,S,allowed-tools to restrict skill tool access,m11:1,m11:c4;m11:6(recap),b2-3,COVERED-NOT-TESTED,1 question; exam framing flagged vs current pre-approve behaviour (m11.js:61).
+3.2-S4,3.2,S,argument-hint prompts for missing parameters,m11:1,m11:c4;m11:6(recap),q11-6,COVERED-NOT-TESTED,q11-6 is effectively recall of field names; 1 question.
+3.2-S5,3.2,S,Skills on demand vs CLAUDE.md always loaded,m11:0;m11:2,m11:c5,b2-4,COVERED-NOT-TESTED,No prose paragraph on the trade-off (table + card only); 1 keyed question (distractors in q11-4/q11-5).
+3.3-K1,3.3,K,Rules files with YAML paths glob frontmatter,m11:0;m11:1;m11:2,m11:c2;m11:6(recap),q11-3;b2-2;q00-3,COVERED+TESTED,q00-3 is recall.
+3.3-K2,3.3,K,Path rules load only for matching files,m11:1,m11:c2,q11-3;b2-2,COVERED+TESTED,Reason (context/tokens) given.
+3.3-K3,3.3,K,Globs beat directory CLAUDE.md for scattered files,m11:1;m11:2,m11:c2;m11:6(recap),q11-3,COVERED-NOT-TESTED,Only q11-3 requires it (b2-2 tests match semantics).
+3.3-S1,3.3,S,"Create path-scoped rule, e.g. terraform glob",m11:1;m11:2,m11:c2,q11-3;b2-2,COVERED+TESTED,
+3.3-S2,3.3,S,Glob by file type regardless of directory,m11:1;m11:2,m11:c2,q11-3,COVERED-NOT-TESTED,1 question; TS 3.3 has only 2 items total.
+3.3-S3,3.3,S,Choose path rules over subdirectory CLAUDE.md,m11:1;m11:2,m11:c2;m11:6(recap),q11-3,COVERED-NOT-TESTED,1 question.
+3.4-K1,3.4,K,"Plan mode for large, multi-approach, architectural work",m11:3;m11:4,m11:c6;m11:6(recap),q11-7,COVERED-NOT-TESTED,TS 3.4 has 1 question total. q11-7 closely mirrors official sample Q5 structure (Phase 3 SAMPLE-CLOSE risk).
+3.4-K2,3.4,K,Direct execution for simple scoped changes,m11:3;m11:4,m11:c6;m11:6(recap),,COVERED-NOT-TESTED,No item where direct execution is the key; sorter only.
+3.4-K3,3.4,K,"Plan mode explores safely, prevents rework",m11:3,,q11-7,COVERED-NOT-TESTED,One sentence; card and recap omit the why.
+3.4-K4,3.4,K,"Explore subagent isolates discovery, returns summary",m11:3;m07:2,m07:c4;m07:4(recap),q07-5,COVERED-NOT-TESTED,"In m11 only a clause; Explore never described (built-in, read-only, what it returns); 1 question (tagged 5.4)."
+3.4-S1,3.4,S,Pick plan mode for architectural/migration tasks,m11:3;m11:4,m11:c6,q11-7,COVERED-NOT-TESTED,1 question; sorter item m11:4 near-paraphrases sample Q5.
+3.4-S2,3.4,S,Pick direct execution for clear single-file fixes,m11:3;m11:4,m11:c6,,COVERED-NOT-TESTED,Zero questions keyed to direct execution.
+3.4-S3,3.4,S,Explore subagent to avoid context exhaustion,m11:3;m07:2,m07:c4,q07-5,COVERED-NOT-TESTED,Multi-phase framing absent; 1 question.
+3.4-S4,3.4,S,"Plan to investigate, then execute directly",m11:3,m11:c6;m11:6(recap),q11-7,COVERED-NOT-TESTED,1 question.
+3.5-K1,3.5,K,Concrete I/O examples beat inconsistent prose,m11:3,m11:c7;m11:6(recap),q11-8;b2-6,COVERED+TESTED,
+3.5-K2,3.5,K,"Test-driven iteration: tests first, share failures",m11:3,m11:6(recap),,COVERED-NOT-TESTED,One bullet; no card; no question keys writing tests first.
+3.5-K3,3.5,K,Interview pattern surfaces unanticipated considerations,m11:3,m11:6(recap),q11-9,COVERED-NOT-TESTED,No card; 1 question.
+3.5-K4,3.5,K,Interacting issues together; independent ones sequentially,m11:3,m11:6(recap),b2-5,COVERED-NOT-TESTED,No card; no item where sequential is correct; 1 question.
+3.5-S1,3.5,S,Give 2-3 I/O examples for transformations,m11:3,m11:c7,q11-8;b2-6,COVERED+TESTED,Count 2-3 stated precisely (m11.js:93).
+3.5-S2,3.5,S,Write test suites first incl. edge/performance,m11:3,m11:6(recap),,COVERED-NOT-TESTED,Zero questions; no card.
+3.5-S3,3.5,S,Interview pattern before unfamiliar-domain implementation,m11:3,m11:6(recap),q11-9,COVERED-NOT-TESTED,1 question.
+3.5-S4,3.5,S,Specific test cases fix edge cases (nulls),m11:3,m11:c7,b2-6;q11-8,COVERED+TESTED,Lesson never names edge-case test cases explicitly; covered via general 'examples beat prose'.
+3.5-S5,3.5,S,Single message for interacting fixes vs sequential,m11:3,m11:6(recap),b2-5,COVERED-NOT-TESTED,1 question.
+3.6-K1,3.6,K,-p / --print for non-interactive runs,m12:0;m12:1,m12:c0;m12:5(recap),b5-1;q00-3,COVERED+TESTED,b5-1 and q00-3 are near official sample Q10 (same invented-flag distractors; m12.js:25 lists them).
+3.6-K2,3.6,K,--output-format json and --json-schema in CI,m12:0;m12:1,m12:c1;m12:5(recap),q12-1,COVERED-NOT-TESTED,Only q12-1 keys it (b5-7 mentions it in a why).
+3.6-K3,3.6,K,CLAUDE.md supplies context to CI-invoked Claude,m12:0;m12:1,m12:c2;m12:5(recap),q12-4;q12-3,COVERED+TESTED,q12-4 is a recall-style 'where' question.
+3.6-K4,3.6,K,Generating session reviews itself poorly; isolate,m12:0;m12:1;m08:2,m08:c3,b5-5;q08-6,COVERED+TESTED,In m12 one clause; reason given in m08:2.
+3.6-S1,3.6,S,Use -p in CI to prevent hangs,m12:0;m12:1,m12:c0,b5-1;q00-3,COVERED+TESTED,q00-3 recall; b5-1 sample-close.
+3.6-S2,3.6,S,JSON + schema output for inline PR comments,m12:0;m12:1,m12:c1;m12:5(recap),q12-1,COVERED-NOT-TESTED,1 question.
+3.6-S3,3.6,S,Include prior findings; report only new issues,m12:0;m12:1,m12:c3;m12:5(recap),q12-2,COVERED-NOT-TESTED,1 question.
+3.6-S4,3.6,S,Provide existing tests to avoid duplicate tests,m12:0,m12:5(recap),q12-3,COVERED-NOT-TESTED,No card; 1 question (combined with S5).
+3.6-S5,3.6,S,Document test standards and fixtures in CLAUDE.md,m12:0;m12:1,m12:c2;m12:5(recap),q12-3;q12-4,COVERED+TESTED,
+4.1-K1,4.1,K,Explicit criteria beat vague instructions,m08:0;m08:1,m08:c0;m08:4(recap),q08-1;b5-6;q08-3,COVERED+TESTED,Vague vs explicit example given (m08.js:17-23).
+4.1-K2,4.1,K,'Be conservative'/high-confidence-only fails on precision,m08:0,m08:c0;m08:4(recap),q08-1;b5-6,COVERED+TESTED,Stated precisely (m08.js:15).
+4.1-K3,4.1,K,False positives erode trust across categories,m08:0,m08:c1;m08:4(recap),q08-2,COVERED-NOT-TESTED,Callout gives the reason; 1 question.
+4.1-S1,4.1,S,"Define report vs skip categories, not confidence filters",m08:0;m08:1,m08:c0;m08:4(recap),q08-1;b5-6,COVERED+TESTED,
+4.1-S2,4.1,S,Temporarily disable high-FP categories,m08:0,m08:c1;m08:4(recap),q08-2,COVERED-NOT-TESTED,1 question; b5-2 distractor (disable security) adds nuance but does not key S2.
+4.1-S3,4.1,S,Severity criteria with code example per level,m08:0,m08:c5;m08:4(recap),q08-3,COVERED-NOT-TESTED,No worked severity example shown; 1 question.
+4.2-K1,4.2,K,Few-shot most effective for consistent format,m08:2,m08:c2;m08:4(recap),b5-7,COVERED-NOT-TESTED,"1 question. TS 4.2 has 4 items, each on a different bullet."
+4.2-K2,4.2,K,Few-shot demonstrates ambiguous-case handling,m08:2,m08:c2;m08:4(recap),q08-4,COVERED-NOT-TESTED,Branch-level test coverage example absent; 1 question.
+4.2-K3,4.2,K,Few-shot lets model generalise to novel cases,m08:2,m08:c2,q08-4;b5-2,COVERED-NOT-TESTED,"Taught in one clause; q08-4/b5-2 mention generalisation only in whys, neither discriminates on it."
+4.2-K4,4.2,K,Few-shot reduces extraction hallucination,m08:2,,q08-5,COVERED-NOT-TESTED,Informal measurements not mentioned; no card; 1 question.
+4.2-S1,4.2,S,2-4 targeted examples with reasoning for ambiguity,m08:2,m08:c2;m08:4(recap),q08-4,COVERED-NOT-TESTED,Count stated precisely (m08.js:51); 1 question.
+4.2-S2,4.2,S,Examples demonstrating location/issue/severity/fix format,m08:2,m08:4(recap),b5-7,COVERED-NOT-TESTED,1 question.
+4.2-S3,4.2,S,Examples contrast acceptable patterns vs real issues,m08:2,,b5-2,COVERED-NOT-TESTED,No card or recap line; 1 question.
+4.2-S4,4.2,S,Examples of varied document structures,m08:2,m08:4(recap),q08-5,COVERED-NOT-TESTED,1 question.
+4.2-S5,4.2,S,Varied-format examples fix empty/null required fields,m08:2,,q08-5,COVERED-NOT-TESTED,Folded into one clause ('empty or fabricated fields'); 1 question.
+4.3-K1,4.3,K,tool_use + JSON schema most reliable structure,m09:0,m09:c0;m09:4(recap),q09-1;q09-2;q02-5,COVERED+TESTED,
+4.3-K2,4.3,K,tool_choice auto vs any vs forced,m02:1;m02:2;m09:0,m02:c2;m02:6(recap),q02-4;q02-5,COVERED+TESTED,Taught in m02 (TS 2.3); m02.js table also lists 'none'.
+4.3-K3,4.3,K,"Schemas stop syntax errors, not semantic errors",m09:0;m09:1,m09:c1;m09:4(recap),q09-2;b6-1,COVERED+TESTED,
+4.3-K4,4.3,K,Required vs optional; enum other+detail,m09:0,m09:c2;m09:c3;m09:4(recap),q09-3;q00-2;b6-2,COVERED+TESTED,
+4.3-S1,4.3,S,Extraction tool schema; read tool_use input,m09:0,m09:c0;m09:4(recap),q09-1;q02-5,COVERED+TESTED,
+4.3-S2,4.3,S,tool_choice any when document type unknown,m02:1;m02:2;m09:0,m02:c2,q02-5,COVERED-NOT-TESTED,1 keyed question (q02-4 uses it as distractor).
+4.3-S3,4.3,S,Force named tool to run extraction first,m02:1;m02:2,m02:c2,q02-4,COVERED-NOT-TESTED,1 question.
+4.3-S4,4.3,S,Nullable fields prevent fabricated values,m09:0,m09:c2;m09:4(recap),q00-2;q09-5,COVERED+TESTED,
+4.3-S5,4.3,S,'unclear' and 'other'+detail enum values,m09:0,m09:c3;m09:4(recap),q09-3;b6-2,COVERED+TESTED,
+4.3-S6,4.3,S,Normalization rules in prompt alongside schema,m09:0,m09:4(recap),q09-7,COVERED-NOT-TESTED,No card; 1 question.
+4.4-K1,4.4,K,Retry appends specific validation errors,m09:1;m09:2,m09:c4;m09:4(recap),q09-4,COVERED-NOT-TESTED,1 question.
+4.4-K2,4.4,K,Retries fail when info absent from source,m09:1;m09:2,m09:c5;m09:4(recap),q09-5,COVERED-NOT-TESTED,Good reasoning; 1 keyed question.
+4.4-K3,4.4,K,detected_pattern enables dismissal analysis,m09:1,m09:4(recap),q09-6,COVERED-NOT-TESTED,No card; 1 question.
+4.4-K4,4.4,K,Semantic validation errors vs schema syntax errors,m09:0;m09:1,m09:c1;m09:4(recap),q09-2;b6-1,COVERED+TESTED,
+4.4-S1,4.4,S,"Follow-up with doc, failed output, errors",m09:1,m09:c4;m09:4(recap),q09-4,COVERED-NOT-TESTED,1 question.
+4.4-S2,4.4,S,Tell retry-fixable from retry-futile failures,m09:1;m09:2,m09:c5;m09:4(recap),q09-5;q09-4,COVERED+TESTED,Sorter widget m09:2 is a good drill.
+4.4-S3,4.4,S,Add detected_pattern to findings,m09:1,m09:4(recap),q09-6,COVERED-NOT-TESTED,No card; 1 question.
+4.4-S4,4.4,S,calculated vs stated total; conflict_detected flag,m09:0;m09:1;m09:2,m09:4(recap),b6-1,COVERED-NOT-TESTED,No card; 1 question.
+4.5-K1,4.5,K,"Batches: 50% cheaper, up to 24h, no SLA",m10:0;m10:2,m10:c0;m10:4(recap),q10-1;b5-4;q10-2,COVERED+TESTED,
+4.5-K2,4.5,K,"Batch for latency-tolerant, not blocking work",m10:0;m10:2,m10:4(recap),q10-1;b5-4,COVERED+TESTED,Pre-merge example only in sorter; q10-1 near official sample Q11.
+4.5-K3,4.5,K,No multi-turn tool calling inside batch request,m10:0;m10:2,m10:c2;m10:4(recap),q10-4,COVERED-NOT-TESTED,Precise wording; 1 question.
+4.5-K4,4.5,K,custom_id correlates requests and results,m10:0,m10:c1;m10:4(recap),q10-5;q10-3,COVERED+TESTED,
+4.5-S1,4.5,S,"Sync for pre-merge, batch for overnight",m10:0;m10:2,m10:4(recap),q10-1;b5-4,COVERED+TESTED,
+4.5-S2,4.5,S,Compute submission cadence from SLA,m10:0;m10:1,m10:c3;m10:4(recap),q10-2;b5-4,COVERED+TESTED,Formula adds post-processing; consistent with guide example when post=2h.
+4.5-S3,4.5,S,"Resubmit only failed custom_ids, modified",m10:0,m10:c4;m10:4(recap),q10-3,COVERED-NOT-TESTED,1 question.
+4.5-S4,4.5,S,Refine prompt on sample before bulk batch,m10:0,m10:c5;m10:4(recap),q10-6,COVERED-NOT-TESTED,1 question.
+4.6-K1,4.6,K,Self-review retains generation reasoning,m08:2;m12:0;m12:1,m08:c3;m08:4(recap),q08-6;b5-5,COVERED+TESTED,
+4.6-K2,4.6,K,Independent instance beats self-review or extended thinking,m08:2,m08:c3;m08:4(recap),q08-6;b5-5,COVERED+TESTED,Extended-thinking contrast taught and tested (q08-6).
+4.6-K3,4.6,K,Per-file plus integration passes avoid dilution,m08:2;m06:2,m08:c4;m06:c4;m08:4(recap),q08-7,COVERED-NOT-TESTED,"1 question, and q08-7 near official sample Q12 (same distractor set)."
+4.6-S1,4.6,S,Second independent instance reviews generated code,m08:2;m12:0,m08:c3,q08-6;b5-5,COVERED+TESTED,
+4.6-S2,4.6,S,Split large reviews: per-file + cross-file pass,m08:2;m06:2,m08:c4;m08:4(recap),q08-7,COVERED-NOT-TESTED,1 question (sample-close).
+4.6-S3,4.6,S,Verification pass self-reports confidence for routing,m08:2,,b5-3,COVERED-NOT-TESTED,One sentence; no card/recap; conflicts with T4 card wording (see notes); 1 question.
+5.1-K1,5.1,K,"Progressive summarization loses numbers, dates, expectations",m07:0;m07:1,m07:c0;m07:4(recap),q07-1,COVERED-NOT-TESTED,Strong example + widget; 1 question.
+5.1-K2,5.1,K,Lost in the middle of long inputs,m07:0,m07:c2;m07:4(recap),q07-3,COVERED-NOT-TESTED,Stated precisely; 1 question.
+5.1-K3,5.1,K,Tool results accumulate disproportionate tokens,m07:0;m07:1,m07:c3;m07:4(recap),q07-2,COVERED-NOT-TESTED,1 question.
+5.1-K4,5.1,K,Send complete conversation history each request,m01:0;m07:0,m01:c0;m01:5(recap),q01-3;q01-2,COVERED+TESTED,q07-1 tags 'send complete transcript' as a T3 trap; reconcile wording with this bullet.
+5.1-S1,5.1,S,Persistent case-facts block outside summarized history,m07:0;m07:1,m07:c1;m07:4(recap),q07-1,COVERED-NOT-TESTED,1 question.
+5.1-S2,5.1,S,"Separate structured layer per issue, multi-issue sessions",m07:0,,,THIN,"Single clause ('one entry per issue'); no example, card or question."
+5.1-S3,5.1,S,Trim tool output to relevant fields,m07:0;m07:1,m07:c3;m07:4(recap),q07-2,COVERED-NOT-TESTED,1 question.
+5.1-S4,5.1,S,Key-findings summary first; explicit section headers,m07:0,m07:c2;m07:4(recap),q07-3,COVERED-NOT-TESTED,1 question.
+5.1-S5,5.1,S,"Subagents return metadata: dates, locations, method",m07:0;m06:0;m13:4,m07:4(recap),q07-7;q13-10;q06-3,COVERED+TESTED,
+5.1-S6,5.1,S,Upstream returns structured data for tight budgets,m07:0,m07:4(recap),q07-7,COVERED-NOT-TESTED,1 question.
+5.2-K1,5.2,K,"Valid triggers: human request, policy gap, no progress",m13:0;m13:1,m13:c0;m13:6(recap),q13-5;q13-1;q13-3,COVERED+TESTED,
+5.2-K2,5.2,K,Explicit demand escalates now; else offer resolution,m13:0;m13:1,m13:c1;m13:c2,q13-1;q13-2,COVERED+TESTED,
+5.2-K3,5.2,K,Sentiment and self-confidence are unreliable proxies,m13:0,m13:c3;m13:6(recap),q13-2;q13-5,COVERED+TESTED,m13.js:27 overstates ('usually confident'); see precision notes.
+5.2-K4,5.2,K,"Multiple matches need clarification, not heuristics",m13:0;m13:1,m13:c4;m13:6(recap),q13-4,COVERED-NOT-TESTED,1 question.
+5.2-S1,5.2,S,Explicit escalation criteria plus few-shot in prompt,m13:0,m13:6(recap),,COVERED-NOT-TESTED,One sentence (m13.js:29); zero questions keying it; no card.
+5.2-S2,5.2,S,Honor explicit human request without investigating first,m13:0;m13:1,m13:c1;m13:6(recap),q13-1,COVERED-NOT-TESTED,1 question.
+5.2-S3,5.2,S,"Acknowledge frustration, resolve, escalate if reiterated",m13:0;m13:1,m13:c2;m13:6(recap),q13-2,COVERED-NOT-TESTED,1 question.
+5.2-S4,5.2,S,Escalate when policy silent or ambiguous,m13:0;m13:1,m13:c0;m13:6(recap),q13-3,COVERED-NOT-TESTED,1 question.
+5.2-S5,5.2,S,Ask for more identifiers on multiple matches,m13:0;m13:1,m13:c4;m13:6(recap),q13-4,COVERED-NOT-TESTED,1 question.
+5.3-K1,5.3,K,Structured error context enables coordinator recovery,m04:2,m04:c4;m04:4(recap),q04-3;q04-1,COVERED+TESTED,q04-1 is tool-level (TS 2.2).
+5.3-K2,5.3,K,Access failure vs valid empty result,m04:0;m04:1,m04:c0;m04:c3;m04:4(recap),q04-4,COVERED-NOT-TESTED,Only q04-4 (tagged 2.2) keys it.
+5.3-K3,5.3,K,Generic error statuses hide context,m04:2,m04:c4,q04-3;q04-1,COVERED+TESTED,
+5.3-K4,5.3,K,Silent suppression and total abort both wrong,m04:2,m04:c3;m04:4(recap),q04-3;q04-5,COVERED+TESTED,
+5.3-S1,5.3,S,"Return failure type, attempt, partials, alternatives",m04:2,m04:c4;m04:4(recap),q04-3;q04-1,COVERED+TESTED,
+5.3-S2,5.3,S,Distinguish access failures from empty results,m04:0;m04:1,m04:c3;m04:4(recap),q04-4,COVERED-NOT-TESTED,1 question.
+5.3-S3,5.3,S,Local recovery for transient; propagate the rest,m04:2,m04:c2;m04:4(recap),q04-5,COVERED-NOT-TESTED,1 question.
+5.3-S4,5.3,S,Coverage annotations for well-supported vs gaps,m04:2,m04:c5;m04:4(recap),q04-6,COVERED-NOT-TESTED,1 question.
+5.4-K1,5.4,K,Long sessions degrade to 'typical patterns',m07:2,m07:c4,q07-4,COVERED-NOT-TESTED,1 question.
+5.4-K2,5.4,K,Scratchpad files persist findings,m07:2,m07:c4;m07:4(recap),q07-4,COVERED-NOT-TESTED,1 question.
+5.4-K3,5.4,K,Subagents isolate verbose exploration,m07:2;m06:0,m07:c4;m07:4(recap),q07-5;q11-5,COVERED+TESTED,q11-5 counts via context: fork sub-agent isolation.
+5.4-K4,5.4,K,State export + manifest for crash recovery,m07:2,m07:c5;m07:4(recap),q07-6,COVERED-NOT-TESTED,1 question.
+5.4-S1,5.4,S,Spawn subagents for specific investigation questions,m07:2,m07:c4,q07-5,COVERED-NOT-TESTED,1 question.
+5.4-S2,5.4,S,Maintain and consult scratchpad findings files,m07:2,m07:c4,q07-4,COVERED-NOT-TESTED,1 question.
+5.4-S3,5.4,S,Summarize phase before spawning next-phase subagents,m07:2,m07:c4;m07:4(recap),,COVERED-NOT-TESTED,One clause; zero questions.
+5.4-S4,5.4,S,Coordinator loads manifest on resume,m07:2,m07:c5,q07-6,COVERED-NOT-TESTED,1 question.
+5.4-S5,5.4,S,/compact during long exploration,m07:2,m07:c4;m07:4(recap),,COVERED-NOT-TESTED,"One clause; never explains what /compact does; appears only as a distractor (q07-5, q11-5, q12-7)."
+5.5-K1,5.5,K,Aggregate accuracy can mask weak segments,m13:2;m13:3,m13:c5;m13:6(recap),q13-6,COVERED-NOT-TESTED,1 question; widget numbers not labelled illustrative.
+5.5-K2,5.5,K,Stratified sampling of high-confidence outputs,m13:2;m13:3,m13:c5;m13:6(recap),q13-7,COVERED-NOT-TESTED,1 question.
+5.5-K3,5.5,K,Field confidence calibrated on labeled sets,m13:2,m13:6(recap),q13-8;b5-3,COVERED+TESTED,Callout m13.js:59 states the nuance well.
+5.5-K4,5.5,K,Validate by doc type and field before automating,m13:2;m13:3,m13:c5;m13:6(recap),q13-6,COVERED-NOT-TESTED,1 question.
+5.5-S1,5.5,S,Stratified sampling for error rates and novel patterns,m13:2;m13:3,m13:c5,q13-7,COVERED-NOT-TESTED,1 question.
+5.5-S2,5.5,S,Segment accuracy analysis before reducing review,m13:2;m13:3,m13:c5,q13-6,COVERED-NOT-TESTED,1 question.
+5.5-S3,5.5,S,Output field confidence; calibrate thresholds,m13:2,m13:6(recap),q13-8;b5-3,COVERED+TESTED,
+5.5-S4,5.5,S,Route low-confidence/contradictory docs to humans,m13:2,,q13-8;b6-2;b6-1,COVERED-NOT-TESTED,Tested 3x but no card or recap line on routing (fails rubric's card/recap test).
+5.6-K1,5.6,K,Summarization loses claim-source attribution,m13:4,m13:6(recap),q06-3;q07-7,COVERED+TESTED,
+5.6-K2,5.6,K,Synthesis preserves and merges claim-source mappings,m13:4;m06:0;m06:1,m13:6(recap),q06-3;q07-7,COVERED+TESTED,
+5.6-K3,5.6,K,Annotate conflicting credible statistics with sources,m13:4,m13:c6;m13:6(recap),q13-9,COVERED-NOT-TESTED,1 question.
+5.6-K4,5.6,K,Dates prevent temporal differences seeming contradictory,m13:4,m13:c6;m13:6(recap),q13-10,COVERED-NOT-TESTED,1 question.
+5.6-S1,5.6,S,Subagents output claim-source mappings with excerpts,m13:4;m06:0;m06:1,m13:6(recap),q06-3;q07-7,COVERED+TESTED,
+5.6-S2,5.6,S,Separate established vs contested; keep methodology,m13:4,m13:6(recap),,COVERED-NOT-TESTED,One bullet; zero questions.
+5.6-S3,5.6,S,Include annotated conflicts; coordinator reconciles,m13:4,m13:c6,q13-9,COVERED-NOT-TESTED,Coordinator-decides half not tested; 1 question.
+5.6-S4,5.6,S,Require publication/collection dates in outputs,m13:4,m13:c6;m13:6(recap),q13-10,COVERED-NOT-TESTED,1 question.
+5.6-S5,5.6,S,"Render content by type: tables, prose, lists",m13:4,,b3-1,COVERED-NOT-TESTED,No card or recap line; 1 question.

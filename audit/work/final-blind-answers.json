@@ -1,0 +1,1662 @@
+[
+ {
+  "id": "q07-1",
+  "answer": "D",
+  "confidence": 4,
+  "second": "B",
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "B keeps numbers but D is the persistent case-facts pattern"
+ },
+ {
+  "id": "q12-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-16",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-4",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-4",
+  "answer": "B",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-2",
+  "answer": "C",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "B",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-8",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-1",
+  "answer": "D",
+  "confidence": 3,
+  "second": "C",
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "Per-page extraction loses table header context; few-shot for split tables plausible"
+ },
+ {
+  "id": "h5-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-6",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-5",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "h3-1",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-10",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-5",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-7",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-9",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-8",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-6",
+  "answer": "C",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "factually-dubious"
+  ],
+  "note": "argument-hint only displays autocomplete hint; does not enforce required argument, but best of options"
+ },
+ {
+  "id": "q13-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-10",
+  "answer": "A",
+  "confidence": 4,
+  "second": "B",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-7",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-21",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b3-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-4",
+  "answer": "C",
+  "confidence": 3,
+  "second": "A",
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "Same-name personal skill overrides team's only for you; differing name safest"
+ },
+ {
+  "id": "q02-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-6",
+  "answer": "C",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-5",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-11",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b1-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b1-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-13",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-7",
+  "answer": "D",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-5",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-5",
+  "answer": "D",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-5",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-7",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-22",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-10",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-8",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-15",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-9",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-12",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b3-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-23",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-1",
+  "answer": "B",
+  "confidence": 4,
+  "second": "C",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-7",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-7",
+  "answer": "D",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-3",
+  "answer": "C",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-10",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q00-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-10",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-9",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q12-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-9",
+  "answer": "A",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-9",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-24",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-9",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q04-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b2-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-17",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-10",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-5",
+  "answer": "B",
+  "confidence": 4,
+  "second": "A",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-3",
+  "answer": "B",
+  "confidence": 3,
+  "second": "C",
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "Per-region with shared template vs per-dimension; both partition cleanly"
+ },
+ {
+  "id": "b4-8",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q05-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "h1-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-10",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h3-8",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-7",
+  "answer": "A",
+  "confidence": 3,
+  "second": "B",
+  "flags": [
+   "ambiguous"
+  ],
+  "note": "Blueprint fallback is Read+Write; sed also works, neither option adds unique context"
+ },
+ {
+  "id": "b6-1",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q10-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h5-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-8",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-6",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-18",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-9",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q01-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-9",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-8",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q02-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q11-7",
+  "answer": "D",
+  "confidence": 4,
+  "second": "B",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h4-10",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b4-4",
+  "answer": "B",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-9",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q13-8",
+  "answer": "C",
+  "confidence": 4,
+  "second": "D",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-4",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-20",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "too-easy"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b6-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q07-6",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h2-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-14",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q08-4",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h6-8",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q09-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "h1-8",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q03-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b5-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "q06-8",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ },
+ {
+  "id": "b7-19",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [],
+  "note": ""
+ }
+]

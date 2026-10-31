@@ -1,0 +1,121 @@
+id,ts,verdict,challenger,argument,why_issues,trap_issues,fix,source
+b2-5,3.5,CONTESTABLE,"B (one at a time, verifying each)","The stem says the bugs 'stem from' one utility but never says the fixes interact. A shared root cause alone doesn't force one message, and test-driven sequential iteration with verification (3.5-K2, 3.5-S2) is a defensible expert choice. Only option A's own text asserts the interaction that 3.5-S5 requires.","A's why asserts 'fixing one at a time risks undoing the others', a premise the stem never establishes.",-,Add to the stem: 'Changing the utility for any one bug changes the behavior the other two depend on.' Then B's why can cite independence explicitly.,3.5-K4; 3.5-S5; 3.5-K2
+q09-4,4.4,HOLDS,D (convert dates in code),"D is deterministic (1.5-S1, 4.3-S6), but the stem asks for retry design. Code also can't disambiguate DD/MM from MM/DD when the day is 12 or less. A is 4.4-S1 almost verbatim. The key holds.","D's why calls code conversion a 'reasonable complement' without noting that dates with a day of 12 or less are ambiguous, so code can't convert them safely.",-,"D's why: 'Code can't tell 03/04 from 04/03, and the question is about retry design.' Keep 'retry design' in the stem.",4.4-K1; 4.4-S1; 4.3-S6
+q11-4,3.2,CONTESTABLE,D (same-name personal skill),"The docs define precedence: personal over project. A same-name ~/.claude/skills/deploy-check runs your variant only for you, and teammates are unaffected, which meets the stem. B wins only because you keep access to the team original (3.2-K4), and the stem doesn't require that.",D's why ('confusing precedence') is inaccurate: precedence is documented and deterministic (personal over project). The real cost is that the personal skill shadows the team skill for you.,-,"Stem: 'while still being able to run the team's /deploy-check'. D's why: 'A same-name personal skill overrides the project one, so you lose the team version.'",3.2-K4; https://code.claude.com/docs/en/skills (Resolve skills that share a name)
+q13-1,5.2,HOLDS,"B (fix first, then offer a human)","5.2-K2's 'offering to resolve when straightforward' and the stem's 'can do in seconds' tempt B. But 5.2-S2 says to honor explicit human requests immediately, without investigating first. K2 contrasts an explicit demand with a straightforward issue where no human was asked for. The key holds.",-,"B, C and D are untagged. 'Overriding an explicit customer preference' has no trap code, which is acceptable.",Optional: make C 'Offer once to do it now; escalate if they decline' to sharpen the 5.2-K2 vs 5.2-S2 contrast without making it correct.,5.2-K1; 5.2-K2; 5.2-S2; 5.2-S3
+b1-2,2.2,CONTESTABLE,"B (transient, isRetryable: true)","2.2-K2 and 5.3-K2 classify timeouts as transient, and 2.2-S1 pairs category with isRetryable, so an exam-trained candidate picks B. A relies on the safety of a non-idempotent write, which no bullet covers. With an idempotency key a retry is safe. A also drops the errorCategory/isRetryable structure the blueprint teaches.","A's why assumes there is no idempotency key, which the stem never says.",B's T6 (blind retry) fits only if the call isn't idempotent. That premise is unstated.,"Stem: 'The provider has no idempotency key.' Reword A as structured: errorCategory transient, isRetryable false until the refund status is checked.",2.2-K2; 2.2-K4; 2.2-S1; 5.3-K2
+b5-4,4.5,BROKEN,B (no issue; use batch),"4.5-K2 names nightly test generation as a batch fit, and the official sample keys batch for an overnight report reviewed next morning. The docs say most batches finish within an hour. The key ('use synchronous') contradicts both. Only strict worst-case reasoning (4.5-K1, 4.5-S2) supports it, and the exam's own example rejects that for overnight work.",B's why ('usually isn't a guarantee') conflicts with the 4.5-K2 example and with the sample's rationale. A's why applies 4.5-S2 SLA logic to a workload the blueprint classes as latency-tolerant.,-,"Either key batch (with a deadline-safe fallback, e.g. process unfinished items synchronously at 6 am), or make the workload blocking (a pre-merge gate) so synchronous is unambiguous.",4.5-K1; 4.5-K2; 4.5-S1; samples.txt batch sample; https://platform.claude.com/docs/en/build-with-claude/batch-processing
+q06-1,1.3,CONTESTABLE,A (vague subagent description),"The SDK troubleshooting entry 'Claude not delegating to subagents' gives an unclear description as the cause and a clear one as the fix. allowedTools only pre-approves, and Agent needs no approval, so B can't block delegation today. Exam 1.3-K1 still keys B. A reality-aware learner picks A.","A's why ('a vague description would cause a wrong choice, not a total failure to spawn') contradicts the SDK docs. B's why has no exam-vs-today note.","A is tagged T7, but it's a documented real cause, not a downstream component that did its job.","Add to the stem: 'Subagent descriptions are specific and were verified in testing.' Add to B's why: 'Today, block delegation with tools or disallowedTools; on the exam, Task in allowedTools.'",1.3-K1; https://code.claude.com/docs/en/agent-sdk/subagents#troubleshooting
+q02-4,2.3,CONTESTABLE,D (prompt instruction),"The docs say forced tool_choice returns a 400 error on Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and with manual extended thinking; they recommend auto plus prompting there. On those models B fails and D is the documented lever. The key is right for the exam (2.3-S4, 4.3-S3).",B's why ('guarantees that tool is called') needs the qualifier 'on models that support forced tool use'.,D's T1 is fine for the exam framing.,"State in the stem that the model supports forced tool use, or add a 'Real world today' line to B's why naming the models that reject it.",2.3-K4; 2.3-S4; 4.3-S3; https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use
+q02-5,2.3,CONTESTABLE,"A (keep auto, strengthen instruction)","The docs say tool_choice 'any' returns a 400 error on current flagship models. They recommend auto with strict tool use, and say prompting still influences which tool auto picks, which is essentially A. The key matches 2.3-S5 and 4.3-S2 for the exam and for models that support forcing.",C's why ('a tool call is guaranteed') has no model caveat. A's why dismisses what the docs recommend on 5.5-class models.,A's T1 holds only under the exam framing.,"State in the stem that the model supports forced tool use, or add a 'Real world today' note to C's why. Same callout as q02-4.",2.3-S5; 4.3-K2; 4.3-S2; https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use
+b4-1,2.5,CONTESTABLE,D (Bash with find),"The tools reference says that on macOS, Linux and WSL, Claude Code leaves Glob out of the default tool set and searches with find through Bash. So D is today's default behavior. Exam 2.5-K2 and 2.5-S2 key Glob with this exact pattern, so the key is right for the exam.",D's why ('the built-in Glob is the intended tool') contradicts the current docs for non-Windows platforms.,-,Stem: 'The agent's tool list includes Glob and Grep.' Or add a 'Real world today' note to D's why.,2.5-K2; 2.5-S2; https://code.claude.com/docs/en/tools-reference#glob-tool-behavior
+b2-3,3.2,HOLDS,-,"The docs say allowed-tools only pre-approves tools and every tool remains callable; disallowed-tools: Bash would actually block the shell. No option offers that. B and C don't limit tools, and the sandbox field in D doesn't exist. The key holds by elimination and per 3.2-S3.","A's why ('configures tool access') implies a restriction, which is false today. C's why ('Prompts for parameters') is also inaccurate today: argument-hint is only an autocomplete hint.",-,"Add an exam-vs-today note to A's why: 'Today allowed-tools only pre-approves; use disallowed-tools: Bash to block the shell. On the exam, allowed-tools restricts.'",3.2-S3; https://code.claude.com/docs/en/skills#pre-approve-tools-for-a-skill
+q11-6,3.2,HOLDS,-,"The docs say argument-hint is only an autocomplete hint and prompts for nothing. The real fix today, a SKILL.md instruction to ask when $ARGUMENTS is empty, isn't offered. B and C don't address arguments, and D is invented. The key holds by elimination and per 3.2-S4.",A's why ('It prompts for the required parameter when it's missing') is false today.,-,"A's why: 'On the exam, argument-hint prompts for the parameter. Today it is an autocomplete hint; also instruct the skill to ask when $ARGUMENTS is empty.'",3.2-S4; https://code.claude.com/docs/en/skills#frontmatter-reference
+q00-1,2.1,HOLDS,C (merge with an action parameter),"The define-tools docs now recommend consolidating related operations into one tool with an action parameter. But they also call descriptions 'by far the most important factor', and the stem asks for a first step with one-line descriptions. B holds per 2.1-K1 and 2.1-S1.","C's why ('consolidation just moves the same ambiguity') conflicts with current docs, which endorse action-parameter consolidation.",The T5 definition ('merge similar tools') conflicts with the docs' consolidation guidance; narrow it to 'merge tools with different contracts or give one agent everything'.,"C's why: 'A valid design later, but a bigger change than a first step; the thin descriptions are the cause.'",2.1-K1; 2.1-S1; https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions
+q00-2,4.3,HOLDS,-,4.3-S4 matches the key almost verbatim. No other option addresses the required-field pressure.,"A's why ends 'That's the actual cause', which reads as if self-confidence is the cause. Reword for clarity.",-,-,4.3-S4
+q00-3,3.6,HOLDS,-,"CLAUDE_HEADLESS is the official sample's invented mechanism. The other three options are real (3.3-S1, 3.6-K1, 2.4-K2).",-,-,-,3.6-K1; 2.4-K2; 3.3-K1
+q01-1,1.1,HOLDS,-,"1.1-S1 and 1.1-S3 make B the only correct loop control. A, C and D are the three named anti-patterns.",-,"A is tagged T1, but it's natural-language parsing for loop termination (1.1-S3), not a business rule left in a prompt. C (an iteration cap as the primary stop) is an untagged 1.1-S3 anti-pattern.","Consider a trap code for 'parse generated text or cap iterations as control flow', or leave A untagged.",1.1-S1; 1.1-S3
+q01-2,1.1,HOLDS,-,1.1-K2 and 1.1-S2: results must be appended to history. The other options don't explain a deterministic repeat.,-,-,-,1.1-K2; 1.1-S2
+q01-3,5.1,HOLDS,-,"5.1-K4. The Messages API is stateless; the API's memory tool is client-side storage, not session history.","A's why is fine, though 'No such setting exists' could note that the memory tool is a different thing.",-,-,5.1-K4
+q01-4,1.1,HOLDS,-,"max_tokens is a cutoff, not a completion. B is the only option that handles it.",-,"D is tagged T8, but the Batches API is real; the distractor makes a false claim about a real feature. That is a loose fit.",-,1.1-K1
+q01-5,1.1,HOLDS,-,1.1-K3 (model-driven selection) plus 1.4-K2 gates. A and D recreate the rigid tree.,-,-,-,1.1-K3; 1.4-S1
+q02-1,2.1,HOLDS,-,"2.1-K3 and 2.1-S2, near-verbatim. D's few-shot routing is a reasonable second step but not first.",-,-,Already flagged as too close to an official sample (Q5); rewrite per the backlog.,2.1-K3; 2.1-S2
+q02-2,2.1,HOLDS,-,2.1-K4 and 2.1-S4: a keyword-sensitive prompt overrides good descriptions.,-,-,-,2.1-K4; 2.1-S4
+q02-3,2.3,HOLDS,-,"2.3-K2, 2.3-K3 and 2.3-S3, including the verify_fact example.",-,-,-,2.3-K3; 2.3-S3
+q02-6,2.5,HOLDS,-,"2.5-S5 verbatim. Today Grep is absent by default on macOS and Linux (Claude greps through Bash), which doesn't change the method.",-,-,-,2.5-S5
+q02-7,2.5,HOLDS,-,"The tools reference says a non-unique old_string is handled by adding surrounding context or replace_all. That is better than Read+Write, but neither is offered. Among these options B wins per 2.5-K4 and 2.5-S3.",B's why says Read+Write is 'the documented fallback'. That's true of the exam guide; the Claude Code docs describe a longer old_string or replace_all instead.,-,B's why: 'The exam's fallback is Read+Write; today Claude would first widen old_string to a unique span.' State that only one handler changes.,2.5-K4; https://code.claude.com/docs/en/tools-reference
+q03-1,1.5,HOLDS,-,1.5-S2 and 1.5-K3: a financial rule needs a deterministic hook.,-,-,-,1.5-S2; 1.5-K3
+q03-2,1.5,HOLDS,-,1.5-S1 verbatim.,-,-,-,1.5-S1
+q03-3,1.4,HOLDS,-,1.4-K3 and 1.4-S3: a structured handoff for humans without the transcript.,-,-,-,1.4-S3
+q03-4,1.4,HOLDS,-,"Only C is a low-stakes judgment call. The other three are financial, privacy or irreversible rules (1.4-K2).",-,-,-,1.4-K1; 1.4-K2
+q03-5,1.4,HOLDS,-,1.4-S2 verbatim.,-,"B's T4 is a loose fit: issue count as a complexity proxy, while T4's tell is sentiment or self-confidence. Acceptable.",-,1.4-S2
+q04-1,2.2,HOLDS,-,2.2-K3 and 2.2-S1 verbatim.,-,B is tagged T9 but isn't an exhortation; it's prompt guidance in place of fixing the tool (T7 or T1). D (escalate every failure) is untagged.,Retag B as T7.,2.2-K3; 2.2-S1
+q04-2,2.2,HOLDS,-,"2.2-S2: a business error is non-retryable, with a customer-friendly explanation. Under the current MCP spec, policy outcomes are tool execution errors (isError), not protocol errors.",-,-,-,2.2-K2; 2.2-S2
+q04-3,5.3,HOLDS,-,5.3-S1 and 5.3-K4.,-,-,Already flagged as too close to an official sample (Q5).,5.3-S1; 5.3-K4
+q04-4,2.2,HOLDS,-,2.2-S4 and 5.3-S2 verbatim.,-,B (blind retries of empty results inside the tool) is untagged; T6 clearly applies.,Tag B T6.,2.2-S4; 5.3-S2
+q04-5,5.3,HOLDS,-,2.2-S3 and 5.3-S3 verbatim.,-,-,-,5.3-S3
+q04-6,5.3,HOLDS,-,5.3-S4 verbatim.,-,D (fill gaps with labeled model estimates) is untagged; a fabrication tag could apply. Minor.,-,5.3-S4
+q05-1,2.4,HOLDS,-,2.4-K2 and 2.4-S1.,-,-,-,2.4-S1
+q05-2,2.4,HOLDS,-,2.4-S2 verbatim.,-,-,-,2.4-S2
+q05-3,2.4,HOLDS,-,2.4-S3 verbatim.,-,-,-,2.4-S3
+q05-4,2.4,HOLDS,-,2.4-K4 and 2.4-S5.,-,"D is tagged T3 (bigger model or window), but it bloats the prompt rather than changing the model. A loose fit.",-,2.4-S5
+q05-5,2.4,HOLDS,-,2.4-S4.,-,-,-,2.4-S4
+q05-6,2.4,HOLDS,-,2.4-K3. Scopes merge; precedence applies only to a server name defined twice.,-,-,-,2.4-K3
+q06-2,1.3,HOLDS,-,"1.3-S3 verbatim. Today subagents run in the background by default, which reinforces rather than contests the key.",-,-,-,1.3-S3
+q06-3,1.3,HOLDS,-,"1.3-S1, 1.3-S2 and 1.2-K2.",D's why ('Subagents don't get the coordinator's history automatically') is true of non-fork subagents only. Today fork subagents inherit the parent conversation.,"D is tagged T8, but conversation inheritance exists today (fork subagents). It's a misconception for exam-style subagents, not an invented feature.",D's why: 'Exam-style subagents start fresh (today only forks inherit history).' Consider dropping T8.,1.2-K2; 1.3-S1; https://code.claude.com/docs/en/agent-sdk/subagents#what-subagents-inherit
+q06-4,1.2,HOLDS,-,1.2-S1 verbatim.,-,-,-,1.2-S1
+q06-5,1.2,HOLDS,-,"1.2-K4. Every subagent succeeded, so the decomposition is at fault.",-,-,Already flagged as too close to an official sample (Q5).,1.2-K4
+q06-6,1.2,HOLDS,-,1.2-S3 verbatim.,-,-,-,1.2-S3
+q06-7,1.6,HOLDS,-,1.6-S3 verbatim.,-,-,-,1.6-S3
+q06-8,1.3,HOLDS,-,1.3-S4 verbatim.,-,-,-,1.3-S4
+q07-1,5.1,HOLDS,-,5.1-K1 and 5.1-S1.,-,"A is tagged T3, but sending the full transcript is not a bigger model or window. A loose fit.",-,5.1-S1
+q07-2,5.1,HOLDS,-,5.1-K3 and 5.1-S3 verbatim.,-,-,-,5.1-S3
+q07-3,5.1,HOLDS,-,5.1-K2 and 5.1-S4.,-,-,-,5.1-S4
+q07-4,5.4,HOLDS,-,5.4-K1 and 5.4-S2. /compact (5.4-S5) isn't offered.,-,-,-,5.4-S2
+q07-5,5.4,HOLDS,-,3.4-S3 and 5.4-K3. C's '/compact before starting' misuses 5.4-S5.,-,-,-,3.4-S3; 5.4-S5
+q07-6,5.4,HOLDS,-,5.4-S4 verbatim.,-,-,-,5.4-S4
+q07-7,5.1,HOLDS,-,5.1-S6 verbatim.,-,"D (longer narratives) is tagged T3, which is about model or window size. A misfit; D could be left untagged.",-,5.1-S6
+q08-1,4.1,HOLDS,-,4.1-K2 and 4.1-S1.,-,-,-,4.1-S1
+q08-2,4.1,HOLDS,-,4.1-S2 verbatim.,-,-,-,4.1-S2
+q08-3,4.1,HOLDS,-,4.1-S3 verbatim.,-,-,-,4.1-S3
+q08-4,4.2,HOLDS,-,4.2-K2 and 4.2-S1 verbatim.,-,-,-,4.2-S1
+q08-5,4.2,HOLDS,-,4.2-S4 and 4.2-S5.,-,-,-,4.2-S5
+q08-6,4.6,HOLDS,-,4.6-K2 and 4.6-S1. Extended thinking is explicitly named as inferior.,-,-,-,4.6-K2
+q08-7,4.6,HOLDS,-,4.6-S2 and 1.6-S2.,-,-,Already flagged as too close to an official sample (Q5).,4.6-S2
+q09-1,4.3,HOLDS,-,"4.3-K1 and 4.3-S1. Today, forced tool_choice is rejected on 5.5-class models and the docs point to structured outputs. That isn't offered, so A still beats the prompt, regex and retry options.",A's why needs the same forced-tool-use model caveat as q02-4. Schema guarantees today also need strict: true.,B is tagged T1 (a high-stakes rule left in a prompt). A loose fit; the point is a prompt used where an API guarantee exists.,Add the shared 'Real world today' note on forced tool use and structured outputs.,4.3-K1; 4.3-S1; https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use
+q09-2,4.3,HOLDS,-,4.3-K3 verbatim.,-,-,-,4.3-K3
+q09-3,4.3,HOLDS,-,4.3-K4 and 4.3-S5.,-,-,-,4.3-S5
+q09-5,4.4,HOLDS,-,4.4-K2 and 4.4-S2 verbatim.,-,-,-,4.4-S2
+q09-6,4.4,HOLDS,-,4.4-K3 and 4.4-S3 verbatim.,-,-,-,4.4-S3
+q09-7,4.3,HOLDS,-,4.3-S6 verbatim.,-,-,-,4.3-S6
+q10-1,4.5,HOLDS,-,4.5-K2 and 4.5-S1.,-,-,Already flagged as too close to an official sample (Q5).,4.5-S1
+q10-2,4.5,HOLDS,-,"Worst case is interval + 24 + 2 ≤ 36, so the interval can be at most 10 h. Only 8 h qualifies. The arithmetic checks out (4.5-S2).",-,-,The options-only solver missed this item because the options are bare numbers. That's fine.,4.5-S2
+q10-3,4.5,HOLDS,-,4.5-S3 verbatim.,-,-,-,4.5-S3
+q10-4,4.5,HOLDS,-,"4.5-K3. The batch docs list tool use (including server tools) as supported, but a client tool like lookup_vendor can't be executed mid-request, so B holds.",A's why ('nothing executes them') should say 'client tools'. Server tools such as web search do run in batch.,-,"A's why: 'Client tools can be defined, but nothing executes them mid-request (server tools are different).'",4.5-K3; https://platform.claude.com/docs/en/build-with-claude/batch-processing
+q10-5,4.5,HOLDS,-,4.5-K4. The docs say results may not match input order; use custom_id.,-,-,-,4.5-K4
+q10-6,4.5,HOLDS,-,4.5-S4 verbatim.,-,-,-,4.5-S4
+q11-1,3.1,HOLDS,-,3.1-K2 and 3.1-S1 verbatim.,-,-,-,3.1-S1
+q11-2,3.1,HOLDS,-,"3.1-K3 and 3.1-S2. Path-scoped .claude/rules/ per package would be a strong modern alternative, but it isn't offered.",-,-,-,3.1-S2
+q11-3,3.3,HOLDS,-,3.3-S2 and 3.3-S3.,-,-,Already flagged as too close to an official sample (Q5).,3.3-S2; 3.3-S3
+q11-5,3.2,HOLDS,-,3.2-K3 and 3.2-S2. context: fork is real and current.,-,-,-,3.2-S2
+q11-7,3.4,HOLDS,-,3.4-S1 (45+ file migration) and 3.4-S4 verbatim.,-,-,-,3.4-S1; 3.4-S4
+q11-8,3.5,HOLDS,-,3.5-K1 and 3.5-S1 verbatim.,-,-,-,3.5-S1
+q11-9,3.5,HOLDS,-,3.5-S3 verbatim.,-,-,-,3.5-S3
+q12-1,3.6,HOLDS,-,3.6-S2. --output-format json and --json-schema are real flags; --format strict isn't.,-,-,-,3.6-S2; https://code.claude.com/docs/en/cli-reference
+q12-2,3.6,HOLDS,-,3.6-S3 verbatim.,-,-,-,3.6-S3
+q12-3,3.6,HOLDS,-,3.6-S4 and 3.6-S5.,-,-,-,3.6-S4; 3.6-S5
+q12-4,3.6,HOLDS,-,"3.6-K3. D (a prompt string, or --append-system-prompt) works but drifts.",-,-,-,3.6-K3
+q12-5,1.7,HOLDS,-,1.7-K1. The CLI docs confirm that --resume accepts a session ID or name.,-,"C (--session) is T8, but the real flag --session-id (UUID only) is close. Acceptable, but the why could name it.","C's why: 'Not a flag; --session-id exists but takes a UUID, not a name.'",1.7-K1; https://code.claude.com/docs/en/cli-reference
+q12-6,1.7,HOLDS,-,1.7-K2 and 1.7-S2. fork_session (CLI: --fork-session) is real.,-,-,-,1.7-S2
+q12-7,1.7,HOLDS,-,1.7-K4 and 1.7-S3. 'Most of the module refactored' rules out targeted re-analysis (1.7-S4).,-,-,-,1.7-S3
+q13-2,5.2,HOLDS,-,5.2-S3 verbatim.,-,-,-,5.2-S3
+q13-3,5.2,HOLDS,-,5.2-S4 verbatim.,-,-,-,5.2-S4
+q13-4,5.2,HOLDS,-,5.2-K4 and 5.2-S5 verbatim.,-,-,-,5.2-S5
+q13-5,5.2,HOLDS,-,5.2-K1 and 5.2-K3.,-,-,-,5.2-K1; 5.2-K3
+q13-6,5.5,HOLDS,-,5.5-K1 and 5.5-S2 verbatim.,"C's why ('This is uncalibrated') presumes the confidence is uncalibrated, but the stem doesn't say so. The stronger point is that it skips the segment check.",C (route on a confidence threshold) is untagged; T4 arguably applies.,C's why: 'Tightening a threshold still doesn't check per-type or per-field accuracy.',5.5-S2
+q13-7,5.5,HOLDS,-,5.5-S1 verbatim.,-,-,-,5.5-S1
+q13-8,5.5,HOLDS,-,5.5-S3 and 5.5-S4. The key correctly uses calibrated confidence.,-,"D's T4 is consistent, but the T4 definition itself condemns all self-confidence routing, which contradicts this key (backlog C-D1-3).",Reword T4 so it covers only uncalibrated confidence (per C-D1-3).,5.5-S3; 5.5-S4
+q13-9,5.6,HOLDS,-,5.6-K3 and 5.6-S3.,-,-,-,5.6-K3
+q13-10,5.6,HOLDS,-,5.6-K4 and 5.6-S4 verbatim.,-,-,-,5.6-S4
+b2-1,3.1,HOLDS,-,"3.1-S4 keys /memory. Per the docs, /memory lists memory locations (including files that don't exist) for editing, while /context shows which files actually loaded. /context isn't offered, so the key holds.",A's why says /memory shows which files are 'actually loaded'. Today that is /context's job.,-,"A's why: 'On the exam, /memory verifies loaded files. Today use /context (Memory files) to see what loaded and /memory to open them.'",3.1-S4; https://code.claude.com/docs/en/memory
+b2-2,3.3,HOLDS,-,3.3-K2 and 3.3-S1.,-,"B and C are tagged T8, but they're misconceptions about a real feature, not invented mechanisms. A loose fit.",-,3.3-K2
+b2-4,3.2,HOLDS,-,3.2-S5 verbatim.,-,-,-,3.2-S5
+b2-6,3.5,HOLDS,-,3.5-S4 verbatim.,-,-,-,3.5-S4
+b4-2,2.5,HOLDS,-,2.5-S4 verbatim.,-,-,-,2.5-S4
+b4-3,1.5,HOLDS,-,"1.5-S2 and 1.5-S3. A permission deny rule (e.g. Bash(git push --force:*)) is an equally deterministic real alternative, but it isn't offered.",-,-,-,1.5-S2; 1.5-S3
+b4-4,1.5,HOLDS,-,1.5-S1 applied to a new domain.,-,D ('ask the agent to double-check its unit conversions') is tagged T1 but is an exhortation; T9 fits.,Retag D as T9.,1.5-S1
+b4-5,2.3,HOLDS,B (detailed paragraph per tool),"'Wrong-tool calls among similar tools' also points to descriptions (2.1-K1, 2.1-S1), which q00-1 treats as the right first fix. But B puts the text in the system prompt, not the tool descriptions, and the stem asks what 'most improves' selection with 26 tools (2.3-K1). A holds.","B's why ('26 options is still too many') is fine, but it doesn't note that B's text lives in the wrong place (the system prompt, not the descriptions).",-,Make B 'rewrite each tool's description' only if the intended contrast is scope vs description; otherwise keep it as is.,2.3-K1; 2.3-S1; 2.1-K1
+b4-6,1.3,HOLDS,-,1.3-K3 and 2.3-S1. The AgentDefinition tools field is current.,-,-,-,1.3-K3; 2.3-S1
+b4-7,2.4,HOLDS,-,2.4 MCP reuse logic.,-,"C (paste the catalog into every prompt) is tagged T3, a loose fit (prompt bloat, not a bigger model).",-,2.4-K3; 2.4-S4
+b4-8,1.6,HOLDS,-,1.6-K1 and 1.6-S1.,-,-,-,1.6-S1
+b5-1,3.6,HOLDS,-,"3.6-S1. The CLI docs show --yes only on subcommands, not on sessions.",-,-,Already flagged as too close to an official sample (Q5).,3.6-S1
+b5-2,4.2,HOLDS,-,4.2-S3 verbatim.,-,-,-,4.2-S3
+b5-3,4.6,HOLDS,-,4.6-S3 and 5.5-S3. The key correctly uses calibrated confidence.,-,-,-,4.6-S3; 5.5-S3
+b5-5,3.6,HOLDS,-,3.6-K4 and 4.6-S1.,-,-,-,3.6-K4
+b5-6,4.1,HOLDS,-,4.1-K1 and 4.1-S1.,-,-,-,4.1-S1
+b5-7,4.2,HOLDS,-,"4.2-S2. --json-schema (3.6-S2) would guarantee the fields in CI and beat few-shot for 'shape', but it isn't offered. The key holds.","D's why recommends --json-schema 'for guaranteed shape', which undercuts the key's claim that examples are 'the most effective lever'.",-,"Stem: findings are free-text comments for humans (no schema), or move the --json-schema mention out of D's why.",4.2-S2; 3.6-S2
+b1-1,1.4,HOLDS,-,1.4-S1 verbatim.,-,-,Already flagged as too close to an official sample (Q5).,1.4-S1
+b3-1,5.6,HOLDS,-,5.6-S5 verbatim.,-,-,-,5.6-S5
+b3-2,2.3,HOLDS,-,2.3-S2 verbatim.,-,-,-,2.3-S2
+b6-1,4.4,HOLDS,-,4.4-S4 verbatim.,-,-,-,4.4-S4
+b6-2,4.3,HOLDS,-,4.3-S5.,-,-,-,4.3-S5

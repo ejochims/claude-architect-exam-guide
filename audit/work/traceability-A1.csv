@@ -1,0 +1,92 @@
+bullet_id,ts,kind,paraphrase,lesson_steps,cards,question_ids,rating,notes
+1.1-K1,1.1,K,"Loop lifecycle: request, check stop_reason, run tools, repeat",m01:0;m01:1;m01:2;m01:3,m01:c1;m01:c2;recap m01:5,q01-1;q01-4;q01-2,COVERED+TESTED,Well taught with code and loopStepper widget. q01-1 is scenario 1; q01-2 and q01-4 lack a scenario tag.
+1.1-K2,1.1,K,Tool results appended to history for next reasoning,m01:0;m01:1;m01:2,m01:c2;recap m01:5,q01-2,COVERED-NOT-TESTED,"Mechanism and why are taught well (tool_use_id pairing, app is the memory). Only q01-2 tests it, and it has no scenario tag, so the mock never draws it."
+1.1-K3,1.1,K,Model-driven tool choice vs hard-coded decision trees,m01:3,m01:c4;recap m01:5,q01-5,COVERED-NOT-TESTED,"One paragraph plus one question (q01-5, scenario 1). No second item and no worked contrast example."
+1.1-S1,1.1,S,"Continue on tool_use, stop on end_turn",m01:1;m01:2;m01:3,m01:c1;recap m01:5,q01-1;q01-4,COVERED+TESTED,q01-4 (max_tokens) has no scenario tag. Coverage is adequate.
+1.1-S2,1.1,S,Add tool results to context between iterations,m01:1;m01:2,m01:c2;recap m01:5,q01-2,COVERED-NOT-TESTED,"Same single item as 1.1-K2 (q01-2, no scenario tag). The widget practises it but is not scored."
+1.1-S3,1.1,S,"Avoid NL-parsing, iteration-cap, text-as-done termination",m01:3;m01:2,m01:c3;recap m01:5,q01-1,COVERED-NOT-TESTED,"All three anti-patterns are explained with reasons, but only q01-1 tests them, and only as its distractors. No item has the iteration cap as the central anti-pattern."
+1.2-K1,1.2,K,Hub-and-spoke: coordinator routes all subagent communication,m06:2,m06:c5;recap m06:4,,COVERED-NOT-TESTED,Stated in one sentence in m06:2. No question requires it; q06-4 only has a 'remove the coordinator' distractor.
+1.2-K2,1.2,K,"Subagents have isolated context, no inherited history",m06:0;m06:1,m06:c2;recap m06:4,q06-3,COVERED-NOT-TESTED,"Taught well (isolation as a feature, contextViewer widget). Only q06-3 tests it, and it is shared with 1.3-K2 and 1.3-S1."
+1.2-K3,1.2,K,"Coordinator decomposes, delegates, aggregates, picks subagents by complexity",m06:2,m06:c3;m06:c5;recap m06:4,q06-4;q06-5;q06-6,COVERED+TESTED,All three items are in scenario 3 and judgment-based.
+1.2-K4,1.2,K,Overly narrow decomposition leaves broad topics uncovered,m06:2;m00:2,m06:c3;recap m06:4,q06-5,COVERED-NOT-TESTED,"Good worked example in m06:2 and trap T7. Only q06-5 tests it, and that item closely mirrors official sample Q7 (SAMPLE-CLOSE), so a correct answer may be recognition."
+1.2-S1,1.2,S,"Coordinator selects subagents dynamically, not full pipeline",m06:2,recap m06:4,q06-4,COVERED-NOT-TESTED,"One sentence with a reason (latency, cost). No card. One question."
+1.2-S2,1.2,S,Partition research scope across subagents to avoid duplication,m06:2,recap m06:4,,COVERED-NOT-TESTED,"One clause with a reason ('so they don't duplicate work'). No example, no card, zero questions. Borderline THIN."
+1.2-S3,1.2,S,"Iterative refinement: evaluate synthesis gaps, re-delegate, re-synthesize",m06:2,recap m06:4,q06-6,COVERED-NOT-TESTED,One sentence. No card. One question (q06-6).
+1.2-S4,1.2,S,"Route all communication via coordinator for observability, control",m06:2,m06:c5,,COVERED-NOT-TESTED,The lesson states the rule without the why; observability and consistent error handling appear only on card m06:c5. Zero questions.
+1.3-K1,1.3,K,Task tool spawns subagents; allowedTools must include Task,m06:0;m06:1,m06:c0;recap m06:4,q06-1,COVERED-NOT-TESTED,One diagnostic item (q06-1). q06-2 names Task in its stem but does not test this. The Task-to-Agent rename is flagged in m06:0.
+1.3-K2,1.3,K,Subagent context must be passed explicitly in prompt,m06:0;m06:1,m06:c2;recap m06:4,q06-3,COVERED-NOT-TESTED,Only q06-3. No item on 'no shared memory between invocations'.
+1.3-K3,1.3,K,"AgentDefinition: description, system prompt, tool restrictions",m06:0;m06:1,m06:c2,b4-6,COVERED-NOT-TESTED,A bulleted list in m06:0. No config example and no explanation of how the description drives delegation. One item (b4-6).
+1.3-K4,1.3,K,Fork-based sessions to explore divergent approaches from baseline,m12:2;m12:3,m12:c5;recap m12:5,q12-6,COVERED-NOT-TESTED,"Absent from m06, the module mapped to 1.3. Taught only in m12 (CI module). One item."
+1.3-S1,1.3,S,Pass complete prior-agent findings in subagent prompt,m06:0;m06:1,m06:c2;recap m06:4,q06-3,COVERED-NOT-TESTED,Only q06-3.
+1.3-S2,1.3,S,Structured formats separate content from metadata for attribution,m06:0;m06:1;m07:0;m13:4,recap m06:4;recap m13:6,q06-3;q07-7;q13-10,COVERED+TESTED,"Tested across 1.3, 5.1 and 5.6. q06-3 and q13-10 are scenario 3."
+1.3-S3,1.3,S,Parallel subagents via multiple Task calls in one response,m06:0;m06:1,m06:c1;recap m06:4,q06-2,COVERED-NOT-TESTED,Only q06-2. The widget shows the latency difference but is unscored.
+1.3-S4,1.3,S,"Coordinator prompts give goals and criteria, not procedures",m06:0,recap m06:4,q06-8,COVERED-NOT-TESTED,"One bullet in m06:0, no card, one question (q06-8)."
+1.4-K1,1.4,K,Programmatic enforcement vs prompt guidance for ordering,m03:0;m03:1;m03:2;m03:3;m03:4,m03:c0;m03:c1;recap m03:7,b1-1;q03-4;q01-5,COVERED+TESTED,"Strong (complianceSim, sorter). q03-4 is unscenario'd classification recall."
+1.4-K2,1.4,K,Prompt-only compliance has non-zero failure rate,m03:0;m03:1,m03:c0;recap m03:7,b1-1;q03-1;b4-3,COVERED+TESTED,The probability-times-volume reasoning is explicit. complianceSim is labeled illustrative.
+1.4-K3,1.4,K,Structured mid-process escalation handoff protocols,m03:5,m03:c4;recap m03:7,q03-3,COVERED-NOT-TESTED,Good JSON example. Only q03-3 tests it.
+1.4-S1,1.4,S,Prerequisite gates block downstream tools until verified,m03:2;m03:3;m03:4,m03:c1;recap m03:7,b1-1,COVERED-NOT-TESTED,"Only b1-1, which closely mirrors official sample Q1 (SAMPLE-CLOSE). The hookPlayground widget is unscored."
+1.4-S2,1.4,S,"Split multi-concern requests, investigate in parallel, unify",m03:5,recap m03:7,q03-5,COVERED-NOT-TESTED,"One paragraph, no card, one question. 'Investigate in parallel using shared context' is asserted without showing how."
+1.4-S3,1.4,S,Compile structured handoff summary for transcript-less humans,m03:5,m03:c4;recap m03:7,q03-3,COVERED-NOT-TESTED,Single item shared with 1.4-K3.
+1.5-K1,1.5,K,PostToolUse hooks transform tool results before model sees,m03:2;m03:4;m07:0,m03:c3;m07:c3;recap m03:7,q03-2;b4-4,COVERED+TESTED,
+1.5-K2,1.5,K,Hooks intercept outgoing calls to enforce compliance,m03:2;m03:3,m03:c2;recap m03:7,q03-1;b4-3,COVERED+TESTED,The SDK code example (PreToolUse deny) is a Phase 2 accuracy check.
+1.5-K3,1.5,K,Hooks deterministic vs prompts probabilistic,m03:0;m03:1;m03:2,m03:c0;recap m03:7,q03-1;b4-3;b1-1,COVERED+TESTED,
+1.5-S1,1.5,S,PostToolUse normalizes heterogeneous formats from MCP tools,m03:2;m03:4,m03:c3;recap m03:7,q03-2;b4-4,COVERED+TESTED,
+1.5-S2,1.5,S,Interception hooks block violations and redirect to escalation,m03:2;m03:3,m03:c2;recap m03:7,q03-1;b4-3,COVERED+TESTED,
+1.5-S3,1.5,S,Choose hooks over prompts when compliance must be guaranteed,m03:0;m03:1;m03:4,m03:c0;recap m03:7,q03-1;b4-3,COVERED+TESTED,
+1.6-K1,1.6,K,Fixed pipelines vs dynamic adaptive decomposition,m06:2,m06:c4;recap m06:4,q06-7;b4-8,COVERED+TESTED,Both items are scenario 4. Only 2 questions are tagged 1.6 in the whole app.
+1.6-K2,1.6,K,Prompt chaining for reviews: per-file then integration pass,m06:2;m08:2,m06:c4;m08:c4;recap m08:4,q08-7,COVERED-NOT-TESTED,"A table row in m06:2; the reasoning (attention dilution) is only in m08:2. Tested only by q08-7, which is tagged 4.6."
+1.6-K3,1.6,K,Value of adaptive plans generated from discoveries,m06:2,m06:c4,q06-7,COVERED-NOT-TESTED,A table row only. One item.
+1.6-S1,1.6,S,"Pick chaining for predictable, dynamic for open-ended work",m06:2,m06:c4;recap m06:4,q06-7;b4-8,COVERED+TESTED,
+1.6-S2,1.6,S,Split large reviews into per-file plus cross-file passes,m08:2;m06:2,m08:c4;recap m08:4,q08-7,COVERED-NOT-TESTED,"Only q08-7 (tagged 4.6, scenario 5). Not in m06's quiz."
+1.6-S3,1.6,S,"Open-ended task: map, find high-impact areas, adaptive plan",m06:2,m06:c4,q06-7,COVERED-NOT-TESTED,"One table row that reuses the guide's own example. q06-7 reuses the same example, so it can be answered by recognition."
+1.7-K1,1.7,K,Named session resumption with --resume,m12:2;m12:3,m12:c4;recap m12:5,q12-5,COVERED-NOT-TESTED,"q12-5 is pure command recall. Taught only in m12 (the CI module), not in a D1 module."
+1.7-K2,1.7,K,fork_session for independent branches from shared baseline,m12:2;m12:3,m12:c5;recap m12:5,q12-6,COVERED-NOT-TESTED,One item. Not explained how a fork differs from a second resume (only in q12-6's 'why').
+1.7-K3,1.7,K,Tell agent about file changes when resuming,m12:2;m12:3,m12:c6;recap m12:5,,COVERED-NOT-TESTED,"Why given ('sessions store history, not file state'). Zero questions."
+1.7-K4,1.7,K,Fresh session with summary beats resuming stale results,m12:2;m12:3,m12:c6;recap m12:5,q12-7,COVERED-NOT-TESTED,One item.
+1.7-S1,1.7,S,Use --resume with names across work sessions,m12:2;m12:3,m12:c4;recap m12:5,q12-5,COVERED-NOT-TESTED,Recall only.
+1.7-S2,1.7,S,fork_session for parallel exploration branches,m12:2;m12:3,m12:c5;recap m12:5,q12-6,COVERED-NOT-TESTED,"One item, scenario 4."
+1.7-S3,1.7,S,"Choose resume when context valid, fresh when stale",m12:2;m12:3,m12:c6;recap m12:5,q12-7,COVERED-NOT-TESTED,One judgment item (q12-7). The m12:3 sorter practises it but is unscored.
+1.7-S4,1.7,S,Name specific changed files for targeted re-analysis,m12:2;m12:3,m12:c6;recap m12:5,,COVERED-NOT-TESTED,Zero questions.
+2.1-K1,2.1,K,Descriptions are main tool-selection signal; minimal ones misroute,m02:0,m02:c0;recap m02:6,q00-1;q02-1;q05-3,COVERED+TESTED,q00-1 has no scenario and mirrors official sample Q2 (SAMPLE-CLOSE). m02.js:24-25's 'weak' example copies sample Q2's tool descriptions verbatim.
+2.1-K2,2.1,K,"Descriptions include input formats, examples, edge cases, boundaries",m02:0,m02:c1;recap m02:6,q00-1;q02-1;q05-3,COVERED+TESTED,
+2.1-K3,2.1,K,Overlapping descriptions cause misrouting between similar tools,m02:0,m02:c0;recap m02:6,q02-1;q00-1,COVERED+TESTED,"q02-1 reuses the guide's own tool names and fix, so it can be answered from the blueprint text alone."
+2.1-K4,2.1,K,System-prompt keywords can create unintended tool associations,m02:0,recap m02:6,q02-2,COVERED-NOT-TESTED,One sentence with an example. No card. One item (q02-2).
+2.1-S1,2.1,S,"Write descriptions differentiating purpose, inputs, outputs, when-to-use",m02:0,m02:c1;recap m02:6,q00-1;q02-1;q05-3,COVERED+TESTED,
+2.1-S2,2.1,S,Rename tools to remove functional overlap,m02:0,m02:c1;recap m02:6,q02-1,COVERED-NOT-TESTED,"One item, and it uses the guide's exact example."
+2.1-S3,2.1,S,Split generic tool into purpose-specific contracted tools,m02:0,recap m02:6,,THIN,One bullet with the guide's example and no reasoning; the 'why' exists only indirectly in trap T5 (m00:2). Zero questions where splitting is the key; merge appears only as a distractor. The in-scope list names 'splitting vs consolidating tools'.
+2.1-S4,2.1,S,Audit system prompts for keyword-sensitive overrides,m02:0,recap m02:6,q02-2,COVERED-NOT-TESTED,Single item shared with 2.1-K4.
+2.2-K1,2.2,K,MCP isError flag communicates tool failure,m04:0,m04:c1;recap m04:4,q04-2;q04-4,COVERED+TESTED,Why isError rather than a protocol error appears only in q04-2's explanations.
+2.2-K2,2.2,K,"Transient, validation, business, permission error categories",m04:0;m04:1,m04:c0;recap m04:4,q04-1;q04-2;q04-4;b1-2,COVERED+TESTED,
+2.2-K3,2.2,K,Generic 'operation failed' blocks recovery decisions,m04:0;m04:2,recap m04:4,q04-1;q04-3,COVERED+TESTED,q04-3 (tagged 5.3) tests it via the generic-status distractor.
+2.2-K4,2.2,K,Retryable vs non-retryable; metadata prevents wasted retries,m04:0;m04:1,m04:c1;recap m04:4,q04-1;q04-2;b1-2,COVERED+TESTED,
+2.2-S1,2.2,S,"Return errorCategory, isRetryable, readable description",m04:0,m04:c1;recap m04:4,q04-1;q04-2,COVERED+TESTED,
+2.2-S2,2.2,S,Business violations: non-retryable plus customer-friendly explanation,m04:0;m04:1,m04:c1;recap m04:4,q04-2,COVERED-NOT-TESTED,One item.
+2.2-S3,2.2,S,Subagents recover transient errors locally; propagate rest with context,m04:2,m04:c2;m04:c4;recap m04:4,q04-5;q04-3,COVERED+TESTED,"Both items are tagged 5.3, not 2.2."
+2.2-S4,2.2,S,Distinguish access failure from valid empty result,m04:0;m04:1;m00:2,m04:c0;m04:c3;recap m04:4,q04-4,COVERED-NOT-TESTED,Taught well with a reason. Only q04-4 has it as the key; q04-5 has it only as a weak distractor.
+2.3-K1,2.3,K,Too many tools degrades selection reliability,m02:1,m02:c3;recap m02:6,b4-5;q02-3,COVERED+TESTED,"Stated as a rule ('accuracy falls as options grow'), without the decision-complexity mechanism."
+2.3-K2,2.3,K,Out-of-role tools get misused,m02:1,m02:c3,q02-3;b4-6,COVERED+TESTED,
+2.3-K3,2.3,K,"Scope tools to role, limited cross-role tools",m02:1,m02:c3;recap m02:6,q02-3;b4-5;b4-6,COVERED+TESTED,
+2.3-K4,2.3,K,"tool_choice options: auto, any, forced named tool",m02:1;m02:2;m09:1,m02:c2;m09:c0;recap m02:6,q02-4;q02-5;q09-1,COVERED+TESTED,
+2.3-S1,2.3,S,Restrict each subagent's tools to its role,m02:1,m02:c3;recap m02:6,q02-3;b4-5;b4-6,COVERED+TESTED,
+2.3-S2,2.3,S,Replace generic tools with constrained validated alternatives,m02:1,,b3-2,COVERED-NOT-TESTED,One bullet. No card or recap line. One item (b3-2).
+2.3-S3,2.3,S,Scoped cross-role tool for frequent needs; complex via coordinator,m02:1,m02:c3;recap m02:6,q02-3,COVERED-NOT-TESTED,"One item. Official sample Q9 covers this, and no original item tests the latency trade-off."
+2.3-S4,2.3,S,"Force a specific tool first, follow-ups in later turns",m02:1;m02:2,m02:c2,q02-4,COVERED-NOT-TESTED,One item.
+2.3-S5,2.3,S,tool_choice any guarantees a tool call,m02:1;m02:2;m09:1,m02:c2;recap m02:6,q02-5,COVERED-NOT-TESTED,One item.
+2.4-K1,2.4,K,Project .mcp.json shared vs user ~/.claude.json personal,m05:1;m05:2,m05:c0;m05:c1;recap m05:5,q05-1;q05-2,COVERED+TESTED,q05-2 is near-recall. Local scope is extra material beyond the blueprint.
+2.4-K2,2.4,K,Env-var expansion in .mcp.json keeps secrets out,m05:1;m05:2,m05:c2;recap m05:5,q05-1,COVERED-NOT-TESTED,"One judgment item. q00-3 lists the expansion only as a 'real mechanism' option, which is recall."
+2.4-K3,2.4,K,All configured servers' tools discovered and available simultaneously,m05:1,recap m05:5,q05-6,COVERED-NOT-TESTED,One item. No card states it (m05:c3 covers precedence instead).
+2.4-K4,2.4,K,"MCP resources expose content catalogs, cut exploratory calls",m05:0;m05:3,m05:c4;recap m05:5,q05-4,COVERED-NOT-TESTED,Taught well with a reason. One item.
+2.4-S1,2.4,S,Configure shared servers in .mcp.json with env expansion,m05:1;m05:2,m05:c0;m05:c2,q05-1,COVERED-NOT-TESTED,One item.
+2.4-S2,2.4,S,Personal/experimental servers in user-scoped ~/.claude.json,m05:1;m05:2,m05:c1,q05-2,COVERED-NOT-TESTED,One recall-leaning item.
+2.4-S3,2.4,S,Richer MCP descriptions so agent prefers them over Grep,m05:1,m05:c5;recap m05:5,q05-3,COVERED-NOT-TESTED,One item.
+2.4-S4,2.4,S,Prefer community MCP servers; custom only for team-specific,m05:0,recap m05:5,q05-5,COVERED-NOT-TESTED,No card. One item. b4-7 (one MCP server for five teams) is related but not this choice.
+2.4-S5,2.4,S,Expose content catalogs as resources,m05:0;m05:3,m05:c4,q05-4,COVERED-NOT-TESTED,Single item shared with 2.4-K4.
+2.5-K1,2.5,K,Grep searches file contents,m02:3;m02:4,m02:c4;recap m02:6,q02-6;b4-2,COVERED+TESTED,
+2.5-K2,2.5,K,Glob matches file paths and names,m02:3;m02:4,m02:c4;recap m02:6,b4-1,COVERED-NOT-TESTED,One recall-style item ('which tool first?').
+2.5-K3,2.5,K,Read/Write full files; Edit uses unique text match,m02:3;m02:4,m02:c5;recap m02:6,q02-7,COVERED-NOT-TESTED,"Taught as a table, with no explanation of why Edit needs a unique anchor. One item."
+2.5-K4,2.5,K,Edit fails on non-unique match: fall back to Read+Write,m02:3;m02:4,m02:c5;recap m02:6,q02-7,COVERED-NOT-TESTED,Rule only. One item.
+2.5-S1,2.5,S,Choose Grep for code-content search across codebase,m02:3;m02:4,m02:c4;recap m02:6,q02-6;b4-2,COVERED+TESTED,
+2.5-S2,2.5,S,Choose Glob for filename patterns,m02:3;m02:4,m02:c4;recap m02:6,b4-1,COVERED-NOT-TESTED,One recall-style item.
+2.5-S3,2.5,S,Read full file then Write when Edit anchor fails,m02:3;m02:4,m02:c5;recap m02:6,q02-7,COVERED-NOT-TESTED,One item.
+2.5-S4,2.5,S,"Explore incrementally: Grep entry points, Read, follow imports",m02:3,recap m02:6,b4-2,COVERED-NOT-TESTED,"Two sentences, no card, one item."
+2.5-S5,2.5,S,"Trace wrapper re-exports: list exported names, Grep each",m02:3,recap m02:6,q02-6,COVERED-NOT-TESTED,"One sentence, no card, one item."

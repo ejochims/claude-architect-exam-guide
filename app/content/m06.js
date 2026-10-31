@@ -1,6 +1,6 @@
 window.LESSONS.m06 = {
   cards: [
-    { f: "A coordinator says it is delegating, but no subagent runs. Likely cause?", b: "Its allowedTools doesn't include \"Task\" (the subagent-spawning tool; it's called Agent in current Claude Code)." },
+    { f: "A coordinator says it is delegating, but no subagent runs. Likely cause?", b: "Exam answer: its allowedTools doesn't include \"Task\" (the subagent-spawning tool). Today the tool is called Agent and allowedTools only pre-approves tools, so check the subagent's description too." },
     { f: "How do you run subagents in parallel?", b: "Emit multiple Task calls in a single coordinator response, not one per turn." },
     { f: "What does a subagent know about the coordinator's conversation?", b: "Nothing automatically. Its context is its AgentDefinition plus the prompt the coordinator writes, so include prior findings explicitly." },
     { f: "Every subagent succeeded but the report misses whole subtopics. Root cause?", b: "The coordinator's task decomposition was too narrow." },
@@ -12,17 +12,18 @@ window.LESSONS.m06 = {
       kind: "read",
       title: "First principle: isolated context is a feature",
       html: `
-<p class="lede">A subagent starts with an empty conversation. It sees only its own definition (system prompt, allowed tools) and the prompt the coordinator writes for it. It does <em>not</em> inherit the coordinator's history or share memory with other subagents.</p>
+<p class="lede">A subagent starts without the coordinator's conversation. It sees only its own definition (system prompt, allowed tools) and the prompt the coordinator writes for it. It does <em>not</em> inherit the coordinator's history or share memory with other subagents.</p>
+<div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> one agent doing research, analysis and writing fills a single context with everything, and quality drops as it grows.</li><li><strong>What it is.</strong> a coordinator splits the task, hands focused pieces to subagents with their own clean context, and combines what they return. All communication goes through the coordinator (hub-and-spoke).</li><li><strong>Why this design.</strong> agents talking peer to peer leave no single place to see coverage, retry failures or control what each agent receives. The hub gives you that control.</li><li><strong>Use it when.</strong> a task splits into parts that benefit from focused context or parallel work. For small, linear tasks, one agent is simpler and cheaper.</li></ul></div>
 <p>That isolation is the point. Verbose search results stay out of the coordinator's context, and each specialist gets a focused prompt and a small tool set. The cost is that <strong>you must pass everything a subagent needs, explicitly.</strong></p>
 <h3>The mechanics</h3>
 <ul>
 <li>Subagents are spawned with the <strong>Task tool</strong>. A coordinator can only delegate if its <code>allowedTools</code> includes <code>"Task"</code>.</li>
 <li>Each subagent type is defined by an <strong><code>AgentDefinition</code></strong>: a description (used to decide when to call it), a system prompt, and restricted tools.</li>
-<li><strong>Parallelism comes from multiple Task calls in one response.</strong> One call per turn runs them one after another.</li>
+<li><strong>Parallelism comes from multiple Task calls in one response.</strong> In the exam's model, one call per turn runs them one after another (today subagents start in the background by default).</li>
 <li>Pass prior results <strong>in full, as structured data</strong> that separates content from metadata (URL, document, page, date), so attribution survives.</li>
 <li>Give subagents <strong>goals and quality criteria</strong>, not step-by-step procedures, so they can adapt to what they find.</li>
 </ul>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Current Claude Code calls the Task tool <code>Agent</code> (<code>Task</code> still works as an alias), and subagents can nest a few levels deep. The exam uses “Task” and hub-and-spoke, so answer in those terms.</p></div>`
+<div class="callout today"><div class="callout-label">Real world today</div><p>Current Claude Code calls the Task tool <code>Agent</code> (<code>Task</code> still works as an alias), and subagents can nest a few levels deep. In today's Agent SDK, <code>allowedTools</code> <em>pre-approves</em> tools rather than gating them, so a coordinator can often delegate without listing <code>"Task"</code>; a vague subagent description is now a common reason Claude answers directly instead of delegating. Subagents also start in the background by default. The exam uses “Task”, an <code>allowedTools</code> gate and hub-and-spoke, so answer in those terms. See <a href="#today">Exam vs. today</a>.</p></div>`
     },
     {
       kind: "widget",
@@ -47,7 +48,9 @@ window.LESSONS.m06 = {
 <tbody>
 <tr><td>Prompt chaining (fixed steps)</td><td>The steps are predictable</td><td>Review each file for local issues, then run one cross-file integration pass</td></tr>
 <tr><td>Dynamic decomposition</td><td>The next step depends on what you find</td><td>“Add tests to this legacy codebase”: map the structure, find high-impact areas, plan by priority, adapt as dependencies appear</td></tr>
-</tbody></table></div>`
+</tbody></table></div>
+<div class="callout key"><div class="callout-label">Why iterate</div><ul style="margin:0;padding-left:18px"><li><strong>Pattern name.</strong> Anthropic calls a generate–evaluate–revise cycle the <em>evaluator-optimizer</em> pattern: one step produces output, another judges it against criteria and sends back what's missing.</li><li><strong>Why it works.</strong> the evaluation is concrete (coverage against the brief), so each extra round targets a known gap instead of redoing everything.</li><li><strong>Use it when.</strong> you have clear criteria for “good enough” and iteration measurably improves the result. Without criteria, loops just cost more.</li></ul></div>
+<div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>allowedTools.</strong> the list of tools an agent may use. It exists for least privilege and for better tool selection: fewer, role-relevant tools.</li><li><strong>Not to confuse.</strong> <code>tools</code> in an AgentDefinition sets a subagent's own tools; a skill's <code>allowed-tools</code> applies while that skill runs; permission modes decide whether calls need approval. (On the exam, the coordinator's <code>allowedTools</code> must include <code>"Task"</code>; see Exam vs. today.)</li></ul></div>`
     },
     {
       kind: "quiz",
@@ -55,82 +58,82 @@ window.LESSONS.m06 = {
       questions: [
         {
           id: "q06-1", ts: "1.3", scenario: 3,
-          stem: "A coordinator's logs show “Delegating literature search to the search specialist,” but no subagent ever runs, and the coordinator then answers from its own knowledge. What is the most likely cause?",
+          stem: "A coordinator's logs show “Delegating literature search to the search specialist,” but no subagent ever runs, and the coordinator then answers from its own knowledge. The same subagent definitions are delegated to reliably by a second coordinator that was configured separately. What is the most likely cause?",
           options: [
-            { t: "The search subagent's description is too vague.", trap: "T7", why: "A vague description would cause a wrong choice, not a total failure to spawn." },
-            { t: "The coordinator's <code>allowedTools</code> doesn't include <code>\"Task\"</code>.", ok: true, why: "Without the Task tool, the coordinator can only describe delegation." },
-            { t: "Subagents need a larger context window.", trap: "T3", why: "Nothing was spawned, so context size isn't the issue." },
-            { t: "The coordinator needs “always delegate” in its prompt.", trap: "T1", why: "It already tried to delegate. It lacks the mechanism." }
+            { t: "The search subagent's description is too vague for the coordinator to match it to the task.", trap: "T7", why: "Vague descriptions do make Claude skip delegation, but the same definitions work under another coordinator, so the difference is in this coordinator's configuration." },
+            { t: "The coordinator's <code>allowedTools</code> doesn't include <code>\"Task\"</code>.", ok: true, why: "Exam framing: without the Task tool, the coordinator can only describe delegation. (Today the tool is named Agent and allowedTools pre-approves rather than gates; see Exam vs. today.)" },
+            { t: "The coordinator's <code>maxTurns</code> is too low, so its run ends before the subagent call can be made.", why: "The coordinator kept going and answered the question, so it wasn't stopped by a turn limit." },
+            { t: "The subagent's AgentDefinition lists <code>tools</code> the search doesn't use, so it exits as soon as it starts.", why: "The subagent never ran at all, and the same definition works under the other coordinator." }
           ]
         },
         {
           id: "q06-2", ts: "1.3", scenario: 3,
           stem: "Two research subagents are independent, yet total research time equals the sum of both. Logs show the coordinator issues one Task call, waits for the result, then issues the next. How do you get parallel execution?",
           options: [
-            { t: "Have the coordinator emit both Task calls in a single response.", ok: true, why: "Multiple Task calls in one response run in parallel." },
-            { t: "Merge both subagents into one with both tool sets.", trap: "T5", why: "This loses specialization and still runs the work serially." },
-            { t: "Lower each subagent's max tokens so their responses come back sooner.", why: "That shortens outputs but doesn't parallelize." },
-            { t: "Use the Message Batches API for subagent calls.", why: "Batch is asynchronous with up to 24-hour latency, which is wrong for an interactive pipeline." }
+            { t: "Have the coordinator emit both Task calls together in a single response.", ok: true, why: "Several Task calls in a single response run in parallel." },
+            { t: "Give each research thread its own coordinator, so the two subagents run inside separate agent loops.", why: "Adds orchestration layers without fixing the cause: the coordinator issues calls one at a time." },
+            { t: "Send the subagent calls through the Message Batches API so they're processed together.", why: "Batches can take up to 24 hours and don't run multi-turn tool loops. Wrong tool for interactive research." },
+            { t: "Lower each subagent's <code>max_tokens</code> so that each one returns sooner.", why: "They'd still run back to back, and their answers might be cut off." }
           ]
         },
         {
           id: "q06-3", ts: "1.3", scenario: 3,
           stem: "The synthesis subagent writes fluent reports with no citations. Its prompt from the coordinator is “Synthesize the findings from the research phase into a report with sources.” What's the fix?",
           options: [
-            { t: "Tell the synthesis agent to look harder for sources and cite each one it uses.", trap: "T9", why: "It has no findings to look at. Subagents don't inherit context." },
-            { t: "Include the complete findings in the synthesis prompt as structured records (claim, source URL or document, page, date).", ok: true, why: "Context must be passed explicitly, and the structure keeps attribution intact." },
-            { t: "Give the synthesis agent web search so it can find and cite its own sources.", trap: "T5", why: "This duplicates research and breaks role separation." },
-            { t: "Have the synthesis agent read the coordinator's transcript to recover the research findings.", trap: "T8", why: "Subagents don't get the coordinator's history automatically." }
+            { t: "Instruct the synthesis agent to attach a source to every claim it makes in the report.", trap: "T9", why: "It can't cite sources it was never given." },
+            { t: "Pass all the findings in the synthesis prompt as structured records with source, page and date.", ok: true, why: "Subagents only know what they're passed. Structured records keep attribution intact." },
+            { t: "Give the synthesis agent a <code>web_search</code> tool, so it can find a source and add a structured citation for each claim itself.", trap: "T5", why: "It would redo research and could attach sources that differ from where the findings came from." },
+            { t: "Let it read the research subagents' session transcripts through the coordinator's shared memory to recover sources.", why: "Subagents have isolated contexts. Nothing is shared unless the coordinator passes it." }
           ]
         },
         {
           id: "q06-4", ts: "1.2", scenario: 3,
           stem: "Every query, including “What year was the company founded?”, runs through search, document analysis, synthesis and report generation, taking about 90 seconds. What should change?",
           options: [
-            { t: "Have the coordinator analyze query complexity and invoke only the subagents needed.", ok: true, why: "Dynamic selection avoids running the full pipeline for simple requests." },
-            { t: "Run all four subagents in parallel for every query to cut the total time.", why: "Synthesis depends on research, and simple queries still pay for the unneeded agents." },
-            { t: "Cache answers to every query so repeated questions return instantly.", why: "This helps repeats only and doesn't address the design." },
-            { t: "Remove the coordinator and have the user's query call the subagents directly.", why: "This loses routing, error handling and observability." }
+            { t: "Have the coordinator assess each query's complexity and invoke only the subagents that query needs.", ok: true, why: "Routing by complexity is the coordinator's job. Simple questions don't need the full pipeline." },
+            { t: "Run all four subagents in parallel for every query, so total time drops to that of the slowest one.", why: "Faster, but still wasteful. A founding-year question needs no pipeline at all." },
+            { t: "Add a cache keyed on query text, so repeated questions skip the pipeline entirely.", why: "Helps only with repeats. First-time simple questions still take 90 seconds." },
+            { t: "Put a fast classifier model in front that routes simple queries to a direct-answer path.", trap: "T2", why: "Extra infrastructure for a decision the coordinator is already positioned to make." }
           ]
         },
         {
           id: "q06-5", ts: "1.2", scenario: 3,
-          stem: "A report on “the future of urban mobility” covered only electric cars. Logs show the coordinator created three subtasks: EV batteries, EV charging and EV pricing. Each subagent returned high-quality results. Root cause?",
+          stem: "To get broader coverage, a coordinator sends the same prompt, “Research AI's impact on healthcare,” to three search subagents. Their results overlap by about 70%, and research costs have tripled. What should change?",
           options: [
-            { t: "The search subagent's queries were too narrow and missed sources on other forms of mobility.", trap: "T7", why: "It searched exactly what it was assigned." },
-            { t: "The coordinator's decomposition was too narrow, omitting transit, micromobility, rail and urban planning.", ok: true, why: "When every subagent succeeds and coverage is missing, look at the decomposition." },
-            { t: "The synthesis subagent failed to notice and fill the gaps in the findings it received.", trap: "T7", why: "Synthesis could add a gap check, but the gap originated in the coordinator's plan." },
-            { t: "The model needs a larger context window to handle a topic this broad.", trap: "T3", why: "Capacity isn't the issue." }
+            { t: "Give each subagent a distinct slice of the topic, such as diagnostics, drug discovery or hospital operations and billing.", ok: true, why: "Partition the scope so parallel subagents cover different ground instead of duplicating work." },
+            { t: "Point each subagent at a different search backend (Scholar, PubMed, news), so each surfaces different sources.", why: "Different engines still return the same subtopics. The overlap is in scope, not in sources." },
+            { t: "Deduplicate the overlapping results in the synthesis step before the report is written.", trap: "T7", why: "Hides the duplication but still pays for it three times, and adds no coverage." },
+            { t: "Replace the three with one search subagent that has three times the <code>max_tokens</code> budget.", trap: "T3", why: "Loses parallelism and puts everything in one context. The fix is a better decomposition." }
           ]
         },
         {
           id: "q06-6", ts: "1.2", scenario: 3,
           stem: "After synthesis, the coordinator notices the report has nothing on regulatory risk, which the user asked about. What should it do?",
           options: [
-            { t: "Ship the report now and note that regulatory risk wasn't covered.", why: "Acceptable only if no further research is possible. Here it is." },
-            { t: "Ask the synthesis agent to add a regulatory section from its general knowledge.", why: "That produces uncited, possibly fabricated content." },
-            { t: "Re-delegate targeted queries on regulatory risk to the search and analysis subagents, then re-run synthesis.", ok: true, why: "This is the iterative refinement loop: evaluate gaps, re-delegate, re-synthesize." },
-            { t: "Restart the entire research run from scratch with a larger budget and more subagents.", why: "Wasteful. Target the gap." }
+            { t: "Ship it with a coverage note, stating that regulatory risk wasn't researched, so the user can follow up.", why: "Coverage notes suit gaps you can't fill. The user asked for this, and it can be filled." },
+            { t: "Ask the synthesis agent to add a regulatory section from its general knowledge.", why: "Unsourced content breaks provenance and may be wrong." },
+            { t: "Re-delegate targeted regulatory-risk queries to the search and analysis subagents, then re-run synthesis with the new findings.", ok: true, why: "The coordinator evaluates gaps and re-delegates only what's missing: the iterative refinement loop." },
+            { t: "Re-run the full pipeline, adding “emphasize regulation” to the coordinator's prompt.", why: "Repeats completed work. A targeted follow-up is cheaper and faster." }
           ]
         },
         {
           id: "q06-7", ts: "1.6", scenario: 4,
           stem: "A developer asks the agent to “add comprehensive tests to this 10-year-old billing service.” How should the work be decomposed?",
           options: [
-            { t: "Use a fixed chain that writes tests for every file in alphabetical order until all are covered.", why: "This ignores risk and dependencies. Open-ended work needs adaptive planning." },
-            { t: "Map the structure, identify high-impact areas, make a prioritized plan, and adapt it as dependencies are discovered.", ok: true, why: "Dynamic decomposition suits open-ended investigation." },
-            { t: "Ask the developer for a complete list of every function that needs tests before starting.", why: "This pushes the analysis back onto the developer." },
-            { t: "Spawn one subagent per file all at once so every file gets tests in parallel.", why: "There's no prioritization, and files that depend on each other get analyzed blind." }
+            { t: "A fixed prompt chain: list files, generate tests for each, run <code>pytest</code>, then fix failures until the suite passes.", why: "Fixed chains suit predictable work. Legacy code needs re-planning as dependencies and risks surface." },
+            { t: "Map the codebase, find the high-impact areas, plan tests by priority, and adapt the plan as hidden dependencies surface.", ok: true, why: "Open-ended work on unfamiliar code calls for dynamic, adaptive decomposition." },
+            { t: "Spawn one subagent per file in parallel, so every file gets tests at the same time.", why: "Ignores priority and cross-file dependencies, and spreads effort evenly where risk isn't even." },
+            { t: "Ask the developer for a list of the functions to test before doing anything else.", why: "Pushes the investigation back onto the developer. The agent can explore the code itself." }
           ]
         },
         {
           id: "q06-8", ts: "1.3", scenario: 3,
           stem: "The coordinator gives the search subagent a 14-step procedure (“1. Search Google Scholar. 2. Open top 3 results…”). It fails when the best sources are government datasets the procedure never mentions. Better prompt design?",
           options: [
-            { t: "Add more steps to the procedure covering government datasets and other source types.", why: "There will always be another unanticipated source type." },
-            { t: "Specify the research goal and quality criteria (recency, credibility, coverage), and let the subagent choose its approach.", ok: true, why: "Goals and criteria let subagents adapt. Procedures make them brittle." },
-            { t: "Give the search subagent every available tool so it can handle any kind of source.", trap: "T5", why: "The rigid prompt is the constraint, not the tools." },
-            { t: "Replace the search subagent with a fixed script that follows the procedure exactly.", why: "This removes the adaptability the subagent provides." }
+            { t: "Extend the procedure with steps for government datasets (data.gov, Eurostat), preprint servers and industry reports.", why: "Patching the list fails again on the next source nobody listed." },
+            { t: "Give it the research goal and quality criteria, and let it choose its own approach.", ok: true, why: "Goals and criteria let the subagent adapt; rigid procedures break on cases they didn't anticipate." },
+            { t: "Give the search subagent every available tool so it can reach any kind of source.", trap: "T5", why: "More tools make selection worse, and the procedure would still steer it away from datasets." },
+            { t: "Pass a ranked allowlist of credible sources (journals, agencies, datasets) for the subagent to search in order.", why: "Still an enumeration: the best source for a new question may not be on the list." }
           ]
         }
       ]
@@ -139,7 +142,7 @@ window.LESSONS.m06 = {
       kind: "recap",
       title: "Recap",
       points: [
-        "Subagents start empty: AgentDefinition + the prompt you write. Pass findings explicitly and in structure.",
+        "Subagents start without the coordinator's history: AgentDefinition + the prompt you write. Pass findings explicitly and in structure.",
         "Delegation requires \"Task\" in the coordinator's allowedTools.",
         "Parallel = multiple Task calls in one response.",
         "Hub-and-spoke: the coordinator routes everything. Select subagents dynamically and partition scope.",

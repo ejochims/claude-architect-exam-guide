@@ -1,0 +1,51 @@
+// Heuristic "test-wise" solvers that never read the stem. If any beats ~35% (chance is 25%),
+// the options themselves leak the answer.
+// Usage: node scripts/audit/cue-baselines.mjs [--json]
+import { loadContent, plain, ABSOLUTE } from "./lib.mjs";
+
+const all = loadContent().questions;
+// --ts 1 (or 1.4) limits the run to one domain or task statement, to gate a rewrite batch on its own.
+const tsArg = process.argv.includes("--ts") ? process.argv[process.argv.indexOf("--ts") + 1] : null;
+// --set holdout|practice gates the sequestered Readiness Check items separately from the practice bank.
+const setArg = process.argv.includes("--set") ? process.argv[process.argv.indexOf("--set") + 1] : null;
+const inSet = q => !setArg || (setArg === "holdout") === !!q.holdout;
+const Q = all.filter(q => inSet(q) && (!tsArg || q.ts === tsArg || q.ts.startsWith(tsArg + ".")));
+const HEDGE = /\b(first|then|before|specific|explicit|targeted|only the|instead|rather than|so that|e\.g\.|because)\b/gi;
+const TECH = /<code>|[A-Za-z]+_[a-z_]+|--[a-z-]+|\.[a-z]+\b|`/g;
+
+// Each solver scores options; the highest score wins (ties go to the first, as a test-taker would).
+const solvers = {
+  "pick-longest": o => plain(o.t).length,
+  "pick-most-hedged": o => (plain(o.t).match(HEDGE) || []).length,
+  "pick-least-absolute": o => (ABSOLUTE.test(plain(o.t)) ? 0 : 1),
+  "pick-most-technical": o => (o.t.match(TECH) || []).length,
+  "pick-most-clauses": o => (plain(o.t).match(/[,;:]/g) || []).length,
+  // The cues an options-only solver reported using: concreteness, and an "enforce it in code" expert tone.
+  "pick-most-concrete": o => (o.t.match(/<code>|\b[a-z]+_[a-z_]+\b|--?[a-z][a-z-]+|\b\d+\b|\.[a-z]{2,4}\b|"[^"]+"/g) || []).length + plain(o.t).split(/\s+/).length / 20,
+  // Inverse cues catch over-correction: a rewrite that always makes the key shortest is just as guessable.
+  "pick-shortest": o => -plain(o.t).length,
+  "pick-least-concrete": o => -((o.t.match(/<code>|\b[a-z]+_[a-z_]+\b|--?[a-z][a-z-]+|\b\d+\b|\.[a-z]{2,4}\b|"[^"]+"/g) || []).length + plain(o.t).split(/\s+/).length / 20),
+  "pick-enforce-in-code": o => (plain(o.t).match(/\b(hook|code|programmatic|deterministic|schema|validat\w*|structured|explicit|specific|gate|block|enforce\w*|custom_id|isError|before|instead)\b/gi) || []).length
+};
+
+const results = {};
+for (const [name, score] of Object.entries(solvers)) {
+  let right = 0;
+  const hits = [];
+  for (const q of Q) {
+    const s = q.options.map(score);
+    const best = Math.max(...s);
+    // Split credit across ties so a non-discriminating heuristic scores ~25%.
+    const tied = s.map((v, i) => (v === best ? i : -1)).filter(i => i >= 0);
+    const credit = tied.some(i => q.options[i].ok) ? 1 / tied.length : 0;
+    right += credit;
+    if (credit === 1) hits.push(q.id);
+  }
+  results[name] = { accuracy: Math.round((1000 * right) / Q.length) / 10, uniqueHits: hits.length, hits };
+}
+
+if (process.argv.includes("--json")) console.log(JSON.stringify(results, null, 2));
+else {
+  console.log(`Stem-blind heuristic solvers over ${Q.length} questions (chance = 25%, target <= 35%)`);
+  for (const [n, r] of Object.entries(results)) console.log(`  ${n.padEnd(22)} ${String(r.accuracy).padStart(5)}%  ${r.accuracy > 35 ? "FAIL" : "ok"}`);
+}

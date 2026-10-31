@@ -1,0 +1,1237 @@
+[
+ {
+  "id": "q01-4",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "absolute-words-in-others"
+  ],
+  "note": "Only option handling max_tokens properly"
+ },
+ {
+  "id": "q06-2",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity",
+   "best-practice-tone"
+  ],
+  "note": "Parallel Task calls in one response"
+ },
+ {
+  "id": "q01-2",
+  "answer": "C",
+  "confidence": 3,
+  "second": "B",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Root-cause mechanism vs prompt patches"
+ },
+ {
+  "id": "q06-1",
+  "answer": "A",
+  "confidence": 3,
+  "second": "D",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Concrete config cause"
+ },
+ {
+  "id": "b2-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Skill vs always-on CLAUDE.md distinction"
+ },
+ {
+  "id": "b5-5",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "specificity"
+  ],
+  "note": "Independent review context"
+ },
+ {
+  "id": "q04-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "length",
+   "best-practice-tone"
+  ],
+  "note": "Local retry, propagate with context"
+ },
+ {
+  "id": "q01-5",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-6",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Named feature fork_session"
+ },
+ {
+  "id": "q03-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": "Structured handoff"
+ },
+ {
+  "id": "q03-1",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "specificity"
+  ],
+  "note": "Programmatic hook enforcement"
+ },
+ {
+  "id": "q06-5",
+  "answer": "B",
+  "confidence": 4,
+  "second": "D",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Names omitted subtopics"
+ },
+ {
+  "id": "q08-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "best-practice-tone"
+  ],
+  "note": "Explicit categories"
+ },
+ {
+  "id": "q11-4",
+  "answer": "C",
+  "confidence": 3,
+  "second": "B",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Avoid name collision"
+ },
+ {
+  "id": "q05-6",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "absolute-words-in-others"
+  ],
+  "note": "Additive scopes"
+ },
+ {
+  "id": "q11-8",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Concrete examples"
+ },
+ {
+  "id": "q12-4",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Shared project config"
+ },
+ {
+  "id": "q02-3",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "length"
+  ],
+  "note": "Least privilege tools"
+ },
+ {
+  "id": "q04-2",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Structured business error"
+ },
+ {
+  "id": "b4-2",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Targeted grep then trace"
+ },
+ {
+  "id": "b5-6",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Explicit criteria"
+ },
+ {
+  "id": "q03-5",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-7",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-4",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity",
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-1",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Real flags, schema"
+ },
+ {
+  "id": "q02-6",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "absolute-words-in-others"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q02-7",
+  "answer": "C",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b2-5",
+  "answer": "A",
+  "confidence": 3,
+  "second": "C",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Justification references shared interaction"
+ },
+ {
+  "id": "q09-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "best-practice-tone"
+  ],
+  "note": "Retry with error feedback"
+ },
+ {
+  "id": "q01-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "stop_reason loop control"
+ },
+ {
+  "id": "q13-2",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "length",
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b5-7",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b2-2",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q00-1",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-5",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-1",
+  "answer": "D",
+  "confidence": 3,
+  "second": "A",
+  "flags": [
+   "odd-one-out"
+  ],
+  "note": "Honor explicit human request"
+ },
+ {
+  "id": "q13-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-1",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Forced tool_use for schema"
+ },
+ {
+  "id": "q07-4",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Scratchpad persistence"
+ },
+ {
+  "id": "q13-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-10",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b2-3",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Real frontmatter field"
+ },
+ {
+  "id": "q07-5",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-7",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-2",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Targeted fix"
+ },
+ {
+  "id": "b5-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": "Calibrated thresholds"
+ },
+ {
+  "id": "q05-5",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-2",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q02-1",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-5",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "hedging"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b3-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b2-1",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Diagnose first with /memory"
+ },
+ {
+  "id": "b4-6",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Enforce via tool restriction"
+ },
+ {
+  "id": "q13-8",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q04-4",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q07-2",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-4",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q04-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q05-2",
+  "answer": "B",
+  "confidence": 3,
+  "second": "A",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Personal server, user scope"
+ },
+ {
+  "id": "q05-1",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "Env var expansion"
+ },
+ {
+  "id": "b4-7",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-8",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-7",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q00-3",
+  "answer": "B",
+  "confidence": 2,
+  "second": "",
+  "flags": [
+   "odd-one-out"
+  ],
+  "note": "Only fabricated-sounding feature"
+ },
+ {
+  "id": "q07-3",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-7",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "length",
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b5-4",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-3",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b4-5",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b1-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": "Programmatic prerequisite"
+ },
+ {
+  "id": "q13-6",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q00-2",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b5-2",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b6-1",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-6",
+  "answer": "D",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q02-4",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-1",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q07-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b5-1",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": "claude -p is real flag"
+ },
+ {
+  "id": "b4-4",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-2",
+  "answer": "D",
+  "confidence": 1,
+  "second": "A",
+  "flags": [
+   "pure-guess"
+  ],
+  "note": "Numeric option, no cue"
+ },
+ {
+  "id": "b1-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "hedging",
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q04-6",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-3",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-5",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q01-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q04-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "length",
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-3",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q05-4",
+  "answer": "C",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b4-8",
+  "answer": "C",
+  "confidence": 3,
+  "second": "B",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-9",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q12-5",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b4-3",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-2",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "absolute-words-in-others",
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b4-1",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q02-5",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-5",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q06-7",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "length",
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q07-1",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q05-3",
+  "answer": "B",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q03-4",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "odd-one-out"
+  ],
+  "note": "Only soft guidance, others are hard rules"
+ },
+ {
+  "id": "q03-2",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-6",
+  "answer": "C",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b3-2",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q07-6",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "length",
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q13-9",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-6",
+  "answer": "D",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity",
+   "length"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q08-3",
+  "answer": "B",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-2",
+  "answer": "C",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q09-6",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q02-2",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b6-2",
+  "answer": "C",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "best-practice-tone"
+  ],
+  "note": ""
+ },
+ {
+  "id": "b2-6",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-3",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q11-5",
+  "answer": "A",
+  "confidence": 4,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-3",
+  "answer": "A",
+  "confidence": 5,
+  "second": "",
+  "flags": [
+   "specificity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "q10-1",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "flags": [
+   "odd-one-out"
+  ],
+  "note": ""
+ }
+]
