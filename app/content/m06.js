@@ -50,7 +50,31 @@ window.LESSONS.m06 = {
 <tr><td>Dynamic decomposition</td><td>The next step depends on what you find</td><td>“Add tests to this legacy codebase”: map the structure, find high-impact areas, plan by priority, adapt as dependencies appear</td></tr>
 </tbody></table></div>
 <div class="callout key"><div class="callout-label">Why iterate</div><ul style="margin:0;padding-left:18px"><li><strong>Pattern name.</strong> Anthropic calls a generate–evaluate–revise cycle the <em>evaluator-optimizer</em> pattern: one step produces output, another judges it against criteria and sends back what's missing.</li><li><strong>Why it works.</strong> the evaluation is concrete (coverage against the brief), so each extra round targets a known gap instead of redoing everything.</li><li><strong>Use it when.</strong> you have clear criteria for “good enough” and iteration measurably improves the result. Without criteria, loops just cost more.</li></ul></div>
-<div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>allowedTools.</strong> the list of tools an agent may use. It exists for least privilege and for better tool selection: fewer, role-relevant tools.</li><li><strong>Not to confuse.</strong> <code>tools</code> in an AgentDefinition sets a subagent's own tools; a skill's <code>allowed-tools</code> applies while that skill runs; permission modes decide whether calls need approval. (On the exam, the coordinator's <code>allowedTools</code> must include <code>"Task"</code>; see Exam vs. today.)</li></ul></div>`
+<div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>allowedTools.</strong> the list of tools an agent may use. It exists for least privilege and for better tool selection: fewer, role-relevant tools.</li><li><strong>Not to confuse.</strong> <code>tools</code> in an AgentDefinition sets a subagent's own tools; a skill's <code>allowed-tools</code> applies while that skill runs; permission modes decide whether calls need approval. (On the exam, the coordinator's <code>allowedTools</code> must include <code>"Task"</code>; see Exam vs. today.)</li></ul></div>
+<!-- ex:m06-agents -->
+<h3>In code: defining subagents</h3>
+<p>In the Agent SDK, each subagent gets a description (how the coordinator decides to use it), its own prompt and its own tools. The coordinator needs the Task tool to spawn them:</p>
+<pre class="code"><code><span class="k">from</span> claude_agent_sdk <span class="k">import</span> ClaudeAgentOptions, AgentDefinition
+
+options = ClaudeAgentOptions(
+    allowed_tools=[<span class="s">"Task"</span>, <span class="s">"WebSearch"</span>, <span class="s">"WebFetch"</span>],   <span class="c"># Task is called Agent today</span>
+    agents={
+        <span class="s">"web-researcher"</span>: AgentDefinition(
+            description=<span class="s">"Finds and reads web sources on one subtopic."</span>,
+            prompt=<span class="s">"Search for sources on the subtopic you're given. "</span>
+                   <span class="s">"Return each finding as claim, source URL and date."</span>,
+            tools=[<span class="s">"WebSearch"</span>, <span class="s">"WebFetch"</span>],
+        ),
+    },
+)</code></pre>
+<!-- ex:m06-task-call -->
+<p>When the coordinator delegates, it calls Task. The subagent sees <strong>only</strong> this prompt, so everything it needs goes in it:</p>
+<pre class="code"><code>{<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_07"</span>, <span class="s">"name"</span>: <span class="s">"Task"</span>,
+ <span class="s">"input"</span>: {
+   <span class="s">"subagent_type"</span>: <span class="s">"web-researcher"</span>,
+   <span class="s">"description"</span>: <span class="s">"Research EU rules for hospital AI"</span>,
+   <span class="s">"prompt"</span>: <span class="s">"Subtopic: EU AI Act obligations for hospitals, 2024-2026.\\nAlready covered: FDA guidance, so skip it.\\nReturn: claim, source URL and publication date for each finding."</span>
+ }}</code></pre>`
     },
     {
       kind: "quiz",

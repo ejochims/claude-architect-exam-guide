@@ -27,7 +27,23 @@ window.LESSONS.m10 = {
 </ul>
 <h3>SLA arithmetic</h3>
 <p>A record that arrives just after a submission waits a full interval, then up to 24 hours in the batch, then your post-processing. (Requests not processed within 24 hours expire and must be resubmitted.) So:</p>
-<pre class="code"><code>max interval = SLA − 24h − post-processing</code></pre>`
+<pre class="code"><code>max interval = SLA − 24h − post-processing</code></pre>
+<!-- ex:m10-batch -->
+<h3>In code: the Message Batches API</h3>
+<p>Each request carries your own <code>custom_id</code>, because results can come back in any order:</p>
+<pre class="code"><code>batch = client.messages.batches.create(requests=[
+    {<span class="s">"custom_id"</span>: <span class="s">"invoice-00017"</span>,               <span class="c"># your key for matching results</span>
+     <span class="s">"params"</span>: {<span class="s">"model"</span>: MODEL, <span class="s">"max_tokens"</span>: <span class="k">1024</span>,
+                <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: doc_17}]}},
+    <span class="c"># ... up to 100,000 requests per batch</span>
+])
+
+<span class="c"># Later, within 24 hours</span>
+<span class="k">for</span> r <span class="k">in</span> client.messages.batches.results(batch.id):
+    <span class="k">if</span> r.result.type == <span class="s">"succeeded"</span>:
+        save(r.custom_id, r.result.message)
+    <span class="k">else</span>:                                        <span class="c"># "errored", "canceled" or "expired"</span>
+        resubmit.append(r.custom_id)             <span class="c"># rerun only these</span></code></pre>`
     },
     {
       kind: "widget",

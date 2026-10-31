@@ -40,7 +40,23 @@ window.LESSONS.m09 = {
 <p>A useful retry sends three things: <strong>the original document, the failed extraction, and the specific validation errors</strong> (“line items sum to 1,180.00 but total is 1,280.00”). Retrying the same prompt unchanged mostly reproduces the same mistake.</p>
 <p><strong>Know when retries can't help.</strong> They fix format mismatches and structural slips. They can't conjure information that isn't in the source. If the PO number lives in a separate purchase order you didn't provide, every retry is an invitation to invent one. Return <code>null</code>, flag it, or fetch the other document.</p>
 <p><strong>Build self-checks into the schema.</strong> Extract <code>calculated_total</code> alongside <code>stated_total</code>, and add a <code>conflict_detected</code> flag for inconsistent sources. Then code can flag mismatches automatically.</p>
-<p><strong>Close the loop.</strong> In review pipelines, add a <code>detected_pattern</code> field to each finding so that when developers dismiss findings you can see <em>which code constructs</em> generate false positives.</p>`
+<p><strong>Close the loop.</strong> In review pipelines, add a <code>detected_pattern</code> field to each finding so that when developers dismiss findings you can see <em>which code constructs</em> generate false positives.</p>
+<!-- ex:m09-retry -->
+<h3>In code: retry with the specific error</h3>
+<p>Your code validates what Claude extracted. If a check fails and the information is in the document, send back exactly what failed:</p>
+<pre class="code"><code>data = tool_use_block.input                       <span class="c"># what Claude extracted</span>
+errors = validate(data)                           <span class="c"># schema + business rules, in your code</span>
+<span class="k">if</span> errors <span class="k">and</span> attempts &lt; <span class="k">2</span>:
+    messages += [
+        {<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: response.content},
+        {<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: [{
+            <span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: tool_use_block.id, <span class="s">"is_error"</span>: <span class="k">True</span>,
+            <span class="s">"content"</span>: <span class="s">"Validation failed: invoice_date 'March 3rd' must be YYYY-MM-DD; "</span>
+                       <span class="s">"line items sum to 412.50 but total is 421.50. Re-check the document."</span>,
+        }]},
+    ]
+elif errors:
+    send_to_human_review(document, errors)        <span class="c"># retries can't find what isn't there</span></code></pre>`
     },
     {
       kind: "widget",
