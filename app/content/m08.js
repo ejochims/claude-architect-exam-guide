@@ -22,7 +22,10 @@ window.LESSONS.m08 = {
 does (e.g. "returns sorted list" but the function never sorts).
 Do not flag wording, grammar, or comments that are merely incomplete.</span></code></pre>
 <p>Write <strong>categorical criteria</strong> for what to report (bugs, security, contradicting comments) and what to skip (minor style, accepted local patterns, speculative performance advice). For severity, define each level with a <strong>concrete code example</strong>.</p>
-<div class="callout key"><div class="callout-label">Trust is shared across categories</div><p>When one category produces mostly false positives, developers start ignoring <em>all</em> the bot's comments, including the accurate ones. Temporarily disable the noisy category to restore trust while you improve its prompt.</p></div>`
+<div class="callout key"><div class="callout-label">Trust is shared across categories</div><p>When one category produces mostly false positives, developers start ignoring <em>all</em> the bot's comments, including the accurate ones. Temporarily disable the noisy category to restore trust while you improve its prompt.</p></div>
+<!-- panel:m08-terms -->
+<div class="callout key"><div class="callout-label">Three terms</div><ul style="margin:0;padding-left:18px"><li><strong>False positive.</strong> a reported finding that isn't a real problem.</li><li><strong>Precision.</strong> the share of reported findings that are real. At 90% precision, one finding in ten is noise.</li><li><strong>Severity.</strong> how much a finding matters. It decides whether the finding blocks a merge.</li></ul></div>
+`
     },
     {
       kind: "widget",
@@ -57,10 +60,13 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
 </ul>
 <h3>Who reviews, and how much at once</h3>
 <div class="mech" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-<div><span class="tag">Independent</span><h4>A second instance</h4><p>A session that generated code keeps its reasoning and tends to defend it. An independent instance without that context catches more than “review your work carefully” or extended (or adaptive) thinking in the same session.</p></div>
+<div><span class="tag">Independent</span><h4>A second instance</h4><p>A session that generated code keeps its reasoning and tends to defend it. An independent instance without that context catches more than “review your work carefully” or extended (or adaptive) thinking, a mode where the model reasons step by step before answering, in the same session.</p></div>
 <div><span class="tag">Multi-pass</span><h4>Per file, then integration</h4><p>One pass over 20 files spreads attention thin: some files get depth, others get skimmed, and findings contradict each other. Review each file for local issues, then run a separate pass on cross-file data flow.</p></div>
 </div>
-<p>A verification pass can also have the model report a confidence level with each finding. That's useful for <strong>routing</strong> findings to human review, once the thresholds have been calibrated (Module 13).</p>`
+<p>A verification pass can also have the model report a confidence level with each finding. That's useful for <strong>routing</strong> findings to human review, once the thresholds have been calibrated (Module 13).</p>
+<!-- panel:m08-independent -->
+<div class="callout key"><div class="callout-label">Running an independent reviewer</div><ul style="margin:0;padding-left:18px"><li><strong>How.</strong> a separate API call, session or subagent that receives the code and the requirements, but not the conversation that produced the code.</li><li><strong>Cost.</strong> one more model call per review; worth it where a miss is expensive.</li><li><strong>Neighbors.</strong> self-review in the same session is cheap but anchored to its own reasoning; per-file passes fix diluted attention, not anchoring; extended thinking reasons longer but is still anchored.</li></ul></div>
+`
     },
     {
       kind: "quiz",

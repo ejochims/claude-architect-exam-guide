@@ -2,7 +2,7 @@ window.LESSONS.m13 = {
   cards: [
     { f: "Three valid escalation triggers?", b: "The customer explicitly asks for a human; policy is ambiguous or silent on the request (or an exception is needed); the agent can't make meaningful progress." },
     { f: "Customer demands a human for a simple issue. What does the agent do?", b: "Escalate immediately. Don't investigate first or try to talk them out of it." },
-    { f: "Frustrated customer, simple issue, no request for a human?", b: "Acknowledge the frustration and offer the resolution. Escalate if they reiterate that they want a person." },
+    { f: "Frustrated customer, simple issue, no request for a human?", b: "Acknowledge the frustration and offer the resolution. If they then ask for a person, hand off right away." },
     { f: "Why not escalate on sentiment or self-rated confidence?", b: "Sentiment doesn't measure complexity, and raw self-rated confidence isn't calibrated to case difficulty. (Calibrated field-level confidence is fine for prioritizing human review: task 5.5.)" },
     { f: "Lookup returns three matching customers?", b: "Ask for an additional identifier. Never pick by heuristic." },
     { f: "97% overall accuracy. Safe to cut human review?", b: "Not yet. Check accuracy by document type and field first, then keep stratified random sampling of high-confidence output." },

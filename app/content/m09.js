@@ -14,7 +14,7 @@ window.LESSONS.m09 = {
       html: `
 <p class="lede">A schema can guarantee that <code>total</code> is a number. It can't guarantee that the number is right, or that the document mentioned a total at all. Separate the two problems.</p>
 <h3>Syntax: use tool_use with a schema</h3>
-<p>Define an extraction tool whose <code>input_schema</code> is the shape you want, make sure it gets called (<code>tool_choice</code>: <code>"any"</code> across several schemas, or a named tool for one), and read the <code>tool_use</code> input. On the exam, this is the most reliable way to get schema-compliant output, and it eliminates JSON syntax errors. Prompt-only “respond in JSON” does not.</p>
+<p>Define an extraction tool whose <code>input_schema</code> is the shape you want, make sure it gets called (<code>tool_choice</code>: <code>"any"</code> across several schemas, or a named tool for one), and read the <code>tool_use</code> input. On the exam, this is the most reliable way to get schema-compliant output and avoid JSON syntax errors. (A strict guarantee takes <code>strict: true</code> or structured outputs; see the note below.) Prompt-only “respond in JSON” does not.</p>
 <div class="callout today"><div class="callout-label">Real world today</div><p>Today only <code>strict: true</code> on a tool, or structured outputs (<code>output_config.format</code>), <em>guarantees</em> schema-valid output; plain tool use is very reliable but not guaranteed. Forced <code>tool_choice</code> returns a 400 error on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1. The exam's answer remains tool use + JSON Schema + <code>tool_choice</code>. See <a href="#today">Exam vs. today</a>.</p></div>
 <h3>Schema design shapes behavior</h3>
 <ul>
@@ -24,9 +24,9 @@ window.LESSONS.m09 = {
 </ul>
 <pre class="code"><code>{
   <span class="s">"vendor"</span>: {<span class="s">"type"</span>: <span class="s">"string"</span>},
-  <span class="s">"po_number"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},           <span class="c">// may be absent</span>
+  <span class="s">"po_number"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},           <span class="c"># may be absent</span>
   <span class="s">"category"</span>: {<span class="s">"enum"</span>: [<span class="s">"hardware"</span>, <span class="s">"software"</span>, <span class="s">"services"</span>, <span class="s">"other"</span>, <span class="s">"unclear"</span>]},
-  <span class="s">"category_detail"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},     <span class="c">// filled when "other"</span>
+  <span class="s">"category_detail"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},     <span class="c"># filled when "other"</span>
   <span class="s">"stated_total"</span>: {<span class="s">"type"</span>: <span class="s">"number"</span>},
   <span class="s">"calculated_total"</span>: {<span class="s">"type"</span>: <span class="s">"number"</span>},               <span class="c">// sum of line items</span>
   <span class="s">"conflict_detected"</span>: {<span class="s">"type"</span>: <span class="s">"boolean"</span>}

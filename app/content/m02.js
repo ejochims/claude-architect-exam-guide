@@ -12,7 +12,7 @@ window.LESSONS.m02 = {
       kind: "read",
       title: "First principle: descriptions are the interface",
       html: `
-<p class="lede">Claude never sees your tool's code. It sees a name, a description and an input schema (plus any input examples), and chooses from those alone. A vague description is a bug in the interface, even though it shows up as a “reasoning” failure.</p>
+<p class="lede">Claude never sees your tool's code. It sees a name, a description and an input schema (plus example inputs, if you provide them), and chooses from those alone. A vague description is a bug in the interface, even though it shows up as a “reasoning” failure.</p>
 <p>A description that lets Claude choose reliably says:</p>
 <ul>
 <li><strong>What it does</strong> and what it returns.</li>
@@ -40,7 +40,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
       kind: "read",
       title: "Fewer tools per agent, and tool_choice",
       html: `
-<p class="lede">Selection accuracy falls as options grow. In the exam's example, an agent with 18 tools makes more mistakes than one with 4–5, and an agent with tools outside its role tends to use them: a synthesis agent with web search starts searching instead of synthesizing.</p>
+<p class="lede">Selection accuracy falls as options grow, because every description competes for the model's attention and similar tools blur together, so there are more near-misses to pick. In the exam's example, an agent with 18 tools makes more mistakes than one with 4–5, and an agent with tools outside its role tends to use them: a synthesis agent with web search starts searching instead of synthesizing.</p>
 <ul>
 <li><strong>Scope tools to the role.</strong> Each subagent gets what its job needs.</li>
 <li><strong>Constrain generic tools.</strong> Replace <code>fetch_url</code> with <code>load_document</code>, which validates that the URL is a document.</li>
@@ -90,7 +90,10 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
 <tr><td><code>Edit</code> fails because the anchor text isn't unique</td><td><code>Read</code> the full file, then <code>Write</code> it</td></tr>
 <tr><td>Run tests, builds, git</td><td><code>Bash</code></td></tr>
 </tbody></table></div>
-<p><strong>Explore incrementally.</strong> Grep for an entry point, Read it, follow its imports, and trace one flow. Don't read every file up front. To trace a function that's re-exported through wrapper modules, first list every name it's exported under, then Grep for each name.</p>`
+<p><strong>Explore incrementally.</strong> Grep for an entry point, Read it, follow its imports, and trace one flow. Don't read every file up front. To trace a function that's re-exported through wrapper modules, first list every name it's exported under, then Grep for each name.</p>
+<!-- panel:m02-edit-why -->
+<div class="callout key"><div class="callout-label">Why the Edit fallback works</div><ul style="margin:0;padding-left:18px"><li><strong>Edit.</strong> replaces one exact piece of text. If that text appears several times, Edit can't tell which one you mean, so it refuses.</li><li><strong>Read, then Write.</strong> reading the file and writing back the full corrected version removes the ambiguity. (Today a longer, unique anchor or <code>replace_all</code> also works.)</li><li><strong>Grep vs. Glob.</strong> Grep searches what's <em>inside</em> files; Glob finds files by <em>name</em>. Searching for a function's callers is Grep; finding every test file is Glob.</li></ul></div>
+`
     },
     {
       kind: "widget",

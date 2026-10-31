@@ -69,7 +69,7 @@ window.LESSONS.f01 = {
 <li><strong>The context window</strong> is the most a single request can hold: system prompt, tool definitions, the full message history and the new message together. Long conversations, long documents and verbose tool results all fill it.</li>
 <li><strong><code>max_tokens</code></strong> caps the reply. If the model reaches it mid-answer, the response stops with <code>stop_reason: "max_tokens"</code>. That's truncation, not completion.</li>
 </ul>
-<p>A full window isn't the only risk. Even when everything fits, <strong>more context doesn't mean the model attends to all of it equally</strong>; facts buried in the middle of a long history are easier to miss. That's why later modules teach you to trim tool output and keep key facts in a structured block, rather than reach for a bigger window.</p>
+<p>A full window isn't the only risk. Even when everything fits, <strong>more context doesn't mean the model attends to all of it equally</strong>; facts buried in the middle of a long history are easier to miss. (<em>Attention</em> is how a model weighs which parts of its input matter for each word it writes. Research on long inputs found facts in the middle are recalled less reliably than those at the start or end, an effect called “lost in the middle.”) That's why later modules teach you to trim tool output and keep key facts in a structured block, rather than reach for a bigger window.</p>
 <h3>Roles and the system prompt</h3>
 <ul>
 <li><strong>System prompt:</strong> standing instructions and context for the whole conversation, such as the agent's job, policies and output format.</li>

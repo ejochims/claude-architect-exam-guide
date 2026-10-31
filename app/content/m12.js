@@ -38,7 +38,10 @@ window.LESSONS.m12 = {
   run: |
     claude -p <span class="s">"Review this PR's diff. Report only new or unresolved issues."</span> \\
       --output-format json \\
-      --json-schema <span class="s">"$(cat .github/review-schema.json)"</span> &gt; review.json</code></pre>`
+      --json-schema <span class="s">"$(cat .github/review-schema.json)"</span> &gt; review.json</code></pre>
+<!-- panel:m12-ci-terms -->
+<div class="callout key"><div class="callout-label">CI terms</div><ul style="margin:0;padding-left:18px"><li><strong>CI (continuous integration).</strong> automated jobs that run on every push or pull request.</li><li><strong>Runner.</strong> the machine that runs those jobs.</li><li><strong>Headless.</strong> no person at a keyboard, so the agent can't ask questions and must not wait for input.</li><li><strong><code>&#36;{{ secrets.NAME }}</code>.</strong> GitHub Actions syntax that injects a stored secret, so API keys never appear in the workflow file.</li></ul></div>
+`
     },
     {
       kind: "widget",
@@ -66,7 +69,10 @@ window.LESSONS.m12 = {
 <pre class="code"><code>claude --continue                                   <span class="c"># resume the most recent session here</span>
 claude --resume 4f1c…                               <span class="c"># resume a specific session by ID</span>
 claude --resume 4f1c… --fork-session                <span class="c"># same history, new branch of the work</span>
-claude                                              <span class="c"># fresh start; paste a short summary of findings</span></code></pre>`
+claude                                              <span class="c"># fresh start; paste a short summary of findings</span></code></pre>
+<!-- panel:m12-names -->
+<div class="callout key"><div class="callout-label">Names and worktrees</div><ul style="margin:0;padding-left:18px"><li><strong>Naming a session.</strong> start it with <code>claude -n auth-race-condition</code>, then resume it later with <code>claude --resume auth-race-condition</code>. Plain <code>--resume</code> opens a picker.</li><li><strong>A git worktree.</strong> a second working folder for the same repository, checked out on another branch, so two sessions can edit files without colliding.</li></ul></div>
+`
     },
     {
       kind: "widget",

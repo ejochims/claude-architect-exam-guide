@@ -78,7 +78,10 @@ options = ClaudeAgentOptions(
    <span class="s">"subagent_type"</span>: <span class="s">"web-researcher"</span>,
    <span class="s">"description"</span>: <span class="s">"Research EU rules for hospital AI"</span>,
    <span class="s">"prompt"</span>: <span class="s">"Subtopic: EU AI Act obligations for hospitals, 2024-2026.\\nAlready covered: FDA guidance, so skip it.\\nReturn: claim, source URL and publication date for each finding."</span>
- }}</code></pre>`
+ }}</code></pre>
+<!-- panel:m06-stop -->
+<div class="callout key"><div class="callout-label">When the coordinator should stop</div><ul style="margin:0;padding-left:18px"><li><strong>The loop.</strong> evaluate the results against the question, re-delegate the gaps, then synthesize again.</li><li><strong>The stop rule.</strong> stop when coverage is good enough, or when a round limit is reached. Without a limit, a coordinator can keep finding “one more angle” for hours.</li></ul></div>
+`
     },
     {
       kind: "quiz",

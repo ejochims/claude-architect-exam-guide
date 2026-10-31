@@ -51,6 +51,9 @@ options = ClaudeAgentOptions(hooks={
 <!-- panel:m03-mechanisms -->
 <h3>Where each mechanism lives</h3>
 <div class="table-wrap"><table><thead><tr><th>Mechanism</th><th>Where it's coded</th><th>What it does</th><th>Use when</th></tr></thead><tbody><tr><td>Prerequisite gate</td><td>Your tool code or loop, checking session state</td><td>Refuses a call until an earlier step succeeded, and says what to do first</td><td>Steps must happen in order (verify, then refund)</td></tr><tr><td><code>PreToolUse</code> hook: deny</td><td>A hook that runs before the call</td><td>Stops the call, with a reason the agent can act on</td><td>An action must never happen (over a limit, a protected branch)</td></tr><tr><td><code>PreToolUse</code> hook: rewrite input</td><td>The same hook, returning <code>updatedInput</code></td><td>Changes the call's input, for example adding a required field</td><td>Every call needs a fixed field or format</td></tr><tr><td><code>PostToolUse</code> hook</td><td>A hook that runs after the call</td><td>Changes the result before the model reasons over it</td><td>Results arrive in mixed formats or contain sensitive data</td></tr><tr><td>Prompt instruction</td><td>System prompt or CLAUDE.md</td><td>Asks; works most of the time</td><td>Soft preferences where an occasional miss is cheap</td></tr></tbody></table></div>
+
+<!-- panel:m03-tool-names -->
+<div class="callout key"><div class="callout-label">Tool names in hooks</div><ul style="margin:0;padding-left:18px"><li><strong>Built-in tools.</strong> use plain names, such as <code>Bash</code> or <code>Edit</code>.</li><li><strong>Your own tools.</strong> in the Agent SDK, custom tools are served through an MCP server, so their names are <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>. A hook's matcher must use that full name, or a pattern that matches it.</li></ul></div>
 `
     },
     {

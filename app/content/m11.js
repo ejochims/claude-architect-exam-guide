@@ -32,7 +32,10 @@ window.LESSONS.m11 = {
 <li><strong><code>@import</code> keeps memory modular.</strong> Each package's <code>CLAUDE.md</code> can import only the standards files relevant to it, e.g. <code>@docs/standards/api.md</code>.</li>
 <li><strong><code>/memory</code></strong> shows which memory files are loaded. It's the first diagnostic when behavior is inconsistent.</li>
 <li><strong>Split a monolithic <code>CLAUDE.md</code></strong> into topic files in <code>.claude/rules/</code>, such as <code>testing.md</code>, <code>api-conventions.md</code> and <code>deployment.md</code>.</li>
-</ul>`
+</ul>
+<!-- panel:m11-glob -->
+<div class="callout key"><div class="callout-label">Globs</div><ul style="margin:0;padding-left:18px"><li><strong>What a glob is.</strong> a file-name pattern. <code>*</code> matches any characters within a name, and <code>**</code> matches any number of folders, so <code>**/*.test.ts</code> means every <code>.test.ts</code> file anywhere in the repository.</li></ul></div>
+`
     },
     {
       kind: "read",
@@ -63,6 +66,11 @@ argument-hint: <span class="s">"[module-path]"</span>
 <div class="callout today"><div class="callout-label">Real world today</div><p>Claude Code has since merged custom commands into skills (both create <code>/name</code>, and <code>.claude/commands/</code> still works). <code>allowed-tools</code> now <em>pre-approves</em> the listed tools for the turn, rather than restricting. <code>argument-hint</code> only shows a hint in autocomplete; it doesn't stop a skill being invoked without the argument. A personal skill with the same name as a project skill now takes precedence for you. Answer in the exam's terms. See <a href="#today">Exam vs. today</a>.</p></div>
 <!-- panel:m11-commands-why -->
 <div class="callout key"><div class="callout-label">Why slash commands exist</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> people retyped the same long prompts (a review checklist, release notes), each a little different, so results varied.</li><li><strong>What it is.</strong> a Markdown file whose body is the prompt. The file name becomes <code>/name</code>, and <code>$ARGUMENTS</code> inserts whatever you type after it.</li><li><strong>Where it lives.</strong> <code>.claude/commands/</code> is shared through the repository; <code>~/.claude/commands/</code> is only yours.</li><li><strong>When to use it, and its neighbors.</strong> a command or skill runs on demand; CLAUDE.md is always loaded; a path rule loads for matching files; a hook runs every time, guaranteed.</li><li><strong>On the exam.</strong> “the whole team should get it” means the project location; “only me” means the user location. (Today commands are merged into skills, which work the same way and can also be used by Claude automatically.)</li></ul></div>
+
+<!-- panel:m11-compare -->
+<h3>Five ways to give Claude standing instructions</h3>
+<div class="table-wrap"><table><thead><tr><th>Mechanism</th><th>Loaded or run when</th><th>Who triggers it</th><th>Use for</th></tr></thead><tbody><tr><td>CLAUDE.md</td><td>Every session</td><td>Automatic</td><td>Conventions that always apply</td></tr><tr><td>Rule with <code>paths</code></td><td>When Claude works on matching files</td><td>Automatic</td><td>Conventions for one file type, wherever it lives</td></tr><tr><td>Slash command</td><td>When you type <code>/name</code></td><td>You</td><td>A saved prompt you run on demand</td></tr><tr><td>Skill</td><td>When invoked, or when Claude judges it relevant</td><td>You or Claude</td><td>A procedure with its own instructions, tools or supporting files</td></tr><tr><td>MCP prompt</td><td>When you pick it</td><td>You</td><td>A prompt template that an MCP server provides</td></tr></tbody></table></div>
+<p>A hook is different from all five: it isn't instructions to the model. It's your code, and it runs every time.</p>
 `
     },
     {
@@ -100,7 +108,11 @@ argument-hint: <span class="s">"[module-path]"</span>
 <li><strong>Test-driven iteration.</strong> Write tests (expected behavior, edge cases, performance) first, then iterate by sharing the failures.</li>
 <li><strong>The interview pattern.</strong> In an unfamiliar domain, have Claude ask you questions first, to surface things like cache invalidation or failure modes before it builds.</li>
 <li><strong>Batch interacting issues.</strong> If fixes interact, describe them together in one detailed message. If they're independent, fix them one after another.</li>
-</ul>`
+</ul>
+<!-- panel:m11-refine -->
+<h3>Iterative refinement, compared</h3>
+<div class="table-wrap"><table><thead><tr><th>Technique</th><th>Use when</th><th>Example</th></tr></thead><tbody><tr><td>Concrete input/output examples</td><td>Prose descriptions keep being misread</td><td>What “short date” means: 03/04/25 → 2025-04-03</td></tr><tr><td>Tests first, then iterate</td><td>The expected behavior can be pinned down as tests</td><td>A refactor must keep 40 known outputs identical</td></tr><tr><td>Interview (Claude asks you questions)</td><td>You don't know the requirements yet</td><td>A caching layer in an unfamiliar domain</td></tr><tr><td>All problems in one message</td><td>The problems interact</td><td>Bugs that share one validation function</td></tr><tr><td>One problem per message</td><td>The problems are independent</td><td>Unrelated fixes in different modules</td></tr></tbody></table></div>
+`
     },
     {
       kind: "widget",

@@ -300,3 +300,34 @@ Verified unchanged:
   - the remaining minor items in `audit/work/novice-fresh-2026-10-31.json`.
 
 **Guide.** The 52 open S3 items are closed: 36 reworded, 16 accepted as guidance.
+
+## Batch 14: remaining walkthrough and Why-test items (2026-10-31)
+
+`scripts/audit/fix-walkthrough.py` applies 16 text edits and 15 panels, and can be re-run safely.
+
+**Edits:**
+- F1: attention and “lost in the middle” explained.
+- F3: domains named, not just numbered.
+- Module 1: client vs. server tools.
+- Module 2: why more tools hurt selection.
+- Module 4: “coordinator” defined where it's first used.
+- Module 8: extended thinking defined.
+- Module 9: the claim that tool use “eliminates” syntax errors made precise; schema comments changed to `#`.
+- Module 13: the frustrated-customer card no longer contradicts “honor a request for a human immediately.”
+- Lab 3: the batch call now forces the tool, and strict mode's `additionalProperties` requirement is noted.
+
+**Panels:**
+- Module 2: the Edit fallback; Grep vs. Glob.
+- Module 3: tool names in hook matchers.
+- Module 4: retry with backoff.
+- Module 5: user vs. local scope, `npx -y`, `${VAR:-default}`; why there are three scopes.
+- Module 6: when a coordinator should stop.
+- Module 7: surviving a crash with a manifest; the cost of `/compact`.
+- Module 8: false positive, precision and severity; how to run an independent reviewer.
+- Module 11: what a glob is; five ways to give Claude standing instructions; iterative refinement compared.
+- Module 12: CI terms; naming sessions (`claude -n`) and worktrees.
+
+**Reviewed, no change:**
+- **m06:0 exam-vs-today notes.** They're already in one “Real world today” box plus one “Not to confuse” bullet.
+- **m00:0 and m14:0.** False positives: the scenario and domain lists and the trap spotter are rendered by embeds and widgets.
+- **l01:2.** The `&quot;` entities are an artifact of the text extraction; browsers render them as quotes.
