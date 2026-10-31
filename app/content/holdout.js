@@ -1,54 +1,55 @@
 // Sequestered Readiness Check items: never shown in lessons, drills or mocks. Take the check once, cold.
+// Questions with a `family` share their options with a practice twin in bank.js that keys a different option.
 window.BANK = window.BANK || [];
 window.BANK.push(
   {
-    id: "h1-1", ts: "1.1", scenario: 1, holdout: true,
-    stem: "When any tool returns an error, the support agent's loop exits and the agent replies “I couldn't complete that.” In many of these cases an alternative tool could have answered the request. What should change?",
+    id: "h1-1", ts: "1.1", scenario: 1, holdout: true, family: "F01",
+    stem: "Some support replies stop mid-sentence. Logs show those responses ended with <code>stop_reason: \"max_tokens\"</code>, and the loop returns whatever text it has whenever the stop reason isn't <code>tool_use</code>. What should change?",
     options: [
-      { t: "Retry the failed tool three times in code with backoff, then exit if it still fails.", trap: "T6", why: "Helps transient errors only; Claude still never sees the failure or gets to choose another path." },
-      { t: "Tell Claude in the system prompt to try another tool whenever one fails.", trap: "T1", why: "Claude never sees the error, because the loop exits first." },
-      { t: "Return the error to Claude as a <code>tool_result</code> with <code>is_error</code> set, and keep the loop running.", ok: true, why: "Errors are information: send them back so the model can reason about the next step." },
-      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> after an error so Claude must call some other tool.", why: "Forces a call without telling Claude what failed or why." }
+      { t: "Decide when to stop by checking <code>stop_reason</code>, not by parsing the reply text.", why: "Right when the loop guesses completion from phrases in the text. This loop already reads <code>stop_reason</code>; it just treats truncation as done." },
+      { t: "Return a tool failure to Claude as a <code>tool_result</code> with <code>is_error</code> set, and keep looping.", why: "Right when a tool error ends the loop. No tool failed here; the reply was cut off." },
+      { t: "Cap the loop at a set number of iterations and hand off to a human when it's reached.", why: "Right when the agent can loop forever. This agent stops too early, not too late." },
+      { t: "Raise <code>max_tokens</code>, and continue the turn when <code>stop_reason</code> is <code>max_tokens</code>.", ok: true, why: "<code>max_tokens</code> means the reply was truncated, not finished. Give it room and continue instead of returning a partial answer." }
     ]
   },
   {
-    id: "h1-2", ts: "1.4", scenario: 1, holdout: true,
-    stem: "A code gate blocks account changes until <code>verify_identity</code> succeeds. Customers now complain they're asked to verify three times in one chat, because the gate checks only the latest turn. Best fix?",
+    id: "h1-2", ts: "1.4", scenario: 1, holdout: true, family: "F02",
+    stem: "Escalations reach human agents as “customer needs help with a refund.” The humans re-ask for the order number, the verification result and what the agent already tried, so customers repeat themselves. What fixes this?",
     options: [
-      { t: "Track verification in session state and have the gate check it.", ok: true, why: "Keep the guarantee in code, and give the gate the state it needs to decide." },
-      { t: "Remove the gate for customers who have chatted before, since they're probably verified.", why: "“Probably” replaces a guarantee with a guess." },
-      { t: "Tell the agent to remember when a customer has already verified in this conversation.", trap: "T9", why: "The gate, not the agent's memory, is what blocks the call." },
-      { t: "Add few-shot examples where the agent skips re-verification for customers it already verified.", trap: "T1", why: "The gate would still block the call; prompt changes don't alter what code checks." }
+      { t: "Block the refund tool in code until <code>verify_identity</code> has succeeded this session.", why: "Right when refunds can happen before verification. The workflow order is fine here; the handoff is thin." },
+      { t: "Add few-shot examples showing how the agent should word its identity-check request.", why: "Right when the agent asks for verification in confusing ways. The problem here is what the human receives." },
+      { t: "Escalate with a structured summary: customer ID, issue, steps taken, what's needed.", ok: true, why: "The human starts without the conversation, so the handoff must carry the facts and progress explicitly." },
+      { t: "Record completed steps in session state so later checks don't ask for them again.", why: "Right when the agent itself re-asks for completed steps. Here the humans lack the information." }
     ]
   },
   {
-    id: "h1-3", ts: "1.5", scenario: 1, holdout: true,
-    stem: "A <code>PostToolUse</code> hook removes card numbers from tool results so the agent can't repeat them. Now the agent can't confirm “the card ending 4242” when customers ask which card was charged. Best fix?",
+    id: "h1-3", ts: "1.5", scenario: 1, holdout: true, family: "F03",
+    stem: "Order data comes from three backends: one returns Unix timestamps, one “MM/DD/YY”, one ISO 8601. The agent sometimes gets return-window eligibility wrong when comparing dates across them. Which addition fits best?",
     options: [
-      { t: "Remove the hook and instruct the agent never to repeat full card numbers.", trap: "T1", why: "Swaps a guarantee for a probabilistic instruction on a compliance rule." },
-      { t: "Change the hook to mask numbers to the last four digits instead of removing them.", ok: true, why: "Normalize to exactly what's safe and needed; the guarantee stays in code." },
-      { t: "Skip the hook for customers who have passed identity verification in this session.", why: "Verification doesn't make it acceptable for the model to hold full card numbers." },
-      { t: "Move the redaction into a <code>PreToolUse</code> hook so it runs before the lookup.", why: "Card numbers arrive in the result; a pre-call hook runs before they exist." }
+      { t: "A <code>PreToolUse</code> hook that blocks refund calls above the approval limit.", why: "Right when an action must be stopped before it runs. The problem here is inconsistent data coming back." },
+      { t: "A <code>PostToolUse</code> hook that masks card numbers to the last four digits.", why: "Right when sensitive values appear in results. The dates here are safe; they're just inconsistent." },
+      { t: "A <code>PostToolUse</code> hook that converts each backend's dates to ISO 8601.", ok: true, why: "Normalize tool results to one format before the model reasons over them." },
+      { t: "A system-prompt line asking the agent to suggest the cheaper shipping option first.", why: "Right for a soft preference where an occasional miss is fine. Date comparison needs consistent data." }
     ]
   },
   {
-    id: "h1-4", ts: "1.6", scenario: 1, holdout: true,
-    stem: "Customers often send one message with three or four requests. The agent resolves the first and forgets the rest, so customers write back. What design helps most?",
+    id: "h1-4", ts: "1.6", scenario: 1, holdout: true, family: "F04",
+    stem: "Customers often send one message with three or four requests, each needing a quick lookup on the same account. The agent resolves the first and forgets the rest. What design fits best?",
     options: [
-      { t: "Ask customers to send one request per message so each can be handled separately.", why: "Pushes the agent's job onto the customer." },
-      { t: "Escalate any message containing more than two requests to a human agent.", why: "Several simple requests aren't a reason to escalate." },
-      { t: "Move to a larger model that tracks several requests at once more reliably.", trap: "T3", why: "Without a list to work from, any model can drop items." },
-      { t: "Extract a checklist of the requests and track every one to a single combined reply.", ok: true, why: "Decompose the message into tracked items, then synthesize one answer." }
+      { t: "Extract every request into a checklist first, then resolve each one in turn.", ok: true, why: "Make every request explicit up front so none is dropped, then work through them with the shared account context." },
+      { t: "Run a fixed sequence: classify, look up the order, then draft the reply.", why: "Right when every ticket follows the same stages. These messages vary in how many requests they hold." },
+      { t: "Let the agent pick each next step from what the previous tool returned.", why: "Right when the path depends on findings. Here the problem is dropping known requests." },
+      { t: "Give each request to its own subagent and run them in parallel.", why: "Right for heavy, independent work. These are quick lookups on one account, so subagents add overhead and split shared context." }
     ]
   },
   {
-    id: "h1-5", ts: "1.4", scenario: 1, holdout: true,
-    stem: "Returns require an RMA and then a shipping label. In about 4% of cases the agent creates the RMA, tells the customer they're all set, and ends the conversation without sending the label. Most reliable fix?",
+    id: "h1-5", ts: "1.4", scenario: 1, holdout: true, family: "F05",
+    stem: "Customers who type “let me talk to a person” are told “I can help with that myself” and kept with the agent. Complaints are rising, although the agent often could have solved the issue. What should change?",
     options: [
-      { t: "Have <code>close_case</code> refuse while any required step such as the label is incomplete.", ok: true, why: "Enforce the workflow's completion condition in code and tell the agent what's left." },
-      { t: "Add a bold reminder to the system prompt that every RMA must be followed by a label.", trap: "T1", why: "Lowers the 4% but can't guarantee it." },
-      { t: "Combine RMA creation and label sending into one tool so they can't be separated.", why: "Works only if the label never needs separate handling; it removes the step the agent may need to retry alone." },
-      { t: "Send a follow-up email with the label automatically 24 hours after every RMA.", why: "Delays the label for everyone to patch a 4% failure." }
+      { t: "Escalate with a structured summary: customer ID, issue, steps taken, what's needed.", why: "Right when the human lacks context after a handoff. Here the handoff never happens." },
+      { t: "Require a code-checked supervisor approval before any account closure runs.", why: "Right for an irreversible action needing sign-off. Nothing irreversible is involved here." },
+      { t: "Keep verified facts in a case-facts block that is re-sent every turn.", why: "Right when facts get lost over a long chat. Here the customer's request is being overridden." },
+      { t: "Hand the conversation to a human when the customer explicitly asks for one.", ok: true, why: "An explicit request for a human is a reason to hand off, even when the agent could solve it." }
     ]
   },
   {
@@ -132,13 +133,13 @@ window.BANK.push(
     ]
   },
   {
-    id: "h2-4", ts: "1.5", scenario: 2, holdout: true,
-    stem: "Files under <code>**/__generated__/**</code> are regenerated from schemas and must never be edited by hand. Claude still edits them sometimes when fixing type errors. What's the right mechanism?",
+    id: "h2-4", ts: "1.5", scenario: 2, holdout: true, family: "F06",
+    stem: "The test suite prints thousands of lines per run. After a few runs Claude's context is full of passing-test output and it loses track of the task. Which addition fits best?",
     options: [
-      { t: "A path-scoped rule for <code>**/__generated__/**</code> saying “never edit these files.”", trap: "T1", why: "Rules convey conventions; they don't guarantee anything." },
-      { t: "Add the generated folders to <code>.gitignore</code> so Claude can't see them.", why: "Claude still needs to read generated types, and ignoring doesn't block edits." },
-      { t: "Regenerate the files after every session to overwrite any manual edits.", why: "Erases the symptom but not the wasted work or confusion." },
-      { t: "A <code>PreToolUse</code> hook that denies edits to those paths.", ok: true, why: "Interception guarantees the rule and redirects the agent to the right fix." }
+      { t: "A <code>PreToolUse</code> hook that blocks Bash commands touching the production config.", why: "Right when an action must never run. Nothing dangerous is happening here." },
+      { t: "A <code>PostToolUse</code> hook that runs the formatter on every file Claude edits.", why: "Right when edits drift from the formatter. The problem here is bloated tool output." },
+      { t: "A CLAUDE.md note describing the team's preferred commit-message style.", why: "Right for a convention where occasional drift is cheap. It doesn't change what tools return." },
+      { t: "A <code>PostToolUse</code> hook that trims test output to the failures before Claude sees it.", ok: true, why: "Trim tool results to what matters before they reach the model, so they stop crowding the context." }
     ]
   },
   {
@@ -192,63 +193,63 @@ window.BANK.push(
     ]
   },
   {
-    id: "h2-10", ts: "1.6", scenario: 2, holdout: true,
-    stem: "A developer asks Claude Code to “improve the performance of the app.” There's no profiling data, and the codebase is large. How should the work be decomposed?",
+    id: "h2-10", ts: "1.6", scenario: 2, holdout: true, family: "F07",
+    stem: "Claude reviews a 40-file pull request in one pass. It misses problems in the later files and contradicts itself about the same pattern in different files. What approach fits best?",
     options: [
-      { t: "Profile to find hotspots first, then plan targeted fixes.", ok: true, why: "Open-ended goals need investigation first, then a plan that adapts to what's found." },
-      { t: "Apply a standard checklist of optimizations to every module, in order.", why: "A fixed pipeline spends effort evenly where the cost isn't even." },
-      { t: "Spawn one subagent per directory to optimize each in parallel.", why: "Parallel effort without knowing where the time goes." },
-      { t: "Ask the developer which functions are slow before doing anything.", why: "The agent can measure this itself." }
+      { t: "Have Claude write a plan, then implement it step by step against that plan.", why: "Right for building a known multi-step change. This is a review whose attention is spread too thin." },
+      { t: "Review one file per pass, then run a final pass over cross-file consistency.", ok: true, why: "Per-file passes keep attention focused, and a separate pass catches what crosses files." },
+      { t: "Make the change directly in one pass, because it's small and well understood.", why: "Right for a small, clear change. A 40-file review is neither." },
+      { t: "Explore the codebase first, then decide the next steps from what turns up.", why: "Right when you don't yet know where to look. Here the files to review are known." }
     ]
   },
   {
-    id: "h3-1", ts: "1.2", scenario: 3, holdout: true,
-    stem: "Three subagents research distinct subtopics, but each cites the same landmark study. The final report lists it as three separate findings, overstating the evidence. What should the coordinator do?",
+    id: "h3-1", ts: "1.2", scenario: 3, holdout: true, family: "F08",
+    stem: "The coordinator's initial split looks sound, but reports still miss things that only become visible once results arrive, such as a major study that several sources cite but nobody searched for. What change fits best?",
     options: [
-      { t: "Tell the synthesis agent to avoid repeating findings in the report.", trap: "T9", why: "Without merged records, synthesis can't tell repeats from corroboration." },
-      { t: "Repartition the subtopics so only one subagent can find that study.", why: "The partition is fine; important studies legitimately appear in several subtopics." },
-      { t: "Merge findings by claim, keeping all of the subtopics' citations.", ok: true, why: "Deduplicate by claim while preserving provenance, so evidence isn't double-counted." },
-      { t: "Drop the study from two of the three subagents' results.", why: "Loses the link between the study and those subtopics." }
+      { t: "Have the coordinator split the topic into distinct subtopics before delegating.", why: "Right when the first split leaves parts of the question out. The split here is fine; the gaps appear later." },
+      { t: "Have the coordinator check results against the question and re-delegate the gaps.", ok: true, why: "Evaluate what came back and send follow-up work for the gaps, so coverage improves as findings arrive." },
+      { t: "Route all subagent output through the coordinator, not directly between subagents.", why: "Right when subagents talk to each other and coordination breaks. Here the issue is coverage." },
+      { t: "Give each subagent only the tools that its role needs.", why: "Right when subagents misuse each other's tools. Here the issue is coverage." }
     ]
   },
   {
-    id: "h3-2", ts: "1.3", scenario: 3, holdout: true,
-    stem: "Subagents return prose summaries. The synthesis agent can't tell which claims come from peer-reviewed studies and which from blog posts, so it weights them equally. What should change?",
+    id: "h3-2", ts: "1.3", scenario: 3, holdout: true, family: "F09",
+    stem: "The coordinator merges subagent reports, but each report is free prose. The final report can't say which source supports which claim, or how recent it is. What change fits best?",
     options: [
-      { t: "Ask the synthesis agent to judge each claim's source quality from the wording of the summaries.", why: "The source type isn't in the summaries to judge." },
-      { t: "Have subagents return structured records for each claim, including source type, publication and date.", ok: true, why: "Pass the metadata downstream agents need to weigh evidence." },
-      { t: "Restrict subagents to peer-reviewed sources only.", why: "Throws away legitimate sources instead of labeling them." },
-      { t: "Give the synthesis agent web search so it can look up each source's quality.", trap: "T5", why: "Redoes research the subagents already did." }
+      { t: "Put the earlier findings and their sources directly in the subagent's prompt.", why: "Right when a subagent never received the earlier results. Here the results arrive; their sources get lost." },
+      { t: "Have subagents return structured results: claim, source URL and date for each.", ok: true, why: "Separating each claim from its source metadata lets the coordinator keep attribution through synthesis." },
+      { t: "Spawn the independent searches in the same turn so they run in parallel.", why: "Right when independent work runs one after another. Here the issue is attribution." },
+      { t: "Write the subagent's prompt as goals and quality criteria, not fixed steps.", why: "Right when rigid steps stop subagents adapting. Here the issue is the shape of what comes back." }
     ]
   },
   {
-    id: "h3-3", ts: "1.6", scenario: 3, holdout: true,
-    stem: "The research question is: “Compare AI regulation in the EU, the US and China across five dimensions: scope, enforcement, liability, transparency and timelines.” How should the coordinator decompose it?",
+    id: "h3-3", ts: "1.6", scenario: 3, holdout: true, family: "F10",
+    stem: "Most requests turn out to be quick factual questions that two or three searches answer. The multi-agent setup adds minutes of overhead and most of the cost. What design fits these requests best?",
     options: [
-      { t: "One subagent per region, all using the same template.", ok: true, why: "Partition along the natural boundary and standardize outputs for synthesis." },
-      { t: "Fifteen subagents, one for each region and dimension pair.", why: "Fragmented; each region's dimensions interrelate, and coordination overhead balloons." },
-      { t: "One subagent that researches everything, to keep the comparison consistent.", why: "Loses parallelism and floods one context." },
-      { t: "One subagent per dimension, each choosing its own structure for the three regions.", why: "Without a shared template the regions aren't comparable, and each subagent must master three legal systems." }
+      { t: "Use a fixed pipeline: search, then analyze, then synthesize, in that order.", why: "Right when every request runs through the same stages. Three stages are still overhead for a two-search answer." },
+      { t: "Let the coordinator choose the next subagent based on what the last one found.", why: "Right when findings change what to do next. These answers don't need that." },
+      { t: "Run the searches for independent subtopics in parallel subagents.", why: "Right when there are several independent subtopics. A quick factual question has one." },
+      { t: "Handle the whole request in a single agent with one context.", ok: true, why: "A small task doesn't need delegation; one agent is faster and cheaper here." }
     ]
   },
   {
-    id: "h3-4", ts: "1.2", scenario: 3, holdout: true,
-    stem: "The coordinator always stops after exactly three research rounds. Some reports still have clear gaps, and simple topics waste rounds. What's the better stopping rule?",
+    id: "h3-4", ts: "1.2", scenario: 3, holdout: true, family: "F11",
+    stem: "Some reports take hours. The coordinator keeps finding “one more angle” and re-delegating long after the question has been answered well. What change fits best?",
     options: [
-      { t: "Raise the fixed count to five rounds so more topics are fully covered.", why: "Still ignores whether coverage is actually complete." },
-      { t: "Check coverage against the brief after each round and stop once it's met.", ok: true, why: "Evaluate output against criteria; iterate only where there are gaps." },
-      { t: "Stop when the subagents stop finding new sources.", why: "New sources can dry up long before the brief is covered." },
-      { t: "Ask the synthesis agent after each round whether the report feels complete.", why: "A vague judgment without criteria." }
+      { t: "Have subagents report to the coordinator, which decides what to pass on.", why: "Right when subagents talk directly and the coordinator loses track. Here the coordinator is the one that won't stop." },
+      { t: "Have the coordinator check each claim's source before including it.", why: "Right when unsupported claims reach the report. Here the problem is open-ended looping." },
+      { t: "Send a failed subtopic back to a subagent with a narrower query.", why: "Right when a subtopic came back empty. Here everything is answered; the coordinator just keeps going." },
+      { t: "Give the coordinator a limit on research rounds before it must synthesize.", ok: true, why: "A bound on rounds forces synthesis once coverage is good enough." }
     ]
   },
   {
-    id: "h3-5", ts: "1.3", scenario: 3, holdout: true,
-    stem: "The coordinator correctly spawns five subagents in one response, but gives each the same generic instruction plus a topic name. Outputs vary wildly in depth and format. What should it change?",
+    id: "h3-5", ts: "1.3", scenario: 3, holdout: true, family: "F12",
+    stem: "The coordinator's prompt tells it to delegate, but it does all the searching itself. Logs show the subagent-spawning tool never appears among its available tools. What change fits best?",
     options: [
-      { t: "Spawn them one at a time so each can be checked before the next starts.", why: "Loses parallelism without fixing the vague instructions." },
-      { t: "Give each subagent its own goal and scope plus a required output format.", ok: true, why: "Clear, task-specific prompts make parallel results consistent and usable." },
-      { t: "Add “be thorough and consistent” to the shared instruction.", trap: "T9", why: "Adds no definition of depth or format." },
-      { t: "Normalize the outputs afterwards with a formatting step.", trap: "T6", why: "Can't add depth that wasn't researched." }
+      { t: "Add the Task (Agent) tool to the coordinator's <code>allowedTools</code>.", ok: true, why: "The coordinator can only spawn subagents if the Task tool (now called Agent) is available to it." },
+      { t: "Include the earlier agent's complete findings in the subagent's prompt.", why: "Right when a subagent lacks earlier results. Here no subagent is ever spawned." },
+      { t: "Define each subagent with its own description, prompt and tool list.", why: "Right when subagents are generic or overlap. Here none can be spawned at all." },
+      { t: "Spawn the subagents in the same response so they run in parallel.", why: "Right when subagents run one after another. Here none run." }
     ]
   },
   {
@@ -372,33 +373,33 @@ window.BANK.push(
     ]
   },
   {
-    id: "h4-8", ts: "1.5", scenario: 4, holdout: true,
-    stem: "A developer-productivity agent occasionally runs <code>rm -rf</code> on build directories outside the project workspace while cleaning up. What's the right control?",
+    id: "h4-8", ts: "1.5", scenario: 4, holdout: true, family: "F13",
+    stem: "Every ticket Claude files through the tracker tool must carry the “eng-tools” label. Claude leaves it off about one time in eight, even with an instruction in CLAUDE.md. What fits best?",
     options: [
-      { t: "A rule in CLAUDE.md that limits cleanup to the workspace directory.", trap: "T1", why: "An irreversible action needs a guarantee." },
-      { t: "A <code>PreToolUse</code> hook that denies <code>rm</code> commands targeting paths outside the workspace.", ok: true, why: "Intercept the call and enforce the boundary every time." },
-      { t: "Remove Bash from the agent, so it can't delete anything.", why: "Blocks the legitimate shell work the agent needs." },
-      { t: "Back up build directories before each session so deletions can be undone.", why: "Recovers after the damage instead of preventing it." }
+      { t: "A <code>PreToolUse</code> hook that denies file writes outside the project directory.", why: "Right when an action must be blocked. Here the action is fine; its input needs a fix." },
+      { t: "A <code>PostToolUse</code> hook that maps the internal API's responses onto one schema.", why: "Right when responses vary in shape. Here the problem is what goes in, not what comes back." },
+      { t: "A <code>PreToolUse</code> hook that adds the required team label to the tool's input.", ok: true, why: "A pre-call hook can modify the input, so the label is there on every call." },
+      { t: "A skill containing the team's release steps, which developers run on demand.", why: "Right for an on-demand workflow. A required field needs to be enforced on every call." }
     ]
   },
   {
-    id: "h4-9", ts: "1.3", scenario: 4, holdout: true,
-    stem: "An explorer subagent's summaries say things like “the auth logic is in the middleware layer,” with no file paths. The coordinator can't act on them without re-searching. What should change?",
+    id: "h4-9", ts: "1.3", scenario: 4, holdout: true, family: "F14",
+    stem: "After a long discussion about the CSV parser, a developer has Claude hand “write tests for the parser we discussed” to a subagent. The subagent writes tests for a different parser. What fixes this?",
     options: [
-      { t: "Specify an output format with the file path and line range of each finding.", ok: true, why: "Define the structured output the coordinator needs to act on." },
-      { t: "Give the coordinator the same search tools so it can find the files itself.", trap: "T5", why: "Duplicates the explorer's work instead of fixing its output." },
-      { t: "Tell the subagent to be more specific in its summaries.", trap: "T9", why: "Vague; doesn't say what “specific” means." },
-      { t: "Raise the subagent's token limit so it has room for more detail.", why: "Room for detail doesn't define which detail is required." }
+      { t: "Use the Explore subagent to search the codebase and return a summary.", why: "Right when exploration floods the main context. Here the subagent lacks the discussion." },
+      { t: "Pass the relevant file paths and the decisions so far in the subagent's prompt.", ok: true, why: "A subagent starts without the conversation, so the specifics must be in its prompt." },
+      { t: "Give the subagent read-only tools so it can't modify anything.", why: "Right when the subagent shouldn't change files. Here it needs to write tests." },
+      { t: "Ask the subagent to return its findings in a fixed structured format.", why: "Right when the caller must parse results reliably. Here the subagent worked on the wrong target." }
     ]
   },
   {
-    id: "h4-10", ts: "1.1", scenario: 4, holdout: true,
-    stem: "An agent built on the raw API runs two tools in parallel and returns both results as one plain-text user message. Claude sometimes attributes the first tool's result to the second. Fix?",
+    id: "h4-10", ts: "1.1", scenario: 4, holdout: true, family: "F15",
+    stem: "Claude asks to read two files in one response. The internal tool's loop runs only the first request, and the next API call is rejected. What should change?",
     options: [
-      { t: "Label each result in the text with the tool's name so Claude can tell them apart.", why: "Better than nothing, but the protocol has a structured way to link results." },
-      { t: "Return each result as its own <code>tool_result</code> block with the matching <code>tool_use_id</code>.", ok: true, why: "tool_use_id ties each result to the call that requested it." },
-      { t: "Run the tools one at a time so only one result comes back per turn.", why: "Gives up parallelism to work around a formatting mistake." },
-      { t: "Ask Claude to call at most one tool per response.", trap: "T1", why: "Restricts the model instead of returning results correctly." }
+      { t: "Return a tool's error to Claude with <code>is_error</code> set so it can try another approach.", why: "Right when a tool failure ends the loop. Here a requested call never ran." },
+      { t: "Check <code>stop_reason</code> to decide whether to run tools or return the answer.", why: "Right when the loop guesses completion from text. Here it mishandles a turn with two calls." },
+      { t: "Run every <code>tool_use</code> block in a response and return all the results together.", ok: true, why: "Each <code>tool_use</code> needs a matching <code>tool_result</code>; return them all in the next user message." },
+      { t: "Send the full message history, including tool results, with each request.", why: "Right when earlier turns go missing. Here the current turn's second call is the problem." }
     ]
   },
   {
@@ -482,23 +483,23 @@ window.BANK.push(
     ]
   },
   {
-    id: "h5-9", ts: "1.4", scenario: 5, holdout: true,
-    stem: "A CI agent must never merge a PR without human approval. After posting “LGTM” in a review, it sometimes calls <code>merge_pr</code>. What's the right fix?",
+    id: "h5-9", ts: "1.4", scenario: 5, holdout: true, family: "F16",
+    stem: "Policy says no AI review may run on code that hasn't passed the secret scanner. The workflow sometimes starts both jobs at once, and the review occasionally reads a leaked key. What fixes this?",
     options: [
-      { t: "Make <code>merge_pr</code> refuse without a recorded approval.", ok: true, why: "Enforce the precondition in code at the action itself." },
-      { t: "Add to the agent's prompt that only humans may merge.", trap: "T1", why: "Probabilistic for an action that must never happen." },
-      { t: "Stop the agent from posting “LGTM,” which seems to trigger the merge.", why: "Treats a symptom; the agent can still merge." },
-      { t: "Review the merge log each week and revert unapproved merges.", why: "Undoes the damage after it's done." }
+      { t: "Have the pipeline block the merge in code when the review reports a blocking issue.", why: "Right when findings are ignored at merge time. The problem here is what runs first." },
+      { t: "Add explicit criteria to the review prompt for what counts as blocking.", why: "Right when the review misjudges severity. Here the order of steps is wrong." },
+      { t: "Make the secret scan a required step that must pass before the review job starts.", ok: true, why: "A required prerequisite must be enforced in the pipeline, not left to timing." },
+      { t: "Post findings as inline comments that cite the file and line.", why: "Right when findings are hard to act on. Here the review shouldn't run yet." }
     ]
   },
   {
-    id: "h5-10", ts: "1.6", scenario: 5, holdout: true,
-    stem: "A CI agent must upgrade a framework across a monorepo of 12 interdependent packages. Earlier attempts upgraded packages in alphabetical order, and builds broke midway. How should it be decomposed?",
+    id: "h5-10", ts: "1.6", scenario: 5, holdout: true, family: "F17",
+    stem: "Most pull requests touch two or three files. The multi-pass review takes six minutes each, single-pass reviews of diffs this size have been accurate, and the team wants fast feedback. What fits best?",
     options: [
-      { t: "Upgrade in dependency order from leaf packages up and verify each before its dependents.", ok: true, why: "Decomposition should follow real dependencies, with checks between steps." },
-      { t: "Upgrade all 12 packages at once, then fix whatever breaks.", why: "Every failure arrives at once and tangled." },
-      { t: "Upgrade the most-used package first, since it has the biggest impact.", why: "The most-used package depends on others that would break." },
-      { t: "Run 12 parallel jobs, one per package.", why: "Interdependent packages can't be upgraded independently." }
+      { t: "Review each changed file in its own pass, then one pass on cross-file interactions.", why: "Right for large diffs where attention spreads thin. Small diffs don't need it." },
+      { t: "Review the whole diff in a single pass, with the PR description as context.", ok: true, why: "A small diff fits comfortably in one pass, which gives fast feedback without losing accuracy." },
+      { t: "Run separate passes for security, performance and style.", why: "Right when one concern crowds out the others. That hasn't happened at this size." },
+      { t: "Review only the files that changed since the last reviewed commit.", why: "Right when re-reviews repeat old findings. Here the problem is speed." }
     ]
   },
   {
