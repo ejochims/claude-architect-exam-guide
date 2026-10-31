@@ -1,0 +1,114 @@
+[
+ {
+  "id": "b4-3",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b4-4",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b4-6",
+  "answer": "C",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b4-8",
+  "answer": "B",
+  "confidence": 2,
+  "second": "C",
+  "note": "Same established pattern repeated per entity points to a fixed per-item sequence, but 'split the input into parts, process each, merge' (C) is defensible; the app never separates these two patterns."
+ },
+ {
+  "id": "b1-1",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "note": "Option B is a distractor; the app teaches a redirecting block reason but not 'pending status'."
+ },
+ {
+  "id": "b7-7",
+  "answer": "A",
+  "confidence": 2,
+  "second": "C",
+  "note": "Per-section passes then merge fits the 300-page problem, but parallel subagents (C) is defensible; the app does not teach this sectioning pattern."
+ },
+ {
+  "id": "b7-8",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-9",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-10",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-11",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-12",
+  "answer": "A",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-13",
+  "answer": "B",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-15",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "note": "Correct by elimination (A and B are about blocked calls and handoff); the app never teaches the pending-status idea."
+ },
+ {
+  "id": "b7-16",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-17",
+  "answer": "D",
+  "confidence": 3,
+  "second": "",
+  "note": ""
+ },
+ {
+  "id": "b7-18",
+  "answer": "B",
+  "confidence": 2,
+  "second": "C",
+  "note": "Rewriting the input to add the trailer is deterministic, but deny-and-explain (C) works and the app teaches only deny/redirect, not input rewriting."
+ }
+]

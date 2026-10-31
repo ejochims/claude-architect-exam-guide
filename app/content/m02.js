@@ -63,7 +63,10 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
 <span class="s">"tool_choice"</span>: {<span class="s">"type"</span>: <span class="s">"any"</span>}                               <span class="c"># must call a tool; Claude picks which</span>
 <span class="s">"tool_choice"</span>: {<span class="s">"type"</span>: <span class="s">"tool"</span>, <span class="s">"name"</span>: <span class="s">"extract_invoice"</span>}   <span class="c"># must call this one tool</span>
 <span class="s">"tool_choice"</span>: {<span class="s">"type"</span>: <span class="s">"none"</span>}                              <span class="c"># may not call tools this turn</span></code></pre>
-<div class="callout note"><div class="callout-label">Real world today</div><p>Newer models reject a forced choice (<code>any</code> or a named tool) in some configurations. Answer the exam with the framing above; see <a href="#today">Exam vs. today</a> for details.</p></div>`
+<div class="callout note"><div class="callout-label">Real world today</div><p>Newer models reject a forced choice (<code>any</code> or a named tool) in some configurations. Answer the exam with the framing above; see <a href="#today">Exam vs. today</a> for details.</p></div>
+<!-- panel:m02-production-rule -->
+<div class="callout key"><div class="callout-label">Exam answer vs. what you build</div><ul style="margin:0;padding-left:18px"><li><strong>On the exam.</strong> a forced <code>tool_choice</code> (<code>any</code> or a named tool) is the answer when a tool call must happen.</li><li><strong>When you build today.</strong> check whether your model accepts a forced choice. If it doesn't, use <code>auto</code> with clear instructions, and guarantee the output's shape with strict tools or structured outputs.</li><li><strong>Strict tool use.</strong> with <code>strict: true</code> on a tool, the API constrains Claude's tool input to your JSON Schema, so it always parses and matches. It doesn't make the values correct; Module 9 covers that.</li></ul></div>
+`
     },
     {
       kind: "widget",

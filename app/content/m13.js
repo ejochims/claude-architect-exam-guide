@@ -57,6 +57,9 @@ window.LESSONS.m13 = {
 <li><strong>Route the right items to people.</strong> Send low-confidence fields and ambiguous or contradictory source documents to reviewers first, so limited capacity goes where it matters.</li>
 </ul>
 <div class="callout note"><div class="callout-label">Confidence: when it's fine</div><p>Raw self-rated confidence as an <em>escalation trigger</em> is a trap. Field-level confidence <em>calibrated against labeled data</em> and used to <em>prioritize review</em> is good practice. The difference is calibration.</p></div>
+
+<!-- panel:m13-calibration -->
+<div class="callout key"><div class="callout-label">Calibration, worked (illustrative numbers)</div><ul style="margin:0;padding-left:18px"><li><strong>Label a sample.</strong> have people check 200 extracted fields by hand.</li><li><strong>Bucket by confidence.</strong> confidence 0.9 and above: 147 of 150 correct (98%); 0.8 to 0.9: 28 of 30 (93%); below 0.8: 12 of 20 (60%).</li><li><strong>Pick the threshold.</strong> if review must catch everything below 95% accuracy, route fields under 0.9 to people. Re-measure as documents change.</li><li><strong>Stratified sampling.</strong> sample separately inside each segment, such as document type or field, so rare segments are represented. One random sample is dominated by the common case and can hide a segment that fails badly.</li></ul></div>
 <!-- ex:m13-routing -->
 <h3>What a routed field looks like</h3>
 <p>Each extracted value carries its confidence and its source, so a reviewer can check it quickly:</p>

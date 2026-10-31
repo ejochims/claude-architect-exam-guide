@@ -30,7 +30,10 @@ window.LESSONS.m04 = {
 <tr><td>Business</td><td>Outside return window, over limit</td><td>Don't retry. Explain to the customer and offer alternatives or escalation</td></tr>
 <tr><td>Permission</td><td>Caller lacks access</td><td>Don't retry. Escalate or request access</td></tr>
 </tbody></table></div>
-<div class="callout key"><div class="callout-label">Empty is not an error</div><p>A search that ran and found nothing is a <strong>successful</strong> result with an empty list. A search that couldn't run is an <strong>error</strong>. Mixing them up either retries valid queries or reports outages as “no results.”</p></div>`
+<div class="callout key"><div class="callout-label">Empty is not an error</div><p>A search that ran and found nothing is a <strong>successful</strong> result with an empty list. A search that couldn't run is an <strong>error</strong>. Mixing them up either retries valid queries or reports outages as “no results.”</p></div>
+<!-- panel:m04-vocabulary -->
+<div class="callout key"><div class="callout-label">Which error fields are real</div><ul style="margin:0;padding-left:18px"><li><strong>Messages API.</strong> <code>is_error: true</code> on a <code>tool_result</code> block. Your code sets it.</li><li><strong>MCP.</strong> <code>isError: true</code> on a tool's result. The server sets it, and the client passes it to the model.</li><li><strong>Everything else.</strong> fields such as <code>errorCategory</code>, <code>isRetryable</code> or a customer-safe message are a recommended convention inside the error's content, not protocol fields. The exam uses these names; the point is that the model gets enough to decide what to do next.</li></ul></div>
+`
     },
     {
       kind: "widget",

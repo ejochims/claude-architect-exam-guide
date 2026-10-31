@@ -28,6 +28,9 @@ window.LESSONS.m10 = {
 <h3>SLA arithmetic</h3>
 <p>A record that arrives just after a submission waits a full interval, then up to 24 hours in the batch, then your post-processing. (Requests not processed within 24 hours expire and must be resubmitted.) So:</p>
 <pre class="code"><code>max interval = SLA − 24h − post-processing</code></pre>
+
+<!-- panel:m10-sla -->
+<div class="callout key"><div class="callout-label">The cadence arithmetic, step by step</div><ul style="margin:0;padding-left:18px"><li><strong>SLA.</strong> the service-level agreement: the latest a result may be ready after a record arrives.</li><li><strong>Submission interval.</strong> how often you send a batch.</li><li><strong>Worst case.</strong> a record arrives just after a submission, waits a full interval, then up to 24 hours of batch processing, then your post-processing.</li><li><strong>Worked example.</strong> with a 30-hour SLA and 2 hours of post-processing, the interval can be at most 30 − 24 − 2 = 4 hours. A 6-hour interval would breach the SLA.</li></ul></div>
 <!-- ex:m10-batch -->
 <h3>In code: the Message Batches API</h3>
 <p>Each request carries your own <code>custom_id</code>, because results can come back in any order:</p>

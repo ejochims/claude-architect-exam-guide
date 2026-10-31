@@ -107,7 +107,10 @@ mcp = MCPServer(<span class="s">"docs"</span>)
     }
   }
 }</code></pre>
-<p><strong>MCP tools compete with built-ins.</strong> If the agent keeps using <code>Grep</code> instead of your dependency-aware code-search tool, the description is usually too thin. Explain what it can do (transitive callers, ranking, cross-repo results) and what it returns, so Claude can see why it's the better choice.</p>`
+<p><strong>MCP tools compete with built-ins.</strong> If the agent keeps using <code>Grep</code> instead of your dependency-aware code-search tool, the description is usually too thin. Explain what it can do (transitive callers, ranking, cross-repo results) and what it returns, so Claude can see why it's the better choice.</p>
+<!-- panel:m05-transports -->
+<div class="callout key"><div class="callout-label">Transports: how a client reaches a server</div><ul style="margin:0;padding-left:18px"><li><strong>stdio.</strong> the client starts the server as a local process and talks to it over standard input and output. It suits tools that run on your machine; each user runs their own copy, and credentials come from local environment variables. In <code>.mcp.json</code> it's an entry with a <code>command</code>.</li><li><strong>HTTP.</strong> the server runs remotely at a URL, and many clients connect to it. It suits shared, hosted services; authentication goes in headers or OAuth. In <code>.mcp.json</code> it's an entry with <code>"type": "http"</code> and a <code>url</code>. (The older SSE transport is deprecated.)</li><li><strong>Why two.</strong> local tools need no network service, while shared services shouldn't be installed on every laptop.</li><li><strong>On the exam.</strong> the transport doesn't change what a tool does. Choose it by where the server runs, and choose the scope (project, user, local) by who should get it.</li></ul></div>
+`
     },
     {
       kind: "widget",

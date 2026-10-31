@@ -269,3 +269,34 @@ Verified unchanged:
 - the lab 1 loop, Module 9 retry, Module 10 and lab 3 Batches calls and result types, and the `tool_choice` types;
 - `AgentDefinition` fields, `query()` and the `PreToolUse` output;
 - the CLI flags `-p`, `--output-format`, `--json-schema`, `--resume`, `--continue` and `--fork-session`.
+
+## Batch 13: practice families, fresh-reviewer recheck, guide wording (2026-10-31)
+
+**Domain 1 practice families.**
+- 16 Domain 1 bank questions are rewritten as 7 practice families (P01–P07, 2–3 members each, distinct keys).
+- `content-check` now allows families with no holdout member.
+- The blind solver (Sonnet) agreed with the key on 16/16. It flagged 4 places where the app hadn't taught the deciding idea; those are fixed by the panels below.
+
+**Fresh-reviewer recheck** (Sonnet, a new agent, reading only the extracted lesson text):
+- **Beginner walkthrough.** 0 blocking, 10 major and 26 minor issues.
+  - 2 of the major issues were false positives: m00's scenario and domain lists and m14's traps are rendered by embeds and widgets that the text extraction leaves out.
+- **Why-test.** The 50 concepts average 9.1 of 12, and 25 score below 10. This reviewer was stricter than the Phase 4b one.
+- **Fixed with 11 panels** (`scripts/audit/add-panels.py`):
+  - F1: why roles alternate, the system prompt, handling `max_tokens`, window size;
+  - Module 2: exam answer vs. what you build, and strict tool use;
+  - Module 3: where each mechanism lives, including `updatedInput`, and blocked vs. pending vs. handoff;
+  - Module 4: which error fields belong to the protocol;
+  - Module 5: stdio vs. HTTP transports;
+  - Module 6: decomposition patterns;
+  - Module 7: the Explore subagent;
+  - Module 10: the SLA arithmetic, worked;
+  - Module 11: why slash commands exist;
+  - Module 13: calibration and stratified sampling, worked.
+- **Not done (lower value):**
+  - restructuring Module 6's exam-vs-today notes;
+  - naming sessions;
+  - defining "glob";
+  - the Module 9 schema-comment nit;
+  - the remaining minor items in `audit/work/novice-fresh-2026-10-31.json`.
+
+**Guide.** The 52 open S3 items are closed: 36 reworded, 16 accepted as guidance.
