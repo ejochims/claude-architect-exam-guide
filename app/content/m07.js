@@ -27,7 +27,23 @@ window.LESSONS.m07 = {
 <li><strong>Choose how history shrinks.</strong> A <em>sliding window</em> keeps the last N turns verbatim and drops older ones, which is simple but forgets early commitments. <em>Progressive summarization</em> condenses older turns into a running summary, which keeps the gist but blurs exact numbers and dates. Either way, pair it with a case-facts block so the specifics survive.</li>
 <li><strong>Position-aware ordering.</strong> Put a key-findings summary at the top of aggregated input, and organize detail under explicit section headers.</li>
 <li><strong>Structured handoffs between agents.</strong> If a downstream agent has a tight budget, have upstream agents return key facts, citations and relevance scores, not verbose reasoning. Ask subagents for metadata too (dates, source locations, methodology).</li>
-</ul>`
+</ul>
+<!-- ex:m07-case-facts -->
+<h3>In practice: keep facts exact, trim the rest</h3>
+<p>A <strong>case-facts block</strong> holds the values that must not drift. Your code keeps it up to date and re-sends it every turn, instead of relying on a summary of the conversation:</p>
+<pre class="code"><code><span class="c">## Case facts (verbatim; re-sent every turn)</span>
+customer_id: C-20931 (identity verified)
+order: A-1042, shipped 2026-03-02
+agreed: refund $84.20 to the original card
+open: customer also wants a replacement charger</code></pre>
+<!-- ex:m07-trim -->
+<p>And trim tool results before they reach the model:</p>
+<pre class="code"><code><span class="c"># Raw result: 40 fields, about 1,800 tokens</span>
+{<span class="s">"order_id"</span>: <span class="s">"A-1042"</span>, <span class="s">"warehouse_bin"</span>: <span class="s">"R7-14"</span>, <span class="s">"carrier_route"</span>: <span class="s">"…"</span>, …}
+
+<span class="c"># What your code passes on</span>
+{<span class="s">"order_id"</span>: <span class="s">"A-1042"</span>, <span class="s">"status"</span>: <span class="s">"shipped"</span>, <span class="s">"delivery"</span>: <span class="s">"2026-03-06"</span>,
+ <span class="s">"items"</span>: [<span class="s">"USB-C charger"</span>], <span class="s">"total"</span>: <span class="k">84.20</span>}</code></pre>`
     },
     {
       kind: "widget",

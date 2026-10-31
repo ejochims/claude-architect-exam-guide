@@ -56,7 +56,15 @@ window.LESSONS.m13 = {
 <li><strong>Stratified random sampling.</strong> Even after automating, keep sampling high-confidence extractions across segments to measure error rates and catch new error patterns.</li>
 <li><strong>Route the right items to people.</strong> Send low-confidence fields and ambiguous or contradictory source documents to reviewers first, so limited capacity goes where it matters.</li>
 </ul>
-<div class="callout note"><div class="callout-label">Confidence: when it's fine</div><p>Raw self-rated confidence as an <em>escalation trigger</em> is a trap. Field-level confidence <em>calibrated against labeled data</em> and used to <em>prioritize review</em> is good practice. The difference is calibration.</p></div>`
+<div class="callout note"><div class="callout-label">Confidence: when it's fine</div><p>Raw self-rated confidence as an <em>escalation trigger</em> is a trap. Field-level confidence <em>calibrated against labeled data</em> and used to <em>prioritize review</em> is good practice. The difference is calibration.</p></div>
+<!-- ex:m13-routing -->
+<h3>What a routed field looks like</h3>
+<p>Each extracted value carries its confidence and its source, so a reviewer can check it quickly:</p>
+<pre class="code"><code>{<span class="s">"field"</span>: <span class="s">"renewal_date"</span>, <span class="s">"value"</span>: <span class="s">"2027-01-31"</span>,
+ <span class="s">"confidence"</span>: <span class="k">0.62</span>,                          <span class="c"># below the 0.80 threshold calibrated on labeled data</span>
+ <span class="s">"source"</span>: {<span class="s">"doc"</span>: <span class="s">"MSA-2291.pdf"</span>, <span class="s">"page"</span>: <span class="k">14</span>,
+            <span class="s">"quote"</span>: <span class="s">"renews automatically on 31 January 2027"</span>},
+ <span class="s">"route"</span>: <span class="s">"human_review"</span>}</code></pre>`
     },
     {
       kind: "widget",
@@ -75,7 +83,16 @@ window.LESSONS.m13 = {
 <li><strong>Dates prevent false contradictions.</strong> “34% adoption” (2021) and “61% adoption” (2025) describe a trend, not a conflict, but only if publication or collection dates travel with the claims.</li>
 <li><strong>Separate established from contested</strong> in the report, and keep the original sources' characterizations and methodological context.</li>
 <li><strong>Render content by type</strong>: financial data as tables, news as prose, technical findings as structured lists.</li>
-</ul>`
+</ul>
+<!-- ex:m13-conflict -->
+<h3>What preserved provenance looks like</h3>
+<p>Each claim keeps its sources and dates through synthesis, and a conflict is shown, not averaged away:</p>
+<pre class="code"><code>{<span class="s">"claim"</span>: <span class="s">"Share of hospitals using AI triage"</span>,
+ <span class="s">"values"</span>: [
+   {<span class="s">"value"</span>: <span class="s">"38%"</span>, <span class="s">"source"</span>: <span class="s">"HIMSS survey"</span>, <span class="s">"url"</span>: <span class="s">"https://…"</span>, <span class="s">"date"</span>: <span class="s">"2025-09"</span>},
+   {<span class="s">"value"</span>: <span class="s">"52%"</span>, <span class="s">"source"</span>: <span class="s">"KLAS report"</span>,  <span class="s">"url"</span>: <span class="s">"https://…"</span>, <span class="s">"date"</span>: <span class="s">"2025-11"</span>}
+ ],
+ <span class="s">"status"</span>: <span class="s">"conflict"</span>}                        <span class="c"># report both, with attribution</span></code></pre>`
     },
     {
       kind: "quiz",

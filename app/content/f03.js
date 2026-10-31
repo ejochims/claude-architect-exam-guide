@@ -53,7 +53,38 @@ window.LESSONS.f03 = {
 <li><strong>Claude Code (Domain 3, parts of 2 and 5).</strong> <code>CLAUDE.md</code> memory, path-scoped rules, skills and slash commands, plan mode, the Explore subagent, MCP server configuration, and running non-interactively in CI with <code>claude -p</code>.</li>
 <li><strong>MCP (Domain 2).</strong> Designing tools and resources, structured errors, and where a server is configured.</li>
 </ul>
-<h3>A short history</h3>
+
+<!-- ex:f03-layers -->
+<h3>The same task at each layer</h3>
+<p>Here is one job, “find where configuration is loaded and summarize it,” done three ways. Notice how much of the work moves off your plate at each layer.</p>
+<p><strong>Claude API.</strong> You write the loop (Module 1):</p>
+<pre class="code"><code>response = client.messages.create(model=MODEL, max_tokens=<span class="k">1024</span>,
+                                  tools=TOOLS, messages=messages)
+<span class="c"># then: check stop_reason, run the tools yourself, append results, repeat</span></code></pre>
+<!-- ex:f03-sdk -->
+<p><strong>Agent SDK.</strong> The SDK runs the loop and provides built-in tools such as Read, Grep and Glob:</p>
+<pre class="code"><code><span class="k">from</span> claude_agent_sdk <span class="k">import</span> query, ClaudeAgentOptions
+
+<span class="k">async</span> <span class="k">for</span> message <span class="k">in</span> query(
+    prompt=<span class="s">"Find where configuration is loaded and summarize it"</span>,
+    options=ClaudeAgentOptions(allowed_tools=[<span class="s">"Read"</span>, <span class="s">"Grep"</span>, <span class="s">"Glob"</span>]),
+):
+    print(message)</code></pre>
+<!-- ex:f03-cli -->
+<p><strong>Claude Code.</strong> The finished agent, here run non-interactively from a script (Module 12):</p>
+<pre class="code"><code>claude -p <span class="s">"Find where configuration is loaded and summarize it"</span></code></pre>
+<!-- ex:f03-mcp -->
+<p><strong>MCP.</strong> A minimal server using the official Python SDK. The function's docstring becomes the tool description, and any MCP client (Claude Code, an Agent SDK app, Claude Desktop) can now call <code>get_order</code>:</p>
+<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+
+mcp = FastMCP(<span class="s">"orders"</span>)
+
+@mcp.tool()
+<span class="k">def</span> get_order(order_number: str) -&gt; str:
+    <span class="s">""</span><span class="s">"Look up one order by its number. Returns status and delivery date."</span><span class="s">""</span>
+    <span class="k">return</span> lookup(order_number)          <span class="c"># your real order system</span>
+
+mcp.run()</code></pre><h3>A short history</h3>
 <ul>
 <li><strong>Feb 2025:</strong> Claude Code launched as a command-line tool for agentic coding (<a href="https://www.anthropic.com/news/claude-3-7-sonnet" target="_blank" rel="noopener">source</a>).</li>
 <li><strong>Sep 2025:</strong> the Claude Code SDK was renamed the <strong>Claude Agent SDK</strong>, because the same harness was proving useful for agents far beyond coding (<a href="https://claude.com/blog/building-agents-with-the-claude-agent-sdk" target="_blank" rel="noopener">source</a>).</li>

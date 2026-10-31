@@ -26,6 +26,22 @@ for (const q of Q) {
 }
 for (const m of modules) for (const t of m.tasks) if (!B.tasks[t]) errors.push(`${m.id}: unknown task ${t}`);
 
+// ---------- Option families ----------
+// Members share all four option texts and key different options, so a solver that sees only the options
+// can answer at most one member of each family correctly.
+const fam = {};
+for (const q of Q) if (q.family) (fam[q.family] = fam[q.family] || []).push(q);
+const optSet = q => q.options.map(o => plain(o.t)).sort().join("\u0001");
+for (const [f, qs] of Object.entries(fam)) {
+  if (qs.length < 2) errors.push(`family ${f}: only ${qs.length} member`);
+  if (new Set(qs.map(optSet)).size > 1) errors.push(`family ${f}: option texts differ between members`);
+  const keys = qs.map(q => plain(q.options.find(o => o.ok)?.t ?? ""));
+  if (new Set(keys).size !== keys.length) errors.push(`family ${f}: two members key the same option`);
+  if (qs.filter(q => q.holdout).length !== 1) errors.push(`family ${f}: needs exactly one holdout member`);
+  if (new Set(qs.map(q => q.ts)).size > 1) errors.push(`family ${f}: members test different task statements`);
+}
+const famQs = Object.values(fam).flat();
+
 // ---------- Coverage ----------
 const perTask = Object.fromEntries(Object.keys(B.tasks).map(t => [t, 0]));
 Q.forEach(q => perTask[q.ts]++);
@@ -92,6 +108,7 @@ const report = {
   },
   traps: { taggedDistractors: tagged, distractors, taggedPct: pct(tagged, distractors), use: trapUse },
   mock: { draws: mock.length, infeasible: mock.filter(m => m.bankShort.length).length, needBorrowing: mock.filter(m => m.borrowed).length, maxBorrowed: Math.max(...mock.map(m => m.borrowed)), unscenarioed: Q.filter(q => q.scenario == null).map(q => q.id), detail: mock },
+  families: { n: Object.keys(fam).length, questions: famQs.length, holdoutInFamilies: famQs.filter(q => q.holdout).length, holdoutTotal: Q.filter(q => q.holdout).length, optionsOnlyCeiling: pct(Object.keys(fam).length, famQs.length) },
   negatedStems: Q.filter(q => /<strong>not<\/strong>|\bNOT\b|\bexcept\b/.test(q.stem)).map(q => q.id),
   cardsPerModule: count(cards, c => c.module),
   errors, warnings
@@ -111,6 +128,8 @@ else {
   console.log(`Correct position — authored ${JSON.stringify(c.authoredPosition)}, displayed ${JSON.stringify(c.displayedPosition)}`);
   console.log(`Trap tags on distractors: ${r.traps.taggedDistractors}/${r.traps.distractors} (${r.traps.taggedPct}%) ${JSON.stringify(r.traps.use)}`);
   console.log(`Mock draws that can't meet domain quotas: ${r.mock.infeasible}/${r.mock.draws} · draws that borrow from other scenarios: ${r.mock.needBorrowing}/${r.mock.draws} (max ${r.mock.maxBorrowed} of 60) · questions with no scenario: ${r.mock.unscenarioed.length}`);
+  const F = r.families;
+  console.log(`Option families: ${F.n} (${F.questions} questions) · holdout in families ${F.holdoutInFamilies}/${F.holdoutTotal} · options-only ceiling across family members ${F.optionsOnlyCeiling}%`);
   if (warnings.length) console.log(`Warnings: ${warnings.join("; ")}`);
   console.log(errors.length ? `\nINVARIANT FAILURES (${errors.length}):\n  ${errors.join("\n  ")}` : "\nInvariants: OK");
 }

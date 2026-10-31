@@ -422,10 +422,16 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     // if they can't fill a domain's quota, borrow that domain's items from the other scenarios.
     const inDraw = shuffle(QUESTIONS.filter(q => scen.includes(q.scenario)));
     const outside = shuffle(QUESTIONS.filter(q => q.scenario && !scen.includes(q.scenario)));
-    const picked = new Set();
+    // Never two members of one option family in a sitting: they share options and would cue each other.
+    const picked = new Set(), fams = new Set();
     for (const d of B.domains) {
       const need = Math.round(d.weight * 0.6), ofD = q => domOfTask(q.ts).id === d.id;
-      [...inDraw.filter(ofD), ...outside.filter(ofD)].slice(0, need).forEach(q => picked.add(q));
+      let n = 0;
+      for (const q of [...inDraw.filter(ofD), ...outside.filter(ofD)]) {
+        if (n === need) break;
+        if (q.family && fams.has(q.family)) continue;
+        picked.add(q); if (q.family) fams.add(q.family); n++;
+      }
     }
     const order = [...scen, ...B.scenarios.map(s => s.n).filter(n => !scen.includes(n))];
     const qids = order.flatMap(n => [...picked].filter(q => q.scenario === n).map(q => q.id));

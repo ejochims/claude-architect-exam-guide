@@ -24,7 +24,19 @@ window.LESSONS.f01 = {
 }</code></pre>
 <p>Nothing persists on Anthropic's side between calls: the API processes each request on its own and doesn't store your conversation for the next one. That's what <em>stateless</em> means.</p>
 <p>The response holds the model's output as a list of <strong>content blocks</strong> (text, or a request to use a tool) and a <code>stop_reason</code> that says why it stopped: it finished (<code>"end_turn"</code>), it wants a tool (<code>"tool_use"</code>), or it hit the length cap (<code>"max_tokens"</code>).</p>
-<svg viewBox="0 0 640 170" role="img" aria-label="Request goes into the model, response comes out, nothing is kept" style="width:100%;height:auto;margin:10px 0">
+
+<!-- ex:f01-response -->
+<p><strong>What comes back.</strong> The response to that request looks like this. The reply sits in <code>content</code>, a list of blocks; here there's a single text block. This agent has no tools yet (F2 adds them), so it can't actually look the order up:</p>
+<pre class="code"><code>{
+  <span class="s">"id"</span>: <span class="s">"msg_01…"</span>,
+  <span class="s">"type"</span>: <span class="s">"message"</span>,
+  <span class="s">"role"</span>: <span class="s">"assistant"</span>,
+  <span class="s">"content"</span>: [
+    {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"I can't look up orders, but I can explain how tracking works."</span>}
+  ],
+  <span class="s">"stop_reason"</span>: <span class="s">"end_turn"</span>,                  <span class="c"># finished normally</span>
+  <span class="s">"usage"</span>: {<span class="s">"input_tokens"</span>: <span class="k">48</span>, <span class="s">"output_tokens"</span>: <span class="k">17</span>}   <span class="c"># what you're billed for</span>
+}</code></pre><svg viewBox="0 0 640 170" role="img" aria-label="Request goes into the model, response comes out, nothing is kept" style="width:100%;height:auto;margin:10px 0">
   <rect x="10" y="40" width="190" height="90" rx="12" style="fill:var(--sunk);stroke:var(--line)"/>
   <text x="105" y="70" text-anchor="middle" style="fill:var(--fg);font:600 15px var(--sans)">Request</text>
   <text x="105" y="94" text-anchor="middle" style="fill:var(--muted);font:13px var(--sans)">system + messages</text>
@@ -39,7 +51,14 @@ window.LESSONS.f01 = {
   <path d="M200 85 H240 M395 85 H435" style="stroke:var(--fg);stroke-width:2;fill:none"/>
   <path d="M232 79 l8 6 -8 6 M427 79 l8 6 -8 6" style="stroke:var(--fg);stroke-width:2;fill:none"/>
 </svg>
-<div class="callout key"><div class="callout-label">Why this matters</div><p>Because the model keeps nothing, <strong>your code is its memory</strong>. To continue a conversation you resend the whole history, including Claude's earlier replies as <code>"assistant"</code> messages. Every design question about agents, context and multi-agent systems comes back to this. (An <strong>agent</strong>, in this course, is a program that calls Claude in a loop, lets it choose tools to act with, and stops when Claude says the task is done. F2 builds one.)</p></div>`
+<div class="callout key"><div class="callout-label">Why this matters</div><p>Because the model keeps nothing, <strong>your code is its memory</strong>. To continue a conversation you resend the whole history, including Claude's earlier replies as <code>"assistant"</code> messages. Every design question about agents, context and multi-agent systems comes back to this. (An <strong>agent</strong>, in this course, is a program that calls Claude in a loop, lets it choose tools to act with, and stops when Claude says the task is done. F2 builds one.)</p></div>
+<!-- ex:f01-next-turn -->
+<p><strong>The next turn.</strong> To ask a follow-up, you send everything again, with Claude's last reply included as an <code>assistant</code> message:</p>
+<pre class="code"><code><span class="s">"messages"</span>: [
+  {<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"Where is order 1042?"</span>},
+  {<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: <span class="s">"I can't look up orders, but…"</span>},   <span class="c"># resent by you</span>
+  {<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"OK. How long is your returns window?"</span>}  <span class="c"># the new message</span>
+]</code></pre>`
     },
     {
       kind: "read",
@@ -59,7 +78,23 @@ window.LESSONS.f01 = {
 <li>Roles alternate, user then assistant, and each message's <code>content</code> can be plain text or a list of <em>content blocks</em> (text, a tool request, a tool result), which F2 uses.</li>
 </ul>
 <p>A system prompt shapes behavior, but it's still text the model follows <em>probabilistically</em>: Claude writes its reply by choosing likely next words, and instructions make the desired behavior more likely without making it certain. Keep that in mind: when a rule must hold every time, the course will show you how to enforce it in code instead.</p>
-<div class="callout note"><div class="callout-label">Out of scope</div><p>Tokenizer details, pricing math and prompt-caching mechanics are not tested. You only need the concepts above.</p></div>`
+<div class="callout note"><div class="callout-label">Out of scope</div><p>Tokenizer details, pricing math and prompt-caching mechanics are not tested. You only need the concepts above.</p></div>
+<!-- ex:f01-blocks -->
+<h3>Content blocks at a glance</h3>
+<p>Once tools are involved, <code>content</code> becomes a list of typed blocks. Claude's reply can mix text with a tool request, and your next message carries the result, linked by its <code>id</code>:</p>
+<pre class="code"><code><span class="c"># Claude's reply (role "assistant"), ending with stop_reason "tool_use"</span>
+[
+  {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"Let me check that order."</span>},
+  {<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"name"</span>: <span class="s">"get_order"</span>,
+   <span class="s">"input"</span>: {<span class="s">"order_number"</span>: <span class="s">"A-1042"</span>}}
+]
+
+<span class="c"># Your next message (role "user")</span>
+[
+  {<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_01"</span>,
+   <span class="s">"content"</span>: <span class="s">"status: shipped; delivery: Friday"</span>}
+]</code></pre>
+<p>F2 walks through this exchange step by step.</p>`
     },
     {
       kind: "recap",

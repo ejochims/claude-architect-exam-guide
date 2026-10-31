@@ -65,12 +65,39 @@ window.LESSONS.f02 = {
 <p><strong>② Claude's response</strong> ends with <code>stop_reason: "tool_use"</code> and contains a block like this:</p>
 <pre class="code"><code>{<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"name"</span>: <span class="s">"get_order"</span>,
  <span class="s">"input"</span>: {<span class="s">"order_number"</span>: <span class="s">"A-1042"</span>}}</code></pre>
-<p><strong>④ Your next request</strong> resends the history, adds Claude's reply as an <code>assistant</code> message, then a <code>user</code> message carrying the result:</p>
+
+<!-- ex:f02-full-response -->
+<p>In full, it's an ordinary message whose content holds an optional text block followed by the tool request:</p>
+<pre class="code"><code>{
+  <span class="s">"role"</span>: <span class="s">"assistant"</span>,
+  <span class="s">"content"</span>: [
+    {<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"Let me look up that order."</span>},
+    {<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"name"</span>: <span class="s">"get_order"</span>,
+     <span class="s">"input"</span>: {<span class="s">"order_number"</span>: <span class="s">"A-1042"</span>}}
+  ],
+  <span class="s">"stop_reason"</span>: <span class="s">"tool_use"</span>          <span class="c"># Claude is waiting for your result</span>
+}</code></pre><p><strong>④ Your next request</strong> resends the history, adds Claude's reply as an <code>assistant</code> message, then a <code>user</code> message carrying the result:</p>
 <pre class="code"><code>{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: [
   {<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_01"</span>,
    <span class="s">"content"</span>: <span class="s">"status: shipped; delivery: Friday"</span>}
 ]}</code></pre>
 <p>If the lookup fails, send the <code>tool_result</code> with <code>"is_error": true</code> and a message saying what went wrong, so Claude can retry, ask the customer, or explain.</p>
+<!-- ex:f02-error-parallel -->
+
+<pre class="code"><code>{<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"is_error"</span>: <span class="k">true</span>,
+ <span class="s">"content"</span>: <span class="s">"Order service timed out after 10 seconds. Safe to retry."</span>}</code></pre>
+<!-- ex:f02-parallel -->
+<h3>Several tools in one turn</h3>
+<p>Claude can request more than one tool in a single response. Run them all, then return <strong>every</strong> result in <strong>one</strong> <code>user</code> message, each matched by its id. If a result is missing, the next request is rejected.</p>
+<pre class="code"><code><span class="c"># Claude's response: two requests</span>
+[{<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"name"</span>: <span class="s">"get_order"</span>, <span class="s">"input"</span>: {<span class="s">"order_number"</span>: <span class="s">"A-1042"</span>}},
+ {<span class="s">"type"</span>: <span class="s">"tool_use"</span>, <span class="s">"id"</span>: <span class="s">"toolu_02"</span>, <span class="s">"name"</span>: <span class="s">"get_customer"</span>, <span class="s">"input"</span>: {<span class="s">"email"</span>: <span class="s">"sam@example.com"</span>}}]
+
+<span class="c"># Your next message: both results together</span>
+{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: [
+  {<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_01"</span>, <span class="s">"content"</span>: <span class="s">"status: shipped"</span>},
+  {<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_02"</span>, <span class="s">"content"</span>: <span class="s">"customer C-20931, plan Plus"</span>}
+]}</code></pre>
 <div class="callout key"><div class="callout-label">Hold on to this</div><p>Claude decides <em>which</em> tool to call and with what input. <strong>Your code decides whether and how it runs.</strong> That split is why later modules put hard rules (refund limits, identity checks) in code that sits between the request and the real system.</p></div>
 <p>Repeat steps ②–④ until Claude answers with <code>"end_turn"</code> and you have an <strong>agent loop</strong>. That's Module 1.</p>`
     },

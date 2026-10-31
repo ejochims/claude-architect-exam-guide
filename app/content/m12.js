@@ -28,7 +28,17 @@ window.LESSONS.m12 = {
 <li><strong>Re-runs:</strong> include the previous review's findings and tell Claude to report only <em>new or still-unaddressed</em> issues. Otherwise every push re-posts the same comments.</li>
 <li><strong>Test generation:</strong> give it the existing test files so it doesn't propose duplicate scenarios, and document testing standards, what makes a test valuable, and the available fixtures in <code>CLAUDE.md</code>.</li>
 <li><strong>Independence:</strong> the session that generated the code is a weak reviewer of it. Review in a separate instance.</li>
-</ul>`
+</ul>
+<!-- ex:m12-ci -->
+<h3>In code: a CI review step</h3>
+<p>A GitHub Actions step that runs Claude Code non-interactively. <code>-p</code> means print mode, so it never waits for input; <code>--json-schema</code> makes the result machine-readable. Claude Code also reads the repository's CLAUDE.md, so project conventions apply in CI too.</p>
+<pre class="code"><code>- name: Claude review
+  env:
+    ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}
+  run: |
+    claude -p <span class="s">"Review this PR's diff. Report only new or unresolved issues."</span> \\
+      --output-format json \\
+      --json-schema <span class="s">"$(cat .github/review-schema.json)"</span> &gt; review.json</code></pre>`
     },
     {
       kind: "widget",
@@ -50,7 +60,13 @@ window.LESSONS.m12 = {
 <tr><td>Resume after a few files changed</td><td>Resume, and <strong>tell Claude exactly which files changed</strong> for targeted re-analysis</td></tr>
 <tr><td>Prior tool results are largely stale</td><td><strong>Start fresh</strong> with a structured summary injected. It's more reliable than reasoning over stale results</td></tr>
 </tbody></table></div>
-<p>When comparing two implementations, fork the session <em>and</em> use separate branches or worktrees, so the conversations diverge and the file edits don't collide.</p>`
+<p>When comparing two implementations, fork the session <em>and</em> use separate branches or worktrees, so the conversations diverge and the file edits don't collide.</p>
+<!-- ex:m12-sessions -->
+<h3>At the command line</h3>
+<pre class="code"><code>claude --continue                                   <span class="c"># resume the most recent session here</span>
+claude --resume 4f1c…                               <span class="c"># resume a specific session by ID</span>
+claude --resume 4f1c… --fork-session                <span class="c"># same history, new branch of the work</span>
+claude                                              <span class="c"># fresh start; paste a short summary of findings</span></code></pre>`
     },
     {
       kind: "widget",

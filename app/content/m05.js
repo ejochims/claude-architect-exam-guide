@@ -61,7 +61,28 @@ window.LESSONS.m05 = {
 <p><strong>Resources reduce exploratory tool calls.</strong> Without a catalog, an agent calls <code>list_docs</code>, <code>search_docs</code> and <code>get_doc</code> just to learn what exists. With the documentation tree exposed as a resource, it can see the map first and fetch only what it needs.</p>
 <p><strong>Build or reuse?</strong> For standard integrations such as Jira, GitHub, Slack or Postgres, use an existing community or vendor server. Write a custom server only for team-specific workflows nothing else covers.</p>
 <div class="callout note"><div class="callout-label">Annotations are hints</div><p>Tool annotations like <code>readOnlyHint</code> or <code>destructiveHint</code> help the host's UI. They aren't a security boundary, because a server can claim anything. Real enforcement lives in hooks, permissions and the tool's own code.</p></div>
-<div class="callout key"><div class="callout-label">Tools, resources and prompts</div><ul style="margin:0;padding-left:18px"><li><strong>Tools.</strong> actions the <em>model</em> decides to call, like the tools in F2.</li><li><strong>Resources.</strong> read-only content the server makes available by address (a URI), such as a docs index or a database schema. The <em>host application</em> decides which resources go into the model's context, sometimes because you pick one (in Claude Code, by typing <code>@</code> and choosing it). The model reads them as context rather than calling them, which is why a catalog resource saves exploratory tool calls.</li><li><strong>Prompts.</strong> reusable templates the <em>user</em> invokes; Claude Code shows them as slash commands.</li><li><strong>Why split them.</strong> each one is controlled by whoever should decide when it's used: the model acts, the application supplies context, the user chooses templates.</li></ul></div>`
+<div class="callout key"><div class="callout-label">Tools, resources and prompts</div><ul style="margin:0;padding-left:18px"><li><strong>Tools.</strong> actions the <em>model</em> decides to call, like the tools in F2.</li><li><strong>Resources.</strong> read-only content the server makes available by address (a URI), such as a docs index or a database schema. The <em>host application</em> decides which resources go into the model's context, sometimes because you pick one (in Claude Code, by typing <code>@</code> and choosing it). The model reads them as context rather than calling them, which is why a catalog resource saves exploratory tool calls.</li><li><strong>Prompts.</strong> reusable templates the <em>user</em> invokes; Claude Code shows them as slash commands.</li><li><strong>Why split them.</strong> each one is controlled by whoever should decide when it's used: the model acts, the application supplies context, the user chooses templates.</li></ul></div>
+<!-- ex:m05-server -->
+<h3>What a server looks like</h3>
+<p>A server exposes <strong>tools</strong> (actions the model calls) and <strong>resources</strong> (content the client can list and read). With the official Python SDK, each one is a decorated function:</p>
+<pre class="code"><code><span class="k">from</span> mcp.server.fastmcp <span class="k">import</span> FastMCP
+
+mcp = FastMCP(<span class="s">"docs"</span>)
+
+@mcp.tool()
+<span class="k">def</span> search_docs(query: str) -&gt; str:
+    <span class="s">""</span><span class="s">"Full-text search over internal engineering docs. Use for how-to and design questions."</span><span class="s">""</span>
+    <span class="k">return</span> search(query)
+
+@mcp.resource(<span class="s">"docs://catalog"</span>)
+<span class="k">def</span> catalog() -&gt; str:
+    <span class="s">""</span><span class="s">"Index of every doc: title, path and one-line summary."</span><span class="s">""</span>
+    <span class="k">return</span> build_index()</code></pre>
+<p>When a tool call fails on bad input, the server returns a normal result flagged as an error, so the model can read it and fix the call (Module 4):</p>
+<!-- ex:m05-iserror -->
+
+<pre class="code"><code>{<span class="s">"content"</span>: [{<span class="s">"type"</span>: <span class="s">"text"</span>, <span class="s">"text"</span>: <span class="s">"Invalid date '03/04'. Use YYYY-MM-DD."</span>}],
+ <span class="s">"isError"</span>: <span class="k">true</span>}</code></pre>`
     },
     {
       kind: "read",
