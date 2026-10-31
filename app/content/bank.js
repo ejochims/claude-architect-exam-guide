@@ -280,5 +280,245 @@ window.BANK = [
       { t: "Default ambiguous agreements to whichever contract type appears more often in the portfolio.", why: "Systematically mislabels the minority type." },
       { t: "Ask for a confidence score with each classification and keep the guess either way.", trap: "T4", why: "Records the uncertainty but still keeps a guess as fact." }
     ]
+  },
+  {
+    id: "b7-1", ts: "3.4", scenario: 4,
+    stem: "A stack trace points to the exact line where a function dereferences a missing config value. A developer asks Claude Code to add a null check there. A teammate suggests starting in plan mode “to be safe.” Best approach?",
+    options: [
+      { t: "Direct execution: the change is small, well scoped, and the cause is already known.", ok: true, why: "Plan mode pays off when there are design choices or many files. Here there are neither." },
+      { t: "Plan mode first, since every change to production code should start from a reviewed plan.", why: "Planning adds a round trip with no decision to make; the fix is already determined." },
+      { t: "Run the Explore subagent to map the module and its callers before touching the function.", why: "Discovery isn't needed when the stack trace pinpoints the line." },
+      { t: "Ask Claude to interview you about edge cases and failure modes before it writes the check.", why: "The interview pattern helps in unfamiliar domains; this requirement is already clear." }
+    ]
+  },
+  {
+    id: "b7-2", ts: "3.4", scenario: 2,
+    stem: "A new billing feature could be built on a message queue or on webhooks from the payment provider. Each implies different infrastructure, retries and failure handling. How should you start with Claude Code?",
+    options: [
+      { t: "Direct execution of the simpler webhook design; refactor to a queue later if load requires it.", why: "Commits to an architecture before comparing approaches whose infrastructure costs differ." },
+      { t: "Plan mode, to explore the codebase and compare both designs before committing to one.", ok: true, why: "Multiple valid approaches with architectural consequences are exactly what plan mode is for." },
+      { t: "Direct execution, asking Claude to keep the code modular so the transport can be swapped.", why: "Modularity doesn't replace deciding which infrastructure you're building." },
+      { t: "Have Claude implement both designs on separate branches and pick the one whose tests pass.", why: "Doubles the work; both can pass tests while differing in operational cost." }
+    ]
+  },
+  {
+    id: "b7-3", ts: "3.4", scenario: 5,
+    stem: "A nightly CI job asks Claude Code to replace a deprecated API across 60 files. Each run makes different choices file to file, so reviewers see inconsistent code. What should change?",
+    options: [
+      { t: "Add “apply one consistent approach to every file” to the job's prompt.", trap: "T9", why: "An exhortation without the approach itself doesn't produce consistency." },
+      { t: "Split it: a planning run produces a migration plan for human approval, then an execution run applies the approved plan.", ok: true, why: "Plan once, agree the approach, then execute it uniformly." },
+      { t: "Raise the job's turn limit so Claude can revisit early files once it understands the pattern.", why: "More turns don't create an agreed approach; files may still diverge." },
+      { t: "Run one job per file in parallel so each file gets Claude's full attention.", why: "Independent runs make even more inconsistent choices." }
+    ]
+  },
+  {
+    id: "b7-4", ts: "3.3", scenario: 4,
+    stem: "<code>.claude/rules/migrations.md</code> holds conventions for SQL migrations in <code>db/migrations/</code>, but its contents appear in every session, including ones that never touch SQL. What's the most likely cause?",
+    options: [
+      { t: "The rule file has no <code>paths:</code> frontmatter, so it loads unconditionally.", ok: true, why: "Rules without paths apply to every session; add <code>paths: [\"db/migrations/**\"]</code>." },
+      { t: "Every file in <code>.claude/rules/</code> loads in every session; scoping isn't supported there.", why: "Path-scoped rules are exactly what <code>paths:</code> frontmatter provides." },
+      { t: "The root CLAUDE.md @imports the rules folder, which forces every rule to load each time.", trap: "T8", why: "Rules load from <code>.claude/rules/</code> on their own; no import is involved." },
+      { t: "The file name needs a <code>.rules.md</code> suffix before Claude Code scopes it by directory.", trap: "T8", why: "Not a real convention; scoping comes from <code>paths:</code>." }
+    ]
+  },
+  {
+    id: "b7-5", ts: "3.3", scenario: 2,
+    stem: "Test files are colocated with source as <code>*.test.ts</code> and <code>*.spec.ts</code> throughout <code>src/</code> and <code>packages/</code>. You want the testing conventions to load only when Claude works on a test file. Which frontmatter fits?",
+    options: [
+      { t: "<code>paths: [\"tests/**\"]</code>", why: "There's no tests directory; colocated test files would never match." },
+      { t: "<code>paths: [\"src/**\", \"packages/**\"]</code>", why: "Matches every source file, so the conventions load almost always." },
+      { t: "<code>paths: [\"**/*.test.ts\", \"**/*.spec.ts\"]</code>", ok: true, why: "Globs on the file pattern match test files wherever they live." },
+      { t: "<code>paths: [\"**/test*\"]</code>", why: "Matches names starting with “test”, not files ending in .test.ts." }
+    ]
+  },
+  {
+    id: "b7-6", ts: "3.1", scenario: 4,
+    stem: "The API team's conventions live in <code>packages/api/CLAUDE.md</code>. A developer starts Claude Code at the repo root and asks about the web app; Claude never mentions the API conventions. Is something wrong?",
+    options: [
+      { t: "Yes: subdirectory CLAUDE.md files load only if the root CLAUDE.md @imports them.", trap: "T8", why: "Subdirectory memory files load without an import." },
+      { t: "No: a subdirectory CLAUDE.md loads when Claude works with files in that directory.", ok: true, why: "Nested memory is loaded on demand, which keeps unrelated sessions lean." },
+      { t: "Yes: Claude Code reads only the CLAUDE.md in the directory where it was launched.", why: "It also reads parent and nested memory files." },
+      { t: "Yes: nested CLAUDE.md files need <code>paths:</code> frontmatter to say where they apply.", why: "<code>paths:</code> is for rules in <code>.claude/rules/</code>, not CLAUDE.md files." }
+    ]
+  },
+  {
+    id: "b7-7", ts: "1.6", scenario: 6,
+    stem: "An agent extracts 40 fields from 300-page loan packages that bundle an application, appraisals, tax returns and disclosures. Fields from documents deep in the package are often missed. What decomposition helps most?",
+    options: [
+      { t: "Split the package into its component documents, run a focused extraction per document type, then merge with a reconciliation step.", ok: true, why: "Decompose by document so each pass has a small, relevant context, then reconcile." },
+      { t: "Use a model with a larger context window so the whole package fits with room to spare.", trap: "T3", why: "It already fits; attention to buried sections is the problem." },
+      { t: "List all 40 fields twice in the prompt, once at the start and once at the end.", trap: "T9", why: "Repetition doesn't help the model find content deep in a long input." },
+      { t: "Extract only from the first 50 pages, where most required fields usually appear.", why: "Drops the appraisals and tax returns that hold many of the fields." }
+    ]
+  },
+  {
+    id: "b7-8", ts: "1.6", scenario: 5,
+    stem: "A CI agent told to “fix all failing tests” (37 failures across 9 modules) thrashes: a fix in one module breaks tests in another, and runs time out. How should the work be decomposed?",
+    options: [
+      { t: "Spawn one subagent per failing test so all 37 are fixed in parallel.", trap: "T5", why: "Parallel edits to shared code conflict, which is the thrashing you're seeing." },
+      { t: "Fix failures in the order the test runner reports them, re-running the suite after each.", why: "Report order ignores shared causes, so related fixes still fight each other." },
+      { t: "Group the failures by root cause first, then fix one cause at a time, re-running the suite after each.", ok: true, why: "Diagnose before decomposing; many failures share a cause." },
+      { t: "Ask Claude to be careful not to break other tests while fixing each one.", trap: "T9", why: "An exhortation doesn't reveal which failures are related." }
+    ]
+  },
+  {
+    id: "b7-9", ts: "1.6", scenario: 1,
+    stem: "Every return request follows the same four steps: verify identity, check eligibility, create the RMA, send the shipping label. Which decomposition fits best?",
+    options: [
+      { t: "Dynamic decomposition, letting the agent plan the steps anew for each request.", why: "Adaptive planning suits open-ended work; this sequence never varies." },
+      { t: "A fixed sequence (prompt chaining), since the steps and their order are always the same.", ok: true, why: "Predictable multi-step workflows suit a fixed pipeline." },
+      { t: "A coordinator with four subagents, one per step, so each step has isolated context.", trap: "T2", why: "Orchestration overhead for a short, linear workflow." },
+      { t: "Give the agent all four tools and let it decide the order from the conversation.", why: "Leaves ordering to chance when the order is fixed and known." }
+    ]
+  },
+  {
+    id: "b7-10", ts: "1.2", scenario: 3,
+    stem: "To save a hop, a teammate proposes letting the search subagent send its results straight to the synthesis subagent, bypassing the coordinator. What's the main cost?",
+    options: [
+      { t: "None of note: fewer hops means lower latency and fewer tokens spent on routing.", why: "Ignores what the coordinator does with results besides forwarding them." },
+      { t: "Subagents can't communicate with each other at all, so the change wouldn't work.", trap: "T8", why: "It could be built; the question is whether it should be." },
+      { t: "The coordinator loses sight of coverage, errors and what synthesis receives, so it can't spot gaps or re-delegate.", ok: true, why: "Hub-and-spoke routing gives the coordinator the observability and control it needs." },
+      { t: "Synthesis would receive results in a different order, which breaks citation numbering.", why: "Ordering is minor and fixable; losing coordination isn't." }
+    ]
+  },
+  {
+    id: "b7-11", ts: "1.2", scenario: 3,
+    stem: "For “context,” the coordinator passes every subagent the user's full 30-turn conversation. Subagents get distracted by side topics and run slowly. What should the coordinator pass instead?",
+    options: [
+      { t: "A summary of the 30 turns, sent to every subagent so each still has the full picture.", why: "Smaller, but every subagent still gets everything rather than what its task needs." },
+      { t: "Only each subagent's specific goal, constraints and relevant prior findings.", ok: true, why: "Scope each subagent's context to its task; isolation is the point of subagents." },
+      { t: "The full conversation, with an instruction to ignore turns unrelated to its task.", trap: "T9", why: "Irrelevant context still costs tokens and attention." },
+      { t: "The full conversation, with subagents moved to a larger context window.", trap: "T3", why: "Room isn't the problem; focus is." }
+    ]
+  },
+  {
+    id: "b7-12", ts: "1.7", scenario: 5,
+    stem: "A CI review step runs <code>claude -p --output-format json</code>. A later step should apply the suggested fixes with the full context of that review. How do you carry the context over?",
+    options: [
+      { t: "Read <code>session_id</code> from the first step's JSON output and run the second step with <code>--resume</code> and that ID.", ok: true, why: "Resuming the specific session gives the second step the review's full context." },
+      { t: "Run the second step with <code>--continue</code>, which picks up the review automatically.", why: "<code>--continue</code> takes the most recent session in that directory, which isn't guaranteed to be this one in CI." },
+      { t: "Re-run the review inside the fix step so it rebuilds the same context first.", why: "Pays for the review twice and may not reproduce the same findings." },
+      { t: "Combine review and fix into one prompt so no context needs to carry over.", why: "Loses the separate review step, and its output, that the pipeline relies on." }
+    ]
+  },
+  {
+    id: "b7-13", ts: "1.7", scenario: 4,
+    stem: "You resume yesterday's investigation session. Since then a teammate changed 3 of the 40 files Claude analyzed; the rest are untouched. What's the most efficient reliable approach?",
+    options: [
+      { t: "Start a new session and inject a structured summary of yesterday's findings.", why: "Reasonable when most results are stale; here 37 of 40 files are still accurate." },
+      { t: "Resume and tell Claude which 3 files changed, so it re-reads only those.", ok: true, why: "Targeted re-analysis keeps the valid context and refreshes only what changed." },
+      { t: "Resume and continue as before, since most of the earlier analysis still holds.", why: "Claude would reason from stale results for the 3 changed files." },
+      { t: "Resume and run <code>/compact</code> so the stale details are summarized away.", why: "Compaction summarizes stale results; it doesn't refresh them." }
+    ]
+  },
+  {
+    id: "b7-14", ts: "1.1", scenario: 6,
+    stem: "An extraction agent may call <code>lookup_vendor</code> several times per document. The loop exits with <code>if response.content[0].type == \"text\": break</code>, and many runs stop after Claude's first sentence, before any lookup. Fix?",
+    options: [
+      { t: "Check the last content block instead of the first, and break when it's text.", why: "Still infers completion from content shape; a reply can end in text and still be mid-task." },
+      { t: "Loop while <code>stop_reason</code> is <code>\"tool_use\"</code> and exit on <code>\"end_turn\"</code>.", ok: true, why: "stop_reason is the structured completion signal; Claude often writes text before a tool call." },
+      { t: "Tell Claude in the system prompt to emit tool calls before any text in its reply.", trap: "T1", why: "Fragile and unnecessary; the loop is reading the wrong signal." },
+      { t: "Raise <code>max_tokens</code> so the tool call fits in the same response as the text.", why: "The tool call is already there; the loop exits before looking at it." }
+    ]
+  },
+  {
+    id: "b7-15", ts: "1.4", scenario: 1,
+    stem: "Refunds over $500 need a manager's approval. The agent correctly routes them for approval, but sometimes tells customers “your refund is on its way” before anyone approves it. Best fix?",
+    options: [
+      { t: "Add few-shot examples of correct wording for refunds that are still pending approval.", trap: "T1", why: "Improves wording on average; the agent still doesn't know the refund's real state." },
+      { t: "Have the approval step return an explicit <code>pending_approval</code> status the agent must relay, instead of a generic success.", ok: true, why: "Make the workflow state explicit in what the code returns, so the agent's message matches reality." },
+      { t: "Add “never confirm refunds over $500” to the system prompt, in bold.", trap: "T1", why: "Probabilistic, and the agent still can't tell pending from processed." },
+      { t: "Audit transcripts weekly and coach the prompt whenever a premature promise appears.", why: "Detects after customers were misinformed." }
+    ]
+  },
+  {
+    id: "b7-16", ts: "1.4", scenario: 5,
+    stem: "When the CI agent can't fix a failing test, it posts “Could not fix this test” on the PR, and engineers start their investigation from scratch. What should it post instead?",
+    options: [
+      { t: "The full agent transcript as an attachment, so engineers can see everything it tried.", why: "Complete but slow to read; the key facts should come first." },
+      { t: "A structured handoff: the test, the failure, its root-cause hypothesis, what it tried, files touched and a suggested next step.", ok: true, why: "A structured summary lets the engineer continue rather than restart." },
+      { t: "A shorter, friendlier message that tags the code owner for the failing module.", why: "Routes the problem but transfers none of the investigation." },
+      { t: "Nothing; retry the fix on the next commit, since the agent may succeed with fresh code.", trap: "T6", why: "Hides the failure and wastes runs." }
+    ]
+  },
+  {
+    id: "b7-17", ts: "1.3", scenario: 4,
+    stem: "A coordinator delegates “review PR 4812” to a reviewer subagent, passing only the PR number. The reviewer spends most of its budget re-fetching the diff, CI logs and the linked issue, all of which the coordinator already loaded. Fix?",
+    options: [
+      { t: "Pass all the gathered context (the diff, a CI summary and the issue's requirements) in the delegation prompt.", ok: true, why: "Subagents only know what they're given; pass what's already been gathered." },
+      { t: "Raise the reviewer's turn limit so it has budget left for the review after fetching.", why: "Pays for duplicated work instead of removing it." },
+      { t: "Let the reviewer read the coordinator's conversation history directly.", trap: "T8", why: "Subagent contexts are isolated; the coordinator must pass context explicitly." },
+      { t: "Have the coordinator do the review itself, since it already has the context.", why: "Gives up the focused, isolated reviewer context the subagent provides." }
+    ]
+  },
+  {
+    id: "b7-18", ts: "1.5", scenario: 5,
+    stem: "In CI, the agent must never edit migration files under <code>db/migrations/</code> that have already been applied. It occasionally does while fixing schema-related test failures. What's the right mechanism?",
+    options: [
+      { t: "A rule in CLAUDE.md stating that applied migrations must never be edited.", trap: "T1", why: "Followed most of the time; an irreversible change needs a guarantee." },
+      { t: "Make the entire repository read-only during the CI job.", why: "Blocks the legitimate fixes the job exists to make." },
+      { t: "A <code>PreToolUse</code> hook on Edit and Write that denies changes to applied migrations and explains why.", ok: true, why: "Interception enforces the rule every time and tells the agent what to do instead." },
+      { t: "A post-run check that fails the job if any applied migration was modified.", why: "Catches it after the run; the agent wasted its work and never learned the constraint." }
+    ]
+  },
+  {
+    id: "b7-19", ts: "2.3", scenario: 4,
+    stem: "A developer agent investigates Jira issues and sometimes updates them, but updates should happen only after the developer confirms. The investigation is done by a subagent. How should Jira tools be distributed?",
+    options: [
+      { t: "Give the investigation subagent read-only Jira tools, and keep update tools with the coordinator, which confirms with the developer first.", ok: true, why: "Scope each agent's tools to its role; writes stay where confirmation happens." },
+      { t: "Give the subagent all Jira tools, and instruct it to ask before any update.", trap: "T1", why: "The subagent can't ask the developer directly, and the instruction isn't a guarantee." },
+      { t: "Remove update tools entirely and have developers update issues by hand.", why: "Overcorrects; confirmed updates are part of the job." },
+      { t: "Give both agents every Jira tool, so either can act when needed.", trap: "T5", why: "Spreads write access to an agent whose role doesn't need it." }
+    ]
+  },
+  {
+    id: "b7-20", ts: "2.5", scenario: 2,
+    stem: "Before deleting a deprecated module, you need every file that imports it and what each one uses it for. Which built-in tool approach fits best?",
+    options: [
+      { t: "Glob for files with the module's name in their path, then Read each of them.", why: "File names don't reveal which files import the module." },
+      { t: "Read the deprecated module itself, then infer its likely callers from what it exports.", why: "Inference isn't a search; you need the actual import sites." },
+      { t: "Grep for the module's import statements, then Read only the matching files to see how each uses it.", ok: true, why: "Search content to find the importers, then read just those." },
+      { t: "Read every file under <code>src/</code> so that no indirect usage is missed.", why: "Floods context; targeted search finds the importers directly." }
+    ]
+  },
+  {
+    id: "b7-21", ts: "2.1", scenario: 1,
+    stem: "<code>search_kb</code>'s description reads “Searches help-center articles.” For questions like “where is my order?” the agent calls it and returns generic shipping articles instead of using <code>get_order</code>. What's the best first fix?",
+    options: [
+      { t: "Route any message mentioning an order to <code>get_order</code> with a keyword rule.", trap: "T2", why: "Keyword routing misfires on paraphrases and bypasses the agent's judgment." },
+      { t: "Say in <code>search_kb</code>'s description what it doesn't cover (order and account data) and which tool to use instead.", ok: true, why: "Descriptions should state boundaries, not just purpose." },
+      { t: "Remove <code>search_kb</code> from the agent, since its articles rarely resolve tickets.", why: "Breaks the questions help articles do answer." },
+      { t: "Add several few-shot examples of order questions answered with <code>get_order</code>.", trap: "T1", why: "Can help, but the description still invites the wrong choice; fix the interface first." }
+    ]
+  },
+  {
+    id: "b7-22", ts: "3.3", scenario: 2,
+    stem: "<code>.claude/rules/api.md</code> has <code>paths: [\"src/api/**\"]</code>, and <code>.claude/rules/testing.md</code> has <code>paths: [\"**/*.test.ts\"]</code>. Claude edits <code>src/api/user.test.ts</code>. Which rules apply?",
+    options: [
+      { t: "Only <code>api.md</code>, because its directory pattern is more specific than a file pattern.", why: "Rules don't compete; every matching rule applies." },
+      { t: "Only <code>testing.md</code>, because file-pattern rules take precedence over directory rules.", why: "There's no precedence between matching rules." },
+      { t: "Both, since the file matches both glob patterns.", ok: true, why: "Every rule whose paths match the file is loaded." },
+      { t: "Neither, unless the root CLAUDE.md imports them.", trap: "T8", why: "Rules load from .claude/rules/ without imports." }
+    ]
+  },
+  {
+    id: "b7-23", ts: "5.3", scenario: 3,
+    stem: "A search subagent runs 10 queries. Six return results; four still time out after local retries. Its output is a single <code>status: \"partial\"</code> plus the merged results. Why is that a problem, and what's better?",
+    options: [
+      { t: "It's fine: “partial” tells the coordinator enough to note a coverage gap in the report.", why: "The coordinator can't tell which queries failed, so it can't re-delegate them." },
+      { t: "Return per-query status: results for the six, and for the four, the query, error type and attempts made.", ok: true, why: "Granular status lets the coordinator retry or re-scope exactly what's missing." },
+      { t: "Report “failed” for the whole task, so the coordinator re-runs all 10 queries.", trap: "T6", why: "Throws away six good results." },
+      { t: "Retry the four queries until they succeed before returning anything.", trap: "T6", why: "Timeouts that survive local retries may not resolve; the coordinator may have alternatives." }
+    ]
+  },
+  {
+    id: "b7-24", ts: "5.5", scenario: 6,
+    stem: "You have 2,000 labeled extractions. On the <code>tax_id</code> field, a model confidence of 0.9 corresponds to 82% observed accuracy; on <code>invoice_date</code>, 0.9 corresponds to 99%. How should review thresholds be set?",
+    options: [
+      { t: "Use 0.9 for every field, since it means 90% confidence.", why: "The labeled data shows 0.9 means different accuracy on different fields." },
+      { t: "Set every field's threshold from the labeled accuracy, so <code>tax_id</code> needs a higher score.", ok: true, why: "Calibrate thresholds per field against labeled data." },
+      { t: "Average the two fields' accuracy and use a single threshold matching that average.", why: "Averaging hides exactly the per-field difference you measured." },
+      { t: "Send every <code>tax_id</code> to review and never review <code>invoice_date</code>.", why: "Ignores the scores entirely and stops measuring invoice_date." }
+    ]
   }
 ];

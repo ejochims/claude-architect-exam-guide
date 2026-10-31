@@ -68,6 +68,27 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 - **Method.** Items were rewritten inline, domain by domain, with `scripts/audit/apply-rewrites.mjs`. Each domain was gated with `cue-baselines.mjs --ts N` before committing.
 - **Still owed:** Phase 8 runs a fresh options-only solver and a blind solver on the rewritten bank, to confirm with a model and not just heuristics.
 
+### Batch 5 (2026-10-31): bank expanded to 204 items, with the Readiness Check
+
+| Metric | Before | After |
+|---|---|---|
+| Total items | 120 | **204**: 144 practice and 60 holdout |
+| Task statements with fewer than 5 items | 21 | **0** |
+| Domain mix (D1–D5) | 21/19/18/23/18% | **26.5 / 18.1 / 20.1 / 19.6 / 15.7%** against 27/18/20/20/15 |
+| Holdout | none | **60 items, 10 per scenario**; D1 17, D2 11, D3 12, D4 12, D5 8 |
+| Stem-blind heuristics, practice and holdout separately | — | every one ≤ 35% (holdout: pick-longest 31.7%, most-clauses 27.4%) |
+| Correct option longest, whole bank | 81.7% | 32.4%. Under the 35% gate but above the 30% aim, because the holdout keys are a little long. |
+| Absolute wording, correct vs distractors | 20.8% vs 28.9% | **26.0% vs 30.2%** |
+
+- **New practice items (24, `b7-*`).** These cover the thinnest task statements: plan mode vs direct execution (3.4 ×3), path rules (3.3 ×3), CLAUDE.md loading (3.1), decomposition (1.6 ×3), hub-and-spoke and context scoping (1.2 ×2), sessions (1.7 ×2), and loop, enforcement, hook and context-passing items, plus 2.1, 2.3, 2.5, 5.3 and 5.5.
+- **Holdout (`content/holdout.js`, `h1-1` to `h6-10`).** These were written to the harder standard. Each shares a task statement with practice items but presents a new decision or a new surface. None paraphrases the official samples.
+- **Readiness Check view (`#readiness`).**
+  - It takes one attempt, merged across devices by its earliest timestamp, with a 120-minute timer.
+  - The result shows the raw % with a 95% range, a per-domain breakdown, and the booking-bar verdict (80% overall and every domain at 70% or more), along with a reminder about the other booking conditions.
+  - Verified headlessly: all 60 holdout items appear in the check, and none appear in mocks or drills.
+- **Residual risk: the same author wrote the holdout and the practice rewrites.** The plan called for separate author agents; efficiency mode dropped that. Batch 7's blind solver on the holdout is the independence check.
+- **Still open: 10 of 15 mock draws can't meet every domain quota** from the practice pool. Scoring is domain-weighted, so results stay comparable, but some draws under-sample D1 or D3.
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

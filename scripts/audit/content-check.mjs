@@ -68,13 +68,13 @@ const scen = B.scenarios.map(s => s.n);
 const draws = [];
 for (let a = 0; a < 6; a++) for (let b = a + 1; b < 6; b++) for (let c = b + 1; c < 6; c++) for (let d = c + 1; d < 6; d++) draws.push([scen[a], scen[b], scen[c], scen[d]]);
 const mock = draws.map(draw => {
-  const pool = Q.filter(q => draw.includes(q.scenario));
+  const pool = Q.filter(q => !q.holdout && draw.includes(q.scenario));
   const short = B.domains.map(d => ({ d: d.id, need: Math.round(d.weight * 0.6), have: pool.filter(q => domainOf(q.ts) === d.id).length })).filter(x => x.have < x.need);
   return { draw: draw.join(","), pool: pool.length, poolCoveredBy60: pct(Math.min(60, pool.length), pool.length), short };
 });
 
 const report = {
-  totals: { questions: Q.length, cards: cards.length, modules: modules.length, lessonQuestions: Q.filter(q => q.src !== "bank").length, bankQuestions: Q.filter(q => q.src === "bank").length },
+  totals: { questions: Q.length, cards: cards.length, modules: modules.length, lessonQuestions: Q.filter(q => q.src !== "bank" && q.src !== "holdout").length, bankQuestions: Q.filter(q => q.src === "bank").length, holdoutQuestions: Q.filter(q => q.src === "holdout").length },
   perTask, tasksBelow5: Object.entries(perTask).filter(([, n]) => n < 5).map(([t, n]) => `${t}:${n}`), tasksUntaught,
   perDomain: Object.fromEntries(Object.entries(perDomain).map(([d, n]) => [d, { n, pct: pct(n, Q.length), target: domainTarget[d] }])),
   perScenario, scenarioByDomain: scenDomain,
@@ -97,7 +97,7 @@ const report = {
 if (json) console.log(JSON.stringify(report, null, 2));
 else {
   const r = report, c = r.cueing;
-  console.log(`Questions ${r.totals.questions} (lessons ${r.totals.lessonQuestions}, bank ${r.totals.bankQuestions}) · cards ${r.totals.cards} · modules ${r.totals.modules}`);
+  console.log(`Questions ${r.totals.questions} (lessons ${r.totals.lessonQuestions}, bank ${r.totals.bankQuestions}, holdout ${r.totals.holdoutQuestions}) · cards ${r.totals.cards} · modules ${r.totals.modules}`);
   console.log(`Per task statement: ${Object.entries(r.perTask).map(([t, n]) => `${t}=${n}`).join(" ")}`);
   console.log(`Task statements below 5 questions: ${r.tasksBelow5.length} (${r.tasksBelow5.join(", ")})`);
   console.log(`Per domain (actual% / target%): ${Object.entries(r.perDomain).sort().map(([d, v]) => `${d} ${v.n} (${v.pct}/${v.target})`).join(" · ")}`);

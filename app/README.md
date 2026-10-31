@@ -9,6 +9,8 @@ Interactive study path for the Claude Certified Architect – Foundations exam. 
 | `content/curriculum.js` | Blueprint domains and weights, 30 task statements, 6 scenarios, the module map, and the 9 distractor traps. |
 | `content/mNN.js` | One lesson per module: `steps` (`read`, `widget`, `quiz`, `recap`) plus `cards` for flashcards. |
 | `content/bank.js` | Extra scenario questions used by drills and the mock exam. |
+| `content/holdout.js` | The 60-item Readiness Check (`holdout: true`), 10 per scenario. Never shown in lessons, drills or mocks; taken once. Load it after `bank.js`. |
+| `content/f01.js`–`f03.js` | Foundations lessons that come before Module 0 (ids `f01`–`f03`). |
 | `widgets.js`, `widgets2.js` | Interactive widgets (`WIDGETS`) and inline embeds (`EMBEDS`). `sorter` is the generic, config-driven one. |
 
 **Question format.** Each question has an `id` and a task statement `ts`, and optionally a `scenario`. It has four `options`, each with text `t`, an explanation `why`, and optionally `ok: true` (exactly one per question) or a `trap` id. Options are shuffled for display using a seed from the question id. Set `holdout: true` to sequester an item from lessons, drills, mocks and readiness; it's reserved for the one-time Readiness Check.

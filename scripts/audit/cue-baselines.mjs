@@ -6,7 +6,10 @@ import { loadContent, plain, ABSOLUTE } from "./lib.mjs";
 const all = loadContent().questions;
 // --ts 1 (or 1.4) limits the run to one domain or task statement, to gate a rewrite batch on its own.
 const tsArg = process.argv.includes("--ts") ? process.argv[process.argv.indexOf("--ts") + 1] : null;
-const Q = tsArg ? all.filter(q => q.ts === tsArg || q.ts.startsWith(tsArg + ".")) : all;
+// --set holdout|practice gates the sequestered Readiness Check items separately from the practice bank.
+const setArg = process.argv.includes("--set") ? process.argv[process.argv.indexOf("--set") + 1] : null;
+const inSet = q => !setArg || (setArg === "holdout") === !!q.holdout;
+const Q = all.filter(q => inSet(q) && (!tsArg || q.ts === tsArg || q.ts.startsWith(tsArg + ".")));
 const HEDGE = /\b(first|then|before|specific|explicit|targeted|only the|instead|rather than|so that|e\.g\.|because)\b/gi;
 const TECH = /<code>|[A-Za-z]+_[a-z_]+|--[a-z-]+|\.[a-z]+\b|`/g;
 

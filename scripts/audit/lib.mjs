@@ -11,12 +11,13 @@ export function loadContent() {
   const ctx = { window: {} };
   vm.createContext(ctx);
   const lessons = fs.readdirSync(CONTENT).filter(f => /^m\d+\.js$/.test(f)).sort();
-  for (const f of ["curriculum.js", ...lessons, "bank.js"]) vm.runInContext(fs.readFileSync(path.join(CONTENT, f), "utf8"), ctx, { filename: f });
+  const extra = fs.existsSync(path.join(CONTENT, "holdout.js")) ? ["holdout.js"] : [];
+  for (const f of ["curriculum.js", ...lessons, "bank.js", ...extra]) vm.runInContext(fs.readFileSync(path.join(CONTENT, f), "utf8"), ctx, { filename: f });
   const w = ctx.window;
   // Same ordering as app/app.js "Content index": lesson questions in module order, then the bank.
   const questions = [];
   for (const m of w.MODULES) if (w.LESSONS[m.id]) w.LESSONS[m.id].steps.forEach((s, si) => (s.questions || []).forEach(q => questions.push({ ...q, module: m.id, step: si, src: m.id })));
-  for (const q of w.BANK || []) questions.push({ ...q, module: (w.MODULES.find(m => m.tasks.includes(q.ts)) || {}).id, src: "bank" });
+  for (const q of w.BANK || []) questions.push({ ...q, module: (w.MODULES.find(m => m.tasks.includes(q.ts)) || {}).id, src: q.holdout ? "holdout" : "bank" });
   const cards = [];
   for (const m of w.MODULES) if (w.LESSONS[m.id]) (w.LESSONS[m.id].cards || []).forEach((c, i) => cards.push({ id: `${m.id}:${i}`, module: m.id, ...c }));
   return { blueprint: w.BLUEPRINT, modules: w.MODULES, lessons: w.LESSONS, traps: w.TRAPS, questions, cards };
