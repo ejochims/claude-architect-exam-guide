@@ -74,9 +74,9 @@ window.LESSONS.m12 = {
           id: "q12-1", ts: "3.6", scenario: 5,
           stem: "Your pipeline runs <code>claude -p</code> for PR review and posts results as inline comments, but the parsing script breaks whenever Claude phrases findings differently. Best fix?",
           options: [
-            { t: "Add <code>--output-format json</code> with a <code>--json-schema</code> for file, line, severity and message.", ok: true, why: "Structured, schema-shaped output is reliable to parse and post." },
-            { t: "Make the parser's regular expressions more flexible so they handle rephrased findings.", trap: "T6", why: "This chases phrasing variations forever." },
-            { t: "Ask in the prompt for a consistent output format.", trap: "T1", why: "Better, but probabilistic, when flags give a guarantee." },
+            { t: "Add <code>--output-format json</code> and a <code>--json-schema</code> for the findings.", ok: true, why: "Schema-validated structured output gives the parser a guaranteed shape." },
+            { t: "Make the parser's regular expressions tolerant of rephrasing, with fallbacks for the most common variants.", trap: "T6", why: "Chasing phrasing variations never ends. Fix the output format at the source." },
+            { t: "Specify the exact format in the prompt, with an example finding such as <code>src/api.ts:42 high …</code>.", trap: "T1", why: "Helps, but prompt formatting is probabilistic. The CLI can enforce a schema." },
             { t: "Add the <code>--format strict</code> flag to the command.", trap: "T8", why: "Not a real flag." }
           ]
         },
@@ -84,30 +84,30 @@ window.LESSONS.m12 = {
           id: "q12-2", ts: "3.6", scenario: 5,
           stem: "After each new commit, the CI reviewer re-posts many of the comments it already made on the PR. Developers are annoyed. What should change?",
           options: [
-            { t: "Include prior findings in context and have Claude report only new or still-unaddressed issues.", ok: true, why: "The reviewer knows what was already said." },
-            { t: "Review only the latest commit's diff instead of the whole PR.", why: "This misses issues that span commits and unresolved earlier ones." },
-            { t: "Deduplicate comments by exact text match against earlier comments before posting.", why: "Rephrased duplicates slip through." },
-            { t: "Run the review only on the PR's first commit.", why: "Later changes go unreviewed." }
+            { t: "Give Claude the prior findings and have it report only new or unaddressed issues.", ok: true, why: "With earlier results in context, Claude can tell what's new and what's been fixed." },
+            { t: "Review only the latest commit's diff (<code>git diff HEAD~1</code>) instead of the whole PR.", why: "Misses issues that appear only when the new commit interacts with earlier changes." },
+            { t: "Before posting, drop any comment whose text exactly matches one already on the PR.", why: "Rephrased duplicates slip through, and fixed issues are never acknowledged." },
+            { t: "Run the review once, on the PR's first commit, and skip later commits.", why: "New problems in later commits go unreviewed." }
           ]
         },
         {
           id: "q12-3", ts: "3.6", scenario: 5,
           stem: "CI test generation keeps proposing tests that already exist and ignores the team's fixture helpers. What two changes help most?",
           options: [
-            { t: "Provide existing test files in context, and document testing standards and available fixtures in CLAUDE.md.", ok: true, why: "Claude sees what's covered and what helpers exist." },
-            { t: "Ask Claude in the prompt to “avoid duplicate tests” and “use our fixtures.”", trap: "T9", why: "It can't avoid duplicates it can't see." },
-            { t: "Generate the tests in a nightly batch job instead of per PR.", why: "Timing doesn't change quality." },
-            { t: "Use a higher-tier model for test generation.", trap: "T3", why: "Missing context, not capability." }
+            { t: "Ask in the prompt to avoid duplicate tests and to use the team's fixtures.", trap: "T9", why: "Claude can't avoid duplicates it can't see or use fixtures it doesn't know about." },
+            { t: "Put existing test files in context, and document standards and fixtures in CLAUDE.md.", ok: true, why: "Context about what exists, and conventions in project memory, fix both problems at the source." },
+            { t: "Move test generation to a nightly batch job (<code>cron: 0 2 * * *</code>) over the whole repo.", why: "Changes when it runs, not what it knows." },
+            { t: "Use a higher-tier model for test generation, since it reasons better about coverage.", trap: "T3", why: "A bigger model still can't see the existing tests or fixtures." }
           ]
         },
         {
           id: "q12-4", ts: "3.6", scenario: 5,
           stem: "Where should CI-invoked Claude Code get the team's review criteria and testing conventions?",
           options: [
-            { t: "The project CLAUDE.md in the repository.", ok: true, why: "CI-invoked Claude Code reads project memory like any session, and it's versioned with the code." },
-            { t: "A <code>CLAUDE_REVIEW_RULES</code> environment variable.", trap: "T8", why: "Not a mechanism Claude Code uses." },
-            { t: "The CI runner's ~/.claude/CLAUDE.md.", why: "This is runner-specific and not versioned with the code." },
-            { t: "Pasted into each pipeline's prompt string.", why: "It works, but duplicates and drifts. CLAUDE.md is the mechanism." }
+            { t: "The project CLAUDE.md in the repository.", ok: true, why: "Committed project memory loads in CI the same way it does locally." },
+            { t: "A <code>CLAUDE_REVIEW_RULES</code> environment variable set in the pipeline's configuration.", trap: "T8", why: "Not a real mechanism." },
+            { t: "A <code>~/.claude/CLAUDE.md</code> baked into the CI runner's image for every job.", why: "Unversioned and separate from the repo, so it drifts from what developers use locally." },
+            { t: "Each pipeline's prompt string, pasted in full so the criteria are always explicit.", why: "Duplicated across pipelines and drifts. CLAUDE.md keeps one versioned source." }
           ]
         },
         {

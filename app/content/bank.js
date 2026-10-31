@@ -5,20 +5,20 @@ window.BANK = [
     id: "b2-1", ts: "3.1", scenario: 2,
     stem: "In the same repository, Claude follows the team's naming conventions in some sessions but not others. What is the best first diagnostic?",
     options: [
-      { t: "Run <code>/memory</code> to see which memory files are actually loaded in the failing sessions.", ok: true, why: "If the file holding the rule isn't loaded for that working directory, no rewording will help. Check loading first." },
-      { t: "Rewrite the conventions in CLAUDE.md in capital letters.", trap: "T9", why: "Emphasis doesn't matter if the file isn't loaded." },
-      { t: "Switch to a more capable model.", trap: "T3", why: "Inconsistency by session points to configuration, not capability." },
-      { t: "Paste the conventions into the start of every prompt.", why: "A workaround that skips diagnosing the loading problem." }
+      { t: "Run <code>/memory</code> to see which memory files are loaded in the failing sessions.", ok: true, why: "Exam framing: check which memory files load before changing them. (Today <code>/context</code> shows what's loaded and <code>/memory</code> opens the files; see Exam vs. today.)" },
+      { t: "Rewrite the conventions in CLAUDE.md in capital letters with “IMPORTANT” markers so they stand out.", trap: "T9", why: "Emphasis doesn't help if the file isn't loaded. Diagnose first." },
+      { t: "Switch to a more capable model, which follows long instruction files more reliably.", trap: "T3", why: "Doesn't diagnose why the conventions apply in some sessions and not others." },
+      { t: "Paste the conventions into the start of every prompt until the inconsistency goes away.", why: "A workaround that hides the cause, likely a file that loads in some sessions but not others." }
     ]
   },
   {
     id: "b2-2", ts: "3.3", scenario: 2,
     stem: "A rule file has <code>paths: [\"src/api/**/*\"]</code>, but its conventions don't apply when Claude edits API tests in <code>tests/api/</code>. Why?",
     options: [
-      { t: "Path-scoped rules load only for matching files, and tests/api/ doesn't match src/api/**/*. Add a matching pattern.", ok: true, why: "Rules with paths load only when the edited file matches." },
-      { t: "Rules files are only loaded when they're referenced from the repository root CLAUDE.md.", trap: "T8", why: ".claude/rules/ files load on their own." },
-      { t: "The paths field doesn't support globs; it needs a regular expression.", trap: "T8", why: "paths takes glob patterns." },
-      { t: "The rule has to be copied into a tests/api/CLAUDE.md file before it applies to that folder.", why: "Fixing the glob is cleaner than duplicating the rule." }
+      { t: "Path-scoped rules load only for matching files, and <code>tests/api/</code> doesn't match <code>src/api/**/*</code>.", ok: true, why: "Add a pattern that covers the tests, such as <code>tests/api/**/*</code>." },
+      { t: "Rules files load only when the root CLAUDE.md references them with an <code>@import</code>.", trap: "T8", why: "Rules in <code>.claude/rules/</code> load on their own; no import is needed." },
+      { t: "The <code>paths</code> field expects regular expressions, so the glob is being read literally.", trap: "T8", why: "<code>paths</code> takes glob patterns." },
+      { t: "A rule applies only inside the directory tree containing it, so it must live in <code>tests/api/</code>.", why: "Rules live in <code>.claude/rules/</code>; their <code>paths</code> decide where they apply." }
     ]
   },
   {
@@ -26,39 +26,39 @@ window.BANK = [
     stem: "A <code>/scaffold-component</code> skill should only read templates and write new files. It should never run shell commands. Which frontmatter setting configures this?",
     options: [
       { t: "<code>allowed-tools</code>, listing only the file tools the skill needs", ok: true, why: "Exam framing: allowed-tools restricts tool access while the skill runs. (Real world today: it pre-approves the listed tools, and restriction is done with disallowed tools or the agent's tool list; see Exam vs. today.)" },
-      { t: "<code>context: fork</code>, so the skill runs isolated from the shell", why: "Isolates context; doesn't limit tools." },
-      { t: "<code>argument-hint</code>, declaring which tools the skill may use", why: "Prompts for parameters; doesn't limit tools." },
-      { t: "<code>sandbox: true</code>, which disables shell access for the skill", trap: "T8", why: "Not a skill frontmatter field." }
+      { t: "<code>context: fork</code>, so the skill runs in an isolated context away from the main shell", why: "Isolates context. It doesn't limit which tools run." },
+      { t: "<code>argument-hint</code>, declaring which tools the skill may use", why: "Describes the expected argument. It doesn't limit tools." },
+      { t: "<code>sandbox: true</code>", trap: "T8", why: "Not a skill frontmatter field." }
     ]
   },
   {
     id: "b2-4", ts: "3.2", scenario: 2,
     stem: "Your team has a 300-line quarterly dependency-audit procedure. Someone proposes adding it to the root CLAUDE.md so Claude “always knows it.” Better option?",
     options: [
-      { t: "Make it an on-demand skill; keep CLAUDE.md for standards that apply to every task.", ok: true, why: "Skills are on demand and task-specific; CLAUDE.md is always loaded." },
-      { t: "Add it to CLAUDE.md under a clear heading so it's always available.", why: "This spends tokens on every turn for a quarterly task, and dilutes everyday rules." },
-      { t: "Add it to each developer's ~/.claude/CLAUDE.md instead.", why: "Not shared, and still always loaded." },
-      { t: "Paste the procedure into the prompt each quarter.", why: "Error-prone and unversioned." }
+      { t: "Add it to CLAUDE.md under a clearly labeled heading, so it's always available when needed.", why: "300 lines load into every session to serve a task done four times a year." },
+      { t: "Make it an on-demand skill, and keep CLAUDE.md for standards that apply to every task.", ok: true, why: "Skills hold task-specific workflows loaded when invoked; CLAUDE.md holds always-on standards." },
+      { t: "Add it to each developer's <code>~/.claude/CLAUDE.md</code>, so it doesn't bloat the shared file.", why: "Still loads in every session for each developer, and copies drift." },
+      { t: "Keep it in the wiki and paste it into the prompt each quarter.", why: "Manual and easy to forget. A skill makes it a versioned, invocable workflow." }
     ]
   },
   {
     id: "b2-5", ts: "3.5", scenario: 2,
-    stem: "Three bugs remain: the date parser drops time zones, the import validator rejects valid ISO dates, and the monthly rollup double-counts midnight records. All stem from the shared date utility. How should you ask Claude to fix them?",
+    stem: "Three bugs remain: the date parser drops time zones, the import validator rejects valid ISO dates, and the monthly rollup double-counts midnight records. All three come from the shared date utility, and fixing any one of them changes behavior the other two rely on. How should you ask Claude to fix them?",
     options: [
-      { t: "Describe all three together in one detailed message, because the fixes interact through the shared utility.", ok: true, why: "Interacting issues belong in a single message. Fixing one at a time risks undoing the others." },
-      { t: "Fix them one at a time in separate messages, verifying each before the next.", why: "Better for independent issues. These interact." },
-      { t: "Ask Claude to fix only the most important bug first.", why: "This leaves related bugs and invites rework." },
-      { t: "Use plan mode separately for each of the three bugs.", why: "Three separate plans miss the shared cause." }
+      { t: "Fix them one at a time in separate messages, verifying each before moving to the next.", why: "Sequential fixes suit independent bugs. Here each fix changes what the others depend on." },
+      { t: "Describe all three together in one detailed message, because each fix changes what the others rely on.", ok: true, why: "Interacting problems need to be solved together, so one fix doesn't break another." },
+      { t: "Fix the most user-visible bug first, then re-test the other two against the new behavior.", why: "Still sequential, and the first fix is designed without the constraints of the other two." },
+      { t: "Use plan mode separately for each bug, so each gets its own investigation and design.", why: "Three separate plans miss the shared cause in the date utility." }
     ]
   },
   {
     id: "b2-6", ts: "3.5", scenario: 2,
     stem: "A data-migration script Claude wrote crashes on rows where <code>middle_name</code> is NULL. You've told it twice to “handle nulls,” and its fixes still fail on some rows. Most effective next step?",
     options: [
-      { t: "Give a specific test case: an input row with NULLs and the exact expected output.", ok: true, why: "Concrete input and expected output pin down the edge case." },
-      { t: "Tell Claude to be very careful with null values this time.", trap: "T9", why: "A general exhortation." },
-      { t: "Rewrite the script yourself instead of iterating.", why: "This abandons the iteration loop." },
-      { t: "Switch to plan mode and ask Claude to rethink the script.", why: "The problem is specification, not planning." }
+      { t: "Tell Claude to handle every possible null value carefully this time, in every column.", trap: "T9", why: "A third instruction to “handle nulls” adds nothing." },
+      { t: "Rewrite the null handling yourself rather than iterating on Claude's version again.", why: "Gives up on a fix that one concrete test case would likely produce." },
+      { t: "Give a concrete test case: a row with NULLs and the exact expected output.", ok: true, why: "A concrete failing input with its expected output removes the ambiguity in “handle nulls”." },
+      { t: "Switch to plan mode and ask Claude to redesign the script's data model from scratch.", why: "Overkill for one unclear requirement. A test case is the targeted fix." }
     ]
   },
 
@@ -147,12 +147,12 @@ window.BANK = [
   // ---------- Scenario 5: Claude Code for CI ----------
   {
     id: "b5-1", ts: "3.6", scenario: 5,
-    stem: "A GitHub Actions step runs <code>claude \"Summarize risky changes in this PR\"</code> and times out after 6 hours with no output. What's the fix?",
+    stem: "A CI step runs <code>claude -p \"Review this PR for risky changes\"</code> with no other input. Claude spends 25+ minutes exploring the whole repository before it reviews anything, and the job often times out. What's the best fix?",
     options: [
-      { t: "Run <code>claude -p \"Summarize risky changes in this PR\"</code>.", ok: true, why: "Print mode runs non-interactively and exits." },
-      { t: "Add <code>--yes</code> to auto-approve prompts.", trap: "T8", why: "Not the documented mechanism for non-interactive runs." },
-      { t: "Set <code>CI=true</code> so Claude detects the runner.", trap: "T8", why: "Not how Claude Code switches modes." },
-      { t: "Increase the job timeout so the step has time to finish.", why: "It will wait forever either way." }
+      { t: "Pipe the PR's diff into the command and scope the review to those changes.", ok: true, why: "Give the agent the scope directly. It no longer has to discover what changed." },
+      { t: "Add <code>--max-turns 5</code> so every run ends quickly, whatever it has found by then.", why: "A turn cap cuts reviews off midway. Scope the input so the work is small instead." },
+      { t: "Raise the job timeout to two hours so the exploration has time to finish.", why: "Pays for the waste instead of removing it." },
+      { t: "Add <code>--output-format json</code> so the pipeline gets results as soon as they're ready.", why: "Changes the output format, not how much the agent explores." }
     ]
   },
   {
@@ -189,10 +189,10 @@ window.BANK = [
     id: "b5-5", ts: "3.6", scenario: 5,
     stem: "A pipeline has Claude auto-fix lint failures and then, in the same session, review its own fix before pushing. Reviewers keep finding problems the self-review approved. Best change?",
     options: [
-      { t: "Run the review in a separate Claude Code invocation that sees the diff but not the fix's reasoning.", ok: true, why: "Session context isolation makes review more effective." },
-      { t: "Add “review critically” to the same session's prompt before the review step.", trap: "T9", why: "It still carries its generation reasoning." },
-      { t: "Increase the maximum turns in the fixing session.", why: "That doesn't add independence." },
-      { t: "Skip the review step for lint fixes.", why: "The stem shows real problems slipping through." }
+      { t: "Run the review in a separate Claude Code invocation that sees the diff but not the fix's reasoning.", ok: true, why: "An independent instance isn't anchored on the reasoning that produced the fix." },
+      { t: "Add “review critically and assume the fix is wrong” to the same session's prompt before the review step.", trap: "T9", why: "The same session still carries the reasoning that produced the fix." },
+      { t: "Increase the fixing session's maximum turns so it has room to test its own changes.", why: "More turns in the same context doesn't add an independent perspective." },
+      { t: "Have the same session re-run the linter and the test suite after its self-review.", why: "Useful, but reviewers are finding problems tools don't catch. The fix is independence." }
     ]
   },
   {
