@@ -831,5 +831,245 @@ window.BANK = [
       { t: "Run separate passes for security, performance and style.", why: "Right when one concern crowds out the others. Here the problem is repetition." },
       { t: "Review only the files that changed since the last reviewed commit.", ok: true, why: "Limit each re-review to what changed so old findings don't repeat." }
     ]
+  },
+  {
+    id: "p2-1", ts: "3.1", scenario: 2, family: "F18",
+    stem: "A developer wants Claude to give terse explanations in every project they work on. Their teammates don't share the preference. Where should it go?",
+    options: [
+      { t: "Put the rule in the repository's root CLAUDE.md and commit it.", why: "Right for team conventions. This would impose one person's preference on everyone." },
+      { t: "Put the rule in <code>~/.claude/CLAUDE.md</code> on the developer's machine.", ok: true, why: "User-level memory applies to all of one person's projects and isn't shared." },
+      { t: "Put the rule in a <code>.claude/rules/</code> file with a <code>paths:</code> glob for test files.", why: "Right for conventions scoped to file patterns. This is a personal preference." },
+      { t: "Put the rule in a CLAUDE.md inside the one directory it applies to.", why: "Right for one directory's conventions. This applies everywhere for one person." }
+    ]
+  },
+  {
+    id: "p4-7", ts: "3.1", scenario: 4, family: "F19",
+    stem: "A new teammate says Claude ignores the team's conventions on their machine; for everyone else it follows them. The conventions live in the tech lead's <code>~/.claude/CLAUDE.md</code>. What fixes this?",
+    options: [
+      { t: "Commit the conventions to the repository's root CLAUDE.md.", ok: true, why: "Team conventions belong in project memory that everyone gets from the repository." },
+      { t: "Split each topic into its own file and <code>@import</code> them from CLAUDE.md.", why: "Right for organizing a large file. The conventions still wouldn't reach the teammate." },
+      { t: "Run <code>/memory</code> to see which memory files this session has loaded.", why: "Useful for diagnosis, but the cause is already known: user-level memory isn't shared." },
+      { t: "Add a CLAUDE.md in the <code>legacy/</code> directory with its own conventions.", why: "Right for one directory's conventions. These apply to the whole team." }
+    ]
+  },
+  {
+    id: "p2-2", ts: "3.2", scenario: 2, family: "F20",
+    stem: "A codebase-analysis skill dumps pages of exploration output into the session each time it runs, crowding out the developer's own work. What fits best?",
+    options: [
+      { t: "A skill in <code>.claude/skills/</code> with <code>context: fork</code> in its frontmatter.", ok: true, why: "Running the skill in a forked context keeps its exploration out of the main session." },
+      { t: "A slash command in <code>.claude/commands/</code>, committed to the repository.", why: "Right for sharing a command with the team. The problem here is output volume." },
+      { t: "A command in <code>~/.claude/commands/</code> on the developer's machine.", why: "Right for a personal shortcut. The problem here is output volume." },
+      { t: "A rule in CLAUDE.md so that it applies in every session.", why: "Right for always-on guidance. This would load more into every session." }
+    ]
+  },
+  {
+    id: "p2-3", ts: "3.2", scenario: 2, family: "F21",
+    stem: "A skill's SKILL.md has grown to 900 lines of reference tables. Any single run needs only a few of them, but all 900 lines load every time. What fixes this?",
+    options: [
+      { t: "Move the detailed reference material into supporting files that the skill links to.", ok: true, why: "Keep SKILL.md short and load detailed material only when a run needs it." },
+      { t: "Add <code>argument-hint</code> to the frontmatter so users see what to pass.", why: "Right when users don't know what to pass. Size is the problem here." },
+      { t: "Rewrite the skill's description to say when it should be used.", why: "Right when Claude doesn't know when to use the skill. Size is the problem here." },
+      { t: "Copy the skill into <code>~/.claude/skills/</code> and change the copy.", why: "Right for a personal variant. The copy would be just as large." }
+    ]
+  },
+  {
+    id: "p4-6", ts: "3.2", scenario: 4, family: "F22",
+    stem: "The platform team wants every engineer who works in the monorepo to get the same <code>/new-service</code> workflow. Where should it live?",
+    options: [
+      { t: "A skill in <code>~/.claude/skills/</code> on the developer's machine.", why: "Right for one person's workflow. Other engineers wouldn't get it." },
+      { t: "A skill in the repository's <code>.claude/skills/</code> directory.", ok: true, why: "A project skill is shared with everyone through the repository." },
+      { t: "A section in the repository's CLAUDE.md that describes the steps.", why: "Right for always-on conventions. This is an on-demand workflow." },
+      { t: "A <code>PostToolUse</code> hook that runs the steps after each edit.", why: "Right for something that must run after every edit. This runs when asked." }
+    ]
+  },
+  {
+    id: "p2-5", ts: "3.4", scenario: 2, family: "F23",
+    stem: "The team needs to replace the logging library across 120 files. Several modules use it in unusual ways, and the team hasn't agreed on the migration pattern. What's the best way to work?",
+    options: [
+      { t: "Start in plan mode and agree on an approach before any files change.", ok: true, why: "A large change with open design choices needs an agreed plan before edits start." },
+      { t: "Make the change directly, then review the diff.", why: "Right for a small, well-understood change. This is neither." },
+      { t: "Have Claude interview you about the requirements before it starts.", why: "Right when the developer doesn't know the requirements. Here the open question is the approach." },
+      { t: "Run the exploration in a subagent and keep only its summary.", why: "Right when exploration would flood the context. It doesn't settle the approach." }
+    ]
+  },
+  {
+    id: "p2-6", ts: "3.5", scenario: 2, family: "F24",
+    stem: "Claude's date parser keeps misreading what the team means by “short date.” Two rounds of prose explanation haven't helped. What works best?",
+    options: [
+      { t: "Give two or three concrete input/output examples of the transformation.", ok: true, why: "Concrete examples remove the ambiguity that prose descriptions leave." },
+      { t: "Write the tests first and have Claude iterate until they pass.", why: "Right for larger behavioral specs. A few examples settle a format faster." },
+      { t: "Have Claude ask clarifying questions before implementing anything.", why: "Right when the developer is unsure what they want. Here they know; Claude misreads it." },
+      { t: "Describe all the problems in one message, because they interact.", why: "Right when several problems interact. Here there's one misunderstanding." }
+    ]
+  },
+  {
+    id: "p2-7", ts: "3.5", scenario: 2, family: "F25",
+    stem: "A refactored function must produce identical outputs for 40 known inputs. Claude's versions keep breaking a few of them. What works best?",
+    options: [
+      { t: "Write the test cases first, then have Claude iterate until they all pass.", ok: true, why: "Known expected outputs make an exact target; tests let Claude check itself." },
+      { t: "Add the missing detail to the prompt: inputs, constraints and expected output.", why: "Right when the prompt omits something. Here the target is already known." },
+      { t: "Have Claude interview you about edge cases before it writes any code.", why: "Right when requirements are unclear. Here they're exact." },
+      { t: "Raise the issues one per message, because they're independent.", why: "Right for independent issues. Here one target covers all of them." }
+    ]
+  },
+  {
+    id: "p5-4", ts: "3.5", scenario: 5, family: "F26",
+    stem: "The reviewer flags “magic numbers” the team considers fine and misses the ones it cares about. A written rule describing the difference hasn't helped. What works best?",
+    options: [
+      { t: "Add a few examples of findings the team accepted and ones it rejected.", ok: true, why: "When a written rule fails on a judgment call, examples show where the line is." },
+      { t: "Add the team's testing and style conventions to the repository's CLAUDE.md.", why: "Right when the reviewer lacks project context. Here it has a rule but misapplies it." },
+      { t: "Try the prompt on a sample of past PRs and refine it before rollout.", why: "Right before rollout. The problem is already known here." },
+      { t: "Split the prompt into separate review passes, one for each concern.", why: "Right when one concern crowds out others. Here one judgment is miscalibrated." }
+    ]
+  },
+  {
+    id: "p5-1", ts: "3.6", scenario: 5, family: "F27",
+    stem: "A script that posts inline PR comments breaks whenever Claude phrases its findings differently. What fixes this?",
+    options: [
+      { t: "Run Claude with the <code>-p</code> flag so that it runs non-interactively.", why: "Right when the job hangs waiting for input. It runs fine here." },
+      { t: "Use <code>--output-format json</code> with <code>--json-schema</code> for parseable output.", ok: true, why: "Schema-constrained JSON gives the script a fixed structure to read." },
+      { t: "Include the previous run's findings so only new issues are reported.", why: "Right when re-runs repeat findings. Here the format varies." },
+      { t: "Run the review in a separate session from the one that generated the code.", why: "Right when the reviewer shares the author's blind spots. Here the format varies." }
+    ]
+  },
+  {
+    id: "p5-2", ts: "3.6", scenario: 5, family: "F28",
+    stem: "Every new push gets a full set of review comments. Many repeat issues that were already raised and fixed. What fixes this?",
+    options: [
+      { t: "Pass the prior review's findings and ask only for new or unresolved issues.", ok: true, why: "With the earlier findings in context, the reviewer can report only what's new or still open." },
+      { t: "Generate the tests and review them in separate Claude sessions.", why: "Right when a session reviews its own output. The problem here is repetition." },
+      { t: "Put the project's test conventions and fixture helpers in CLAUDE.md.", why: "Right when generated code ignores conventions. The problem here is repetition." },
+      { t: "Validate the JSON output against the schema and fail the job if it's invalid.", why: "Right when malformed output breaks parsing. The problem here is repetition." }
+    ]
+  },
+  {
+    id: "p5-3", ts: "3.6", scenario: 5, family: "F29",
+    stem: "The reviewer flags intentional behavior changes as bugs because it doesn't know what each PR is meant to do. What fits best?",
+    options: [
+      { t: "Have a separate session, without the generator's context, review the code.", why: "Right when the reviewer shares the author's blind spots. Here it lacks the PR's intent." },
+      { t: "Run the review overnight on a schedule instead of on every push.", why: "Right when cost matters more than speed. It doesn't explain the change's intent." },
+      { t: "Give the reviewer the PR description and linked issue as context.", ok: true, why: "Telling the reviewer what the change is for lets it tell intended changes from bugs." },
+      { t: "Give the review job read-only tools so it can't change the branch.", why: "Right when the reviewer must not modify the branch. Here it misjudges intent." }
+    ]
+  },
+  {
+    id: "p5-5", ts: "4.1", scenario: 5, family: "F30",
+    stem: "The reviewer reports style nits, possible bugs and security holes with the same urgency. Developers can't tell what must be fixed before merging. What's the best step?",
+    options: [
+      { t: "Define which issue categories to report and which to skip, with an example of each.", why: "Right when unwanted categories are reported. All of these are wanted; their priority is unclear." },
+      { t: "Turn off the noisiest category for now while its criteria are rewritten.", why: "Right when one category is unreliable. Here they all lack priority." },
+      { t: "Require each finding to cite the exact line and state its concrete impact.", why: "Right when findings are vague. Here they're specific but unranked." },
+      { t: "Add severity levels, with a written criterion for each level.", ok: true, why: "Defined severity levels let developers see what blocks a merge." }
+    ]
+  },
+  {
+    id: "p6-7", ts: "4.1", scenario: 6, family: "F31",
+    stem: "Reviewers can't check extracted values quickly: they have to search 80-page contracts for where each one came from. What fixes this?",
+    options: [
+      { t: "Define exactly what counts as a “termination clause,” with included and excluded examples.", why: "Right when a category is misunderstood. Here the values are fine but hard to verify." },
+      { t: "Make the field nullable, and return null when the document doesn't contain one.", why: "Right when values are invented for absent fields. Here the issue is verification time." },
+      { t: "Add a field where the model explains how it arrived at each value.", why: "Explaining the derivation doesn't say where in the document to look." },
+      { t: "Require a page and section reference for every extracted value.", ok: true, why: "A location for every value lets reviewers jump straight to the evidence." }
+    ]
+  },
+  {
+    id: "p5-6", ts: "4.6", scenario: 5, family: "F32",
+    stem: "Claude reviews the code it just generated, in the same conversation, and approves nearly everything. What fits best?",
+    options: [
+      { t: "Review each file separately, then do one pass on cross-file interactions.", why: "Right for large diffs. The issue here is self-review." },
+      { t: "Have a second, independent instance review without the first one's reasoning.", ok: true, why: "An instance without the generator's reasoning doesn't share its blind spots." },
+      { t: "Have the reviewer give a confidence for each finding to direct human attention.", why: "Right for directing human attention. The reviewer still shares the author's blind spots." },
+      { t: "Review the whole diff in a single pass, with the PR description as context.", why: "Right for small diffs. Self-review would remain." }
+    ]
+  },
+  {
+    id: "p6-6", ts: "4.6", scenario: 6, family: "F33",
+    stem: "The same instance that extracted the data is asked to verify it, and it confirms its own errors. What fits best?",
+    options: [
+      { t: "Have a second instance, without the first one's reasoning, re-extract a sample to compare.", ok: true, why: "An independent instance doesn't share the first one's reasoning, so it can catch its errors." },
+      { t: "Have the model report confidence per field and send low-confidence fields to people.", why: "Right for prioritizing human review. Self-verification would still miss these errors." },
+      { t: "Check that the totals add up, and retry with the error when they don't.", why: "Right for checkable arithmetic. Most fields can't be checked that way." },
+      { t: "Split long documents into sections, extract from each, then merge the results.", why: "Right for long documents. The problem here is self-verification." }
+    ]
+  },
+  {
+    id: "p5-7", ts: "4.2", scenario: 5, family: "F34",
+    stem: "Review findings come back in a different shape each run: sometimes a list, sometimes prose, sometimes a table. What works best?",
+    options: [
+      { t: "Add two or three borderline findings as examples, with the reasoning for each.", why: "Right for borderline judgment. Here the content is fine; the shape varies." },
+      { t: "Write explicit criteria for which categories to report and which to skip.", why: "Right when unwanted categories appear. Here the shape varies." },
+      { t: "Show an example of the exact output structure for one finding.", ok: true, why: "An example of the exact format shows the model what to reproduce every time." },
+      { t: "Add examples from each of the languages the reviewer covers.", why: "Right when quality differs by language. Here the shape varies." }
+    ]
+  },
+  {
+    id: "p6-1", ts: "4.2", scenario: 6, family: "F35",
+    stem: "Extraction works on the standard invoice template but fails on invoices that put the total in a footer table or a sidebar. What works best?",
+    options: [
+      { t: "Add example documents in each layout, showing where each field is found.", ok: true, why: "Examples of each layout show the model where fields live when the structure changes." },
+      { t: "Add an example of a document missing a field, with null as the output.", why: "Right when fields are absent. Here they're present in other places." },
+      { t: "Add an example that shows the reasoning for an ambiguous date.", why: "Right for ambiguous values. Here the problem is location." },
+      { t: "Define each field precisely in the prompt, with its expected format.", why: "Right when a field's meaning is unclear. Here its location varies." }
+    ]
+  },
+  {
+    id: "p6-2", ts: "4.3", scenario: 6, family: "F36",
+    stem: "Every document must go through <code>extract_metadata</code> before any other processing. The model sometimes calls a different tool first. What fixes this?",
+    options: [
+      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> so the model must call one of the extraction tools.", why: "Right when any of several tools is acceptable. Here one specific tool must run first." },
+      { t: "Force one tool with <code>tool_choice: {\"type\": \"tool\", \"name\": …}</code>.", ok: true, why: "Forcing the named tool guarantees it runs first. (Exam framing; see Exam vs. today for current model support.)" },
+      { t: "Make the fields that may be absent nullable in the schema.", why: "Right when values are invented. Here the wrong tool runs." },
+      { t: "Add an <code>\"other\"</code> enum value plus a free-text detail field.", why: "Right when categories don't fit. Here the wrong tool runs." }
+    ]
+  },
+  {
+    id: "p6-8", ts: "4.3", scenario: 6, family: "F37",
+    stem: "The <code>payment_terms</code> enum has four values, but about 8% of contracts use other terms, and the model forces them into the nearest value. What fixes this?",
+    options: [
+      { t: "Make the fields that may be absent nullable in the schema.", why: "Right when a value is absent. Here a real value doesn't fit the list." },
+      { t: "Add an <code>\"other\"</code> enum value with a free-text detail field.", ok: true, why: "An escape value plus detail captures real cases that the list doesn't cover." },
+      { t: "Define the output with a strict JSON schema in the tool definition.", why: "Right for syntax errors. The output is valid, just forced into the wrong category." },
+      { t: "Add a validation step that checks the values against business rules.", why: "Right for checkable rules. A wrong but valid category passes them." }
+    ]
+  },
+  {
+    id: "p6-3", ts: "4.4", scenario: 6, family: "F38",
+    stem: "About 5% of extractions fail validation because dates come back as “March 3rd” instead of ISO 8601. The dates are in the documents. What's the right next step?",
+    options: [
+      { t: "Retry, including the specific validation error in the follow-up request.", ok: true, why: "The value exists; telling the model exactly what failed lets it correct the format." },
+      { t: "Stop retrying and send the document to human review.", why: "Right when the source lacks the value. Here it's present." },
+      { t: "Extract both the stated total and a calculated total, and flag mismatches.", why: "Right for internal consistency. This is a format error." },
+      { t: "Record a <code>detected_pattern</code> with each flag to see which ones reviewers dismiss.", why: "Right for analyzing reviewer dismissals. This is a format error." }
+    ]
+  },
+  {
+    id: "p6-4", ts: "4.4", scenario: 6, family: "F39",
+    stem: "Reviewers dismiss many of the extractor's “anomaly” flags. The team wants to learn which kinds of flag to stop raising. What fits best?",
+    options: [
+      { t: "Retry with the validation error and the original document in the follow-up.", why: "Right for correcting format errors. This is about which flags are useful." },
+      { t: "Extract the line items, the stated total and a calculated total, then compare them.", why: "Right for detecting inconsistencies. This is about which flags are useful." },
+      { t: "Make the field nullable so the model can report that a value is absent.", why: "Right when values are absent. This is about which flags are useful." },
+      { t: "Record a <code>detected_pattern</code> with each flag to see which ones reviewers dismiss.", ok: true, why: "Tagging each flag with its pattern shows which patterns reviewers dismiss." }
+    ]
+  },
+  {
+    id: "p5-8", ts: "4.5", scenario: 5, family: "F40",
+    stem: "A weekly scan of 2,000 repositories runs through synchronous calls. Nobody needs the results before Monday morning, and cost is the main complaint. What fits best?",
+    options: [
+      { t: "Use the Message Batches API for the nightly audit of every repository.", ok: true, why: "Non-urgent bulk work suits batches, which cost 50% less." },
+      { t: "Keep synchronous calls for the pre-merge check that developers wait on.", why: "Right for blocking checks. Nobody waits on this one." },
+      { t: "Refine the prompt on a sample first, then submit the full batch.", why: "Right for a new prompt. This scan's prompt is established." },
+      { t: "Resubmit only the failed requests, matched by their <code>custom_id</code>.", why: "Right after failures. Here the issue is cost." }
+    ]
+  },
+  {
+    id: "p6-5", ts: "4.5", scenario: 6, family: "F41",
+    stem: "A new extraction prompt has never run on real documents. The team must process 50,000 by Friday at the lowest cost. What fits best?",
+    options: [
+      { t: "Submit all 50,000 documents through the Message Batches API.", why: "Batching an untested prompt risks paying for 50,000 bad results." },
+      { t: "Resubmit only the failed documents, matched by their <code>custom_id</code>.", why: "Right after a batch with failures. Nothing has run yet." },
+      { t: "Run the prompt on a sample of a few hundred, refine it, then batch the rest.", ok: true, why: "Fix problems on a sample cheaply first, then batch the rest at the lower price." },
+      { t: "Process documents synchronously as they arrive.", why: "Right when results are needed immediately. It costs more and nothing here is urgent." }
+    ]
   }
 ];

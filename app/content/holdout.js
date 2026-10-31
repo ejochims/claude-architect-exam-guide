@@ -103,33 +103,33 @@ window.BANK.push(
     ]
   },
   {
-    id: "h2-1", ts: "3.1", scenario: 2, holdout: true,
-    stem: "The root CLAUDE.md says “write tests with Jest.” One package, <code>packages/billing</code>, has migrated to Vitest, but Claude keeps writing Jest tests there. Best fix?",
+    id: "h2-1", ts: "3.1", scenario: 2, holdout: true, family: "F18",
+    stem: "The test conventions apply to every <code>*.test.ts</code> file, and those files are spread across 30 directories. The team wants the conventions loaded only when Claude is working on test files. Where should they go?",
     options: [
-      { t: "Add <code>packages/billing/CLAUDE.md</code> stating that this package uses Vitest.", ok: true, why: "A nested CLAUDE.md applies when Claude works in that package, refining the general rule." },
-      { t: "Change the root CLAUDE.md to say “use Jest or Vitest, whichever fits.”", why: "Makes the rule vaguer for every package without saying which one uses which." },
-      { t: "Add a rule with <code>paths: [\"**/*.test.ts\"]</code> that says to use Vitest.", why: "Applies to test files in every package, including the ones still on Jest." },
-      { t: "Remind Claude at the start of each session in that package.", why: "Manual, and easy to forget." }
+      { t: "Put the rule in the repository's root CLAUDE.md and commit it.", why: "Right for conventions everyone needs in every session. This would load them for all work, not just tests." },
+      { t: "Put the rule in <code>~/.claude/CLAUDE.md</code> on the developer's machine.", why: "Right for one person's preferences. Teammates wouldn't get these conventions." },
+      { t: "Put the rule in a <code>.claude/rules/</code> file with a <code>paths:</code> glob for test files.", ok: true, why: "A path-scoped rule loads only when Claude touches matching files, wherever they live." },
+      { t: "Put the rule in a CLAUDE.md inside the one directory it applies to.", why: "Right when the files sit in one directory. These are spread across 30." }
     ]
   },
   {
-    id: "h2-2", ts: "3.2", scenario: 2, holdout: true,
-    stem: "A <code>/gen-migration</code> skill reads many schema files, producing thousands of lines of exploration, and needs a migration name. Developers want the main conversation kept clean and a hint about the name. Which frontmatter fits?",
+    id: "h2-2", ts: "3.2", scenario: 2, holdout: true, family: "F20",
+    stem: "The team wants a <code>/review-migration</code> command that every developer gets automatically when they pull the repository. Where should it live?",
     options: [
-      { t: "<code>allowed-tools: Read</code> and <code>argument-hint: \"[migration-name]\"</code>", why: "Limits tools but still runs the exploration in the main conversation." },
-      { t: "<code>context: fork</code> and <code>argument-hint: \"[migration-name]\"</code>", ok: true, why: "Fork isolates the verbose work; the hint documents the expected argument." },
-      { t: "<code>context: fork</code> and <code>allowed-tools: Read</code>", why: "Isolates the work but says nothing about the name it expects." },
-      { t: "<code>argument-hint: \"[migration-name]\"</code> and <code>quiet: true</code>", trap: "T8", why: "<code>quiet</code> isn't a skill frontmatter field." }
+      { t: "A skill in <code>.claude/skills/</code> with <code>context: fork</code> in its frontmatter.", why: "Right when a skill's output would flood the session. Nothing here needs isolation." },
+      { t: "A slash command in <code>.claude/commands/</code>, committed to the repository.", ok: true, why: "Project commands are shared through the repository. (Today skills in <code>.claude/skills/</code> work the same way.)" },
+      { t: "A command in <code>~/.claude/commands/</code> on the developer's machine.", why: "Right for a personal shortcut. Teammates wouldn't get it." },
+      { t: "A rule in CLAUDE.md so that it applies in every session.", why: "Right for always-on guidance. This is an on-demand command." }
     ]
   },
   {
-    id: "h2-3", ts: "3.2", scenario: 2, holdout: true,
-    stem: "A 15-step weekly release procedure was added to CLAUDE.md. Sessions now load it every time, and Claude occasionally starts release steps during unrelated tasks. Best change?",
+    id: "h2-3", ts: "3.2", scenario: 2, holdout: true, family: "F21",
+    stem: "Claude never uses the team's migration skill unprompted, even on migration tasks; people have to invoke it by name. Its description reads “Migration helper.” What fixes this?",
     options: [
-      { t: "Keep it in CLAUDE.md, but add “only follow this when asked to release.”", trap: "T1", why: "Still loads every session and still competes for attention." },
-      { t: "Move it to each release manager's <code>~/.claude/CLAUDE.md</code>.", why: "Still always-on for those people, and copies drift." },
-      { t: "Make it a skill invoked as <code>/release</code>, and keep CLAUDE.md for always-on standards.", ok: true, why: "On-demand workflows belong in skills; CLAUDE.md is for what applies to every task." },
-      { t: "Split the procedure into 15 separate rules files, one per step.", why: "Rules hold conventions, not invocable workflows." }
+      { t: "Move the detailed reference material into supporting files that the skill links to.", why: "Right when SKILL.md is bloated. The problem is that Claude doesn't know when to use it." },
+      { t: "Add <code>argument-hint</code> to the frontmatter so users see what to pass.", why: "Right when users don't know what arguments to pass. It's only a hint and doesn't affect when Claude uses the skill." },
+      { t: "Rewrite the skill's description to say when it should be used.", ok: true, why: "Claude decides when to use a skill from its description, so the description must say when it applies." },
+      { t: "Copy the skill into <code>~/.claude/skills/</code> and change the copy.", why: "Right for a personal variant. It doesn't help Claude recognize when to use the skill." }
     ]
   },
   {
@@ -143,33 +143,33 @@ window.BANK.push(
     ]
   },
   {
-    id: "h2-5", ts: "3.4", scenario: 2, holdout: true,
-    stem: "You need to fix an intermittent race condition in a module you've never worked in. You don't yet know where it comes from. What workflow fits best?",
+    id: "h2-5", ts: "3.4", scenario: 2, holdout: true, family: "F23",
+    stem: "A developer needs to fix a typo in one error message. They know exactly which file and line it's in. What's the best way to work?",
     options: [
-      { t: "Plan mode to find the cause, then direct execution for the fix.", ok: true, why: "Investigate before committing; once the cause is clear, execution is straightforward." },
-      { t: "Direct execution: ask Claude to fix the race and iterate until the test stops failing.", why: "An intermittent failure can stop appearing without being fixed." },
-      { t: "Plan mode for everything, including writing and testing the fix.", why: "Planning is for investigation and design; the fix itself doesn't need it." },
-      { t: "Ask Claude to add retries around the failing operation as a first step.", why: "Masks the race instead of finding it." }
+      { t: "Start in plan mode and agree on an approach before any files change.", why: "Right for large or ambiguous changes. Planning a one-line fix is overhead." },
+      { t: "Make the change directly, then review the diff.", ok: true, why: "A small, well-understood change needs no planning step." },
+      { t: "Have Claude interview you about the requirements before it starts.", why: "Right when the requirements are unclear. Here they're exact." },
+      { t: "Run the exploration in a subagent and keep only its summary.", why: "Right when exploration would flood the context. Nothing needs exploring here." }
     ]
   },
   {
-    id: "h2-6", ts: "3.5", scenario: 2, holdout: true,
-    stem: "Claude's SQL query passes all tests but takes 40 seconds on production-size data. You've asked twice to “make it faster,” and Claude reshuffles the syntax with little change. Most effective next step?",
+    id: "h2-6", ts: "3.5", scenario: 2, holdout: true, family: "F24",
+    stem: "A developer reports bugs one at a time. Each fix breaks something another fix relied on, because all the bugs run through the same validation code. What works best?",
     options: [
-      { t: "Ask Claude to “aggressively optimize” and try harder this time.", trap: "T9", why: "Adds urgency, not information." },
-      { t: "Give it table sizes and current timing plus a target and the <code>EXPLAIN</code> plan.", ok: true, why: "Concrete measurements show where the time goes, and what success means." },
-      { t: "Switch to a larger model that knows more optimization techniques.", trap: "T3", why: "Without the plan and data sizes, any model is guessing." },
-      { t: "Rewrite the query yourself rather than iterating further.", why: "Gives up before providing the information that would let Claude succeed." }
+      { t: "Give two or three concrete input/output examples of the transformation.", why: "Right when prose descriptions are being misread. Here the fixes conflict." },
+      { t: "Write the tests first and have Claude iterate until they pass.", why: "Right when behavior can be pinned down by tests. The issue here is fixing interacting bugs separately." },
+      { t: "Have Claude ask clarifying questions before implementing anything.", why: "Right when requirements are unclear. Here the bugs are known." },
+      { t: "Describe all the problems in one message, because they interact.", ok: true, why: "Interacting problems need to be seen together, so one fix doesn't undo another." }
     ]
   },
   {
-    id: "h2-7", ts: "3.5", scenario: 2, holdout: true,
-    stem: "You need a parser for a date-range syntax with a strict spec and about 30 edge cases. Earlier attempts each handled a different subset of the cases. What approach converges fastest?",
+    id: "h2-7", ts: "3.5", scenario: 2, holdout: true, family: "F25",
+    stem: "A developer is building a caching layer in a domain they know little about. They aren't sure which invalidation cases matter. What works best?",
     options: [
-      { t: "Write tests from the spec's examples and iterate until all of them pass.", ok: true, why: "Tests make every edge case concrete and give Claude an objective target." },
-      { t: "Paste the full spec and ask for a complete implementation in one pass.", why: "That's what produced partial coverage; nothing checks each case." },
-      { t: "Use the interview pattern so Claude asks about requirements before coding.", why: "Useful when requirements are unknown; here they're already written down." },
-      { t: "Ask Claude to review its own implementation against the spec after writing it.", why: "Self-review shares the original blind spots; executable tests don't." }
+      { t: "Write the test cases first, then have Claude iterate until they all pass.", why: "Right when the expected behavior is known. Here the developer can't write the cases yet." },
+      { t: "Add the missing detail to the prompt: inputs, constraints and expected output.", why: "Right when you know what's missing from the prompt. Here the developer doesn't know." },
+      { t: "Have Claude interview you about edge cases before it writes any code.", ok: true, why: "Questions surface edge cases the developer wouldn't think to specify." },
+      { t: "Raise the issues one per message, because they're independent.", why: "Right for independent issues. Here the requirements aren't known yet." }
     ]
   },
   {
@@ -353,23 +353,23 @@ window.BANK.push(
     ]
   },
   {
-    id: "h4-6", ts: "3.2", scenario: 4, holdout: true,
-    stem: "Your team wants a <code>/pr-summary</code> command available to every developer as soon as they clone the repo, and versioned with the code. Where should it live?",
+    id: "h4-6", ts: "3.2", scenario: 4, holdout: true, family: "F22",
+    stem: "A developer wants their own scaffolding workflow available in every repository they work in, without changing anything for their teammates. Where should it live?",
     options: [
-      { t: "In each developer's <code>~/.claude/</code> directory, distributed through the onboarding docs.", why: "Personal and unversioned, so copies drift." },
-      { t: "In the project's <code>.claude/</code> directory, as a project command or skill committed to the repo.", ok: true, why: "Project-scoped commands and skills are versioned and shared on clone." },
-      { t: "In the root CLAUDE.md, as a section titled “/pr-summary.”", why: "Memory content isn't an invocable command." },
-      { t: "In the CI pipeline's configuration, where it runs automatically.", why: "That's automation, not a command developers can run." }
+      { t: "A skill in <code>~/.claude/skills/</code> on the developer's machine.", ok: true, why: "User-level skills follow one person across projects and aren't shared." },
+      { t: "A skill in the repository's <code>.claude/skills/</code> directory.", why: "Right for a team workflow. It would only exist in one repository and affect teammates." },
+      { t: "A section in the repository's CLAUDE.md that describes the steps.", why: "Right for always-on conventions. This is an on-demand workflow." },
+      { t: "A <code>PostToolUse</code> hook that runs the steps after each edit.", why: "Right for something that must run after every edit. This runs when asked." }
     ]
   },
   {
-    id: "h4-7", ts: "3.1", scenario: 4, holdout: true,
-    stem: "The root CLAUDE.md contains <code>@docs/standards.md</code>. After the docs were reorganized, Claude stopped following the standards. Nothing else changed. What's the most likely cause?",
+    id: "h4-7", ts: "3.1", scenario: 4, holdout: true, family: "F19",
+    stem: "Claude ignores one of the team's rules in a developer's session. The developer has edited several instruction files and isn't sure which of them Claude is actually reading. What's the best first step?",
     options: [
-      { t: "The file moved, so the import no longer resolves. Update the @import path.", ok: true, why: "Imports point at a path; check what's loaded, then fix the reference." },
-      { t: "@imports only work for files in the same directory as CLAUDE.md.", why: "Imports can reference other paths." },
-      { t: "The standards file is now too long to import, so it's silently skipped.", why: "Length isn't what changed; the location did." },
-      { t: "Claude needs a restart after any docs change before imports take effect.", why: "A new session reloads memory, but a broken path stays broken." }
+      { t: "Commit the conventions to the repository's root CLAUDE.md.", why: "Right when conventions live only on one person's machine. First find out what's loaded." },
+      { t: "Split each topic into its own file and <code>@import</code> them from CLAUDE.md.", why: "Right when one CLAUDE.md has become hard to maintain. This is a diagnosis problem." },
+      { t: "Run <code>/memory</code> to see which memory files this session has loaded.", ok: true, why: "See what's loaded before changing anything; the fix depends on which file is missing." },
+      { t: "Add a CLAUDE.md in the <code>legacy/</code> directory with its own conventions.", why: "Right when one directory needs different rules. The problem here isn't known yet." }
     ]
   },
   {
@@ -403,83 +403,83 @@ window.BANK.push(
     ]
   },
   {
-    id: "h5-1", ts: "3.6", scenario: 5, holdout: true,
-    stem: "The CI review job posts comments on lockfiles, generated code and the <code>vendor/</code> directory. Developers ignore its output as noise. Where should the review scope be defined?",
+    id: "h5-1", ts: "3.6", scenario: 5, holdout: true, family: "F27",
+    stem: "The new CI job hangs until it times out. The logs show Claude waiting for input. What fixes this?",
     options: [
-      { t: "In the project CLAUDE.md, so every run applies it.", ok: true, why: "Project memory gives CI the same context everywhere, in one versioned place." },
-      { t: "In a post-processing script that deletes comments on those paths before posting.", why: "Works, but the job still spends effort reviewing files nobody wants reviewed." },
-      { t: "In each pipeline's prompt string, listing the paths to ignore.", why: "Duplicated across pipelines, and it drifts." },
-      { t: "In a <code>CLAUDE_IGNORE</code> environment variable on the runner.", trap: "T8", why: "Not a real mechanism." }
+      { t: "Run Claude with the <code>-p</code> flag so that it runs non-interactively.", ok: true, why: "Without <code>-p</code>, Claude Code starts an interactive session and waits for input." },
+      { t: "Use <code>--output-format json</code> with <code>--json-schema</code> for parseable output.", why: "Right when downstream scripts can't parse the output. Here nothing is produced." },
+      { t: "Include the previous run's findings so only new issues are reported.", why: "Right when re-runs repeat findings. Here the job never finishes." },
+      { t: "Run the review in a separate session from the one that generated the code.", why: "Right when the reviewer shares the author's blind spots. Here the job never finishes." }
     ]
   },
   {
-    id: "h5-2", ts: "3.6", scenario: 5, holdout: true,
-    stem: "A CI step must gate the merge on Claude's verdict (pass or fail), with reasons attached to the PR. How should the step get the verdict?",
+    id: "h5-2", ts: "3.6", scenario: 5, holdout: true, family: "F28",
+    stem: "Tests generated in CI ignore the team's fixture helpers and duplicate setup code in every file. The CI prompt doesn't mention the helpers anywhere. What fixes this?",
     options: [
-      { t: "Check whether the output text contains the word “PASS.”", trap: "T6", why: "Fragile; “doesn't PASS” matches too." },
-      { t: "Use the exit code of <code>claude -p</code> as the verdict.", why: "The exit code reflects whether the run succeeded, not what Claude concluded." },
-      { t: "<code>--output-format json</code> with a <code>--json-schema</code> verdict field.", ok: true, why: "Schema-validated structured output is machine-readable and reliable." },
-      { t: "Ask Claude to put its verdict on the first line of its response.", trap: "T1", why: "Formatting by instruction is probabilistic." }
+      { t: "Pass the prior review's findings and ask only for new or unresolved issues.", why: "Right when re-runs repeat old findings. Here the problem is missing project context." },
+      { t: "Generate the tests and review them in separate Claude sessions.", why: "Right when a session reviews its own work. Here the generator doesn't know the helpers exist." },
+      { t: "Put the project's test conventions and fixture helpers in CLAUDE.md.", ok: true, why: "CI runs read CLAUDE.md, so project conventions there reach every generated test." },
+      { t: "Validate the JSON output against the schema and fail the job if it's invalid.", why: "Right when output breaks downstream parsing. Here the tests are valid but ignore conventions." }
     ]
   },
   {
-    id: "h5-3", ts: "3.6", scenario: 5, holdout: true,
-    stem: "A PR has 30 commits. The review job runs on every push, reviews the entire diff each time, and re-raises issues that were already discussed or fixed. What should each run do?",
+    id: "h5-3", ts: "3.6", scenario: 5, holdout: true, family: "F29",
+    stem: "The session that generates code in CI then reviews its own output. It rarely finds problems that human reviewers later catch. What fits best?",
     options: [
-      { t: "Review only the newest commit's diff, ignoring earlier commits.", why: "Misses problems that arise from how new and old changes interact." },
-      { t: "Review the diff with prior findings and report only open issues.", ok: true, why: "Prior findings in context let the reviewer skip what's resolved." },
-      { t: "Skip review until the PR is marked ready, then review once.", why: "Loses early feedback, the reason it runs on each push." },
-      { t: "Post every finding, and let developers resolve duplicates by hand.", why: "The noise is the complaint." }
+      { t: "Have a separate session, without the generator's context, review the code.", ok: true, why: "A reviewer without the generator's reasoning doesn't share its blind spots." },
+      { t: "Run the review overnight on a schedule instead of on every push.", why: "Right when cost matters more than fast feedback. Timing isn't the issue here." },
+      { t: "Give the reviewer the PR description and linked issue as context.", why: "Right when the reviewer misreads intent. Here it's too close to the code it wrote." },
+      { t: "Give the review job read-only tools so it can't change the branch.", why: "Right when the reviewer must not modify the branch. Here it misses issues." }
     ]
   },
   {
-    id: "h5-4", ts: "3.5", scenario: 5, holdout: true,
-    stem: "The CI test generator produces tests that pass but don't check much: many assert only that a function returns something. How do you get meaningful tests?",
+    id: "h5-4", ts: "3.5", scenario: 5, holdout: true, family: "F26",
+    stem: "A new review prompt is about to go live on 300 repositories. Nobody has yet seen how it behaves on real diffs. What should happen first?",
     options: [
-      { t: "Tell the generator to write thorough, high-quality assertions.", trap: "T9", why: "Doesn't define what a meaningful assertion is." },
-      { t: "Require a minimum number of assertions per test.", why: "Easy to satisfy with more trivial assertions." },
-      { t: "Examples of good assertions, plus a fail-when-stubbed check.", ok: true, why: "Examples define quality, and a stub check verifies the test exercises real behavior." },
-      { t: "Use a larger model for test generation.", trap: "T3", why: "Without a quality criterion, any model can write weak tests." }
+      { t: "Add a few examples of findings the team accepted and ones it rejected.", why: "Right when you know which judgments it gets wrong. Here nothing has been observed yet." },
+      { t: "Add the team's testing and style conventions to the repository's CLAUDE.md.", why: "Right when the reviewer lacks project context. Here nobody knows how it behaves." },
+      { t: "Try the prompt on a sample of past PRs and refine it before rollout.", ok: true, why: "Refine on a sample first; problems cost far less to fix before 300 repositories depend on it." },
+      { t: "Split the prompt into separate review passes, one for each concern.", why: "Right when one concern crowds out others. That hasn't been observed." }
     ]
   },
   {
-    id: "h5-5", ts: "4.1", scenario: 5, holdout: true,
-    stem: "The security reviewer flags every <code>eval</code>-like call, including test fixtures that deliberately run sandboxed code. Developers now skim past its findings. Best change?",
+    id: "h5-5", ts: "4.1", scenario: 5, holdout: true, family: "F30",
+    stem: "Developers now ignore every review comment because the “naming” category is wrong most of the time. The other categories are accurate. What's the best immediate step?",
     options: [
-      { t: "Define criteria that cover untrusted input in production code and skip fixtures.", ok: true, why: "Explicit criteria remove the false positives at their source." },
-      { t: "Ask the reviewer to use more judgment about which <code>eval</code> calls matter.", trap: "T9", why: "Judgment without criteria is what produced the noise." },
-      { t: "Drop the dynamic-execution check, since it's mostly false positives.", why: "Gives up a real security check instead of scoping it." },
-      { t: "Post <code>eval</code> findings only when the model rates them severe.", trap: "T4", why: "Uncalibrated ratings don't fix unclear criteria." }
+      { t: "Define which issue categories to report and which to skip, with an example of each.", why: "Right when the reviewer reports things the team doesn't want at all. Here one category is unreliable." },
+      { t: "Turn off the noisiest category for now while its criteria are rewritten.", ok: true, why: "Removing the unreliable category restores trust in the accurate ones while its criteria are fixed." },
+      { t: "Require each finding to cite the exact line and state its concrete impact.", why: "Right when findings are vague. These are specific, just wrong." },
+      { t: "Add severity levels, with a written criterion for each level.", why: "Right when urgent and minor findings look alike. Here one category is wrong." }
     ]
   },
   {
-    id: "h5-6", ts: "4.6", scenario: 5, holdout: true,
-    stem: "Code is generated in one CI job and reviewed by a separate Claude instance in another. The reviewer still approves subtle bugs. It receives the diff plus the PR description, which the generator wrote to explain its reasoning. Best change?",
+    id: "h5-6", ts: "4.6", scenario: 5, holdout: true, family: "F32",
+    stem: "Human reviewers spend equal time on all 40 findings per PR, though a handful are far shakier than the rest. The team wants human time spent where it matters most. What fits best?",
     options: [
-      { t: "Withhold the generator's explanation from the reviewer.", ok: true, why: "Independence means not inheriting the generator's reasoning, even secondhand." },
-      { t: "Have the reviewer run twice and post only findings both runs agree on.", why: "Both runs see the same anchoring explanation." },
-      { t: "Ask the reviewer to assume the explanation is wrong.", trap: "T9", why: "The explanation still frames how it reads the diff." },
-      { t: "Use a larger model for the reviewer.", trap: "T3", why: "A bigger model is anchored by the same explanation." }
+      { t: "Review each file separately, then do one pass on cross-file interactions.", why: "Right when attention spreads thin over many files. Here the findings already exist." },
+      { t: "Have a second, independent instance review without the first one's reasoning.", why: "Right when a reviewer checks its own work. Here the issue is where humans spend time." },
+      { t: "Have the reviewer give a confidence for each finding to direct human attention.", ok: true, why: "Per-finding confidence lets humans check the uncertain findings first." },
+      { t: "Review the whole diff in a single pass, with the PR description as context.", why: "Right for small diffs. It doesn't rank the findings." }
     ]
   },
   {
-    id: "h5-7", ts: "4.2", scenario: 5, holdout: true,
-    stem: "The reviewer flags broad <code>except Exception</code> handlers in top-level CLI entry points, where they're intentional, and also catches genuinely swallowed exceptions in library code. Criteria are already written. What helps most?",
+    id: "h5-7", ts: "4.2", scenario: 5, holdout: true, family: "F34",
+    stem: "The reviewer handles clear-cut issues well but is inconsistent on borderline ones, such as whether an unchecked error in a test helper matters. What works best?",
     options: [
-      { t: "Contrasting few-shot examples of the two patterns.", ok: true, why: "Examples teach the distinction that written criteria leave ambiguous." },
-      { t: "Stop checking exception handling in any file named <code>cli.py</code>.", why: "A file-name rule misses entry points elsewhere and hides real bugs in those files." },
-      { t: "Add “be conservative about exception-handling findings.”", trap: "T9", why: "Vague caution doesn't teach the distinction." },
-      { t: "Disable the exception-handling category.", why: "Loses the genuine catches along with the false positives." }
+      { t: "Add two or three borderline findings as examples, with the reasoning for each.", ok: true, why: "Examples of the hard cases, with the reasoning, show how to judge the borderline." },
+      { t: "Write explicit criteria for which categories to report and which to skip.", why: "Right when whole categories are unwanted. Here the problem is borderline judgment within one." },
+      { t: "Show an example of the exact output structure for one finding.", why: "Right when the format varies. Here the judgment varies." },
+      { t: "Add examples from each of the languages the reviewer covers.", why: "Right when quality differs by language. Here it differs by how clear-cut the case is." }
     ]
   },
   {
-    id: "h5-8", ts: "4.5", scenario: 5, holdout: true,
-    stem: "Each night, a CI job generates documentation for 3,000 modules. The docs need to be published by the next business day, and the team wants to cut cost. Should it use the Message Batches API?",
+    id: "h5-8", ts: "4.5", scenario: 5, holdout: true, family: "F40",
+    stem: "The team moved the pre-merge check to the Message Batches API to save 50%. Developers now wait hours for results before they can merge. What fits best?",
     options: [
-      { t: "No: batches have no latency guarantee, so nightly jobs should stay synchronous.", why: "The guarantee is up to 24 hours, which fits a next-business-day deadline." },
-      { t: "Yes: the deadline tolerates the 24-hour worst case.", ok: true, why: "Check the worst case against the deadline; here it fits." },
-      { t: "No: documentation generation needs tool calls, which batch can't run.", why: "Generating docs from supplied source doesn't need a multi-turn tool loop." },
-      { t: "Yes, but only if results come back in the same order as the modules.", why: "Use custom_id; order doesn't matter." }
+      { t: "Use the Message Batches API for the nightly audit of every repository.", why: "Right for non-blocking work like nightly audits. A pre-merge check is blocking." },
+      { t: "Keep synchronous calls for the pre-merge check that developers wait on.", ok: true, why: "Batches can take up to 24 hours; a check people wait on needs a synchronous response." },
+      { t: "Refine the prompt on a sample first, then submit the full batch.", why: "Right before the first large run. The problem here is latency." },
+      { t: "Resubmit only the failed requests, matched by their <code>custom_id</code>.", why: "Right after a batch with failures. The problem here is latency." }
     ]
   },
   {
@@ -503,83 +503,83 @@ window.BANK.push(
     ]
   },
   {
-    id: "h6-1", ts: "4.2", scenario: 6, holdout: true,
-    stem: "Invoices with line-item tables that continue onto a second page often come back with the second page's items missing. The prompt already says “include every line item.” What helps most?",
+    id: "h6-1", ts: "4.2", scenario: 6, holdout: true, family: "F35",
+    stem: "One European supplier writes dates like 03/04/25, and the extractor reads them sometimes day-first and sometimes month-first. What works best?",
     options: [
-      { t: "Repeat “include every line item, including those on later pages” in bold.", trap: "T9", why: "Repetition adds no new information." },
-      { t: "Add few-shot examples showing correct extraction from tables split across pages.", ok: true, why: "Examples of the varied structure teach the model how to handle it." },
-      { t: "Extract each page separately and concatenate the results.", why: "Splits rows and headers that span the page break." },
-      { t: "Make the line-items array required, with at least one item.", why: "The array isn't empty; it's incomplete." }
+      { t: "Add example documents in each layout, showing where each field is found.", why: "Right when layouts vary. Here one format is ambiguous." },
+      { t: "Add an example of a document missing a field, with null as the output.", why: "Right when values are invented for missing fields. The date here is present." },
+      { t: "Add an example that shows the reasoning for an ambiguous date.", ok: true, why: "Showing the reasoning (European supplier, so day first) teaches the model how to resolve the ambiguity." },
+      { t: "Define each field precisely in the prompt, with its expected format.", why: "Right when the field's meaning is unclear. Here the format is known but read inconsistently." }
     ]
   },
   {
-    id: "h6-2", ts: "4.3", scenario: 6, holdout: true,
-    stem: "<code>payment_terms</code> is an enum of <code>NET30</code> and <code>NET60</code>. Some invoices say “due on receipt” or “2/10 net 30,” and these get forced into one of the two values. Best schema change?",
+    id: "h6-2", ts: "4.3", scenario: 6, holdout: true, family: "F36",
+    stem: "The document type isn't known in advance, and there's one extraction tool per type. Sometimes the model replies in plain text instead of calling any of them. What fixes this?",
     options: [
-      { t: "Add the specific values seen so far to the enum, and review it each month.", why: "The list keeps lagging behind real invoices." },
-      { t: "Change <code>payment_terms</code> to free text so any wording is captured.", why: "Loses the consistent values downstream systems use." },
-      { t: "Add an <code>\"other\"</code> value with a <code>payment_terms_detail</code> string for the original wording.", ok: true, why: "Keeps the standard categories and captures what doesn't fit." },
-      { t: "Make the field optional so unusual terms can be left blank.", why: "Loses information that's actually in the document." }
+      { t: "Set <code>tool_choice</code> to <code>\"any\"</code> so the model must call one of the extraction tools.", ok: true, why: "Requiring some tool call guarantees structured output while letting the model pick the right schema. (Exam framing; see Exam vs. today for current model support.)" },
+      { t: "Force one tool with <code>tool_choice: {\"type\": \"tool\", \"name\": …}</code>.", why: "Right when one specific tool must run. Here the right tool depends on the document." },
+      { t: "Make the fields that may be absent nullable in the schema.", why: "Right when values are invented for absent fields. Here no tool is called." },
+      { t: "Add an <code>\"other\"</code> enum value plus a free-text detail field.", why: "Right when real values fall outside the categories. Here no tool is called." }
     ]
   },
   {
-    id: "h6-3", ts: "4.4", scenario: 6, holdout: true,
-    stem: "Validation flags totals that don't match their line items. Retrying with the specific error fixes about 70%. The rest are low-quality scans where an amount is illegible. What should happen to those?",
+    id: "h6-3", ts: "4.4", scenario: 6, holdout: true, family: "F38",
+    stem: "Validation fails because <code>tax_id</code> is empty. Checking the source PDF shows the document never contains a tax ID, and two retries made no difference. What's the right next step?",
     options: [
-      { t: "Retry them again with stronger wording in the error feedback.", why: "The missing information isn't in the image; no wording recovers it." },
-      { t: "Stop retrying and route it to human review with the conflict flagged.", ok: true, why: "Retries fix extraction errors, not missing source information." },
-      { t: "Have the model infer the illegible amount from the total.", why: "Fabricates a value to hide a gap." },
-      { t: "Raise the image resolution and retry indefinitely.", why: "A low-quality scan stays low quality; endless retries cost money." }
+      { t: "Retry, including the specific validation error in the follow-up request.", why: "Right when the value exists but came back in the wrong form. Retries can't find information that isn't there." },
+      { t: "Stop retrying and send the document to human review.", ok: true, why: "When the information is missing from the source, a person must resolve it." },
+      { t: "Extract both the stated total and a calculated total, and flag mismatches.", why: "Right for checking internal consistency. The problem here is a missing value." },
+      { t: "Record a <code>detected_pattern</code> with each flag to see which ones reviewers dismiss.", why: "Right for learning from reviewer dismissals. This is a single missing value." }
     ]
   },
   {
-    id: "h6-4", ts: "4.4", scenario: 6, holdout: true,
-    stem: "The validation–retry loop sends the model “Validation failed. Please try again.” About half of the retries return the same invalid output. Best change?",
+    id: "h6-4", ts: "4.4", scenario: 6, holdout: true, family: "F39",
+    stem: "Totals taken from the invoice summary box sometimes don't match the line items. Nobody notices until finance reconciles at month end. What fits best?",
     options: [
-      { t: "Retry up to five times instead of two.", trap: "T6", why: "More blind retries repeat the same mistake." },
-      { t: "Use a different model for retries.", trap: "T3", why: "Without the error, a different model has nothing to correct." },
-      { t: "The failing field, rule and returned value.", ok: true, why: "Specific error feedback gives the model what it needs to fix the output." },
-      { t: "Lower the validation rules' strictness so fewer records fail.", why: "Lets bad data through." }
+      { t: "Retry with the validation error and the original document in the follow-up.", why: "Right when a known error needs correcting. Here nothing detects the error." },
+      { t: "Extract the line items, the stated total and a calculated total, then compare them.", ok: true, why: "Extracting both totals lets the pipeline catch inconsistencies on its own." },
+      { t: "Make the field nullable so the model can report that a value is absent.", why: "Right when values are absent. Here they're present but inconsistent." },
+      { t: "Record a <code>detected_pattern</code> with each flag to see which ones reviewers dismiss.", why: "Right for analyzing dismissals. Here the error goes unnoticed." }
     ]
   },
   {
-    id: "h6-5", ts: "4.5", scenario: 6, holdout: true,
-    stem: "You need to extract data from 500,000 documents within three days, at the lowest cost. The prompt is already validated on a sample. What's the right plan?",
+    id: "h6-5", ts: "4.5", scenario: 6, holdout: true, family: "F41",
+    stem: "A 50,000-document batch has finished: 600 requests errored and the rest succeeded. The team plans to rerun all 50,000. What fits best?",
     options: [
-      { t: "Submit all 500,000 as one batch for the maximum discount.", why: "A batch is limited to 100,000 requests (or 256 MB), so it won't be accepted." },
-      { t: "Run synchronous calls with many parallel workers to finish quickly.", why: "Full price, when the deadline tolerates batch processing." },
-      { t: "Several batches within limits; resubmit failed IDs.", ok: true, why: "Batching fits the deadline and halves cost; targeted resubmission handles failures." },
-      { t: "Process a small sample each day so the prompt can keep improving.", why: "The prompt is already validated, and this misses the deadline." }
+      { t: "Submit all 50,000 documents through the Message Batches API.", why: "That reprocesses 49,400 documents that already succeeded." },
+      { t: "Resubmit only the failed documents, matched by their <code>custom_id</code>.", ok: true, why: "Rerun only what failed; <code>custom_id</code> ties each result to its document." },
+      { t: "Run the prompt on a sample of a few hundred, refine it, then batch the rest.", why: "Right for an untested prompt. This one has already run." },
+      { t: "Process documents synchronously as they arrive.", why: "Right when results are needed immediately. This is a bulk rerun." }
     ]
   },
   {
-    id: "h6-6", ts: "4.6", scenario: 6, holdout: true,
-    stem: "After extraction, the same request asks the model to “double-check your values.” It rarely changes anything, yet audits still find errors. What's a better verification design?",
+    id: "h6-6", ts: "4.6", scenario: 6, holdout: true, family: "F33",
+    stem: "Extraction from 60-page contracts misses clauses that appear late in the document. Short contracts are extracted accurately. What fits best?",
     options: [
-      { t: "Ask the model to double-check twice, in two separate turns of the same conversation.", why: "The same context repeats the same blind spots." },
-      { t: "An independent pass checking every value against its source excerpt.", ok: true, why: "An independent pass grounded in the source catches what self-review misses." },
-      { t: "Raise the extraction's temperature so the check sees a different answer.", why: "Randomness isn't verification." },
-      { t: "Have the model rate its confidence in each value and flag those below 7.", trap: "T4", why: "Uncalibrated self-ratings don't find errors." }
+      { t: "Have a second instance, without the first one's reasoning, re-extract a sample to compare.", why: "Right when an extractor confirms its own errors. Here attention fades over a long document." },
+      { t: "Have the model report confidence per field and send low-confidence fields to people.", why: "Right for directing human review. The missed clauses would still be missed." },
+      { t: "Check that the totals add up, and retry with the error when they don't.", why: "Right for values a rule can check. Missing clauses aren't caught by arithmetic." },
+      { t: "Split long documents into sections, extract from each, then merge the results.", ok: true, why: "Smaller passes keep attention on each section, and a merge step combines them." }
     ]
   },
   {
-    id: "h6-7", ts: "4.1", scenario: 6, holdout: true,
-    stem: "<code>is_amended</code> comes back true whenever a contract contains the word “amend,” including clauses like “this contract may be amended by mutual agreement.” What's the best prompt change?",
+    id: "h6-7", ts: "4.1", scenario: 6, holdout: true, family: "F31",
+    stem: "The extractor labels auto-renewal and notice-period clauses as “termination clauses.” The legal team means only clauses that allow early exit. What fixes this?",
     options: [
-      { t: "Define amended precisely with examples of mentions that don't count.", ok: true, why: "Explicit criteria with contrasting examples remove the keyword shortcut." },
-      { t: "Tell the model not to rely on keywords when judging amendments.", trap: "T9", why: "Says what not to do, without saying what amended means." },
-      { t: "Have the model report its confidence in each <code>is_amended</code> value.", trap: "T4", why: "The model is confidently wrong when the criteria are unclear." },
-      { t: "Post-process with a rule that sets <code>is_amended</code> false unless “amendment” appears twice.", trap: "T6", why: "Swaps one keyword heuristic for another." }
+      { t: "Define exactly what counts as a “termination clause,” with included and excluded examples.", ok: true, why: "Explicit criteria with edge examples tell the model where the category's boundary is." },
+      { t: "Make the field nullable, and return null when the document doesn't contain one.", why: "Right when values are invented for absent fields. Here a real clause is mislabeled." },
+      { t: "Add a field where the model explains how it arrived at each value.", why: "Right when you need to audit reasoning. It won't change where the boundary is." },
+      { t: "Require a page and section reference for every extracted value.", why: "Right when reviewers can't find the source. Here the category itself is misunderstood." }
     ]
   },
   {
-    id: "h6-8", ts: "4.3", scenario: 6, holdout: true,
-    stem: "A downstream system requires dates in ISO 8601. The extraction schema types <code>contract_date</code> as a plain string, and outputs arrive in many formats. What should you add?",
+    id: "h6-8", ts: "4.3", scenario: 6, holdout: true, family: "F37",
+    stem: "Some contracts have no renewal date. In those cases the extractor fills in a plausible-looking date anyway. What fixes this?",
     options: [
-      { t: "Change the field type to number and store dates as Unix timestamps.", why: "Pushes the conversion onto the model without telling it how." },
-      { t: "State the format in schema and prompt and then validate and retry.", ok: true, why: "State the format, then check it deterministically, with targeted retries." },
-      { t: "Accept any format and let the downstream system parse whatever arrives.", why: "Moves the problem downstream, where ambiguous dates are harder to fix." },
-      { t: "Ask the model to use “a standard date format.”", trap: "T9", why: "Too vague to produce consistent output." }
+      { t: "Make the fields that may be absent nullable in the schema.", ok: true, why: "If the schema requires a value, the model invents one; nullable lets it say “absent.”" },
+      { t: "Add an <code>\"other\"</code> enum value with a free-text detail field.", why: "Right when real values fall outside the categories. Here there's no value at all." },
+      { t: "Define the output with a strict JSON schema in the tool definition.", why: "Right for syntax errors. The output here is valid but invented." },
+      { t: "Add a validation step that checks the values against business rules.", why: "Right for checkable rules. A plausible invented date passes most of them." }
     ]
   },
   {
