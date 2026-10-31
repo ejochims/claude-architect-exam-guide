@@ -98,6 +98,12 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | The 4 official preparation exercises have no in-app home | **Built as labs L1–L4** (`content/l01.js`–`l04.js`): support agent with escalation; Claude Code team configuration; structured extraction pipeline; multi-agent research pipeline. Each lab has a brief with a diagram and done-when criteria, a design-decision sorter, annotated code or config to build and run, a debugging sorter, a recap, and flashcards. |
 | Verification | content-check passes (113 cards, 21 modules); browser suite 274 checks, no problems. |
 
+### Batch 9 (2026-10-31): capstone (backlog P5)
+
+| Item | Status |
+|---|---|
+| P5: m00 tested material from m02–m12 on day one | **Fixed.** The trap spotter and q00-1, q00-2 and q00-3 moved, unchanged, into the new **Module 14, "Capstone: think like the exam"**, after Module 13 and before the labs. It opens with a recap of the four moves and the booking rule, linking to the mock and the Readiness Check. m00 now keeps only orientation (logistics and how to read a question), and its recap points to the capstone. Question IDs are unchanged, so saved answers carry over; m00's saved step-completion indices may be off by up to two. |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

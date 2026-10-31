@@ -109,7 +109,7 @@ The final panel saw items with shuffled options and no keys or explanations.
 | Readiness measure | latest answer, inflatable by retries | **first attempt only** |
 | Holdout | none | **60-item Readiness Check, taken once** |
 | Mock score | invented scaled score | **domain-weighted % with a 95% range** |
-| Browser suite | — | **274 checks, no problems** (1280px light and 390px dark, labs included) |
+| Browser suite | — | **278 checks, no problems** (1280px light and 390px dark, labs and capstone included) |
 
 ### What the options-only result means
 
@@ -144,5 +144,4 @@ The official sample questions use the same distractor families (prompt-only fixe
 3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
 4. **Some open items remain:**
    - app-side S2 and S3 claims in `claims-log.csv`;
-   - moving the m00 quiz to a capstone;
    - mock domain-quota feasibility for 10 of 15 draws.

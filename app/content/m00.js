@@ -2,8 +2,7 @@ window.LESSONS.m00 = {
   cards: [
     { f: "Exam format?", b: "60 multiple-choice questions, 120 minutes, scaled 100–1000, pass at 720. 4 of 6 scenarios drawn. No penalty for guessing." },
     { f: "Four moves for reading a question?", b: "Find the evidence → name the root cause → classify the constraint (guarantee vs judgment) → pick the proportionate fix." },
-    { f: "What does \u201cmost effective first step\u201d signal?", b: "The cheap, targeted fix for the root cause, not new infrastructure." },
-    { f: "Name the nine traps.", b: "Prompt where code is needed; over-built first step; bigger model or window; unreliable proxy; consolidate everything; hide or hammer the error; fix the wrong component; feature that doesn't exist; just tell it to try harder." }
+    { f: "What does \u201cmost effective first step\u201d signal?", b: "The cheap, targeted fix for the root cause, not new infrastructure." }
   ],
   steps: [
     {
@@ -30,60 +29,19 @@ window.LESSONS.m00 = {
   <li><strong>Classify the constraint.</strong> Does this behavior need a <em>guarantee</em> (money, identity, compliance, irreversible actions) or <em>good judgment</em> (tone, choosing among options)? Guarantees belong in code; judgment belongs in prompts, descriptions and examples.</li>
   <li><strong>Pick the proportionate fix.</strong> Prefer the lowest-effort change that removes the root cause. Watch the qualifier: <em>“most effective first step”</em> means the cheap targeted fix; <em>“most reliable”</em> for a hard rule means code.</li>
 </ol>
-<div class="callout key"><div class="callout-label">The one idea underneath everything</div><p>Ask where responsibility should live. The model is good at interpreting language, choosing among well-described options and synthesizing evidence. Code is responsible for permissions, thresholds, ordering, retries, validation and audit trails.</p></div>`
-    },
-    {
-      kind: "widget",
-      title: "Know the nine traps",
-      intro: "Distractors aren't random. Nearly all of them fall into nine recurring patterns. Learn to name the pattern and you can eliminate options in seconds.",
-      widget: "trapSpotter"
-    },
-    {
-      kind: "quiz",
-      title: "Check your reasoning",
-      questions: [
-        {
-          id: "q00-1", ts: "2.1",
-          stem: "An IT-helpdesk agent's <code>get_account</code> tool takes an <code>account_id</code> such as <code>AC-00418822</code>. Its description is detailed, yet the agent often passes users' email addresses into <code>account_id</code>, and the calls fail. What is the most effective first step?",
-          options: [
-            { t: "Train a small classifier that rewrites emails into <code>account_id</code> values before each call reaches the backend.", trap: "T2", why: "New infrastructure before the cheap fix: tell the model what the parameter expects." },
-            { t: "Describe the parameter's format, and say to call <code>find_account_by_email</code> first whenever only an email is known.", ok: true, why: "Parameter descriptions guide inputs too. State the format and how to get a valid ID." },
-            { t: "Have the backend return a generic “invalid input” error so the agent learns from the failures.", trap: "T6", why: "A generic error doesn't say what's wrong or how to get the right value." },
-            { t: "Upgrade to the most capable model, which infers ID formats from examples it has seen before.", trap: "T3", why: "No model can know your ID format unless you describe it." }
-          ]
-        },
-        {
-          id: "q00-2", ts: "4.3",
-          stem: "A lease-abstraction pipeline extracts <code>renewal_notice_days</code>. When a lease doesn't mention notice, the output still contains a plausible number such as 60. The schema marks the field as a required integer. Which change fixes the root cause?",
-          options: [
-            { t: "Have the model add a confidence score to each field and drop values below 0.7.", trap: "T4", why: "An arbitrary threshold doesn't touch the cause: the schema forces a value to exist." },
-            { t: "Make the field nullable and tell the model to return null whenever the lease doesn't state it.", ok: true, why: "A required field creates pressure to fabricate. Allow absence explicitly." },
-            { t: "Run each extraction three times at temperature 0.7 and keep the value that at least two runs agree on.", trap: "T6", why: "Fabricated defaults are often consistent, so runs can agree on the same invented 60." },
-            { t: "Switch to a model with a longer context window so it reads the whole lease, including the appendices.", trap: "T3", why: "The model isn't missing text; the value doesn't exist and the schema demands one." }
-          ]
-        },
-        {
-          id: "q00-3", ts: "3.6",
-          stem: "Which of these is <strong>not</strong> a real Claude Code mechanism?",
-          options: [
-            { t: "<code>.claude/rules/</code> files whose <code>paths:</code> frontmatter loads conventions only for matching files", why: "Real. Path-scoped rules are explicitly on the exam (task statement 3.3)." },
-            { t: "<code>claude -p</code> for one-shot, non-interactive runs in CI", why: "Real. <code>-p</code> (<code>--print</code>) runs once and exits, so pipelines don't hang." },
-            { t: "Setting <code>CLAUDE_HEADLESS=true</code> so Claude Code stops waiting for input", ok: true, trap: "T8", why: "Invented. The documented mechanism is the <code>-p</code> flag. Invented flags and env vars are a common distractor." },
-            { t: "<code>${GITHUB_TOKEN}</code> expansion inside a committed <code>.mcp.json</code>, keeping secrets out of the repo", why: "Real. It's how teams share MCP configuration without committing secrets." }
-          ]
-        }
-      ]
+<div class="callout key"><div class="callout-label">The one idea underneath everything</div><p>Ask where responsibility should live. The model is good at interpreting language, choosing among well-described options and synthesizing evidence. Code is responsible for permissions, thresholds, ordering, retries, validation and audit trails.</p></div>
+<p class="small">You'll practice these patterns in the capstone (Module 14), once you've learned the material they're built from.</p>`
     },
     {
       kind: "recap",
       title: "Recap",
       points: [
-        "60 questions, 120 minutes, pass at 720 of 1000. Guess rather than skip.",
+        "About 60 questions (unofficial count), 120 minutes, pass at 720 of 1000. Guess rather than skip.",
         "4 of 6 scenarios appear. Prepare all six.",
         "Read the stem as an incident report: evidence → root cause → constraint type → proportionate fix.",
         "Guarantees go in code; judgment goes in prompts, descriptions and examples.",
         "“First step” means the cheap fix that targets the root cause, not new infrastructure.",
-        "Nine traps: prompt-for-guarantee, over-built, bigger model, unreliable proxy, consolidate, hide/hammer errors, wrong component, invented feature, try-harder exhortations."
+        "Nine traps (you'll drill them in the capstone, Module 14): prompt-for-guarantee, over-built, bigger model, unreliable proxy, consolidate, hide/hammer errors, wrong component, invented feature, try-harder exhortations."
       ]
     }
   ]
