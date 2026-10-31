@@ -84,23 +84,23 @@ window.BANK = [
     ]
   },
   {
-    id: "b4-3", ts: "1.5", scenario: 4,
+    id: "b4-3", ts: "1.5", scenario: 4, family: "P01",
     stem: "A developer-productivity agent built on the Agent SDK must never run <code>git push --force</code> against protected branches. What's the right mechanism?",
     options: [
-      { t: "A <code>PreToolUse</code> hook on Bash that denies the command and names the safe alternative.", ok: true, why: "Tool-call interception enforces the rule every time and tells the agent what to do instead." },
-      { t: "A line in CLAUDE.md that forbids force pushes to protected branches.", trap: "T1", why: "Instructions are followed probabilistically. A destructive action needs a guarantee." },
-      { t: "Remove Bash from the agent's tool list, so it can't run <code>git push</code> or any other shell command.", why: "Blocks the legitimate shell work the agent needs. The rule is narrow, so the control should be too." },
-      { t: "Have the agent ask the developer to confirm every <code>git</code> command, showing the exact branch and flags first.", trap: "T1", why: "Still prompt-based, and adds friction to every harmless git command." }
+      { t: "A <code>PreToolUse</code> hook that denies the matching call and says why.", ok: true, why: "An action that must never happen is blocked before it runs, with a reason the agent can act on." },
+      { t: "A <code>PostToolUse</code> hook that converts results to one unit before the agent sees them.", why: "Right when results arrive in mixed formats. Here the danger is an action, not a result." },
+      { t: "A <code>PreToolUse</code> hook that rewrites the tool's input into the required form.", why: "Right when a call needs a missing field added. Silently rewriting a force push changes what the developer asked for." },
+      { t: "A CLAUDE.md rule that explains the convention and the reason for it.", why: "Right for a convention where an occasional miss is cheap. A force push to a protected branch isn't." }
     ]
   },
   {
-    id: "b4-4", ts: "1.5", scenario: 4,
-    stem: "Three MCP servers report file sizes as raw bytes, “4.2 MB” strings and kibibytes. The agent's cleanup recommendations are often off by orders of magnitude. Best fix?",
+    id: "b4-4", ts: "1.5", scenario: 4, family: "P01",
+    stem: "Three MCP servers report file sizes as raw bytes, “4.2 MB” strings and kibibytes. The agent's cleanup recommendations are often off by orders of magnitude. What's the right mechanism?",
     options: [
-      { t: "Add a <code>PostToolUse</code> hook that normalizes every size to bytes before the agent sees any of the results.", ok: true, why: "Normalize heterogeneous formats in code before the model reasons about them." },
-      { t: "Describe the three size formats and their conversion rules in the system prompt.", trap: "T1", why: "The model still converts on every read, and probabilistic arithmetic occasionally fails." },
-      { t: "Add a <code>size_unit</code> field to each server's output so the agent knows how to read each value.", why: "Labels the units but still leaves the conversion to the model every time." },
-      { t: "Ask the agent to double-check its unit conversions before recommending any deletion.", trap: "T9", why: "An exhortation adds no information or structure. Remove the conversion step instead." }
+      { t: "A <code>PreToolUse</code> hook that denies the matching call and says why.", why: "Right when an action must be stopped. Nothing here should be blocked." },
+      { t: "A <code>PostToolUse</code> hook that converts results to one unit before the agent sees them.", ok: true, why: "Normalize results to one unit before the model reasons over them." },
+      { t: "A <code>PreToolUse</code> hook that rewrites the tool's input into the required form.", why: "Right when the agent's inputs need fixing. The problem here is what comes back." },
+      { t: "A CLAUDE.md rule that explains the convention and the reason for it.", why: "Right for soft conventions. Unit conversion needs to happen every time." }
     ]
   },
   {
@@ -114,13 +114,13 @@ window.BANK = [
     ]
   },
   {
-    id: "b4-6", ts: "1.3", scenario: 4,
+    id: "b4-6", ts: "1.3", scenario: 4, family: "P02",
     stem: "An “explorer” subagent meant only to map unfamiliar code occasionally edits files while investigating. Where should you fix this?",
     options: [
-      { t: "Give its AgentDefinition only read-only tools.", ok: true, why: "Scope the subagent's tools to its role (Read, Grep, Glob). It can't edit what it has no tool to edit." },
-      { t: "State in its system prompt that it must never modify files while investigating.", trap: "T1", why: "A prompt lowers the rate but doesn't guarantee it." },
-      { t: "Add a <code>PostToolUse</code> hook that runs <code>git checkout</code> on any file the explorer edits, reverting it.", why: "Undoes the damage after the fact. Removing the capability prevents it." },
-      { t: "Have the coordinator review the explorer's diff after each run, and discard any edits it made.", trap: "T7", why: "Detects the problem after it happens, and puts the fix in the wrong component." }
+      { t: "Give the subagent's AgentDefinition only the read-only tools it needs.", ok: true, why: "Scope the tools to the role: a subagent can't edit files if it has no editing tools." },
+      { t: "Pass everything the coordinator already gathered in the delegation prompt.", why: "Right when a subagent re-fetches what the coordinator has. This one does too much, not too little." },
+      { t: "Have the subagent return its findings in a fixed, structured format.", why: "Right when the caller can't parse results. The problem here is unwanted edits." },
+      { t: "Write the subagent's prompt as goals and quality criteria, not fixed steps.", why: "Right when rigid steps make a subagent inflexible. Prompt wording won't guarantee it never edits." }
     ]
   },
   {
@@ -134,13 +134,13 @@ window.BANK = [
     ]
   },
   {
-    id: "b4-8", ts: "1.6", scenario: 4,
+    id: "b4-8", ts: "1.6", scenario: 4, family: "P03",
     stem: "The agent must generate CRUD boilerplate (model, controller, tests, docs) for 30 similar entities that follow an established pattern. Which decomposition fits?",
     options: [
-      { t: "Prompt chaining: the same fixed sequence of generation steps, run once for each entity.", ok: true, why: "A predictable, repeated pattern suits a fixed pipeline." },
-      { t: "Dynamic decomposition that re-plans after each entity based on what it learned.", why: "Re-planning suits open-ended work. Here the pattern is already established." },
-      { t: "Generate all 30 entities in one large request so the outputs stay consistent.", trap: "T3", why: "A huge single output degrades in quality and is hard to verify or retry piece by piece." },
-      { t: "Have a coordinator decide, for each entity, which files to generate and in what order.", why: "Adds judgment where none is needed. The files and their order are the same every time." }
+      { t: "Run the same fixed sequence of steps once for each item.", ok: true, why: "A known, repeated pattern is what a fixed sequence is for: predictable and easy to check." },
+      { t: "Group the work by root cause first, then handle one group at a time.", why: "Right when failures share causes. Nothing has failed here." },
+      { t: "Split the input into its parts, process each part separately, then merge.", why: "Right when one large input hides details. These are 30 small, similar tasks." },
+      { t: "Let the agent choose each next step from what the previous one found.", why: "Right when the path depends on findings. Here the path is known in advance." }
     ]
   },
 
@@ -218,13 +218,13 @@ window.BANK = [
 
   // ---------- Scenario 1: Customer Support Resolution Agent ----------
   {
-    id: "b1-1", ts: "1.4", scenario: 1,
-    stem: "A prerequisite gate now blocks <code>update_payment_method</code> until <code>verify_identity</code> succeeds. When it blocks a call, it returns the text “Error.” Logs show the agent retrying the same blocked call several times before giving up. What should the gate return?",
+    id: "b1-1", ts: "1.4", scenario: 1, family: "P05",
+    stem: "A prerequisite gate blocks <code>update_payment_method</code> until <code>verify_identity</code> succeeds. When it blocks a call, it returns the text “Error.” Logs show the agent retrying the same blocked call several times before giving up. What should change?",
     options: [
-      { t: "A structured result saying the call was blocked because identity isn't verified, and to call <code>verify_identity</code> first.", ok: true, why: "Tell the agent what failed and what to do next, so it can recover instead of retrying blindly." },
-      { t: "A <code>success</code> result with <code>changed: false</code>, so the conversation continues without surfacing an error.", trap: "T6", why: "Hiding the block makes the agent believe the update happened." },
-      { t: "Keep returning “Error,” and escalate the conversation to a human whenever the gate blocks a call.", why: "Over-escalation. The agent can recover on its own if it knows why it was blocked." },
-      { t: "Leave the gate as is, and add a system-prompt line telling the agent to verify identity first so it rarely triggers.", trap: "T1", why: "Doesn't change what the gate returns, so the agent still can't recover when it does trigger." }
+      { t: "Return a structured result saying why the call was blocked and what to do first.", ok: true, why: "Say why the call was blocked and what unblocks it, so the agent calls <code>verify_identity</code> instead of retrying." },
+      { t: "Return an explicit pending status that the agent must relay to the customer.", why: "Right when an action is waiting on someone. Here the agent needs to take a step first." },
+      { t: "Post a structured handoff: the problem, what was tried and a suggested next step.", why: "Right when handing work to a person. The agent can fix this itself." },
+      { t: "Add a system-prompt rule telling the agent to follow the required order.", why: "The gate already enforces the order. The agent's problem is that it can't tell what the gate wants." }
     ]
   },
   {
@@ -342,73 +342,73 @@ window.BANK = [
     ]
   },
   {
-    id: "b7-7", ts: "1.6", scenario: 6,
+    id: "b7-7", ts: "1.6", scenario: 6, family: "P04",
     stem: "An agent extracts 40 fields from 300-page loan packages that bundle an application, appraisals, tax returns and disclosures. Fields from documents deep in the package are often missed. What decomposition helps most?",
     options: [
-      { t: "Split the package into its component documents, run a focused extraction per document type, then merge with a reconciliation step.", ok: true, why: "Decompose by document so each pass has a small, relevant context, then reconcile." },
-      { t: "Use a model with a larger context window so the whole package fits with room to spare.", trap: "T3", why: "It already fits; attention to buried sections is the problem." },
-      { t: "List all 40 fields twice in the prompt, once at the start and once at the end.", trap: "T9", why: "Repetition doesn't help the model find content deep in a long input." },
-      { t: "Extract only from the first 50 pages, where most required fields usually appear.", why: "Drops the appraisals and tax returns that hold many of the fields." }
+      { t: "A fixed pipeline that runs the same steps in the same order every time.", why: "Right when every case follows identical steps. The problem here is attention over a long input." },
+      { t: "Separate passes for each document or section, then a step that merges results.", ok: true, why: "Focused passes per document keep attention on each part; the merge step reconciles them." },
+      { t: "A single agent that decides its next step from each result.", why: "Right when the path depends on findings. The problem here is coverage of a long input." },
+      { t: "Parallel subagents, one per independent subtask, then a synthesis step.", why: "Right for independent research subtasks. Fields here are extracted from parts of one package and need reconciling." }
     ]
   },
   {
-    id: "b7-8", ts: "1.6", scenario: 5,
+    id: "b7-8", ts: "1.6", scenario: 5, family: "P03",
     stem: "A CI agent told to “fix all failing tests” (37 failures across 9 modules) thrashes: a fix in one module breaks tests in another, and runs time out. How should the work be decomposed?",
     options: [
-      { t: "Spawn one subagent per failing test so all 37 are fixed in parallel.", trap: "T5", why: "Parallel edits to shared code conflict, which is the thrashing you're seeing." },
-      { t: "Fix failures in the order the test runner reports them, re-running the suite after each.", why: "Report order ignores shared causes, so related fixes still fight each other." },
-      { t: "Group the failures by root cause first, then fix one cause at a time, re-running the suite after each.", ok: true, why: "Diagnose before decomposing; many failures share a cause." },
-      { t: "Ask Claude to be careful not to break other tests while fixing each one.", trap: "T9", why: "An exhortation doesn't reveal which failures are related." }
+      { t: "Run the same fixed sequence of steps once for each item.", why: "Right for repeated, independent tasks. These failures interact." },
+      { t: "Group the work by root cause first, then handle one group at a time.", ok: true, why: "Fixing by root cause stops one fix from breaking another, and shrinks 37 failures to a few causes." },
+      { t: "Split the input into its parts, process each part separately, then merge.", why: "Right when a long input hides details. Splitting by module keeps the interacting fixes apart." },
+      { t: "Let the agent choose each next step from what the previous one found.", why: "Right for open-ended investigation. Here, unstructured fixing is what causes the thrashing." }
     ]
   },
   {
-    id: "b7-9", ts: "1.6", scenario: 1,
+    id: "b7-9", ts: "1.6", scenario: 1, family: "P04",
     stem: "Every return request follows the same four steps: verify identity, check eligibility, create the RMA, send the shipping label. Which decomposition fits best?",
     options: [
-      { t: "Dynamic decomposition, letting the agent plan the steps anew for each request.", why: "Adaptive planning suits open-ended work; this sequence never varies." },
-      { t: "A fixed sequence (prompt chaining), since the steps and their order are always the same.", ok: true, why: "Predictable multi-step workflows suit a fixed pipeline." },
-      { t: "A coordinator with four subagents, one per step, so each step has isolated context.", trap: "T2", why: "Orchestration overhead for a short, linear workflow." },
-      { t: "Give the agent all four tools and let it decide the order from the conversation.", why: "Leaves ordering to chance when the order is fixed and known." }
+      { t: "A fixed pipeline that runs the same steps in the same order every time.", ok: true, why: "When the steps and their order never change, a fixed pipeline is predictable and easy to audit." },
+      { t: "Separate passes for each document or section, then a step that merges results.", why: "Right when a long input hides details. A return request is short." },
+      { t: "A single agent that decides its next step from each result.", why: "Right when each step depends on what turns up. Here the steps are always the same." },
+      { t: "Parallel subagents, one per independent subtask, then a synthesis step.", why: "Right for independent subtasks. These steps depend on each other in order." }
     ]
   },
   {
-    id: "b7-10", ts: "1.2", scenario: 3,
-    stem: "To save a hop, a teammate proposes letting the search subagent send its results straight to the synthesis subagent, bypassing the coordinator. What's the main cost?",
+    id: "b7-10", ts: "1.2", scenario: 3, family: "P06",
+    stem: "To save a hop, a teammate proposes letting the search subagent send its results straight to the synthesis subagent, bypassing the coordinator. Coverage gaps have been the system's main quality problem. What should the team do?",
     options: [
-      { t: "None of note: fewer hops means lower latency and fewer tokens spent on routing.", why: "Ignores what the coordinator does with results besides forwarding them." },
-      { t: "Subagents can't communicate with each other at all, so the change wouldn't work.", trap: "T8", why: "It could be built; the question is whether it should be." },
-      { t: "The coordinator loses sight of coverage, errors and what synthesis receives, so it can't spot gaps or re-delegate.", ok: true, why: "Hub-and-spoke routing gives the coordinator the observability and control it needs." },
-      { t: "Synthesis would receive results in a different order, which breaks citation numbering.", why: "Ordering is minor and fixable; losing coordination isn't." }
+      { t: "Keep routing results through the coordinator so it can check coverage.", ok: true, why: "The coordinator can only spot gaps and re-delegate if results pass through it." },
+      { t: "Pass each subagent only its goal, constraints and the relevant prior findings.", why: "Right when subagents get too much context. This is about where results go." },
+      { t: "Have independent subagents run in parallel within the same turn.", why: "Right when independent work runs one after another. Saving a hop isn't worth losing the coverage check." },
+      { t: "Give the coordinator a cap on research rounds before it synthesizes.", why: "Right when the coordinator won't stop. Here the concern is coverage." }
     ]
   },
   {
-    id: "b7-11", ts: "1.2", scenario: 3,
+    id: "b7-11", ts: "1.2", scenario: 3, family: "P06",
     stem: "For “context,” the coordinator passes every subagent the user's full 30-turn conversation. Subagents get distracted by side topics and run slowly. What should the coordinator pass instead?",
     options: [
-      { t: "A summary of the 30 turns, sent to every subagent so each still has the full picture.", why: "Smaller, but every subagent still gets everything rather than what its task needs." },
-      { t: "Only each subagent's specific goal, constraints and relevant prior findings.", ok: true, why: "Scope each subagent's context to its task; isolation is the point of subagents." },
-      { t: "The full conversation, with an instruction to ignore turns unrelated to its task.", trap: "T9", why: "Irrelevant context still costs tokens and attention." },
-      { t: "The full conversation, with subagents moved to a larger context window.", trap: "T3", why: "Room isn't the problem; focus is." }
+      { t: "Keep routing results through the coordinator so it can check coverage.", why: "Right when results bypass the coordinator. The problem here is what goes into each subagent." },
+      { t: "Pass each subagent only its goal, constraints and the relevant prior findings.", ok: true, why: "Give each subagent what its task needs, and no more." },
+      { t: "Have independent subagents run in parallel within the same turn.", why: "Right when independent work runs one after another. Each subagent is slow here because of its input." },
+      { t: "Give the coordinator a cap on research rounds before it synthesizes.", why: "Right when the coordinator loops too long. The problem here is the input." }
     ]
   },
   {
-    id: "b7-12", ts: "1.7", scenario: 5,
-    stem: "A CI review step runs <code>claude -p --output-format json</code>. A later step should apply the suggested fixes with the full context of that review. How do you carry the context over?",
+    id: "b7-12", ts: "1.7", scenario: 5, family: "P07",
+    stem: "A CI review step runs <code>claude -p --output-format json</code>. A later step must apply the suggested fixes with the full context of that review, and nothing has changed in between. How do you carry the context over?",
     options: [
-      { t: "Read <code>session_id</code> from the first step's JSON output and run the second step with <code>--resume</code> and that ID.", ok: true, why: "Resuming the specific session gives the second step the review's full context." },
-      { t: "Run the second step with <code>--continue</code>, which picks up the review automatically.", why: "<code>--continue</code> takes the most recent session in that directory, which isn't guaranteed to be this one in CI." },
-      { t: "Re-run the review inside the fix step so it rebuilds the same context first.", why: "Pays for the review twice and may not reproduce the same findings." },
-      { t: "Combine review and fix into one prompt so no context needs to carry over.", why: "Loses the separate review step, and its output, that the pipeline relies on." }
+      { t: "Resume the earlier session by its ID with <code>--resume</code>.", ok: true, why: "Read <code>session_id</code> from the first step's JSON output and pass it to <code>--resume</code> in the second step." },
+      { t: "Resume, and tell Claude which files changed so it re-reads only those.", why: "Right when files changed since the session. Nothing changed here." },
+      { t: "Start a fresh session seeded with a short summary of the findings.", why: "Right when the old context is stale or too long. Here it's exactly what the next step needs." },
+      { t: "Fork the session to try a different approach from the same point.", why: "Right for exploring an alternative. Here the next step continues the same work." }
     ]
   },
   {
-    id: "b7-13", ts: "1.7", scenario: 4,
+    id: "b7-13", ts: "1.7", scenario: 4, family: "P07",
     stem: "You resume yesterday's investigation session. Since then a teammate changed 3 of the 40 files Claude analyzed; the rest are untouched. What's the most efficient reliable approach?",
     options: [
-      { t: "Start a new session and inject a structured summary of yesterday's findings.", why: "Reasonable when most results are stale; here 37 of 40 files are still accurate." },
-      { t: "Resume and tell Claude which 3 files changed, so it re-reads only those.", ok: true, why: "Targeted re-analysis keeps the valid context and refreshes only what changed." },
-      { t: "Resume and continue as before, since most of the earlier analysis still holds.", why: "Claude would reason from stale results for the 3 changed files." },
-      { t: "Resume and run <code>/compact</code> so the stale details are summarized away.", why: "Compaction summarizes stale results; it doesn't refresh them." }
+      { t: "Resume the earlier session by its ID with <code>--resume</code>.", why: "Resuming alone leaves Claude trusting stale reads of the 3 changed files." },
+      { t: "Resume, and tell Claude which files changed so it re-reads only those.", ok: true, why: "Keep the valid context, and point Claude at the specific files that are now stale." },
+      { t: "Start a fresh session seeded with a short summary of the findings.", why: "Right when most of the context is stale. Here 37 of 40 files are unchanged." },
+      { t: "Fork the session to try a different approach from the same point.", why: "Right for trying an alternative approach. Here the work continues, with 3 files updated." }
     ]
   },
   {
@@ -422,43 +422,43 @@ window.BANK = [
     ]
   },
   {
-    id: "b7-15", ts: "1.4", scenario: 1,
-    stem: "Refunds over $500 need a manager's approval. The agent correctly routes them for approval, but sometimes tells customers “your refund is on its way” before anyone approves it. Best fix?",
+    id: "b7-15", ts: "1.4", scenario: 1, family: "P05",
+    stem: "Refunds over $500 need a manager's approval. The agent routes them for approval correctly, but sometimes tells customers “your refund is on its way” before anyone has approved it. What should change?",
     options: [
-      { t: "Add few-shot examples of correct wording for refunds that are still pending approval.", trap: "T1", why: "Improves wording on average; the agent still doesn't know the refund's real state." },
-      { t: "Have the approval step return an explicit <code>pending_approval</code> status the agent must relay, instead of a generic success.", ok: true, why: "Make the workflow state explicit in what the code returns, so the agent's message matches reality." },
-      { t: "Add “never confirm refunds over $500” to the system prompt, in bold.", trap: "T1", why: "Probabilistic, and the agent still can't tell pending from processed." },
-      { t: "Audit transcripts weekly and coach the prompt whenever a premature promise appears.", why: "Detects after customers were misinformed." }
+      { t: "Return a structured result saying why the call was blocked and what to do first.", why: "Right when a call is blocked by a missing step. This one went through and is waiting." },
+      { t: "Return an explicit pending status that the agent must relay to the customer.", ok: true, why: "An explicit pending status makes the agent tell the customer the true state, not a generic success." },
+      { t: "Post a structured handoff: the problem, what was tried and a suggested next step.", why: "Right when handing work to a person. The customer is the one being misinformed here." },
+      { t: "Add a system-prompt rule telling the agent to follow the required order.", why: "Right for soft preferences. What the customer is told about money needs to be accurate every time." }
     ]
   },
   {
-    id: "b7-16", ts: "1.4", scenario: 5,
+    id: "b7-16", ts: "1.4", scenario: 5, family: "P05",
     stem: "When the CI agent can't fix a failing test, it posts “Could not fix this test” on the PR, and engineers start their investigation from scratch. What should it post instead?",
     options: [
-      { t: "The full agent transcript as an attachment, so engineers can see everything it tried.", why: "Complete but slow to read; the key facts should come first." },
-      { t: "A structured handoff: the test, the failure, its root-cause hypothesis, what it tried, files touched and a suggested next step.", ok: true, why: "A structured summary lets the engineer continue rather than restart." },
-      { t: "A shorter, friendlier message that tags the code owner for the failing module.", why: "Routes the problem but transfers none of the investigation." },
-      { t: "Nothing; retry the fix on the next commit, since the agent may succeed with fresh code.", trap: "T6", why: "Hides the failure and wastes runs." }
+      { t: "Return a structured result saying why the call was blocked and what to do first.", why: "Right when an agent's call is blocked. Here the agent is handing the work to people." },
+      { t: "Return an explicit pending status that the agent must relay to the customer.", why: "Right when work is waiting on approval. Here engineers need to take over." },
+      { t: "Post a structured handoff: the problem, what was tried and a suggested next step.", ok: true, why: "Give the humans the failure, the hypothesis, what was tried and what to do next, so they don't start over." },
+      { t: "Add a system-prompt rule telling the agent to follow the required order.", why: "Right when steps run in the wrong order. Here the problem is an empty handoff." }
     ]
   },
   {
-    id: "b7-17", ts: "1.3", scenario: 4,
-    stem: "A coordinator delegates “review PR 4812” to a reviewer subagent, passing only the PR number. The reviewer spends most of its budget re-fetching the diff, CI logs and the linked issue, all of which the coordinator already loaded. Fix?",
+    id: "b7-17", ts: "1.3", scenario: 4, family: "P02",
+    stem: "A coordinator delegates “review PR 4812” to a reviewer subagent, passing only the PR number. The reviewer spends most of its budget re-fetching the diff, CI logs and the linked issue, all of which the coordinator already loaded. What fits best?",
     options: [
-      { t: "Pass all the gathered context (the diff, a CI summary and the issue's requirements) in the delegation prompt.", ok: true, why: "Subagents only know what they're given; pass what's already been gathered." },
-      { t: "Raise the reviewer's turn limit so it has budget left for the review after fetching.", why: "Pays for duplicated work instead of removing it." },
-      { t: "Let the reviewer read the coordinator's conversation history directly.", trap: "T8", why: "Subagent contexts are isolated; the coordinator must pass context explicitly." },
-      { t: "Have the coordinator do the review itself, since it already has the context.", why: "Gives up the focused, isolated reviewer context the subagent provides." }
+      { t: "Give the subagent's AgentDefinition only the read-only tools it needs.", why: "Right when a subagent does things outside its role. This one is just repeating work." },
+      { t: "Pass everything the coordinator already gathered in the delegation prompt.", ok: true, why: "A subagent starts with none of the coordinator's context, so pass what's already been gathered." },
+      { t: "Have the subagent return its findings in a fixed, structured format.", why: "Right when results are hard to use. The waste here happens before the review starts." },
+      { t: "Write the subagent's prompt as goals and quality criteria, not fixed steps.", why: "Right when step-by-step prompts make subagents rigid. The problem here is missing context." }
     ]
   },
   {
-    id: "b7-18", ts: "1.5", scenario: 5,
-    stem: "In CI, the agent must never edit migration files under <code>db/migrations/</code> that have already been applied. It occasionally does while fixing schema-related test failures. What's the right mechanism?",
+    id: "b7-18", ts: "1.5", scenario: 5, family: "P01",
+    stem: "Every commit the CI agent makes must include a <code>Ticket:</code> trailer with the issue ID from the job's context. The agent leaves it out about one time in ten. What's the right mechanism?",
     options: [
-      { t: "A rule in CLAUDE.md stating that applied migrations must never be edited.", trap: "T1", why: "Followed most of the time; an irreversible change needs a guarantee." },
-      { t: "Make the entire repository read-only during the CI job.", why: "Blocks the legitimate fixes the job exists to make." },
-      { t: "A <code>PreToolUse</code> hook on Edit and Write that denies changes to applied migrations and explains why.", ok: true, why: "Interception enforces the rule every time and tells the agent what to do instead." },
-      { t: "A post-run check that fails the job if any applied migration was modified.", why: "Catches it after the run; the agent wasted its work and never learned the constraint." }
+      { t: "A <code>PreToolUse</code> hook that denies the matching call and says why.", why: "Right when an action must not happen. Here the commit is fine; its input is missing a field." },
+      { t: "A <code>PostToolUse</code> hook that converts results to one unit before the agent sees them.", why: "Right when results vary in format. The problem here is the outgoing call." },
+      { t: "A <code>PreToolUse</code> hook that rewrites the tool's input into the required form.", ok: true, why: "A pre-call hook can add the required trailer to every commit, so it's there every time." },
+      { t: "A CLAUDE.md rule that explains the convention and the reason for it.", why: "Right when an occasional miss is acceptable. Here every commit needs the trailer." }
     ]
   },
   {

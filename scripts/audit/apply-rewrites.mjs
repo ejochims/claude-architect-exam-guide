@@ -1,6 +1,6 @@
 // Applies rewritten questions to the content files in place, matching each by id.
 // Usage: node scripts/audit/apply-rewrites.mjs <rewrites.json>
-// rewrites.json: { "<id>": { "stem"?: "...", "options": [{ "t", "ok"?, "trap"?, "why" }] } }
+// rewrites.json: { "<id>": { "stem"?: "...", "family"?: "...", "options": [{ "t", "ok"?, "trap"?, "why" }] } }
 // Only the stem string and the options array of each question are replaced; everything else is untouched.
 import fs from "fs";
 import path from "path";
@@ -35,6 +35,11 @@ for (const [id, rw] of Object.entries(rewrites)) {
   if (rw.stem) {
     const s = src.indexOf("stem: ", at), e = src.indexOf('",', s);
     src = src.slice(0, s) + `stem: ${JSON.stringify(rw.stem)}` + src.slice(e + 1);
+  }
+  // Optional option-family id, added to the question's id line.
+  if (rw.family && !src.slice(at, src.indexOf("\n", at)).includes("family:")) {
+    const eol = src.indexOf("\n", at);
+    src = src.slice(0, eol) + ` family: ${JSON.stringify(rw.family)},` + src.slice(eol);
   }
   const o = src.indexOf("options: [", at) + "options: ".length, c = closing(src, o);
   src = src.slice(0, o) + "[\n" + rw.options.map(x => `${indent}  ${lit(x)}`).join(",\n") + `\n${indent}]` + src.slice(c + 1);
