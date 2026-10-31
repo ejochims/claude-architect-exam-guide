@@ -34,7 +34,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | E7 | Fixed: the home copy no longer says "Aim for 80%+ before booking". It says practice scores alone don't justify booking, and states the real rule. |
 | E8 | Fixed: the task chip is hidden in exam mode (verified: 0 chips). |
 | R3 | Fixed: the mock intro says "about 60 questions (the count is unofficial)". |
-| Still open | Mock domain quotas remain infeasible for some draws. Weighted scoring makes scores comparable; a feasible bank comes with batches 4–5. |
+| Resolved (Batch 10) | ~~Mock domain quotas remain infeasible for some draws.~~ All 15 draws now meet every domain quota (`content-check`: 0/15 infeasible). |
 
 ### Batch 3 (2026-10-31): Foundations, MCP's "why", logistics, glossary
 
@@ -46,7 +46,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | P6 (MAJOR) | Fixed: **F1 "What a Claude call really is"**. HTTP/API/SDK, request anatomy, content blocks and `stop_reason`, tokens, the context window, `max_tokens`, roles and the system prompt, with a diagram. Plus a **searchable glossary** (`#glossary`, 50 terms, each linked to its lesson) and a nav link. |
 | R4, F10 | Fixed: m00 opens with verified logistics (120 min, 100–1,000 scale, 720, $125, Partner Network, 4 attempts in 12 months, 12-month validity), the 60-question count labeled unofficial, the multiple-response and guide-update warnings, sources, and the booking rule. |
 | Note | Inserting m05 step 0 shifts m05's step indices by one. Saved step-completion for m05 may be off by one, and older audit references to `m05:i` mean the pre-batch numbering. |
-| Still open | P5: move the m00 quiz and trap spotter to a capstone. P7: "Why it exists" panels for the remaining primitives below 10/12. The 4 preparation exercises as in-app labs. |
+| Resolved (Batches 8, 9, 13, 14) | ~~P5, P7, labs.~~ The capstone (Batch 9), the four in-app labs L1–L4 (Batch 8), and the "Why it exists" panels (Batches 8, 13, 14) are built. |
 
 ### Batch 4 (2026-10-31): all 120 questions rewritten (backlog Q1–Q7)
 
@@ -87,7 +87,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
   - The result shows the raw % with a 95% range, a per-domain breakdown, and the booking-bar verdict (80% overall and every domain at 70% or more), along with a reminder about the other booking conditions.
   - Verified headlessly: all 60 holdout items appear in the check, and none appear in mocks or drills.
 - **Residual risk: the same author wrote the holdout and the practice rewrites.** The plan called for separate author agents; efficiency mode dropped that. Batch 7's blind solver on the holdout is the independence check.
-- **Still open: 10 of 15 mock draws can't meet every domain quota** from the practice pool. Scoring is domain-weighted, so results stay comparable, but some draws under-sample D1 or D3.
+- **Resolved (Batch 10):** ~~10 of 15 mock draws can't meet every domain quota.~~ All 15 draws now meet every quota.
 
 ### Batch 8 (2026-10-31): labs and "Why it exists" panels
 
@@ -116,7 +116,7 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | ID | Sev | Item | Evidence | Action |
 |---|---|---|---|---|
 | R0 | S1 | No access yet to the official practice exam, the only external calibration signal | Guide v0.1 preparation step 8 | **You:** ask your Partner Network or Academy contact for the practice-exam link. Save it for the final pre-booking check. |
-| R1 | S1 | The current official certification FAQ says the exams use "multiple choice and scenario-based multiple response questions". Guide v0.1 says every question has one correct answer and three distractors. The app models only single-answer items, so its chance baseline and readiness math assume that format. | `audit/work/coverage-A1-notes.md` §4 (FMT-1); https://anthropic-partners.skilljar.com/page/faq-certifications | Confirm the CCAR-F format (see R2). If multiple-response items are in scope: add a `multi` item type (several `ok` options, all-or-nothing scoring), write about 15 practice items, and update `content-check.mjs` and the readiness math. |
+| R1 | S1 | The current official certification FAQ says the exams use "multiple choice and scenario-based multiple response questions". Guide v0.1 says every question has one correct answer and three distractors. The app models only single-answer items, so its chance baseline and readiness math assume that format. | `audit/work/coverage-A1-notes.md` §4 (FMT-1); https://anthropic-partners.skilljar.com/page/faq-certifications | **Done in Batch 16:** the FAQ was re-checked on 2026-10-31 and still says this. A `multi` type and 15 practice items are built. **You:** check whether the current CCAR-F guide on the Partner Academy describes multiple-response items. If it says single-answer only, the items can stay as extra practice. |
 | R2 | S1 | Exam content may be updated. Pearson VUE announces updated content from 2026-12-07 for the other Claude exams, and there are unconfirmed mentions of updated guides on 2026-11-17. The audit uses Guide v0.1, dated Feb 2025. | `coverage-A1-notes.md` §4 (FMT-2) | **You:** check the current CCAR-F exam guide version on the Partner Academy after Nov 17, and before booking. If it changed, re-parse it and re-run Phase 1 coverage against the diff. |
 | R3 | S2 | "60 questions" is stated only on third-party sites. The 120-minute limit is official. | `coverage-A1-notes.md` §4 | Show the question count in the app as "about 60 (unofficial)" until it's confirmed. Keep the 60-item mock, which costs nothing if the real count differs. |
 | R4 | S2 | The app doesn't mention the 4-attempts-per-12-months limit, the retake waiting periods, or the 12-month validity. | FAQ | Add these to the in-app logistics page (the Foundations track). |
@@ -344,3 +344,46 @@ Totals now:
 - 79 families covering 164 of 278 questions;
 - the correct option is the longest in 28.8% of questions;
 - the best stem-blind heuristic scores 27.1% on practice questions.
+
+## Batch 16: multiple response, traceability re-rate, hygiene (2026-10-31)
+
+**Exam format (R1).** https://anthropic-partners.skilljar.com/page/faq-certifications, checked 2026-10-31:
+- It says "All Claude certification exams use multiple choice and scenario-based multiple response questions," and lists Architect – Foundations.
+- It doesn't give the question count, how many answers a multiple-response item has, or a last-updated date.
+- The current CCAR-F guide is behind the Partner Academy login and wasn't checked.
+
+**The `multi` item type.**
+- **Format:** 5 options with 2 keyed (3 allowed). The stem says "Select TWO". Scoring is all-or-nothing: right only if the selected set equals the keyed set.
+- **Scope:** practice only. The Readiness Check stays single-answer, so it remains comparable.
+- **App:** checkboxes with a "Check answer" button that's enabled at exactly k picks. A "Select k" chip, and keyed options you missed get a dashed border. In the mock, multi items draw within the domain quotas at their natural rate (about 4 in 60), and the result page shows a "Multiple-response x of y" line. First-attempt readiness, domain weighting and the Wilson range are unchanged, because a multi item still produces one right-or-wrong result.
+- **Items:** `mr-01` to `mr-15` (D1 5, D2 3, D3 3, D4 1, D5 3), in `audit/work/multi-items.json`, added with `add-items.mjs`. Each carries `bl` bullet tags. Every distractor is a real technique that's wrong for that scenario.
+- **Checks:**
+  - `content-check.mjs`: format invariants for multi items; cue stats are single-answer only.
+  - `cue-baselines.mjs`: top-k heuristics for multi items, against a chance of 10%. All are 0–23.4%, under the 25% target. The first draft failed on length (both keys were the two longest options in 7 of 15) and on enforce-in-code (28.3%). Both are fixed.
+  - `browser-suite.mjs`: wrong set marked wrong, keyed set marked right, Check answer disabled before k picks, exam-mode chip, mock scored all-or-nothing (1 of 2). Result: 284 checks, no problems.
+- **Open:** a blind solver check on the 15 items in a fresh session (the authoring session can't check them independently).
+
+**Domain mix.** The multi spread fixes Domain 4's over-weight with no trims or holdout moves:
+
+| Domain | Before | After | Target |
+|---|---|---|---|
+| D1 | 25.5% | 25.9% | 27% |
+| D2 | 17.3% | 17.4% | 18% |
+| D3 | 20.1% | 20.1% | 20% |
+| D4 | 22.7% | **21.8%** | 20% |
+| D5 | 14.4% | 14.7% | 15% |
+
+All five are now within ±2 points of target.
+
+**Traceability re-rate.** The new script `scripts/audit/traceability.mjs` re-rates all 240 bullets by ID. It combines the Phase 1 CSVs, the blueprint-only solver's bullet IDs, and the `bl` tags, and writes `audit/work/traceability-rerate.csv`.
+- **Result:** 225 TESTED and 15 COVERED-NOT-TESTED. Phase 1 had 82 tested, 155 covered but not tested, and 3 thin.
+- **The 15 bullets with no linked question:** 1.2-K1, 1.2-S4, 1.7-K3, 1.7-S4, 2.1-S3, 3.1-K4, 3.2-K1, 3.2-S1, 3.5-K2, 3.5-S2, 5.1-S2, 5.2-S1, 5.4-S3, 5.4-S5, 5.6-S2.
+- **Accepted for now:** each sits in a task statement with at least 5 questions. 158 later questions carry only a task-statement tag, so these bullets are probably tested but unattributed. To close one, add `bl` tags to the existing questions that test it.
+
+**Hygiene.**
+- **`q00-3`:** the trap tag on the keyed option of the negated stem is removed. `content-check` now reports no warnings.
+- **Backlog:** the stale "Still open" rows in batches 2, 3 and 5 are marked resolved.
+- **`audit/SUMMARY.md`:** residual risk #4 is completed, and the batch 1–7 tables are marked as a snapshot.
+- **`docs/STUDY-APP-PLAN.md` §6:** the three false claims (length bias, mock balance, scaled score) are corrected, with a pointer to SUMMARY.
+
+**Ship check.** Before these changes, the published artifact matched `main` (`96a3bbd`) file by file, including the static cover. The only difference in `index.html` is the platform's document wrapper, so no republish was needed. Republish after this batch merges.

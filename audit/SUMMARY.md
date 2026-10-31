@@ -67,6 +67,8 @@ Scenario × domain skews (Phase 1 will check these against the guide's scenario 
 
 ## After (2026-10-31, remediation batches 1–7)
 
+> The tables below are the batch 1–7 snapshot. For current totals, run the scripts or see the latest batch in `audit/backlog.md`. As of Batch 16: 293 questions (233 practice, including 15 multiple-response, and 60 holdout), 79 families, and domains at 25.9 / 17.4 / 20.1 / 21.8 / 14.7%.
+
 **Reproduce:**
 - `node scripts/audit/content-check.mjs`
 - `node scripts/audit/cue-baselines.mjs` (add `--set holdout`, or `--ts N`, to check a subset)
@@ -167,6 +169,11 @@ Memorizing a practice answer therefore points you to the wrong answer on its Rea
 
 1. **Every reviewer and author is an AI model.** The same model family wrote, rewrote and checked these items, and the holdout and practice rewrites had the same author in efficiency mode. No human who has passed the exam has reviewed them. Calibrate against the **official practice exam** (backlog R0) before trusting any score.
 2. **Practice questions test recognition more than scenario judgment.** This was fixed for the Readiness Check and the 60 practice twins (see "Option families"). The 158 original practice questions, and therefore most mock-exam questions, are unchanged. Expect mock scores to run higher than the Readiness Check.
-3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
+3. **The exam format may have changed.** The official FAQ (checked 2026-10-31) says every Claude exam uses "multiple choice and scenario-based multiple response questions"; guide v0.1 describes single-answer items only. The app now has 15 multiple-response practice items, scored all-or-nothing (Batch 16). The real exam's share of them, and how many answers each asks for, are unknown. An updated guide may appear after Nov 17 (backlog R2).
 4. **Some open items remain:**
    - none in the markdown guide: its 52 S3 wording items were closed on 2026-10-31;
+   - **114 practice questions aren't in option families** and still mostly test recognition. Convert them, Domains 1 and 3 first, if mock scores and the Readiness Check differ by more than 10 points (Batch 11);
+   - **no blind solver check yet on the 15 multiple-response items.** The session that wrote them can't check them independently, so it's deferred to a fresh session;
+   - **15 blueprint bullets have no question linked by ID** (`node scripts/audit/traceability.mjs`). All are in task statements with at least 5 questions, and 158 later questions carry only a task-statement tag, so most are probably tested but unattributed (Batch 16);
+   - **no re-score of the Why-test by a new reviewer**, and the minor items in `audit/work/novice-fresh-2026-10-31.json` are open;
+   - **no human who has passed the exam has reviewed anything** (risk 1). The official practice exam is the only external check (backlog R0).
