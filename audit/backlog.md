@@ -331,3 +331,16 @@ Verified unchanged:
 - **m06:0 exam-vs-today notes.** They're already in one “Real world today” box plus one “Not to confuse” bullet.
 - **m00:0 and m14:0.** False positives: the scenario and domain lists and the trap spotter are rendered by embeds and widgets.
 - **l01:2.** The `&quot;` entities are an artifact of the text extraction; browsers render them as quotes.
+
+## Batch 15: Domain 2–5 practice families (2026-10-31)
+
+28 bank questions in Domains 2–5 are rewritten as 12 practice families (P08–P19) within their task statements. The blind solver (Sonnet) agreed with the key on **28/28**. It noted 2 weaker alternatives (better tool descriptions), which the explanations already address.
+
+The other 20 bank questions are unchanged:
+- most are alone in their task statement (2.1, 2.2, 2.4, 5.x);
+- pairing would create two defensible keys (the 4.1 explicit-criteria and 4.2 format few-shot items all share one key idea; 3.3's path-rule diagnostics; b8-12, b8-3 and b8-8 duplicate a family's key).
+
+Totals now:
+- 79 families covering 164 of 278 questions;
+- the correct option is the longest in 28.8% of questions;
+- the best stem-blind heuristic scores 27.1% on practice questions.
