@@ -104,72 +104,72 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
       questions: [
         {
           id: "q02-1", ts: "2.1", scenario: 3,
-          stem: "In a research system, the coordinator sends web-search results to <code>analyze_document</code> and PDFs to <code>analyze_content</code> about a third of the time. Both descriptions read “Analyzes the provided content and extracts key points.” What should you do first?",
+          stem: "A research agent uses one generic <code>analyze_document</code> tool to summarize papers, extract statistics and fact-check claims. Its outputs come back in inconsistent shapes, and downstream steps break. What should you do first?",
           options: [
-            { t: "Add a routing layer that inspects each input's MIME type and calls the right tool directly.", trap: "T2", why: "This bypasses the model with new infrastructure before fixing the obvious interface problem." },
-            { t: "Rename and redescribe the tools so each states its input type, output and when to use it, e.g. <code>extract_web_results</code> vs <code>extract_pdf_tables</code>.", ok: true, why: "Identical descriptions give Claude nothing to choose between. Distinct names and boundaries fix the root cause." },
-            { t: "Merge both into one <code>analyze</code> tool that accepts any input and works out internally which analysis to run.", trap: "T5", why: "This removes the choice but hides real differences in input handling and output contracts." },
-            { t: "Add eight few-shot examples of correct routing to the coordinator's prompt, covering both web results and PDFs.", why: "Examples help with ambiguous cases, but these tools are identical by description. Fix the descriptions first." }
+            { t: "Add few-shot examples of each output shape to the agent's prompt, one for every kind of analysis.", trap: "T1", why: "Improves consistency a little, but one tool still serves three purposes with no contract for any of them." },
+            { t: "Split it into purpose-specific tools such as <code>extract_statistics</code>, each with a defined output.", ok: true, why: "Purpose-specific tools with clear input and output contracts are easier to select and to consume." },
+            { t: "Normalize every output into one shape with a <code>normalize_output()</code> post-processing step.", trap: "T6", why: "Patches the symptom; the mixed-purpose tool keeps producing ambiguous results." },
+            { t: "Move the agent to a larger model that keeps its output format consistent across tasks.", trap: "T3", why: "The interface is ambiguous; a bigger model doesn't define a contract." }
           ]
         },
         {
           id: "q02-2", ts: "2.1", scenario: 1,
           stem: "Your tool descriptions are detailed and distinct, yet the agent calls <code>get_customer</code> when users ask “where is order #5521?”. The system prompt includes: “Whenever a customer mentions their account or an order, start by calling get_customer.” What is the most likely fix?",
           options: [
-            { t: "Rewrite the tool descriptions again with more examples.", trap: "T7", why: "The descriptions are already good. A keyword-triggered instruction in the system prompt is overriding them." },
-            { t: "Revise the system prompt instruction that ties the word “order” to get_customer.", ok: true, why: "Keyword-sensitive instructions create unintended tool associations. Remove or narrow the rule." },
-            { t: "Remove get_customer from the agent's tools.", why: "The agent still needs it for account questions and verification." },
-            { t: "Use <code>tool_choice: {\"type\":\"tool\",\"name\":\"lookup_order\"}</code> on every turn.", why: "Forcing one tool every turn breaks every non-order request." }
+            { t: "Rewrite the tool descriptions again, adding several example customer questions to each.", trap: "T7", why: "The descriptions are already good. The system prompt is overriding them." },
+            { t: "Revise the system prompt rule that ties the word “order” to <code>get_customer</code>.", ok: true, why: "Keyword-triggered instructions in the system prompt can override well-written tool descriptions." },
+            { t: "Remove <code>get_customer</code> from the tools so it can't be chosen for order questions.", why: "Breaks every request that genuinely needs customer data." },
+            { t: "Force <code>lookup_order</code> with <code>tool_choice</code> on every turn of the conversation.", why: "Breaks every request that isn't about an order." }
           ]
         },
         {
           id: "q02-3", ts: "2.3", scenario: 3,
           stem: "A synthesis subagent was given all 16 research tools “for flexibility.” It now runs its own web searches mid-synthesis, producing duplicate and lower-quality sources. Best change?",
           options: [
-            { t: "Restrict the synthesis agent to the tools its role needs, plus a narrow <code>verify_fact</code> tool if quick checks are common.", ok: true, why: "Scope tools to role. Cross-specialization tools get misused; a narrow cross-role tool covers the frequent need." },
-            { t: "Tell the synthesis agent in its system prompt that it must not run searches and should only use the findings it's given.", trap: "T1", why: "This leaves the temptation in place and relies on compliance. Removing the tools is structural." },
-            { t: "Switch the synthesis agent to a more capable model that will use its tools with better judgment.", trap: "T3", why: "The problem is tool distribution, not capability." },
-            { t: "Merge search and synthesis into one agent with all 16 tools so no handoff is needed.", trap: "T5", why: "This worsens the selection problem." }
+            { t: "Limit the synthesis agent to its role's tools, plus a narrow <code>verify_fact</code> tool if quick fact checks are common.", ok: true, why: "Scoped tools keep each agent in its role; a narrow tool covers the legitimate need." },
+            { t: "Tell the synthesis agent in its system prompt never to call <code>web_search</code>, and to use only the findings it's given.", trap: "T1", why: "Probabilistic, while the search tools stay available to misuse." },
+            { t: "Switch the synthesis agent to a more capable model that uses its 16 tools with better judgment.", trap: "T3", why: "Too many tools degrade selection whatever the model." },
+            { t: "Merge search and synthesis into one agent with all 16 tools, so no handoff is needed.", trap: "T5", why: "Makes the overload worse and loses context isolation." }
           ]
         },
         {
           id: "q02-4", ts: "2.3", scenario: 6,
           stem: "An extraction pipeline must always run <code>extract_metadata</code> before enrichment tools. Sometimes Claude calls <code>enrich_with_crm</code> first. What is the most reliable fix?",
           options: [
-            { t: "List <code>extract_metadata</code> first in the tools array so Claude sees it before the enrichment tools.", why: "Tool order isn't a sequencing guarantee." },
-            { t: "Set <code>tool_choice: {\"type\": \"tool\", \"name\": \"extract_metadata\"}</code> on the first request, then run enrichment in follow-up turns.", ok: true, why: "Forced tool choice guarantees that tool is called, on models that support forced tool use, which the exam assumes. Later steps get their own requests." },
-            { t: "Set <code>tool_choice: \"any\"</code> on every request so Claude is required to call one of the extraction tools.", why: "This guarantees some tool call, not which one." },
-            { t: "Add “ALWAYS call extract_metadata before any enrichment tool” to the system prompt, in bold.", trap: "T1", why: "Probabilistic, when an API setting gives a guarantee." }
+            { t: "List <code>extract_metadata</code> first in the tools array, so Claude sees it before the enrichment tools.", why: "Tool order isn't a sequencing mechanism." },
+            { t: "Force <code>extract_metadata</code> with <code>tool_choice</code> on the first request, then enrich in later turns.", ok: true, why: "Exam framing: forcing a named tool guarantees it runs first. (Today forced tool use returns 400 on some models; see Exam vs. today.)" },
+            { t: "Set <code>tool_choice: \"any\"</code> on every request, so Claude always calls one of the extraction tools.", why: "Guarantees some tool call, not which one." },
+            { t: "Add “ALWAYS call <code>extract_metadata</code> before any <code>enrich_*</code> tool” to the system prompt, in bold.", trap: "T1", why: "Lowers the rate but doesn't guarantee the order." }
           ]
         },
         {
           id: "q02-5", ts: "2.3", scenario: 6,
           stem: "A pipeline has <code>extract_invoice</code>, <code>extract_receipt</code> and <code>extract_contract</code>. Documents arrive unlabeled. About 4% of responses are prose summaries instead of tool calls. Fix?",
           options: [
-            { t: "Keep <code>tool_choice: \"auto\"</code> and strengthen the instruction to always use a tool.", trap: "T1", why: "\"auto\" permits text. Stronger wording only lowers the rate." },
-            { t: "Force <code>extract_invoice</code>; invoices are the most common type.", why: "This applies the wrong schema to receipts and contracts." },
-            { t: "Set <code>tool_choice: \"any\"</code>.", ok: true, why: "A tool call is guaranteed, and Claude still picks the schema that matches the document. (Exam framing; on models that reject forced tool use, use auto plus strict tools.)" },
-            { t: "Parse the prose summaries with regex as a fallback.", trap: "T6", why: "This patches symptoms with fragile parsing instead of using the guarantee the API offers." }
+            { t: "Keep <code>tool_choice: \"auto\"</code> and add a firm instruction to always respond with one of the extraction tools.", trap: "T1", why: "“auto” permits text. Stronger wording only lowers the rate." },
+            { t: "Force <code>extract_invoice</code> on every request, since invoices are the most common document type.", why: "Mislabels every receipt and contract." },
+            { t: "Set <code>tool_choice: \"any\"</code>.", ok: true, why: "A tool call is guaranteed, and Claude still picks the schema that matches. (Exam framing; on models that reject forced tool use, use auto plus strict tools.)" },
+            { t: "Parse the prose summaries with regular expressions as a fallback path into the same schema.", trap: "T6", why: "Fragile, and it treats the symptom." }
           ]
         },
         {
           id: "q02-6", ts: "2.5", scenario: 4,
           stem: "A developer asks the agent to find every place <code>formatCurrency</code> is used, but it's re-exported from <code>utils/index.ts</code> as <code>fmtMoney</code> and from <code>legacy.ts</code> as <code>toCurrency</code>. What approach finds all usages?",
           options: [
-            { t: "Glob for files with “currency” in their names, then read each of them for call sites.", why: "Glob matches file names, not usages inside files." },
-            { t: "Grep the whole repository for formatCurrency, which will find every call site including re-exports.", why: "This misses every call through the aliases." },
-            { t: "First identify every name the function is exported under, then Grep for each name across the codebase.", ok: true, why: "Tracing through wrapper modules means collecting the aliases first, then searching for each." },
-            { t: "Read every file in src/ one by one to be thorough, since text search can miss indirect usage.", why: "Reading everything up front wastes context. Explore incrementally." }
+            { t: "Glob for files with “currency” in their names, then Read each one and list its call sites.", why: "File names don't reveal where a function is called from." },
+            { t: "Grep the whole repository for <code>formatCurrency</code>, which covers every call site.", why: "Misses calls made through the aliases <code>fmtMoney</code> and <code>toCurrency</code>." },
+            { t: "First find every name the function is exported under, then Grep for each of those names across the codebase.", ok: true, why: "Trace re-exports first, then search for every alias." },
+            { t: "Read every file in <code>src/</code> one by one, since text search can miss indirect usage.", why: "Slow and fills the context window. Targeted search is the right tool." }
           ]
         },
         {
           id: "q02-7", ts: "2.5", scenario: 4,
           stem: "Claude's <code>Edit</code> on <code>routes.ts</code> keeps failing with “old_string is not unique.” The block to change appears in three handlers. What is the reliable next step?",
           options: [
-            { t: "Retry the same Edit; it may succeed on another attempt.", trap: "T6", why: "The same non-unique anchor fails the same way." },
-            { t: "Read the full file, then Write the modified version.", ok: true, why: "When Edit can't find a unique anchor, Read + Write is the documented fallback." },
-            { t: "Use Grep to replace the text.", why: "Grep searches; it doesn't edit." },
-            { t: "Ask the developer to make the code unique first.", why: "This pushes work to a human when a tool fallback exists." }
+            { t: "Retry the same Edit; the match may succeed on another attempt.", trap: "T6", why: "The text is still duplicated, so the match fails the same way." },
+            { t: "Read the full file, then Write the modified version.", ok: true, why: "Exam framing: when Edit can't find a unique anchor, fall back to Read + Write. (Today a longer, unique old_string or replace_all also works; see Exam vs. today.)" },
+            { t: "Run <code>sed -i</code> through Bash to replace the block in place, since sed doesn't need a unique match.", why: "sed changes all three handlers, but only one should change." },
+            { t: "Use Grep with a replacement pattern to change only the first occurrence of the block.", why: "Grep searches; it doesn't edit files." }
           ]
         }
       ]

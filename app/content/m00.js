@@ -44,12 +44,12 @@ window.LESSONS.m00 = {
       questions: [
         {
           id: "q00-1", ts: "2.1",
-          stem: "An internal IT-helpdesk agent often calls <code>reset_password</code> when users ask to unlock their account, instead of <code>unlock_account</code>. Both tools have one-line descriptions. What is the <strong>most effective first step</strong>?",
+          stem: "An IT-helpdesk agent's <code>get_account</code> tool takes an <code>account_id</code> such as <code>AC-00418822</code>. Its description is detailed, yet the agent often passes users' email addresses into <code>account_id</code>, and the calls fail. What is the most effective first step?",
           options: [
-            { t: "Train a lightweight intent classifier on past tickets that selects the tool before Claude sees the request.", trap: "T2", why: "This might work eventually, but it builds infrastructure before trying the cheap fix that targets the cause: thin descriptions." },
-            { t: "Rewrite both descriptions to state what each does, the inputs it expects, example requests, and when to use it instead of the other.", ok: true, why: "Descriptions are the model's main signal for choosing a tool. Two one-liners give it nothing to tell the tools apart. This is the proportionate root-cause fix." },
-            { t: "Merge both into a single <code>manage_account_access</code> tool with an <code>action</code> parameter so Claude no longer has to choose between them.", trap: "T5", why: "Consolidation just moves the same ambiguity into a parameter, and it's a bigger change than a first step warrants." },
-            { t: "Upgrade to the most capable model available so it can infer the right tool from the tool names and the user's wording.", trap: "T3", why: "A stronger model still has nothing to go on when the interface doesn't distinguish the tools." }
+            { t: "Train a small classifier that rewrites emails into <code>account_id</code> values before each call reaches the backend.", trap: "T2", why: "New infrastructure before the cheap fix: tell the model what the parameter expects." },
+            { t: "Describe the parameter's format, and say to call <code>find_account_by_email</code> first whenever only an email is known.", ok: true, why: "Parameter descriptions guide inputs too. State the format and how to get a valid ID." },
+            { t: "Have the backend return a generic “invalid input” error so the agent learns from the failures.", trap: "T6", why: "A generic error doesn't say what's wrong or how to get the right value." },
+            { t: "Upgrade to the most capable model, which infers ID formats from examples it has seen before.", trap: "T3", why: "No model can know your ID format unless you describe it." }
           ]
         },
         {

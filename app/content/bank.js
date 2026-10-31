@@ -67,20 +67,20 @@ window.BANK = [
     id: "b4-1", ts: "2.5", scenario: 4,
     stem: "A developer asks the agent to list every React component test file in a large monorepo. Which built-in tool should it use first?",
     options: [
-      { t: "Glob with a pattern such as <code>**/*.test.tsx</code>", ok: true, why: "Finding files by name pattern is Glob's job." },
-      { t: "Grep for “describe(”", why: "This searches contents, slowly, and matches non-component tests too." },
-      { t: "Read the root directory listing recursively", why: "Inefficient, and Read isn't a search tool." },
-      { t: "Bash with a long find command", why: "Exam framing: Glob is the dedicated file-pattern tool. (Real world today: on macOS and Linux, current Claude Code runs file search through Bash by default; the exam still expects Glob.)" }
+      { t: "Glob, with a pattern such as <code>**/*.test.tsx</code>", ok: true, why: "Finding files by name pattern is Glob's job." },
+      { t: "Grep for <code>describe(</code> across the repository", why: "This searches contents, slowly, and matches non-component tests too." },
+      { t: "Read the root directory listing, then each subdirectory listing in turn", why: "Inefficient, and Read isn't a search tool." },
+      { t: "Bash, with <code>find . -name \"*.test.tsx\"</code>", why: "Exam framing: Glob is the dedicated file-pattern tool. (Real world today: on macOS and Linux, current Claude Code runs file search through Bash by default; the exam still expects Glob.)" }
     ]
   },
   {
     id: "b4-2", ts: "2.5", scenario: 4,
     stem: "An engineer wants to understand how a legacy order service processes cancellations. What exploration strategy should the agent follow?",
     options: [
-      { t: "Grep for the cancellation entry point, Read it, then follow imports to trace the flow.", ok: true, why: "Incremental exploration from entry points keeps context focused." },
-      { t: "Read every file in the service before answering, to be thorough.", why: "This floods context and degrades answers." },
-      { t: "Glob for files containing “cancel” in the name and read them all.", why: "Name matching misses logic and pulls in noise." },
-      { t: "Ask the engineer which files implement cancellation.", why: "This pushes work back that the tools can do." }
+      { t: "Grep for the cancellation entry point, Read it and then follow its imports.", ok: true, why: "Incremental, targeted exploration builds understanding without flooding context." },
+      { t: "Read every file in the service before answering, so nothing relevant is missed.", why: "Fills the context window with irrelevant code." },
+      { t: "Glob for files with “cancel” in their names, then Read all of them in full.", why: "Names miss the real flow, which often runs through generic handlers." },
+      { t: "Ask the engineer which files implement cancellation, then read those.", why: "The agent can find this itself; that's the point of the request." }
     ]
   },
   {
@@ -107,10 +107,10 @@ window.BANK = [
     id: "b4-5", ts: "2.3", scenario: 4,
     stem: "A single developer-productivity agent has 26 tools from four MCP servers plus the built-ins. Logs show frequent wrong-tool calls among similar tools. Which change most improves selection?",
     options: [
-      { t: "Split the work into specialized subagents, each with only the tools its role needs.", ok: true, why: "Fewer, role-scoped tools per agent improve selection reliability." },
-      { t: "Add a detailed paragraph per tool to the system prompt.", why: "Helpful, but 26 options is still too many." },
-      { t: "Consolidate all MCP tools into one generic <code>do_task</code> tool.", trap: "T5", why: "This hides the real choices." },
-      { t: "Move to a bigger model that copes better with large, overlapping tool sets.", trap: "T3", why: "Decision complexity remains." }
+      { t: "Split the work into specialized subagents, each given only the tools that its particular role needs.", ok: true, why: "Fewer, role-relevant tools per agent improve selection." },
+      { t: "Add a detailed paragraph for each of the 26 tools to the system prompt, with usage examples.", why: "Helps a little, but 26 overlapping options still degrade selection." },
+      { t: "Consolidate all MCP tools into one generic <code>do_task</code> tool with free-form input.", trap: "T5", why: "Hides the distinctions instead of resolving them." },
+      { t: "Move to a bigger model that copes better with large, overlapping tool sets.", trap: "T3", why: "Capacity doesn't fix an overloaded tool set." }
     ]
   },
   {
@@ -127,10 +127,10 @@ window.BANK = [
     id: "b4-7", ts: "2.4", scenario: 4,
     stem: "Five internal teams are building different Claude-powered tools that all need read access to your company's API catalog. What's the most reusable integration?",
     options: [
-      { t: "Expose the catalog once through an MCP server that every team's client can connect to.", ok: true, why: "MCP shines when many clients need the same integration." },
-      { t: "Have each of the five teams write its own custom tool against the catalog API.", why: "Five implementations that drift apart." },
-      { t: "Paste the full catalog into each tool's system prompt.", trap: "T3", why: "Bloated and stale." },
-      { t: "Put the catalog in each repository's CLAUDE.md file.", why: "Only works in Claude Code, and goes stale." }
+      { t: "Expose the catalog once through an MCP server that every team's client connects to.", ok: true, why: "Integrate once; every MCP-capable client can use it." },
+      { t: "Have each of the five teams write a custom tool against the catalog's REST API, sharing a common client library.", why: "Five integrations to maintain, even with a shared library." },
+      { t: "Paste the full catalog into each tool's system prompt.", trap: "T3", why: "Bloats every request and goes stale." },
+      { t: "Generate a nightly export of the catalog into each repository's CLAUDE.md.", why: "Bloats memory and isn't queryable." }
     ]
   },
   {
@@ -229,12 +229,12 @@ window.BANK = [
   },
   {
     id: "b1-2", ts: "2.2", scenario: 1,
-    stem: "<code>process_refund</code> sends the request to the payment provider, which then times out without confirming. How should the tool report this?",
+    stem: "<code>process_refund</code> isn't idempotent: sending the same request twice issues two refunds. It sends a refund to the payment provider, which then times out without confirming. How should the tool report this?",
     options: [
-      { t: "As an error saying the outcome is uncertain and unsafe to retry until the refund status is checked.", ok: true, why: "A timeout after submission may already have succeeded. Blind retries risk a double refund." },
-      { t: "As a transient error with isRetryable: true, so the agent retries the refund.", trap: "T6", why: "A write that may have happened isn't safe to retry blindly." },
-      { t: "As a success, since the request was probably processed.", why: "This could tell the customer a refund happened when it didn't." },
-      { t: "As a generic “payment failed” error so the agent tells the customer to try again.", trap: "T6", why: "This hides the uncertainty the agent must act on." }
+      { t: "As an error saying the outcome is unknown and it's unsafe to retry until the refund status is checked.", ok: true, why: "For a non-idempotent action, a timeout means “unknown”, not “failed”. Check before retrying." },
+      { t: "As a transient error with <code>isRetryable: true</code>, since payment-provider timeouts are usually temporary.", trap: "T6", why: "Timeouts are usually retryable, but here a retry can refund the customer twice." },
+      { t: "As a success, since the provider probably processed it.", why: "“Probably” isn't confirmation." },
+      { t: "As a generic “payment failed” error so the agent asks the customer to try the refund again.", trap: "T6", why: "Could trigger a duplicate refund, and hides the uncertainty." }
     ]
   },
 
@@ -253,10 +253,10 @@ window.BANK = [
     id: "b3-2", ts: "2.3", scenario: 3,
     stem: "The document-analysis subagent has a generic <code>fetch_url</code> tool and sometimes fetches tracking pages and login walls instead of documents. Best change?",
     options: [
-      { t: "Replace fetch_url with a load_document tool that validates the URL is a supported document.", ok: true, why: "Constrained tools prevent misuse structurally." },
-      { t: "Tell the subagent in its prompt to fetch only document URLs.", trap: "T1", why: "Probabilistic, when a structural fix exists." },
-      { t: "Give the subagent web search too, so it can find better URLs.", trap: "T5", why: "This adds cross-role tools." },
-      { t: "Retry any fetch that returns an HTML page instead of a document.", trap: "T6", why: "Retrying doesn't fix the wrong target." }
+      { t: "Replace <code>fetch_url</code> with a <code>load_document</code> tool that accepts only supported documents.", ok: true, why: "A constrained, purpose-specific tool removes the misuse at the interface." },
+      { t: "Tell the subagent in its prompt to fetch only URLs ending in <code>.pdf</code>, <code>.docx</code> or similar document types.", trap: "T1", why: "Probabilistic; the tool still accepts any URL." },
+      { t: "Give the subagent web search too, so it can find better URLs before fetching anything.", trap: "T5", why: "More tools, same problem." },
+      { t: "Retry any fetch that returns an HTML page instead of a document, up to three times.", trap: "T6", why: "The same URL returns the same page." }
     ]
   },
 

@@ -79,20 +79,20 @@ window.LESSONS.m04 = {
           id: "q04-1", ts: "2.2", scenario: 1,
           stem: "<code>lookup_order</code> returns <code>{\"error\": \"Operation failed\"}</code> for timeouts, malformed IDs and permission problems alike. The agent retries malformed IDs repeatedly and tells customers with valid IDs to “provide a correct order number.” Best fix?",
           options: [
-            { t: "Return structured errors with an errorCategory (transient / validation / permission), isRetryable, and a human-readable description.", ok: true, why: "Uniform errors make appropriate recovery impossible. Categories and retryability tell the agent what to do." },
-            { t: "Add system-prompt guidance explaining how the agent should interpret and respond to “Operation failed.”", trap: "T9", why: "The information isn't in the error, so no prompt can help the model recover it." },
-            { t: "Retry every failure three times with backoff inside the tool before reporting it to the agent.", trap: "T6", why: "This wastes retries on malformed IDs and permission errors that never succeed." },
-            { t: "Escalate every tool failure to a human agent so customers never receive a wrong answer.", why: "This overwhelms humans with transient blips the tool could absorb." }
+            { t: "Return structured errors with an <code>errorCategory</code>, <code>isRetryable</code> and a readable description.", ok: true, why: "The agent needs to know what failed and whether to retry, ask or explain." },
+            { t: "Add structured system-prompt guidance on interpreting “Operation failed” in each situation.", trap: "T9", why: "The agent can't tell the situations apart from an identical message." },
+            { t: "Retry every failure three times with exponential backoff (<code>retry(3)</code>) inside the tool, then report “Operation failed.”", trap: "T6", why: "Wastes time on permanent errors and still hides the cause." },
+            { t: "Escalate every tool failure to a human agent, so customers never receive a wrong answer.", trap: "T7", why: "Overkill. Most failures can be handled once they're classified." }
           ]
         },
         {
           id: "q04-2", ts: "2.2", scenario: 1,
           stem: "<code>process_return</code> rejects a request because the item is final-sale. How should the tool report this?",
           options: [
-            { t: "Throw an exception so the agent framework surfaces the full stack trace to the model.", why: "Exceptions often reach the model as opaque failures, if they reach it at all." },
-            { t: "Return a successful result with <code>{\"note\": \"final sale\"}</code> so the agent can explain it if needed.", trap: "T6", why: "Marking a rejection as success invites the agent to tell the customer the return went through." },
-            { t: "Return <code>isError: true</code> with category “business”, <code>isRetryable: false</code>, and a customer-friendly explanation.", ok: true, why: "The agent knows not to retry and has wording to explain the outcome." },
-            { t: "Return a JSON-RPC protocol error so the client knows the call was rejected.", why: "Protocol errors are for malformed requests. The tool ran and applied policy." }
+            { t: "Throw an exception, so the agent framework passes the full stack trace, including the policy check, to the model.", why: "A stack trace isn't actionable, and it leaks internals." },
+            { t: "Return a successful result with <code>{\"note\": \"final sale\"}</code> so the agent can mention it if needed.", trap: "T6", why: "Marking a rejection as success invites the agent to say the return worked." },
+            { t: "Return <code>isError: true</code> with category “business”, marked not retryable, plus a customer-friendly reason.", ok: true, why: "The agent can explain the policy and won't retry." },
+            { t: "Return a structured JSON-RPC protocol error so the client knows the call was rejected.", why: "Protocol errors are for malformed requests. The tool ran and applied policy." }
           ]
         },
         {
@@ -109,10 +109,10 @@ window.LESSONS.m04 = {
           id: "q04-4", ts: "2.2", scenario: 3,
           stem: "<code>search_archive</code> returns <code>[]</code> both when nothing matches and when the archive service is unreachable. The coordinator concludes some topics have no coverage. Fix?",
           options: [
-            { t: "Return an empty successful result for no matches, and an isError result with a transient category when the service is unreachable.", ok: true, why: "Access failures need retry decisions; valid empty results don't. They must be distinguishable." },
-            { t: "Always retry empty results twice inside the tool before returning them, in case the service was down.", why: "This wastes calls on genuinely empty queries and still can't tell the cases apart." },
-            { t: "Have the coordinator treat every empty result as a possible outage and re-run that query later.", trap: "T7", why: "The tool is ambiguous. Fix it at the source." },
-            { t: "Return a dummy result with default values when the service is down, so downstream steps still have data.", trap: "T6", why: "Fabricating data is worse than an empty list." }
+            { t: "Return an empty success for no matches, and an <code>isError</code> result marked transient when the archive service is down.", ok: true, why: "An access failure and an empty result mean different things and need different handling." },
+            { t: "Retry every empty <code>[]</code> result twice inside the tool before returning it, in case the service was down.", why: "Slows down every genuine no-match and still can't tell the agent which case it is." },
+            { t: "Have the coordinator treat every empty result as a possible outage and re-run that query later.", trap: "T7", why: "Fixes the wrong component. The tool should say what happened." },
+            { t: "Return placeholder results with default values when the service is down, so downstream steps still have data.", trap: "T6", why: "Fabricated data is worse than an honest error." }
           ]
         },
         {

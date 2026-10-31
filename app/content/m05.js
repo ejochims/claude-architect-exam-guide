@@ -128,60 +128,60 @@ window.LESSONS.m05 = {
           id: "q05-1", ts: "2.4", scenario: 4,
           stem: "Your team wants everyone who clones the repo to have the same Jira MCP server, but each engineer has a personal API token. What configuration should you use?",
           options: [
-            { t: "Commit <code>.mcp.json</code> with the server entry and <code>\"JIRA_TOKEN\": \"${JIRA_TOKEN}\"</code>, and have each engineer set the variable locally.", ok: true, why: "Project scope shares the config; environment-variable expansion keeps secrets out of version control." },
-            { t: "Commit <code>.mcp.json</code> with a single shared service-account token so every engineer works out of the box.", why: "This leaks a credential into git history." },
-            { t: "Ask every engineer to add the server to their own <code>~/.claude.json</code> with their personal token.", why: "This works, but it isn't shared or versioned, and configs drift." },
-            { t: "Put the server definition and a token placeholder in <code>CLAUDE.md</code> so Claude Code configures it.", trap: "T8", why: "CLAUDE.md holds instructions and context, not MCP server configuration." }
+            { t: "Commit <code>.mcp.json</code> with <code>\"JIRA_TOKEN\": \"${JIRA_TOKEN}\"</code> and have each engineer set the variable.", ok: true, why: "Shared configuration, personal secrets, nothing sensitive in the repo." },
+            { t: "Commit <code>.mcp.json</code> with one shared service-account token in <code>\"JIRA_TOKEN\"</code>, so every clone works out of the box.", why: "A secret in version control, and every action is attributed to one account." },
+            { t: "Have each engineer add the server to their own <code>~/.claude.json</code> with a personal token.", why: "Works, but the setup isn't shared and drifts between engineers." },
+            { t: "Put the server definition and a token placeholder in CLAUDE.md, so Claude Code configures it.", trap: "T8", why: "CLAUDE.md doesn't configure MCP servers." }
           ]
         },
         {
           id: "q05-2", ts: "2.4", scenario: 4,
           stem: "You want to try an experimental MCP server in all your projects without affecting teammates. Where should you configure it?",
           options: [
-            { t: "The project's <code>.mcp.json</code>, on a feature branch.", why: "It's still shared once merged, and it's tied to one repo." },
-            { t: "User scope in <code>~/.claude.json</code>.", ok: true, why: "Personal and available in every project, not shared through version control." },
-            { t: "<code>.claude/settings.json</code> in each repo.", why: "This is project-shared and repetitive." },
-            { t: "<code>~/.claude/CLAUDE.md</code>.", trap: "T8", why: "Memory files don't configure MCP servers." }
+            { t: "The project's <code>.mcp.json</code>, on a feature branch that you never merge.", why: "Per-project, and it ends up on a shared branch." },
+            { t: "User scope in <code>~/.claude.json</code>.", ok: true, why: "User scope applies to you, in every project." },
+            { t: "<code>.claude/settings.local.json</code> in each repository you work in.", why: "Per-project, so you'd repeat it in every repo." },
+            { t: "<code>~/.claude/CLAUDE.md</code>, so it loads in every project for you alone.", trap: "T8", why: "Memory files don't configure MCP servers." }
           ]
         },
         {
           id: "q05-3", ts: "2.4", scenario: 4,
           stem: "You added an MCP server with a <code>find_references</code> tool that understands transitive imports, but the agent keeps using Grep. Its description is “Finds references.” What should you do first?",
           options: [
-            { t: "Remove Grep from the agent's tools so it has no choice but to use the MCP tool.", why: "Grep is still the right tool for plain text search. Removing it is heavy-handed." },
-            { t: "Expand the MCP tool's description to explain its capabilities, inputs and outputs, and when it beats text search.", ok: true, why: "Claude chooses by description, and “Finds references” gives it no reason to prefer the richer tool." },
-            { t: "Add “always prefer MCP tools over built-in tools” to the project CLAUDE.md.", trap: "T1", why: "A blanket instruction without explaining the tool's value is weaker and over-broad." },
-            { t: "Switch to a larger model that is better at noticing when a specialized tool is available.", trap: "T3", why: "The model lacks information, not capability." }
+            { t: "Remove Grep from the agent's tools so it has to use the MCP tool for references.", why: "Breaks every legitimate text search." },
+            { t: "Expand the MCP tool's description to say what it finds, what it returns and when it beats text search.", ok: true, why: "Agents choose tools from descriptions. A two-word description loses to a familiar built-in." },
+            { t: "Add “always prefer MCP tools over built-in tools” to the project CLAUDE.md.", trap: "T1", why: "A blanket rule is wrong in many cases and doesn't explain this tool's value." },
+            { t: "Switch to a larger model, which is better at noticing when a specialized tool is available, and retest.", trap: "T3", why: "The description gives any model nothing to go on." }
           ]
         },
         {
           id: "q05-4", ts: "2.4", scenario: 4,
           stem: "Logs show the agent calls <code>list_runbooks</code>, then <code>search_runbooks</code> several times, before every incident, just to learn which runbooks exist. How can you cut those calls?",
           options: [
-            { t: "Expose the runbook catalog as an MCP resource.", ok: true, why: "Resources give the agent visibility into available content without exploratory tool calls." },
-            { t: "Merge list and search into one tool.", trap: "T5", why: "This still requires calls to discover what exists." },
-            { t: "Cache the search results in the tool.", why: "This speeds calls but doesn't remove the exploration." },
-            { t: "Add every runbook's full text to the system prompt.", trap: "T3", why: "This bloats every request. A catalog plus on-demand fetch is the efficient pattern." }
+            { t: "Expose the runbook catalog as an MCP resource.", ok: true, why: "A resource lets the agent see what exists without exploratory tool calls." },
+            { t: "Merge <code>list_runbooks</code> and <code>search_runbooks</code> into one tool with a query parameter.", trap: "T5", why: "Still a tool call per incident just to discover what exists." },
+            { t: "Cache search results inside the tool for an hour, so repeated searches return instantly.", why: "Faster calls, but the agent still makes them." },
+            { t: "Add every runbook's full text to the system prompt.", trap: "T3", why: "Bloats every request. A catalog is enough." }
           ]
         },
         {
           id: "q05-5", ts: "2.4", scenario: 4,
           stem: "The team needs the agent to read and update GitHub issues, and also run a proprietary release checklist unique to your company. What's the sensible approach?",
           options: [
-            { t: "Build one custom MCP server that covers both the GitHub issues and the release checklist.", why: "This reinvents a standard integration that already exists and must be maintained." },
-            { t: "Use an existing GitHub MCP server, and write a small custom server only for the release checklist.", ok: true, why: "Reuse community servers for standard integrations; reserve custom servers for team-specific workflows." },
-            { t: "Have the agent call the GitHub REST API through Bash with curl.", why: "This loses structured tool descriptions, typed inputs and centralized auth." },
-            { t: "Describe the checklist in CLAUDE.md and skip MCP, letting Claude follow it by hand.", why: "Instructions can't perform the GitHub actions." }
+            { t: "Build one custom MCP server covering both the GitHub issues and the release checklist.", why: "Reinvents a standard integration that already exists." },
+            { t: "Use an existing GitHub MCP server, and write a small custom one only for the checklist.", ok: true, why: "Reuse standard servers; build custom only for what's unique to you." },
+            { t: "Have the agent call GitHub's REST API with curl through Bash, authenticating with a token.", why: "Bypasses typed tools and descriptions, and is brittle." },
+            { t: "Describe the checklist in CLAUDE.md and skip MCP, letting Claude follow it manually.", why: "Loses structured, reliable tool access for the checklist." }
           ]
         },
         {
           id: "q05-6", ts: "2.4", scenario: 4,
           stem: "The repo's <code>.mcp.json</code> defines a <code>github</code> server. A developer also has a personal <code>notes</code> server at user scope. What does the agent have access to in this project?",
           options: [
-            { t: "Only the project servers; project scope replaces user scope.", why: "Scopes merge across different server names. Precedence only applies to a name defined twice." },
-            { t: "Tools from both servers, discovered at connection time and available at the same time.", ok: true, why: "All configured servers load together." },
-            { t: "Only the user's notes server, because personal configuration takes precedence over the project's.", why: "Precedence only applies when the same name is defined twice." },
-            { t: "Whichever single server the developer selects when the session starts.", trap: "T8", why: "There is no such selection step." }
+            { t: "Only the project servers, because project scope replaces user scope.", why: "Scopes combine. Precedence matters only when names collide." },
+            { t: "Tools from both servers, discovered at connection and available together.", ok: true, why: "All configured servers load; their tools are available at the same time." },
+            { t: "Only the notes server, because personal configuration takes precedence over the project's.", why: "Precedence applies to same-named servers, and local beats project beats user." },
+            { t: "Whichever single server the developer selects with <code>--mcp-server</code> when starting the session.", trap: "T8", why: "No such selection exists; configured servers all load." }
           ]
         }
       ]
