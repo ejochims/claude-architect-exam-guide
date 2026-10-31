@@ -418,13 +418,19 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
       return touch();
     }
     const scen = shuffle(B.scenarios.map(s => s.n)).slice(0, 4).sort((a, b) => a - b);
-    // Fill toward the blueprint's domain weights (27/18/20/20/15% of 60), then top up to 60.
-    const pool = shuffle(QUESTIONS.filter(q => scen.includes(q.scenario)));
+    // Meet the blueprint's domain weights exactly (27/18/20/20/15% of 60). Draw from the 4 scenarios first;
+    // if they can't fill a domain's quota, borrow that domain's items from the other scenarios.
+    const inDraw = shuffle(QUESTIONS.filter(q => scen.includes(q.scenario)));
+    const outside = shuffle(QUESTIONS.filter(q => q.scenario && !scen.includes(q.scenario)));
     const picked = new Set();
-    for (const d of B.domains) pool.filter(q => domOfTask(q.ts).id === d.id).slice(0, Math.round(d.weight * 0.6)).forEach(q => picked.add(q));
-    for (const q of pool) { if (picked.size >= 60) break; picked.add(q); }
-    const qids = scen.flatMap(n => [...picked].filter(q => q.scenario === n).map(q => q.id));
-    state.mock = { startedAt: Date.now(), qids, ans: {}, flags: {}, scen, cur: 0 };
+    for (const d of B.domains) {
+      const need = Math.round(d.weight * 0.6), ofD = q => domOfTask(q.ts).id === d.id;
+      [...inDraw.filter(ofD), ...outside.filter(ofD)].slice(0, need).forEach(q => picked.add(q));
+    }
+    const order = [...scen, ...B.scenarios.map(s => s.n).filter(n => !scen.includes(n))];
+    const qids = order.flatMap(n => [...picked].filter(q => q.scenario === n).map(q => q.id));
+    const borrowed = [...new Set([...picked].filter(q => !scen.includes(q.scenario)).map(q => q.scenario))];
+    state.mock = { startedAt: Date.now(), qids, ans: {}, flags: {}, scen, borrowed, cur: 0 };
     touch();
   }
   function submitMock() {
@@ -460,7 +466,7 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     if (!state.mock) {
       app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, one best answer each, no feedback until you submit.")}
 <div class="read"><div class="panel">
-<ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
+<ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>The 60 questions always match the blueprint's domain weights. If the four drawn scenarios can't fill a domain's share, a few questions come from another scenario.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
 <button class="btn accent" type="button" id="begin">Begin the exam</button></div></div>`;
       document.getElementById("begin").addEventListener("click", () => { startMock(); viewMock(); });
       return;

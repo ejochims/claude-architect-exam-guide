@@ -70,7 +70,10 @@ for (let a = 0; a < 6; a++) for (let b = a + 1; b < 6; b++) for (let c = b + 1; 
 const mock = draws.map(draw => {
   const pool = Q.filter(q => !q.holdout && draw.includes(q.scenario));
   const short = B.domains.map(d => ({ d: d.id, need: Math.round(d.weight * 0.6), have: pool.filter(q => domainOf(q.ts) === d.id).length })).filter(x => x.have < x.need);
-  return { draw: draw.join(","), pool: pool.length, poolCoveredBy60: pct(Math.min(60, pool.length), pool.length), short };
+  // The mock borrows a short domain's items from other scenarios, so a draw fails only if the whole bank is short.
+  const borrowed = short.reduce((a, x) => a + x.need - x.have, 0);
+  const bankShort = B.domains.filter(d => Q.filter(q => !q.holdout && q.scenario && domainOf(q.ts) === d.id).length < Math.round(d.weight * 0.6)).map(d => d.id);
+  return { draw: draw.join(","), pool: pool.length, poolCoveredBy60: pct(Math.min(60, pool.length), pool.length), short, borrowed, bankShort };
 });
 
 const report = {
@@ -88,7 +91,7 @@ const report = {
     authoredPosition: origPos, displayedPosition: shownPos
   },
   traps: { taggedDistractors: tagged, distractors, taggedPct: pct(tagged, distractors), use: trapUse },
-  mock: { draws: mock.length, infeasible: mock.filter(m => m.short.length).length, unscenarioed: Q.filter(q => q.scenario == null).map(q => q.id), detail: mock },
+  mock: { draws: mock.length, infeasible: mock.filter(m => m.bankShort.length).length, needBorrowing: mock.filter(m => m.borrowed).length, maxBorrowed: Math.max(...mock.map(m => m.borrowed)), unscenarioed: Q.filter(q => q.scenario == null).map(q => q.id), detail: mock },
   negatedStems: Q.filter(q => /<strong>not<\/strong>|\bNOT\b|\bexcept\b/.test(q.stem)).map(q => q.id),
   cardsPerModule: count(cards, c => c.module),
   errors, warnings
@@ -107,7 +110,7 @@ else {
   console.log(`Absolute wording: correct ${c.absoluteWording.correctPct}% vs distractors ${c.absoluteWording.distractorPct}%`);
   console.log(`Correct position — authored ${JSON.stringify(c.authoredPosition)}, displayed ${JSON.stringify(c.displayedPosition)}`);
   console.log(`Trap tags on distractors: ${r.traps.taggedDistractors}/${r.traps.distractors} (${r.traps.taggedPct}%) ${JSON.stringify(r.traps.use)}`);
-  console.log(`Mock draws with an unmeetable domain quota: ${r.mock.infeasible}/${r.mock.draws}; questions with no scenario: ${r.mock.unscenarioed.length}`);
+  console.log(`Mock draws that can't meet domain quotas: ${r.mock.infeasible}/${r.mock.draws} · draws that borrow from other scenarios: ${r.mock.needBorrowing}/${r.mock.draws} (max ${r.mock.maxBorrowed} of 60) · questions with no scenario: ${r.mock.unscenarioed.length}`);
   if (warnings.length) console.log(`Warnings: ${warnings.join("; ")}`);
   console.log(errors.length ? `\nINVARIANT FAILURES (${errors.length}):\n  ${errors.join("\n  ")}` : "\nInvariants: OK");
 }

@@ -520,5 +520,145 @@ window.BANK = [
       { t: "Average the two fields' accuracy and use a single threshold matching that average.", why: "Averaging hides exactly the per-field difference you measured." },
       { t: "Send every <code>tax_id</code> to review and never review <code>invoice_date</code>.", why: "Ignores the scores entirely and stops measuring invoice_date." }
     ]
+  },
+  {
+    id: "b8-1", ts: "4.1", scenario: 1,
+    stem: "The support agent's prompt says to “offer a goodwill credit when appropriate.” Credits vary wildly between similar cases, and finance can't predict the cost. Best change?",
+    options: [
+      { t: "Spell out when a credit applies and how much, by case type, with an example of each.", ok: true, why: "Explicit criteria replace a vague judgment with a consistent rule." },
+      { t: "Tell the agent to be fair and consistent when it decides on credits.", trap: "T9", why: "Restates the goal without saying what fair means." },
+      { t: "Have the agent rate each case's severity from 1 to 10 and credit cases above 7.", trap: "T4", why: "An uncalibrated self-rating moves the inconsistency rather than removing it." },
+      { t: "Route every credit decision to a human team lead for approval.", trap: "T2", why: "Overkill for small credits; clear criteria fix the inconsistency." }
+    ]
+  },
+  {
+    id: "b8-2", ts: "4.2", scenario: 1,
+    stem: "The agent's replies must end with a summary block in a set format (case ID, actions taken, next step) that the CRM parses. Instructions describe the format, but about 15% of replies vary it. What helps most?",
+    options: [
+      { t: "Repeat the format description at the end of the system prompt as well.", trap: "T9", why: "More description of the same format adds no new information." },
+      { t: "Add two or three examples of replies ending in the exact summary block.", ok: true, why: "When instructions alone vary, examples of the exact format fix it." },
+      { t: "Let the CRM parser accept the common variations as they appear.", trap: "T6", why: "Chases the variations instead of fixing the output." },
+      { t: "Lower the temperature so replies follow the format more closely.", why: "More repeatable, not more correct; the format still drifts." }
+    ]
+  },
+  {
+    id: "b8-3", ts: "4.6", scenario: 1,
+    stem: "Before an agent's reply goes out in high-value disputes, a second step checks it against policy. That step is the same conversation asked to “review your reply.” It rarely catches the errors auditors later find. Better design?",
+    options: [
+      { t: "Ask the same conversation to review its reply twice before sending.", why: "The same context repeats the same blind spots." },
+      { t: "A separate call given the reply and policy but not the agent's reasoning.", ok: true, why: "An independent reviewer isn't anchored on how the reply was produced." },
+      { t: "Have the agent attach a confidence score and send low-scoring replies to a human.", trap: "T4", why: "Uncalibrated scores don't catch confident policy errors." },
+      { t: "Switch the agent to a larger model for high-value disputes.", trap: "T3", why: "Doesn't add an independent check." }
+    ]
+  },
+  {
+    id: "b8-4", ts: "4.6", scenario: 2,
+    stem: "Claude Code generates a migration script, then you ask the same session whether it's safe to run in production. It says yes; the script later locks a large table for 20 minutes. What would have caught it?",
+    options: [
+      { t: "Asking the same session again, more skeptically, before running it.", trap: "T9", why: "The same context shares the original blind spots." },
+      { t: "A fresh session reviewing the script against locking and data-volume criteria.", ok: true, why: "An independent review with concrete criteria isn't anchored on the generator's reasoning." },
+      { t: "Plan mode for the next migration so Claude thinks harder before writing it.", why: "Better planning, but still no independent check of the result." },
+      { t: "Running the script in production during low traffic, as a rule.", why: "Reduces impact without catching the problem." }
+    ]
+  },
+  {
+    id: "b8-5", ts: "4.1", scenario: 2,
+    stem: "You ask Claude Code to “write good tests” for a payment module. It writes many tests for getters and setters and few for refund edge cases. Best change to the request?",
+    options: [
+      { t: "Name what to cover, such as refund edge cases and rounding.", ok: true, why: "Explicit criteria define what good means for this module." },
+      { t: "Ask for “more thorough tests” this time.", trap: "T9", why: "Thorough by what standard? The criteria are still missing." },
+      { t: "Ask for at least 50 tests so coverage goes up.", why: "A count invites more trivial tests." },
+      { t: "Generate tests with a larger model.", trap: "T3", why: "Without criteria, any model can focus on the easy cases." }
+    ]
+  },
+  {
+    id: "b8-6", ts: "4.3", scenario: 3,
+    stem: "Search subagents return findings as free-form text. Synthesis often can't tell a claim from its source or date, and parsing breaks. What should subagents produce?",
+    options: [
+      { t: "Markdown with a heading per finding, so synthesis can split on headings.", why: "Still free text; fields aren't guaranteed." },
+      { t: "Tool output with claim, source, date and excerpt fields.", ok: true, why: "A schema-defined tool output gives synthesis reliable fields." },
+      { t: "A longer narrative that explains where each claim came from.", why: "Harder to parse, and the fields still aren't structured." },
+      { t: "Plain text, with synthesis told to extract sources carefully.", trap: "T9", why: "Leaves the structure to chance." }
+    ]
+  },
+  {
+    id: "b8-7", ts: "4.4", scenario: 3,
+    stem: "Findings must cite a URL that appears in the subagent's fetched sources. A validator finds about 5% cite URLs that were never fetched. Retrying with “cite real sources” barely helps. Better retry?",
+    options: [
+      { t: "Retry with the list of fetched URLs and the specific citation that failed.", ok: true, why: "Specific feedback, plus the valid options, lets the model correct the citation." },
+      { t: "Retry up to five times with the same instruction.", trap: "T6", why: "The same request repeats the same mistake." },
+      { t: "Drop any finding with an invalid citation, without telling anyone.", trap: "T6", why: "Silently loses findings that may be real." },
+      { t: "Raise the subagent's temperature on retries for more variety.", why: "Variety isn't correctness." }
+    ]
+  },
+  {
+    id: "b8-8", ts: "4.6", scenario: 3,
+    stem: "Reports sometimes include claims their cited sources don't support. A teammate proposes asking the synthesis agent to “double-check its citations” at the end. Better approach?",
+    options: [
+      { t: "An independent pass checking each claim against its excerpt.", ok: true, why: "An independent, source-grounded check catches what self-review misses." },
+      { t: "The synthesis agent's own double-check, run in the same conversation.", why: "Anchored on its own wording and reasoning." },
+      { t: "Requiring at least two sources for every claim in the report.", why: "Changes the threshold without checking support." },
+      { t: "Dropping every claim that has only one source.", why: "Loses valid findings; still doesn't check support." }
+    ]
+  },
+  {
+    id: "b8-9", ts: "4.1", scenario: 4,
+    stem: "A code-review assistant in the editor flags every TODO comment as an issue. Developers silence it. The team wants TODOs flagged only when they reference a closed ticket or are older than 90 days. Best change?",
+    options: [
+      { t: "Tell the assistant to use judgment about which TODOs matter.", trap: "T9", why: "No criteria, so the noise continues." },
+      { t: "Stop checking TODOs entirely.", why: "Loses the useful cases." },
+      { t: "State both criteria, with examples that count and don't.", ok: true, why: "Explicit criteria with contrasting examples cut the false positives." },
+      { t: "Cap the assistant at two TODO findings per file.", why: "Still flags the wrong ones." }
+    ]
+  },
+  {
+    id: "b8-10", ts: "4.2", scenario: 4,
+    stem: "A developer tool drafts commit messages. Your convention is “type(scope): summary” plus a body explaining why. The instructions describe it, but drafts drift in format. What helps most?",
+    options: [
+      { t: "Two or three example commit messages in exactly the team's format.", ok: true, why: "Examples show the precise format instructions leave room on." },
+      { t: "A longer description of the convention with every allowed type listed.", why: "More prose, same ambiguity." },
+      { t: "A regex that rejects drafts and asks the developer to rewrite them.", trap: "T6", why: "Pushes the work to the developer." },
+      { t: "A bigger model for drafting commit messages.", trap: "T3", why: "Format drift isn't a capability problem." }
+    ]
+  },
+  {
+    id: "b8-11", ts: "4.5", scenario: 4,
+    stem: "Every weekend, a job asks Claude to check 4,000 internal repositories' READMEs against the documentation standard. Results are reviewed on Monday. Cost matters. How should the job run?",
+    options: [
+      { t: "Synchronous calls in parallel, so results arrive within minutes.", why: "Full price for results nobody reads until Monday." },
+      { t: "The Message Batches API, with a <code>custom_id</code> per repository.", ok: true, why: "Latency-tolerant work fits batch: half the cost, matched by custom_id." },
+      { t: "One request containing all 4,000 READMEs, to save on overhead.", trap: "T3", why: "Far beyond a single context window, and one failure loses everything." },
+      { t: "Synchronous calls, one repository at a time, overnight.", why: "Slow and still full price." }
+    ]
+  },
+  {
+    id: "b8-12", ts: "3.2", scenario: 4,
+    stem: "Developers repeatedly paste the same 40-line prompt to triage flaky tests. You want it versioned with the repo and runnable as one command. What should you create?",
+    options: [
+      { t: "A committed project skill or command for the workflow.", ok: true, why: "A reusable, versioned workflow everyone gets on clone." },
+      { t: "A section in CLAUDE.md, so the prompt loads in every session.", why: "Always-on context for an occasional task." },
+      { t: "A snippet in each developer's editor.", why: "Not versioned with the repo, so copies drift." },
+      { t: "A wiki page developers copy from.", why: "Still manual pasting." }
+    ]
+  },
+  {
+    id: "b8-13", ts: "3.4", scenario: 4,
+    stem: "A developer wants to replace the app's hand-rolled auth with the company's SSO library. It touches routing, sessions and 30 files, and there are two plausible integration approaches. How should they start?",
+    options: [
+      { t: "Direct execution, starting with the routing changes and adjusting as needed.", why: "Commits to an approach before comparing the two options." },
+      { t: "Plan mode to compare both approaches, then execute the plan.", ok: true, why: "Architectural, multi-file, with alternatives: plan first." },
+      { t: "Ask Claude to implement both approaches and keep whichever compiles.", why: "Twice the work, and compiling doesn't decide architecture." },
+      { t: "Direct execution with tests run after each file.", why: "Tests catch breakage but don't choose the design." }
+    ]
+  },
+  {
+    id: "b8-14", ts: "3.1", scenario: 4,
+    stem: "An engineer's personal <code>~/.claude/CLAUDE.md</code> says “prefer tabs.” The project's CLAUDE.md says “use 2-space indentation,” and the formatter enforces it in CI. The engineer's sessions sometimes produce tabs. What's the right fix?",
+    options: [
+      { t: "Remove the conflicting personal preference.", ok: true, why: "Personal memory shouldn't contradict project standards." },
+      { t: "Add “IMPORTANT” to the project rule so it wins.", trap: "T9", why: "Emphasis doesn't resolve the contradiction." },
+      { t: "Move the project rule into each engineer's personal file.", why: "Unversioned copies drift." },
+      { t: "Disable the CI formatter check.", why: "Removes the guarantee instead of fixing the conflict." }
+    ]
   }
 ];
