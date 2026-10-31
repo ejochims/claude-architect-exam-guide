@@ -3,7 +3,10 @@
 // Usage: node scripts/audit/cue-baselines.mjs [--json]
 import { loadContent, plain, ABSOLUTE } from "./lib.mjs";
 
-const { questions: Q } = loadContent();
+const all = loadContent().questions;
+// --ts 1 (or 1.4) limits the run to one domain or task statement, to gate a rewrite batch on its own.
+const tsArg = process.argv.includes("--ts") ? process.argv[process.argv.indexOf("--ts") + 1] : null;
+const Q = tsArg ? all.filter(q => q.ts === tsArg || q.ts.startsWith(tsArg + ".")) : all;
 const HEDGE = /\b(first|then|before|specific|explicit|targeted|only the|instead|rather than|so that|e\.g\.|because)\b/gi;
 const TECH = /<code>|[A-Za-z]+_[a-z_]+|--[a-z-]+|\.[a-z]+\b|`/g;
 
@@ -13,7 +16,13 @@ const solvers = {
   "pick-most-hedged": o => (plain(o.t).match(HEDGE) || []).length,
   "pick-least-absolute": o => (ABSOLUTE.test(plain(o.t)) ? 0 : 1),
   "pick-most-technical": o => (o.t.match(TECH) || []).length,
-  "pick-most-clauses": o => (plain(o.t).match(/[,;:]/g) || []).length
+  "pick-most-clauses": o => (plain(o.t).match(/[,;:]/g) || []).length,
+  // The cues an options-only solver reported using: concreteness, and an "enforce it in code" expert tone.
+  "pick-most-concrete": o => (o.t.match(/<code>|\b[a-z]+_[a-z_]+\b|--?[a-z][a-z-]+|\b\d+\b|\.[a-z]{2,4}\b|"[^"]+"/g) || []).length + plain(o.t).split(/\s+/).length / 20,
+  // Inverse cues catch over-correction: a rewrite that always makes the key shortest is just as guessable.
+  "pick-shortest": o => -plain(o.t).length,
+  "pick-least-concrete": o => -((o.t.match(/<code>|\b[a-z]+_[a-z_]+\b|--?[a-z][a-z-]+|\b\d+\b|\.[a-z]{2,4}\b|"[^"]+"/g) || []).length + plain(o.t).split(/\s+/).length / 20),
+  "pick-enforce-in-code": o => (plain(o.t).match(/\b(hook|code|programmatic|deterministic|schema|validat\w*|structured|explicit|specific|gate|block|enforce\w*|custom_id|isError|before|instead)\b/gi) || []).length
 };
 
 const results = {};

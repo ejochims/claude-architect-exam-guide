@@ -114,30 +114,30 @@ window.LESSONS.m12 = {
           id: "q12-5", ts: "1.7", scenario: 2,
           stem: "Yesterday you named a session “auth-race-condition” while investigating a bug. Today you want to continue it. Command?",
           options: [
-            { t: "<code>claude --continue</code>", why: "This picks the most recent session in the directory, which may not be this one." },
-            { t: "<code>claude --resume auth-race-condition</code>", ok: true, why: "Named resumption picks up that specific conversation." },
-            { t: "<code>claude --session auth-race-condition</code>", trap: "T8", why: "Not the documented flag." },
-            { t: "Start fresh and paste yesterday's notes.", why: "Valid if things are stale, but here the context is still useful." }
+            { t: "<code>claude --continue</code>", why: "Continues the most recent conversation in this directory, which may not be this one." },
+            { t: "<code>claude --resume auth-race-condition</code>", ok: true, why: "<code>--resume</code> with the session name picks up that named session." },
+            { t: "<code>claude --resume auth-race-condition --fork-session</code>", why: "Forking creates a new branch from that session. You wanted to continue the original." },
+            { t: "Start a new session and paste in yesterday's notes.", why: "Throws away context that is still valid. Nothing has changed since yesterday." }
           ]
         },
         {
           id: "q12-6", ts: "1.7", scenario: 4,
           stem: "After a long analysis of a payments module, you want to try two different refactoring strategies without either polluting the other's conversation. Best approach?",
           options: [
-            { t: "Use fork_session to create two branches from the shared analysis.", ok: true, why: "Forks share the baseline and diverge independently." },
-            { t: "Resume the same session twice in two terminals.", why: "Both append to one history, which gets confusing." },
-            { t: "Ask the session to try both approaches one after the other.", why: "The second approach is influenced by the first." },
-            { t: "Start two fresh sessions and redo the analysis.", why: "This wastes the shared baseline." }
+            { t: "Use <code>fork_session</code> to create two branches from the shared analysis.", ok: true, why: "Forks share the analysis up to the branch point, then diverge independently." },
+            { t: "Resume the session twice, with <code>--resume</code> in two terminals, one strategy in each.", why: "Both attempts build on one session's history, so they aren't cleanly isolated." },
+            { t: "Ask Claude to try both strategies one after the other in the current session.", why: "The second attempt is shaped by everything in the first." },
+            { t: "Start two new sessions and redo the analysis in each one.", why: "Wastes the completed analysis." }
           ]
         },
         {
           id: "q12-7", ts: "1.7", scenario: 2,
           stem: "You resume an investigation session from last week. Since then, teammates refactored most of the module you analyzed. What's the most reliable approach?",
           options: [
-            { t: "Resume the session and let Claude rely on its earlier tool results.", why: "Stale results mislead." },
-            { t: "Start a new session and inject a structured summary of the findings that still hold.", ok: true, why: "Fresh with a summary beats reasoning over stale tool results." },
-            { t: "Resume the session and run /compact to clean it up.", why: "Compacting stale content doesn't make it accurate." },
-            { t: "Fork the old session and continue in the fork.", why: "The fork inherits the same stale context." }
+            { t: "Resume the session and give Claude a specific list of the changed files, so it re-reads only those.", why: "Targeted re-analysis works when a few files changed. Here most of the module did, so nearly every earlier result is stale." },
+            { t: "Start fresh, with a structured summary of the findings that still hold.", ok: true, why: "When most earlier tool results are stale, a fresh start with a curated summary is more reliable." },
+            { t: "Resume the session and run <code>/compact</code> first so the stale details get summarized away.", why: "Compaction summarizes stale results; it doesn't refresh them." },
+            { t: "Fork last week's session and continue the work in the fork.", why: "A fork inherits the same stale tool results." }
           ]
         }
       ]

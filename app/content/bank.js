@@ -87,20 +87,20 @@ window.BANK = [
     id: "b4-3", ts: "1.5", scenario: 4,
     stem: "A developer-productivity agent built on the Agent SDK must never run <code>git push --force</code> against protected branches. What's the right mechanism?",
     options: [
-      { t: "A PreToolUse hook on Bash that denies matching commands and explains the allowed alternative.", ok: true, why: "Tool-call interception guarantees the rule." },
-      { t: "Add a line to CLAUDE.md forbidding force pushes to protected branches.", trap: "T1", why: "Probabilistic, for an irreversible action." },
-      { t: "Remove Bash from the agent's tools entirely.", why: "Overkill. The agent needs Bash for tests and builds." },
-      { t: "Instruct the model to ask for confirmation before every git command.", trap: "T1", why: "This still relies on the model, and adds friction." }
+      { t: "A <code>PreToolUse</code> hook on Bash that denies the command and names the safe alternative.", ok: true, why: "Tool-call interception enforces the rule every time and tells the agent what to do instead." },
+      { t: "A line in CLAUDE.md that forbids force pushes to protected branches.", trap: "T1", why: "Instructions are followed probabilistically. A destructive action needs a guarantee." },
+      { t: "Remove Bash from the agent's tool list, so it can't run <code>git push</code> or any other shell command.", why: "Blocks the legitimate shell work the agent needs. The rule is narrow, so the control should be too." },
+      { t: "Have the agent ask the developer to confirm every <code>git</code> command, showing the exact branch and flags first.", trap: "T1", why: "Still prompt-based, and adds friction to every harmless git command." }
     ]
   },
   {
     id: "b4-4", ts: "1.5", scenario: 4,
     stem: "Three MCP servers report file sizes as raw bytes, “4.2 MB” strings and kibibytes. The agent's cleanup recommendations are often off by orders of magnitude. Best fix?",
     options: [
-      { t: "Add a PostToolUse hook that normalizes every size to bytes before the agent sees it.", ok: true, why: "Normalize heterogeneous formats in code before the model reasons over them." },
-      { t: "Explain all three size formats and how to convert them in the system prompt.", trap: "T1", why: "This asks the model to do mechanical conversion perfectly." },
-      { t: "Merge the three MCP servers into one server.", trap: "T5", why: "Merging doesn't normalize anything, and you may not own the servers." },
-      { t: "Ask the agent to double-check its unit conversions.", trap: "T1", why: "This is still probabilistic." }
+      { t: "Add a <code>PostToolUse</code> hook that normalizes every size to bytes before the agent sees any of the results.", ok: true, why: "Normalize heterogeneous formats in code before the model reasons about them." },
+      { t: "Describe the three size formats and their conversion rules in the system prompt.", trap: "T1", why: "The model still converts on every read, and probabilistic arithmetic occasionally fails." },
+      { t: "Add a <code>size_unit</code> field to each server's output so the agent knows how to read each value.", why: "Labels the units but still leaves the conversion to the model every time." },
+      { t: "Ask the agent to double-check its unit conversions before recommending any deletion.", trap: "T9", why: "An exhortation adds no information or structure. Remove the conversion step instead." }
     ]
   },
   {
@@ -117,10 +117,10 @@ window.BANK = [
     id: "b4-6", ts: "1.3", scenario: 4,
     stem: "An “explorer” subagent meant only to map unfamiliar code occasionally edits files while investigating. Where should you fix this?",
     options: [
-      { t: "Restrict its tools in its AgentDefinition to read-only ones (Read, Grep, Glob).", ok: true, why: "Tool restrictions in the agent definition make the role's limits structural." },
-      { t: "Tell it in its prompt that it must never edit files.", trap: "T1", why: "Structural restriction is more reliable." },
-      { t: "Give the coordinator fewer tools so it delegates less.", trap: "T7", why: "The subagent is the one editing." },
-      { t: "Have a reviewer check its edits after each run.", why: "Reactive, and it wastes reviewer time." }
+      { t: "Give its AgentDefinition only read-only tools.", ok: true, why: "Scope the subagent's tools to its role (Read, Grep, Glob). It can't edit what it has no tool to edit." },
+      { t: "State in its system prompt that it must never modify files while investigating.", trap: "T1", why: "A prompt lowers the rate but doesn't guarantee it." },
+      { t: "Add a <code>PostToolUse</code> hook that runs <code>git checkout</code> on any file the explorer edits, reverting it.", why: "Undoes the damage after the fact. Removing the capability prevents it." },
+      { t: "Have the coordinator review the explorer's diff after each run, and discard any edits it made.", trap: "T7", why: "Detects the problem after it happens, and puts the fix in the wrong component." }
     ]
   },
   {
@@ -137,10 +137,10 @@ window.BANK = [
     id: "b4-8", ts: "1.6", scenario: 4,
     stem: "The agent must generate CRUD boilerplate (model, controller, tests, docs) for 30 similar entities that follow an established pattern. Which decomposition fits?",
     options: [
-      { t: "A fixed sequential pipeline (prompt chaining) applied per entity.", ok: true, why: "Predictable, repeated steps suit chaining." },
-      { t: "Dynamic decomposition that re-plans after each entity.", why: "Unnecessary overhead and variability for a known pattern." },
-      { t: "One giant prompt generating all 30 at once.", trap: "T3", why: "Attention dilution and inconsistent output." },
-      { t: "Ask the developer to specify each file individually.", why: "This defeats the purpose of automation." }
+      { t: "Prompt chaining: the same fixed sequence of generation steps, run once for each entity.", ok: true, why: "A predictable, repeated pattern suits a fixed pipeline." },
+      { t: "Dynamic decomposition that re-plans after each entity based on what it learned.", why: "Re-planning suits open-ended work. Here the pattern is already established." },
+      { t: "Generate all 30 entities in one large request so the outputs stay consistent.", trap: "T3", why: "A huge single output degrades in quality and is hard to verify or retry piece by piece." },
+      { t: "Have a coordinator decide, for each entity, which files to generate and in what order.", why: "Adds judgment where none is needed. The files and their order are the same every time." }
     ]
   },
 
@@ -219,12 +219,12 @@ window.BANK = [
   // ---------- Scenario 1: Customer Support Resolution Agent ----------
   {
     id: "b1-1", ts: "1.4", scenario: 1,
-    stem: "In about 3% of conversations the agent calls <code>update_payment_method</code> before <code>verify_identity</code> has succeeded. What makes this impossible?",
+    stem: "A prerequisite gate now blocks <code>update_payment_method</code> until <code>verify_identity</code> succeeds. When it blocks a call, it returns the text “Error.” Logs show the agent retrying the same blocked call several times before giving up. What should the gate return?",
     options: [
-      { t: "Add a programmatic prerequisite that blocks update_payment_method until verify_identity succeeds.", ok: true, why: "A gate guarantees ordering for a high-risk action." },
-      { t: "Reorder the tools so verify_identity is listed first in the tools array.", why: "Tool order isn't enforcement." },
-      { t: "Add few-shot examples that show verification happening first.", trap: "T1", why: "This lowers the rate but can't make it zero." },
-      { t: "Route all payment-method changes to human agents.", trap: "T2", why: "Disproportionate. A gate solves it." }
+      { t: "A structured result saying the call was blocked because identity isn't verified, and to call <code>verify_identity</code> first.", ok: true, why: "Tell the agent what failed and what to do next, so it can recover instead of retrying blindly." },
+      { t: "A <code>success</code> result with <code>changed: false</code>, so the conversation continues without surfacing an error.", trap: "T6", why: "Hiding the block makes the agent believe the update happened." },
+      { t: "Keep returning “Error,” and escalate the conversation to a human whenever the gate blocks a call.", why: "Over-escalation. The agent can recover on its own if it knows why it was blocked." },
+      { t: "Leave the gate as is, and add a system-prompt line telling the agent to verify identity first so it rarely triggers.", trap: "T1", why: "Doesn't change what the gate returns, so the agent still can't recover when it does trigger." }
     ]
   },
   {
