@@ -90,7 +90,7 @@
         h("div", { class: "cv-note" }, a.note))));
       let verdict, ok = false;
       if (!task) verdict = "No subagents run. The coordinator can only describe a delegation.";
-      else if (!pass) verdict = "Subagents ran, but synthesis received none of their output. Subagents don't inherit context: findings must be in the prompt.";
+      else if (!pass) verdict = "Subagents ran, but synthesis received none of their output. Subagents don't inherit the coordinator's conversation: findings must be in the prompt.";
       else { ok = true; verdict = `Cited report produced. Research phase took ${parallel ? "about 40 seconds (both subagents in one response)" : "about 80 seconds (one Task call per turn, run one after another)"}.`; }
       const key = `${task}${pass}${parallel}`;
       seen.add(key);
@@ -208,15 +208,15 @@
     const shown = new Set();
     const body = h("div", { class: "seg-body" });
     const data = {
-      type: [["Typed invoices", 99.1, 6200], ["Email receipts", 98.4, 2900], ["Handwritten forms", 81.7, 900]],
-      field: [["Total amount", 99.3], ["Invoice date", 98.6], ["Vendor name", 98.9], ["Tax ID", 74.2]]
+      type: [["Typed invoices", 99.1, 6200], ["Email receipts", 98.4, 2900], ["Handwritten forms", 78.4, 900]],
+      field: [["Total amount", 99.6], ["Invoice date", 99.2], ["Vendor name", 99.4], ["PO number", 98.8], ["Tax ID", 88.0]]
     };
     const table = (rows, unit) => h("div", { class: "seg-table" }, rows.map(([n, v, c]) => h("div", { class: "seg-r" },
       h("span", {}, n), h("span", { class: "bar" }, h("span", { style: `width:${v}%;background:${v < 90 ? "var(--bad)" : "var(--good)"}` })),
       h("span", { class: `seg-v ${v < 90 ? "bad" : ""}` }, `${v}%`), c ? h("span", { class: "small" }, `${c.toLocaleString()} ${unit}`) : null)));
     const render = () => {
       body.innerHTML = "";
-      body.append(h("div", { class: "big-num" }, "97.0% accurate overall"), h("p", { class: "small" }, "10,000 extracted documents last quarter. The proposal: stop human review of high-confidence extractions."));
+      body.append(h("div", { class: "big-num" }, "97.0% accurate overall"), h("p", { class: "small" }, "10,000 extracted documents last quarter. The proposal: stop human review of high-confidence extractions. (Illustrative numbers; accuracy here means the share of extracted fields that are correct.)"));
       if (shown.has("type")) body.append(h("h4", {}, "By document type"), table(data.type, "docs"));
       if (shown.has("field")) body.append(h("h4", {}, "By field"), table(data.field));
       if (shown.size === 2) {

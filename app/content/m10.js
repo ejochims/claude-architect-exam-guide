@@ -2,7 +2,7 @@ window.LESSONS.m10 = {
   cards: [
     { f: "Message Batches API: the three numbers to know?", b: "About 50% cost savings, up to a 24-hour processing window, no guaranteed latency SLA." },
     { f: "How do you match batch results to inputs?", b: "By custom_id. Never rely on result order." },
-    { f: "Can a batch request run a multi-turn tool loop?", b: "No. A batch request can't execute tools mid-request and continue. Use the synchronous API for agentic loops." },
+    { f: "Can a batch request run a multi-turn tool loop?", b: "No, not with your own tools. A batch request can't execute them mid-request and continue. Use the synchronous API for agentic loops." },
     { f: "Max submission interval for an SLA?", b: "SLA − 24h batch window − post-processing time." },
     { f: "3% of a batch failed for context length. Next step?", b: "Resubmit only the failed custom_ids, modified (e.g. chunked), not the whole batch." },
     { f: "Before batching 50,000 documents?", b: "Refine the prompt on a representative sample to maximize first-pass success." }
@@ -26,7 +26,7 @@ window.LESSONS.m10 = {
 <li><strong>Handle failures surgically.</strong> Resubmit only the failed <code>custom_id</code>s, modified as needed (for example, chunk the documents that exceeded the context limit).</li>
 </ul>
 <h3>SLA arithmetic</h3>
-<p>A record that arrives just after a submission waits a full interval, then up to 24 hours in the batch, then your post-processing. So:</p>
+<p>A record that arrives just after a submission waits a full interval, then up to 24 hours in the batch, then your post-processing. (Requests not processed within 24 hours expire and must be resubmitted.) So:</p>
 <pre class="code"><code>max interval = SLA − 24h − post-processing</code></pre>`
     },
     {
@@ -46,7 +46,7 @@ window.LESSONS.m10 = {
           ["Nightly generation of test-gap reports reviewed the next morning.", "batch", "Latency-tolerant and high volume: take the 50% savings."],
           ["A check that must finish before a PR can merge.", "sync", "Developers are blocked. No 24-hour risk is acceptable."],
           ["Re-extracting 80,000 archived contracts for a new field.", "batch", "A backfill with no one waiting."],
-          ["An agent that calls inventory tools during extraction.", "sync", "Batch can't execute tools mid-request."],
+          ["An agent that calls inventory tools during extraction.", "sync", "Batch can't execute your own tools mid-request."],
           ["A weekly compliance audit of support transcripts.", "batch", "Weekly cadence, no blocking dependency."],
           ["Customer-facing chat replies.", "sync", "Someone is waiting on every turn."]
         ]
@@ -124,7 +124,7 @@ window.LESSONS.m10 = {
       points: [
         "Batch: about 50% cheaper, up to 24h, no latency SLA. Use it only where nothing is waiting.",
         "Correlate by custom_id; never by order.",
-        "No multi-turn tool calling inside a batch request.",
+        "No multi-turn tool calling with your own tools inside a batch request.",
         "Max interval = SLA − 24h − post-processing.",
         "Resubmit only failed custom_ids, with the fix (e.g. chunking).",
         "Refine on a sample before large batches."

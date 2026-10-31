@@ -104,6 +104,13 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 |---|---|
 | P5: m00 tested material from m02–m12 on day one | **Fixed.** The trap spotter and q00-1, q00-2 and q00-3 moved, unchanged, into the new **Module 14, "Capstone: think like the exam"**, after Module 13 and before the labs. It opens with a recap of the four moves and the booking rule, linking to the mock and the Readiness Check. m00 now keeps only orientation (logistics and how to read a question), and its recap points to the capstone. Question IDs are unchanged, so saved answers carry over; m00's saved step-completion indices may be off by up to two. |
 
+### Batch 10 (2026-10-31): mock balance and remaining claims
+
+| Item | Status |
+|---|---|
+| Mock domain balance (E5) | **Fixed.** `startMock` fills each domain's quota from the drawn scenarios, then borrows from other scenarios. All 15 draws now meet the blueprint weights exactly. 14 new practice items (`b8-*`: D4 in scenarios 1–4, D3 in scenario 4) cut borrowing to 6 of 15 draws, at most 6 of 60 questions. |
+| App-side S2/S3 claims | **Resolved:** wording fixes and exam-framing notes across m00–m13, the `segmentReveal` arithmetic and label, and the q07-1 trap tag. Status per row is in `audit/claims-status.md`. |
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

@@ -76,7 +76,7 @@ Scenario × domain skews (Phase 1 will check these against the guide's scenario 
 
 | Metric | Before | After |
 |---|---|---|
-| Questions | 120 | **204**: 144 practice and 60 holdout |
+| Questions | 120 | **218**: 158 practice and 60 holdout |
 | Task statements with fewer than 5 questions | 21 | **0** |
 | Domain mix (D1–D5) | 21 / 19 / 18 / 23 / 18% | **26.5 / 18.1 / 20.1 / 19.6 / 15.7%** against 27/18/20/20/15 |
 | Foundations lessons | none | **F1–F3**: API call, tool use end to end, product map |
@@ -128,10 +128,10 @@ The official sample questions use the same distractor families (prompt-only fixe
 | # | Criterion | Status |
 |---|---|---|
 | 1 | Every blueprint bullet COVERED+TESTED; no unlabeled out-of-scope leaks | **Met for coverage.** Every task statement now has at least 5 items, and the 155 bullets that were covered but under-tested gained items. A full re-rating of all 240 bullets wasn't repeated. |
-| 2 | Every claim verified; zero S1/S2 WRONG, OUTDATED or UNFLAGGED; illustrative numbers labeled | **Partly met.** All S1 claims are fixed. Guide S2 claims are fixed. Some app-side S2 and S3 rows in `claims-log.csv` remain (for example the `segmentReveal` arithmetic and a few `/memory` mentions in lessons). |
+| 2 | Every claim verified; zero S1/S2 WRONG, OUTDATED or UNFLAGGED; illustrative numbers labeled | **Met for the app.** Every non-correct claim is fixed, flagged as exam framing, or accepted (`claims-status.md`). The `segmentReveal` numbers now add up to 97.0% and are labeled illustrative. 52 S3 wording items remain in the secondary markdown guide. |
 | 3 | Every question meets the pass bar; cue metrics on target | **Mostly met.** The key agreement and heuristic gates are met. The options-only model result is at 92% (see above). |
 | 4 | About 200 items, domain targets met, about 60 unseen holdout | **Met** (204 items; 60 holdout). |
-| 5 | Readiness uses first attempts with an interval; caveated score; feasible mock | **Mostly met.** 10 of 15 scenario draws still can't meet every domain quota; scoring is domain-weighted to compensate. |
+| 5 | Readiness uses first attempts with an interval; caveated score; feasible mock | **Met.** Every mock matches the blueprint's domain quotas exactly in all 15 draws. 6 draws borrow up to 6 of 60 questions from another scenario. |
 | 6 | Zero open S1/S2 contradictions between guide and app | **Met** (`consistency.md`). |
 | 6b | One-stop shop: Foundations, Why-test ≥ 10/12, novice walkthrough with zero blocking issues, labs, glossary | **Mostly met.** Foundations F1–F3, glossary, Exam vs. today, the MCP "why", and **four in-app labs** (L1–L4, one per official preparation exercise) are built. **"Why it exists" panels** were added for the primitives that scored below 10/12. The final novice walkthrough of F1–F3, m05 and m11 found 1 blocking issue (CLAUDE.md and memory undefined) and 16 major ones; all are addressed by the panels and Foundations edits. A re-score of the primitives by a new reviewer wasn't run. |
 | 7 | Scripts and browser suite pass; artifact republished; PR up | **Met.** |
@@ -143,5 +143,4 @@ The official sample questions use the same distractor families (prompt-only fixe
 2. **Questions test recognition more than scenario judgment.** See "What the options-only result means" above.
 3. **The exam format may have changed.** The current FAQ mentions multiple-response questions, and an updated guide may appear after Nov 17 (backlog R1 and R2). The app models single-answer items only.
 4. **Some open items remain:**
-   - app-side S2 and S3 claims in `claims-log.csv`;
-   - mock domain-quota feasibility for 10 of 15 draws.
+   - 52 S3 wording items in the secondary markdown guide;

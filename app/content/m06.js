@@ -12,14 +12,14 @@ window.LESSONS.m06 = {
       kind: "read",
       title: "First principle: isolated context is a feature",
       html: `
-<p class="lede">A subagent starts with an empty conversation. It sees only its own definition (system prompt, allowed tools) and the prompt the coordinator writes for it. It does <em>not</em> inherit the coordinator's history or share memory with other subagents.</p>
+<p class="lede">A subagent starts without the coordinator's conversation. It sees only its own definition (system prompt, allowed tools) and the prompt the coordinator writes for it. It does <em>not</em> inherit the coordinator's history or share memory with other subagents.</p>
 <div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> one agent doing research, analysis and writing fills a single context with everything, and quality drops as it grows.</li><li><strong>What it is.</strong> a coordinator splits the task, hands focused pieces to subagents with their own clean context, and combines what they return. All communication goes through the coordinator (hub-and-spoke).</li><li><strong>Why this design.</strong> agents talking peer to peer leave no single place to see coverage, retry failures or control what each agent receives. The hub gives you that control.</li><li><strong>Use it when.</strong> a task splits into parts that benefit from focused context or parallel work. For small, linear tasks, one agent is simpler and cheaper.</li></ul></div>
 <p>That isolation is the point. Verbose search results stay out of the coordinator's context, and each specialist gets a focused prompt and a small tool set. The cost is that <strong>you must pass everything a subagent needs, explicitly.</strong></p>
 <h3>The mechanics</h3>
 <ul>
 <li>Subagents are spawned with the <strong>Task tool</strong>. A coordinator can only delegate if its <code>allowedTools</code> includes <code>"Task"</code>.</li>
 <li>Each subagent type is defined by an <strong><code>AgentDefinition</code></strong>: a description (used to decide when to call it), a system prompt, and restricted tools.</li>
-<li><strong>Parallelism comes from multiple Task calls in one response.</strong> One call per turn runs them one after another.</li>
+<li><strong>Parallelism comes from multiple Task calls in one response.</strong> In the exam's model, one call per turn runs them one after another (today subagents start in the background by default).</li>
 <li>Pass prior results <strong>in full, as structured data</strong> that separates content from metadata (URL, document, page, date), so attribution survives.</li>
 <li>Give subagents <strong>goals and quality criteria</strong>, not step-by-step procedures, so they can adapt to what they find.</li>
 </ul>
@@ -142,7 +142,7 @@ window.LESSONS.m06 = {
       kind: "recap",
       title: "Recap",
       points: [
-        "Subagents start empty: AgentDefinition + the prompt you write. Pass findings explicitly and in structure.",
+        "Subagents start without the coordinator's history: AgentDefinition + the prompt you write. Pass findings explicitly and in structure.",
         "Delegation requires \"Task\" in the coordinator's allowedTools.",
         "Parallel = multiple Task calls in one response.",
         "Hub-and-spoke: the coordinator routes everything. Select subagents dynamically and partition scope.",

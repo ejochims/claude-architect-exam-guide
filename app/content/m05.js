@@ -75,7 +75,7 @@ window.LESSONS.m05 = {
 <tr><td>User</td><td><code>~/.claude.json</code></td><td>You, in every project</td></tr>
 <tr><td>Local</td><td><code>~/.claude.json</code>, keyed to this project</td><td>You, in this project only</td></tr>
 </tbody></table></div>
-<p>If the same server name appears at more than one scope, <strong>local beats project beats user</strong>, and the winner's whole entry is used. Servers with different names all load together: <strong>tools from every configured server are discovered at connection time and available simultaneously.</strong></p>
+<p>If the same server name appears at more than one scope, <strong>local beats project beats user</strong>, and the winner's whole entry is used. Servers with different names all load together: <strong>tools from every configured server are discovered at connection time and available simultaneously.</strong> (Real world today: Claude Code can defer loading full tool definitions until they're needed, using tool search. On the exam, treat all configured tools as available.)</p>
 <p><strong>Never commit a secret.</strong> <code>.mcp.json</code> expands environment variables, so the team shares the config and each person supplies their own token:</p>
 <pre class="code"><code>{
   <span class="s">"mcpServers"</span>: {

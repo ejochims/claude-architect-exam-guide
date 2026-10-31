@@ -22,7 +22,7 @@ window.LESSONS.m12 = {
 <tr><td>Output in an exact shape, e.g. findings to post as inline PR comments</td><td><code>--json-schema</code> with <code>--output-format json</code></td></tr>
 <tr><td>Team standards, fixtures, review criteria</td><td>The project <code>CLAUDE.md</code>, which CI-invoked Claude Code reads</td></tr>
 </tbody></table></div>
-<p class="small">Distractors invent mechanisms: a <code>--batch</code> flag, a <code>CLAUDE_HEADLESS</code> variable, piping <code>/dev/null</code> into stdin. Know the real ones.</p>
+<p class="small">Distractors invent mechanisms: a <code>--batch</code> flag, a <code>CLAUDE_HEADLESS</code> variable, or offer shell workarounds such as piping <code>/dev/null</code> into stdin instead of the real mechanism. Know the real ones.</p>
 <h3>Review and test generation that developers trust</h3>
 <ul>
 <li><strong>Re-runs:</strong> include the previous review's findings and tell Claude to report only <em>new or still-unaddressed</em> issues. Otherwise every push re-posts the same comments.</li>

@@ -1,10 +1,10 @@
 window.LESSONS.m11 = {
   cards: [
     { f: "A new teammate doesn't get the team's conventions. Common cause?", b: "The conventions live in someone's user-level ~/.claude/CLAUDE.md, which isn't shared. Move them to the project CLAUDE.md." },
-    { f: "How do you diagnose which memory files are loaded?", b: "The /memory command." },
+    { f: "How do you diagnose which memory files are loaded?", b: "The /memory command (exam term; today /context lists what loaded and /memory opens the files)." },
     { f: "Conventions for test files spread across every directory?", b: ".claude/rules/ file with YAML frontmatter paths: [\"**/*.test.tsx\"]. It loads only when matching files are edited." },
-    { f: "Team slash command vs personal one?", b: "Team: .claude/commands/ in the repo. Personal: ~/.claude/commands/." },
-    { f: "Skill frontmatter: context: fork, allowed-tools, argument-hint?", b: "fork = run in an isolated sub-agent context; allowed-tools = control tool access during the skill; argument-hint = prompt for missing parameters." },
+    { f: "Team slash command vs personal one?", b: "Team: .claude/commands/ in the repo. Personal: ~/.claude/commands/. (Exam terms; commands are merged into skills today.)" },
+    { f: "Skill frontmatter: context: fork, allowed-tools, argument-hint?", b: "fork = run in an isolated sub-agent context; allowed-tools = (exam) restrict tool access during the skill, today it pre-approves; argument-hint = (exam) prompt for missing parameters, today an autocomplete hint." },
     { f: "Skills vs CLAUDE.md?", b: "Skills load on demand for task-specific workflows. CLAUDE.md is always loaded and holds universal standards." },
     { f: "Plan mode or direct execution?", b: "Plan mode for large, multi-file, architectural or multi-approach work. Direct for clear, well-scoped changes. Often: plan, then execute." },
     { f: "Prose description of a transformation is interpreted inconsistently. Fix?", b: "Give 2–3 concrete input/output examples." }
@@ -58,7 +58,7 @@ argument-hint: <span class="s">"[module-path]"</span>
 <li><strong><code>context: fork</code></strong> runs the skill in an isolated sub-agent context, so verbose output (codebase analysis) or exploratory noise (brainstorming) doesn't pollute the main conversation.</li>
 <li><strong><code>allowed-tools</code></strong> controls tool access while the skill runs, for example limiting it to file operations so it can't take destructive actions.</li>
 <li><strong><code>argument-hint</code></strong> prompts the developer for a required parameter when they invoke the skill without one.</li>
-<li>For your own variant of a team skill, create it in <code>~/.claude/skills/</code> <strong>under a different name</strong> so teammates aren't affected.</li>
+<li>For your own variant of a team skill, create it in <code>~/.claude/skills/</code> <strong>under a different name</strong> so teammates aren't affected and the team version stays available to you.</li>
 </ul>
 <div class="callout today"><div class="callout-label">Real world today</div><p>Claude Code has since merged custom commands into skills (both create <code>/name</code>, and <code>.claude/commands/</code> still works). <code>allowed-tools</code> now <em>pre-approves</em> the listed tools for the turn, rather than restricting. <code>argument-hint</code> only shows a hint in autocomplete; it doesn't stop a skill being invoked without the argument. A personal skill with the same name as a project skill now takes precedence for you. Answer in the exam's terms. See <a href="#today">Exam vs. today</a>.</p></div>`
     },
@@ -216,9 +216,9 @@ argument-hint: <span class="s">"[module-path]"</span>
       title: "Recap",
       points: [
         "Ask who (me vs team) and when (always, matching files, on demand).",
-        "~/.claude/CLAUDE.md is personal. Team standards go in the project CLAUDE.md. Use @import for modularity and /memory to diagnose.",
+        "~/.claude/CLAUDE.md is personal. Team standards go in the project CLAUDE.md. Use @import for modularity and /memory to diagnose (exam term; /context lists what loaded today).",
         ".claude/rules/ with paths globs: conventions for files scattered across directories.",
-        "Commands: .claude/commands (team) vs ~/.claude/commands (personal). Skills: context: fork, allowed-tools, argument-hint.",
+        "Commands (exam terms): .claude/commands (team) vs ~/.claude/commands (personal). Skills: context: fork, allowed-tools, argument-hint.",
         "Plan mode for big, multi-file or architectural work; direct for scoped fixes; plan then execute.",
         "Iterate with I/O examples, tests first, the interview pattern, and batched interacting fixes."
       ]

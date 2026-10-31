@@ -45,7 +45,7 @@ window.LESSONS.m04 = {
           ["Refund of $640 exceeds the $500 agent limit.", "business", "isRetryable: false, a customer-friendly explanation, and a pointer to escalation."],
           ["Knowledge-base search for “firmware 2.1 rollback” returned zero articles.", "empty", "Success with no matches. Don't retry, and don't report an outage."],
           ["The service account can't read the HR records table.", "permission", "Not retryable. Escalate or route to someone with access."],
-          ["Request to the carrier API timed out after 10 seconds.", "transient", "A read that timed out is usually safe to retry locally."],
+          ["A read-only tracking request to the carrier API timed out after 10 seconds.", "transient", "A read that timed out is usually safe to retry locally."],
           ["Customer asked to cancel an order that has already shipped.", "business", "A policy outcome. Explain and offer the return flow instead."]
         ]
       }

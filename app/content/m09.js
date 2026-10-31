@@ -1,6 +1,6 @@
 window.LESSONS.m09 = {
   cards: [
-    { f: "Most reliable way to get schema-compliant structured output?", b: "Define an extraction tool whose input schema is your target schema, set tool_choice so it's called, and read tool_use.input." },
+    { f: "Most reliable way to get schema-compliant structured output?", b: "Define an extraction tool whose input schema is your target schema, set tool_choice so it's called, and read tool_use.input. (Exam answer. Today strict: true or structured outputs guarantee the schema.)" },
     { f: "What does a strict JSON schema NOT prevent?", b: "Semantic errors: line items that don't sum to the total, values in the wrong field, fabricated values." },
     { f: "A field may be absent from the source. Schema choice?", b: "Make it optional or nullable and instruct the model to return null, so it isn't pressured to fabricate." },
     { f: "Categories keep growing. Schema pattern?", b: "Enum plus \"other\" with a detail string. Add \"unclear\" for ambiguous cases." },
@@ -139,7 +139,7 @@ window.LESSONS.m09 = {
       kind: "recap",
       title: "Recap",
       points: [
-        "tool_use with a JSON schema is the reliable path to valid structure; read the tool_use input.",
+        "tool_use with a JSON schema is the exam's reliable path to valid structure (today strict: true guarantees it); read the tool_use input.",
         "Schemas guarantee syntax, never semantics. Validate meaning in code.",
         "Nullable fields prevent fabrication; enum + \"other\" + detail handles growth; \"unclear\" handles ambiguity.",
         "Add normalization rules to the prompt for messy source formats.",

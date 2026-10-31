@@ -1,6 +1,6 @@
 window.LESSONS.m00 = {
   cards: [
-    { f: "Exam format?", b: "60 multiple-choice questions, 120 minutes, scaled 100–1000, pass at 720. 4 of 6 scenarios drawn. No penalty for guessing." },
+    { f: "Exam format?", b: "About 60 questions (unofficial count), 120 minutes, scaled 100–1000, pass at 720. 4 of 6 scenarios drawn. No penalty for guessing." },
     { f: "Four moves for reading a question?", b: "Find the evidence → name the root cause → classify the constraint (guarantee vs judgment) → pick the proportionate fix." },
     { f: "What does \u201cmost effective first step\u201d signal?", b: "The cheap, targeted fix for the root cause, not new infrastructure." }
   ],
@@ -14,9 +14,9 @@ window.LESSONS.m00 = {
 <div class="callout key"><div class="callout-label">When to book</div><p>Book when three things are true: a cold first attempt at the Readiness Check scores 80% or more, with every domain at 70% or more; two mock exams a week apart score 80% or more; and the official practice exam scores 80% or more. Practice-question scores alone aren't enough, because you've seen those questions and their explanations.</p></div>
 <p>Every question sits inside a production scenario. Your sitting draws <strong>4 of these 6</strong> at random, so you need all six:</p>
 <div data-embed="scenarios"></div>
-<p>Questions map to five weighted domains. The two heaviest, agentic architecture and Claude Code, make up almost half the exam:</p>
+<p>Questions map to five weighted domains. Agentic architecture (27%) and Claude Code (20%, tied with prompt engineering) together make up almost half the exam:</p>
 <div data-embed="weights"></div>
-<div class="callout note"><div class="callout-label">Two minutes per question</div><p>That's enough time to reason, but not enough to rebuild the whole topic from memory. This course drills the reasoning patterns until they're automatic.</p></div>`
+<div class="callout note"><div class="callout-label">About two minutes per question</div><p>That's enough time to reason, but not enough to rebuild the whole topic from memory. This course drills the reasoning patterns until they're automatic.</p></div>`
     },
     {
       kind: "read",

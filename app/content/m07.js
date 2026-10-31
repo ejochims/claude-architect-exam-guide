@@ -4,7 +4,7 @@ window.LESSONS.m07 = {
     { f: "The fix for losing exact transactional facts?", b: "A persistent “case facts” block (amounts, dates, IDs, statuses) included in every prompt, outside the summarized history." },
     { f: "Lost in the middle: what is it, and the mitigation?", b: "Models use the start and end of long inputs most reliably. Put a key-findings summary first and use explicit section headers." },
     { f: "Order lookups return 40+ fields, and 5 matter. What do you do?", b: "Trim tool output to the relevant fields before it enters context, in the tool or in a PostToolUse hook." },
-    { f: "Long exploration: Claude starts citing “typical patterns” instead of the actual classes. Remedies?", b: "Scratchpad files for key findings, Explore or other subagents for verbose discovery, phase summaries injected into new contexts, and /compact." },
+    { f: "Long exploration: Claude starts citing “typical patterns” instead of the actual classes. Remedies?", b: "Scratchpad files for key findings, Explore or other subagents for verbose discovery, phase summaries injected into new contexts, and /compact. (Today Claude Code also compacts automatically near the context limit.)" },
     { f: "Crash recovery in multi-agent systems?", b: "Each agent exports state to a known location; on resume the coordinator loads a manifest and injects the relevant state into agent prompts." }
   ],
   steps: [
@@ -16,7 +16,7 @@ window.LESSONS.m07 = {
 <h3>Four ways long conversations go wrong</h3>
 <ul>
 <li><strong>Summaries lose specifics.</strong> “Customer was promised a $247.83 refund on order #8812 by Friday” becomes “customer discussed a refund.” When they ask “where's my $247.83?”, the agent can't answer.</li>
-<li><strong>Tool output crowds out everything else.</strong> An order lookup returns 40+ fields; the return workflow needs 5. Over twenty turns, that's most of your context.</li>
+<li><strong>Tool output crowds out everything else.</strong> An order lookup returns 40+ fields; the return workflow needs 5. Over twenty turns, those unused fields can fill most of the context (illustrative).</li>
 <li><strong>The middle gets skipped.</strong> Models reliably use the beginning and end of long inputs and may miss findings buried in the middle.</li>
 <li><strong>History isn't sent.</strong> If prior turns aren't in the request, they don't exist for the model (Module 1).</li>
 </ul>
@@ -57,7 +57,7 @@ window.LESSONS.m07 = {
           id: "q07-1", ts: "5.1", scenario: 1,
           stem: "In a 40-turn support session with progressive summarization, the customer asks, “So the $312.40 credit will post by the 14th, right?” The agent replies vaguely that a credit was discussed. Best fix?",
           options: [
-            { t: "Stop summarizing and send the complete 40-turn transcript on every turn so nothing is ever lost.", trap: "T3", why: "Costs more, and important details can still get lost in the middle of a long history." },
+            { t: "Stop summarizing and send the complete 40-turn transcript on every turn so nothing is ever lost.", why: "Misconception: avoid summarization at any cost. Full history is the baseline; at 40 turns it costs more, and important details can still get lost in the middle." },
             { t: "Keep a persistent case-facts section (amounts, dates, IDs, commitments) in every prompt.", ok: true, why: "Facts kept outside the summarized history survive summarization." },
             { t: "Instruct the summarizer to keep every number and date it sees, verbatim, in each summary.", trap: "T9", why: "Summaries still compress and drift; key facts need a dedicated place." },
             { t: "Have the agent search the transcript store whenever the customer mentions an amount or a date.", why: "Adds a lookup per turn and still depends on the agent noticing it needs one." }

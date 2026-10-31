@@ -11,7 +11,7 @@ window.LESSONS.m03 = {
       kind: "read",
       title: "First principle: probability × volume",
       html: `
-<p class="lede">A prompt changes the <em>probability</em> of a behavior. Code changes whether it's <em>possible</em>. The exam tests this distinction more than anything else.</p>
+<p class="lede">A prompt changes the <em>probability</em> of a behavior. Code changes whether it's <em>possible</em>. The exam tests this distinction often, across Domains 1 and 4.</p>
 <p>Suppose a well-written instruction is followed 99.5% of the time. That's excellent for tone, phrasing, or deciding when to offer a coupon. Now apply it to “never refund more than $500 without a manager” across 200,000 conversations a year: <strong>about 1,000 unauthorized refunds</strong>. More emphasis, capital letters or few-shot examples can raise 99.5%, but never to 100%.</p>
 <div class="callout key"><div class="callout-label">Decision rule</div><p>If one miss has financial, legal, safety or irreversible consequences, enforce it in code: a hook, a prerequisite gate, or logic inside the tool. If a miss just makes a reply less good, guide it with the prompt.</p></div>
 <p>Next, watch the arithmetic play out.</p>`

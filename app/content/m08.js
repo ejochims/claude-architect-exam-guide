@@ -2,7 +2,7 @@ window.LESSONS.m08 = {
   cards: [
     { f: "Why doesn't “only report high-confidence findings” fix false positives?", b: "It's a general exhortation. Precision comes from specific categorical criteria: what to report and what to skip." },
     { f: "One review category is mostly noise and developers ignore all comments. Move?", b: "Temporarily disable the high-false-positive category to restore trust while you improve its prompt." },
-    { f: "How many few-shot examples, and what should they show?", b: "2–4 targeted examples for the ambiguous cases, showing the reasoning for why one option was chosen over plausible alternatives." },
+    { f: "How many few-shot examples, and what should they show?", b: "2–4 targeted examples for the ambiguous cases, showing the reasoning for why one option was chosen over plausible alternatives. (The exam's number; Anthropic's general guidance is 3–5.)" },
     { f: "Why is self-review in the same session weak?", b: "The model keeps its generation reasoning and is less likely to question it. Use an independent instance without that context." },
     { f: "Large multi-file review gives inconsistent, shallow results. Fix?", b: "Per-file passes for local issues plus a separate integration pass for cross-file data flow." },
     { f: "Severity labels are inconsistent. Fix?", b: "Define explicit severity criteria with a concrete code example for each level." }
@@ -49,7 +49,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
 <p class="lede">When detailed instructions still produce inconsistent output, examples are the most effective lever.</p>
 <div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> prose instructions leave format and edge cases open to interpretation, so outputs vary.</li><li><strong>What it looks like.</strong> a few worked examples in the prompt, e.g. <code>&lt;example&gt;</code> input → reasoning → output <code>&lt;/example&gt;</code>, chosen to cover the ambiguous cases.</li><li><strong>Why it works.</strong> examples show the exact format and the judgment behind a choice, which the model generalizes to new cases. More instructions only describe it.</li><li><strong>Use it when.</strong> instructions alone give inconsistent output or the boundary between two choices is subtle. If the criteria themselves are unclear, write the criteria first.</li></ul></div>
 <ul>
-<li><strong>2–4 targeted examples</strong> aimed at the <em>ambiguous</em> cases, not the easy ones.</li>
+<li><strong>2–4 targeted examples</strong> (the exam's number; Anthropic's general guidance is 3–5) aimed at the <em>ambiguous</em> cases, not the easy ones.</li>
 <li><strong>Show the reasoning</strong>: why this action and not the plausible alternative. That lets the model generalize to new cases instead of copying the examples.</li>
 <li><strong>Show the output format</strong> (location, issue, severity, suggested fix) to get consistent structure.</li>
 <li><strong>Show acceptable patterns next to real issues</strong> to cut false positives.</li>
@@ -57,7 +57,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
 </ul>
 <h3>Who reviews, and how much at once</h3>
 <div class="mech" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-<div><span class="tag">Independent</span><h4>A second instance</h4><p>A session that generated code keeps its reasoning and tends to defend it. An independent instance without that context catches more than “review your work carefully” or extended thinking in the same session.</p></div>
+<div><span class="tag">Independent</span><h4>A second instance</h4><p>A session that generated code keeps its reasoning and tends to defend it. An independent instance without that context catches more than “review your work carefully” or extended (or adaptive) thinking in the same session.</p></div>
 <div><span class="tag">Multi-pass</span><h4>Per file, then integration</h4><p>One pass over 20 files spreads attention thin: some files get depth, others get skimmed, and findings contradict each other. Review each file for local issues, then run a separate pass on cross-file data flow.</p></div>
 </div>
 <p>A verification pass can also have the model report a confidence level with each finding. That's useful for <strong>routing</strong> findings to human review, once the thresholds have been calibrated (Module 13).</p>`

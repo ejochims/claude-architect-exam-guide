@@ -52,7 +52,7 @@ window.LESSONS.m13 = {
 <p class="lede">For extraction at scale, the question is which outputs a human should check, and how you know the rest are safe.</p>
 <ul>
 <li><strong>Aggregate accuracy hides weak segments.</strong> 97% overall can include 80% on handwritten forms or one critical field. Validate accuracy <strong>by document type and by field</strong> before reducing review.</li>
-<li><strong>Field-level confidence, calibrated.</strong> Have the model output a confidence for each field, then set review thresholds using a <strong>labeled validation set</strong>. Raw scores mean nothing until calibrated.</li>
+<li><strong>Field-level confidence, calibrated.</strong> Have the model output a confidence for each field, then set review thresholds using a <strong>labeled validation set</strong>. Raw scores mean nothing until calibrated. Raw scores aren't probabilities until calibrated: a 0.9 may not mean 90% correct.</li>
 <li><strong>Stratified random sampling.</strong> Even after automating, keep sampling high-confidence extractions across segments to measure error rates and catch new error patterns.</li>
 <li><strong>Route the right items to people.</strong> Send low-confidence fields and ambiguous or contradictory source documents to reviewers first, so limited capacity goes where it matters.</li>
 </ul>

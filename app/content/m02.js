@@ -3,16 +3,16 @@ window.LESSONS.m02 = {
     { f: "What is the model's main signal for choosing between tools?", b: "The tool descriptions (plus names and schemas). Minimal or overlapping descriptions cause misrouting." },
     { f: "Two tools keep getting confused. First step?", b: "Rewrite and differentiate the descriptions (inputs, example queries, edge cases, when to use instead of the other). Rename if purposes overlap." },
     { f: "tool_choice \"any\" vs a named tool?", b: "\"any\" guarantees some tool call, and Claude picks which. {\"type\":\"tool\",\"name\":X} forces that specific tool." },
-    { f: "Why not give every agent all 18 tools?", b: "More tools means harder selection and cross-role misuse. Give each agent the 4–5 tools its role needs, plus scoped cross-role tools for frequent needs." },
+    { f: "Why not give every agent all 18 tools (the exam's example)?", b: "More tools means harder selection and cross-role misuse. Give each agent the 4–5 tools its role needs, plus scoped cross-role tools for frequent needs." },
     { f: "Grep vs Glob?", b: "Grep searches file contents (function names, error strings). Glob matches file paths and names (**/*.test.tsx)." },
-    { f: "Edit fails because the anchor text isn't unique. Fallback?", b: "Read the full file, then Write the modified version." }
+    { f: "Edit fails because the anchor text isn't unique. Fallback?", b: "Read the full file, then Write the modified version. (Exam answer. Today a longer, unique old_string or replace_all also works.)" }
   ],
   steps: [
     {
       kind: "read",
       title: "First principle: descriptions are the interface",
       html: `
-<p class="lede">Claude never sees your tool's code. It sees a name, a description and an input schema, and chooses from those alone. A vague description is a bug in the interface, even though it shows up as a “reasoning” failure.</p>
+<p class="lede">Claude never sees your tool's code. It sees a name, a description and an input schema (plus any input examples), and chooses from those alone. A vague description is a bug in the interface, even though it shows up as a “reasoning” failure.</p>
 <p>A description that lets Claude choose reliably says:</p>
 <ul>
 <li><strong>What it does</strong> and what it returns.</li>
@@ -32,7 +32,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
 <h3>When descriptions aren't enough</h3>
 <ul>
 <li><strong>Rename overlapping tools.</strong> <code>analyze_content</code> and <code>analyze_document</code> invite confusion. <code>extract_web_results</code> and <code>extract_pdf_tables</code> don't.</li>
-<li><strong>Split generic tools</strong> into purpose-specific ones with clear contracts: <code>analyze_document</code> becomes <code>extract_data_points</code>, <code>summarize_content</code> and <code>verify_claim_against_source</code>.</li>
+<li><strong>Split generic tools</strong> (exam framing; today's tool docs also endorse grouping closely related operations behind an <code>action</code> parameter) into purpose-specific ones with clear contracts: <code>analyze_document</code> becomes <code>extract_data_points</code>, <code>summarize_content</code> and <code>verify_claim_against_source</code>.</li>
 <li><strong>Check the system prompt.</strong> A line like “whenever a customer mentions their account, start with get_customer” can override a perfect description and misroute order questions.</li>
 </ul>`
     },
@@ -40,7 +40,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
       kind: "read",
       title: "Fewer tools per agent, and tool_choice",
       html: `
-<p class="lede">Selection accuracy falls as options grow. An agent with 18 tools makes more mistakes than one with 4–5, and an agent with tools outside its role tends to use them: a synthesis agent with web search starts searching instead of synthesizing.</p>
+<p class="lede">Selection accuracy falls as options grow. In the exam's example, an agent with 18 tools makes more mistakes than one with 4–5, and an agent with tools outside its role tends to use them: a synthesis agent with web search starts searching instead of synthesizing.</p>
 <ul>
 <li><strong>Scope tools to the role.</strong> Each subagent gets what its job needs.</li>
 <li><strong>Constrain generic tools.</strong> Replace <code>fetch_url</code> with <code>load_document</code>, which validates that the URL is a document.</li>
@@ -67,7 +67,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
       kind: "read",
       title: "The built-in tools",
       html: `
-<p class="lede">Claude Code and the Agent SDK ship with Read, Write, Edit, Bash, Grep and Glob. The exam checks that you match each to its job.</p>
+<p class="lede">Claude Code and the Agent SDK ship with Read, Write, Edit, Bash, Grep and Glob. The exam checks that you match each to its job. (Real world today: on macOS and Linux, Claude Code runs file search through Bash by default, and Edit can also take a longer unique <code>old_string</code> or <code>replace_all</code>. Answer the exam with the dedicated tools.)</p>
 <div class="callout key"><div class="callout-label">Key terms</div><ul style="margin:0;padding-left:18px"><li><strong>What they are.</strong> the tools Claude Code ships with: <strong>Read</strong> (open a file), <strong>Write</strong> (create a file), <strong>Edit</strong> (replace a unique text span), <strong>Bash</strong> (run a shell command), <strong>Grep</strong> (search file contents), <strong>Glob</strong> (find files by name pattern), plus web tools and the subagent tool.</li><li><strong>Why separate tools.</strong> a narrow tool with a clear purpose is easier for the model to choose correctly and easier for you to permit or block than one general shell.</li><li><strong>Neighbors.</strong> MCP tools add capabilities from outside systems and compete with built-ins for selection, which is why their descriptions must say when they're the better choice.</li></ul></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Need</th><th>Tool</th></tr></thead>
@@ -182,8 +182,8 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
         "Descriptions are the selection mechanism: say what, inputs, examples, edge cases, and when to use it instead of the neighbor.",
         "Overlapping tools: rename and split them. Also check the system prompt for keyword triggers.",
         "4–5 role-scoped tools per agent beat 18. Add narrow cross-role tools for frequent needs.",
-        "tool_choice: auto (no guarantee), any (some tool), named (that tool), none.",
-        "Grep = contents, Glob = paths, Edit = unique anchor, Read + Write = fallback.",
+        "tool_choice: auto (no guarantee), any (some tool), named (that tool), none. Forced choices need a model that supports them.",
+        "Grep = contents, Glob = paths, Edit = unique anchor, Read + Write = fallback (exam framing; see Exam vs. today).",
         "Explore incrementally from entry points; resolve aliases before tracing usage."
       ]
     }
