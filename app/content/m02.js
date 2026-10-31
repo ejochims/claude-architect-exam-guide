@@ -164,7 +164,7 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
         },
         {
           id: "q02-7", ts: "2.5", scenario: 4,
-          stem: "Claude's <code>Edit</code> on <code>routes.ts</code> keeps failing with “old_string is not unique.” The block to change appears in three handlers. What is the reliable next step?",
+          stem: "Claude's <code>Edit</code> on <code>routes.ts</code> keeps failing with “old_string is not unique.” The same block appears in three handlers, and only one of them should change. What is the reliable next step?",
           options: [
             { t: "Retry the same Edit; the match may succeed on another attempt.", trap: "T6", why: "The text is still duplicated, so the match fails the same way." },
             { t: "Read the full file, then Write the modified version.", ok: true, why: "Exam framing: when Edit can't find a unique anchor, fall back to Read + Write. (Today a longer, unique old_string or replace_all also works; see Exam vs. today.)" },

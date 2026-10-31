@@ -228,7 +228,7 @@ window.BANK.push(
       { t: "One subagent per region, all using the same template.", ok: true, why: "Partition along the natural boundary and standardize outputs for synthesis." },
       { t: "Fifteen subagents, one for each region and dimension pair.", why: "Fragmented; each region's dimensions interrelate, and coordination overhead balloons." },
       { t: "One subagent that researches everything, to keep the comparison consistent.", why: "Loses parallelism and floods one context." },
-      { t: "One subagent per dimension, each covering all three regions.", why: "Workable, but each subagent must master three legal systems at once." }
+      { t: "One subagent per dimension, each choosing its own structure for the three regions.", why: "Without a shared template the regions aren't comparable, and each subagent must master three legal systems." }
     ]
   },
   {
