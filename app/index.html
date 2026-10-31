@@ -471,7 +471,27 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
     <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
   </div>
 </header>
-<main id="app" class="wrap"></main>
+<main id="app" class="wrap">
+<!-- Static cover: shown until app.js renders (and in previews and thumbnails). -->
+<section class="hero">
+  <div>
+    <div class="eyebrow">Claude Certified Architect · Foundations</div>
+    <h1>From first principles to <em>exam-ready</em></h1>
+    <p>Agentic loops, tools and MCP, Claude Code, prompt design and context management. 18 lessons, 4 labs, 218 practice questions and a one-time 60-question Readiness Check.</p>
+  </div>
+  <div class="goal">
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="52.8"/><text x="50" y="58" text-anchor="middle">720</text></svg>
+    <div><div class="goal-k">Pass mark</div><div class="goal-v">720 / 1000</div><div class="goal-k">5 domains · 6 scenarios · 120 minutes</div></div>
+  </div>
+</section>
+<div class="domains">
+  <div class="dom"><div class="dom-top"><span class="dom-n dom-d1">D1</span><span class="dom-w">27%</span></div><div class="dom-name">Agentic architecture</div><div class="bar"><span class="dom-bg-d1" style="width:100%"></span></div></div>
+  <div class="dom"><div class="dom-top"><span class="dom-n dom-d2">D2</span><span class="dom-w">18%</span></div><div class="dom-name">Tools &amp; MCP</div><div class="bar"><span class="dom-bg-d2" style="width:67%"></span></div></div>
+  <div class="dom"><div class="dom-top"><span class="dom-n dom-d3">D3</span><span class="dom-w">20%</span></div><div class="dom-name">Claude Code</div><div class="bar"><span class="dom-bg-d3" style="width:74%"></span></div></div>
+  <div class="dom"><div class="dom-top"><span class="dom-n dom-d4">D4</span><span class="dom-w">20%</span></div><div class="dom-name">Prompts &amp; structured output</div><div class="bar"><span class="dom-bg-d4" style="width:74%"></span></div></div>
+  <div class="dom"><div class="dom-top"><span class="dom-n dom-d5">D5</span><span class="dom-w">15%</span></div><div class="dom-name">Context &amp; reliability</div><div class="bar"><span class="dom-bg-d5" style="width:56%"></span></div></div>
+</div>
+</main>
 <footer class="foot"><div class="wrap">Independent study guide built on the published exam blueprint. Not affiliated with or endorsed by Anthropic. All practice questions are original.</div></footer>
 
 <script src="content/curriculum.js"></script>
