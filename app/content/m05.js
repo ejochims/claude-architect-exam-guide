@@ -128,7 +128,7 @@ window.LESSONS.m05 = {
           id: "q05-1", ts: "2.4", scenario: 4,
           stem: "Your team wants everyone who clones the repo to have the same Jira MCP server, but each engineer has a personal API token. What configuration should you use?",
           options: [
-            { t: "Commit <code>.mcp.json</code> with <code>\"JIRA_TOKEN\": \"${JIRA_TOKEN}\"</code> and have each engineer set the variable.", ok: true, why: "Shared configuration, personal secrets, nothing sensitive in the repo." },
+            { t: "Commit <code>.mcp.json</code> with <code>\"JIRA_TOKEN\": \"${JIRA_TOKEN}\"</code> and have every engineer set the variable.", ok: true, why: "Shared configuration, personal secrets, nothing sensitive in the repo." },
             { t: "Commit <code>.mcp.json</code> with one shared service-account token in <code>\"JIRA_TOKEN\"</code>, so every clone works out of the box.", why: "A secret in version control, and every action is attributed to one account." },
             { t: "Have each engineer add the server to their own <code>~/.claude.json</code> with a personal token.", why: "Works, but the setup isn't shared and drifts between engineers." },
             { t: "Put the server definition and a token placeholder in CLAUDE.md, so Claude Code configures it.", trap: "T8", why: "CLAUDE.md doesn't configure MCP servers." }
@@ -179,7 +179,7 @@ window.LESSONS.m05 = {
           stem: "The repo's <code>.mcp.json</code> defines a <code>github</code> server. A developer also has a personal <code>notes</code> server at user scope. What does the agent have access to in this project?",
           options: [
             { t: "Only the project servers, because project scope replaces user scope.", why: "Scopes combine. Precedence matters only when names collide." },
-            { t: "Tools from both servers, discovered at connection and available together.", ok: true, why: "All configured servers load; their tools are available at the same time." },
+            { t: "Tools from both servers, all discovered at connection and available together.", ok: true, why: "All configured servers load; their tools are available at the same time." },
             { t: "Only the notes server, because personal configuration takes precedence over the project's.", why: "Precedence applies to same-named servers, and local beats project beats user." },
             { t: "Whichever single server the developer selects with <code>--mcp-server</code> when starting the session.", trap: "T8", why: "No such selection exists; configured servers all load." }
           ]

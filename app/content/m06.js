@@ -78,7 +78,7 @@ window.LESSONS.m06 = {
           stem: "The synthesis subagent writes fluent reports with no citations. Its prompt from the coordinator is “Synthesize the findings from the research phase into a report with sources.” What's the fix?",
           options: [
             { t: "Instruct the synthesis agent to attach a source to every claim it makes in the report.", trap: "T9", why: "It can't cite sources it was never given." },
-            { t: "Pass the full findings in the synthesis prompt as structured records with source, page and date.", ok: true, why: "Subagents only know what they're passed. Structured records keep attribution intact." },
+            { t: "Pass all the findings in the synthesis prompt as structured records with source, page and date.", ok: true, why: "Subagents only know what they're passed. Structured records keep attribution intact." },
             { t: "Give the synthesis agent a <code>web_search</code> tool, so it can find a source and add a structured citation for each claim itself.", trap: "T5", why: "It would redo research and could attach sources that differ from where the findings came from." },
             { t: "Let it read the research subagents' session transcripts through the coordinator's shared memory to recover sources.", why: "Subagents have isolated contexts. Nothing is shared unless the coordinator passes it." }
           ]

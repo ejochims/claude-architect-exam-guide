@@ -57,7 +57,7 @@ window.LESSONS.m00 = {
           stem: "A lease-abstraction pipeline extracts <code>renewal_notice_days</code>. When a lease doesn't mention notice, the output still contains a plausible number such as 60. The schema marks the field as a required integer. Which change fixes the root cause?",
           options: [
             { t: "Have the model add a confidence score to each field and drop values below 0.7.", trap: "T4", why: "An arbitrary threshold doesn't touch the cause: the schema forces a value to exist." },
-            { t: "Make the field nullable and tell the model to return null when the lease doesn't state it.", ok: true, why: "A required field creates pressure to fabricate. Allow absence explicitly." },
+            { t: "Make the field nullable and tell the model to return null whenever the lease doesn't state it.", ok: true, why: "A required field creates pressure to fabricate. Allow absence explicitly." },
             { t: "Run each extraction three times at temperature 0.7 and keep the value that at least two runs agree on.", trap: "T6", why: "Fabricated defaults are often consistent, so runs can agree on the same invented 60." },
             { t: "Switch to a model with a longer context window so it reads the whole lease, including the appendices.", trap: "T3", why: "The model isn't missing text; the value doesn't exist and the schema demands one." }
           ]

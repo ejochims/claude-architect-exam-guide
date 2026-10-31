@@ -90,7 +90,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
           stem: "The same kind of null-dereference is labeled “critical” in one PR and “minor” in another. How do you make severity consistent?",
           options: [
             { t: "Tell the model to be consistent when assigning severity across pull requests.", trap: "T9", why: "An exhortation with no definition of what each level means." },
-            { t: "Define each severity level clearly, with a concrete code example for each.", ok: true, why: "Explicit criteria with examples remove the ambiguity behind the inconsistency." },
+            { t: "Define every severity level clearly, with a concrete code example for each.", ok: true, why: "Explicit criteria with examples remove the ambiguity behind the inconsistency." },
             { t: "Collapse the scale to two levels, blocking and non-blocking, so there's less room for disagreement.", why: "Fewer levels hide the ambiguity; borderline cases still flip between them." },
             { t: "Run the review three times and assign the median of the three severity labels.", why: "Averages the inconsistency instead of removing its cause, at three times the cost." }
           ]

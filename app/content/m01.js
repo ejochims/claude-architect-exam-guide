@@ -96,10 +96,10 @@ window.LESSONS.m01 = {
           id: "q01-3", ts: "5.1", scenario: 1,
           stem: "In a 6-turn support chat, the assistant asks again for the order number the customer gave in turn 2. Logs show each API request contains the system prompt and the latest user message. What should you change?",
           options: [
-            { t: "Enable the API's persistent memory setting for the session.", trap: "T8", why: "No such setting exists. The Messages API is stateless; history is the application's job." },
-            { t: "Move to a model with a larger context window so earlier details aren't dropped.", trap: "T3", why: "Six turns fit easily. The window was never the limit, because the earlier turns weren't sent." },
-            { t: "Send the full conversation history (or a managed form of it) on every request.", ok: true, why: "Claude only sees what the request contains. Coherence across turns requires the prior turns." },
-            { t: "Add “remember the customer's details” to the system prompt.", trap: "T9", why: "The model can't remember what it was never shown." }
+            { t: "Enable the API's persistent session memory, keyed on the customer's <code>conversation_id</code>.", trap: "T8", why: "The Messages API is stateless; there's no server-side memory to enable." },
+            { t: "Move to a model with a 1M-token context window so earlier details aren't dropped.", trap: "T3", why: "Window size is irrelevant: earlier turns are never sent at all." },
+            { t: "Send the full conversation history (or a managed version of it) on every request.", ok: true, why: "The model is stateless. History must be in each request." },
+            { t: "Add “Remember the customer's details from earlier turns” to the system prompt.", trap: "T9", why: "It can't remember what isn't in the request." }
           ]
         },
         {

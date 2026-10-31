@@ -97,19 +97,19 @@ window.LESSONS.m04 = {
         },
         {
           id: "q04-3", ts: "5.3", scenario: 3,
-          stem: "A document-analysis subagent can open 7 of 10 assigned PDFs. The other 3 return 403 after retries. What should it return to the coordinator?",
+          stem: "A document-analysis subagent can open 7 of 10 assigned PDFs. The other 3 return 403 (access denied). Some topics in the research brief depend mainly on those 3 documents. Who should decide how the research proceeds, and with what information?",
           options: [
-            { t: "The analysis of the 7 readable PDFs, presented as the complete result so the synthesis step isn't delayed.", trap: "T6", why: "Silent suppression. The coordinator can't compensate for a gap it doesn't know about." },
-            { t: "An error that stops the research workflow, so nobody receives a report built on incomplete documents.", trap: "T6", why: "This discards 7 good analyses over a recoverable problem." },
-            { t: "Structured status: the 7 analyses as partial results, the 3 failed documents with failure type (access denied), what was attempted, and alternatives.", ok: true, why: "The coordinator can now find alternate sources, proceed with annotated gaps, or escalate." },
-            { t: "A status of “Document analysis unavailable” after its retries, so the coordinator knows something failed.", trap: "T6", why: "Generic status hides the partial results and specifics." }
+            { t: "The subagent should finish with the 7 and leave the 3 out of its output, so the run isn't delayed.", trap: "T6", why: "Silently dropping failures makes the coordinator believe coverage is complete." },
+            { t: "The subagent should retry the 403s with backoff until they succeed or the run's time budget is spent.", trap: "T6", why: "Access-denied errors aren't transient. Retrying wastes time and changes nothing." },
+            { t: "The coordinator, given the 7 analyses as partial results and each failed document with its error type and attempts.", ok: true, why: "The coordinator has the whole brief, so it decides: find other sources, re-scope, or proceed with coverage notes." },
+            { t: "The subagent should stop the workflow with an error, so no report is built on incomplete documents.", trap: "T6", why: "Throws away 7 good analyses; the coordinator may well have a way around the gap." }
           ]
         },
         {
           id: "q04-4", ts: "2.2", scenario: 3,
           stem: "<code>search_archive</code> returns <code>[]</code> both when nothing matches and when the archive service is unreachable. The coordinator concludes some topics have no coverage. Fix?",
           options: [
-            { t: "Return an empty success for no matches, and an <code>isError</code> result marked transient when the archive service is down.", ok: true, why: "An access failure and an empty result mean different things and need different handling." },
+            { t: "Return an empty success only for true no-matches, and an <code>isError</code> result marked transient when the service is down.", ok: true, why: "An access failure and an empty result mean different things and need different handling." },
             { t: "Retry every empty <code>[]</code> result twice inside the tool before returning it, in case the service was down.", why: "Slows down every genuine no-match and still can't tell the agent which case it is." },
             { t: "Have the coordinator treat every empty result as a possible outage and re-run that query later.", trap: "T7", why: "Fixes the wrong component. The tool should say what happened." },
             { t: "Return placeholder results with default values when the service is down, so downstream steps still have data.", trap: "T6", why: "Fabricated data is worse than an honest error." }
@@ -119,20 +119,20 @@ window.LESSONS.m04 = {
           id: "q04-5", ts: "5.3", scenario: 3,
           stem: "The search subagent hits frequent 2-second timeouts that succeed on immediate retry. Currently each timeout goes back to the coordinator, which re-delegates, adding about 30 seconds per task. Best design?",
           options: [
-            { t: "Have the subagent retry transient timeouts locally with backoff and propagate only failures it can't resolve, with context.", ok: true, why: "Local recovery for transient errors, escalation for the rest." },
-            { t: "Increase the coordinator's turn limit so it has room for the extra re-delegation round trips.", why: "This doesn't reduce the wasted round trips." },
-            { t: "Have the subagent return an empty result list on timeout so the coordinator isn't interrupted.", trap: "T6", why: "Silent suppression of a failure." },
-            { t: "Give the coordinator the search tools directly so it can retry searches itself without delegating.", trap: "T5", why: "This breaks role separation and still doesn't handle retries well." }
+            { t: "Have the subagent retry transient timeouts locally, escalating only what it can't resolve.", ok: true, why: "Handle recoverable errors where they happen; propagate only real failures, with context." },
+            { t: "Raise the coordinator's <code>max_turns</code> so it has room for the extra re-delegation round trips.", why: "Accommodates the waste instead of removing it." },
+            { t: "Have the subagent return an empty result list on timeout so the coordinator isn't interrupted.", trap: "T6", why: "Turns a recoverable error into a silent coverage gap." },
+            { t: "Give the coordinator the search tools directly so it can retry searches without delegating.", trap: "T5", why: "Blurs roles and bloats the coordinator's context; the retry belongs in the subagent." }
           ]
         },
         {
           id: "q04-6", ts: "5.3", scenario: 3,
           stem: "A financial-sector report was produced after the market-data subagent failed. The final report reads as complete. What should the synthesis output include?",
           options: [
-            { t: "Nothing extra. Readers prefer clean reports, and the missing data can be added in the next edition.", trap: "T6", why: "Hiding gaps misleads the reader." },
-            { t: "Coverage annotations distinguishing well-supported findings from areas with gaps due to unavailable sources.", ok: true, why: "Readers can judge reliability, and the coordinator can target re-research." },
-            { t: "A general disclaimer at the top of the report noting that some data may be incomplete.", why: "Too vague to act on. Name the specific gaps." },
-            { t: "Estimated figures from the model's own knowledge to fill the market-data gap, labeled as estimates.", why: "This fabricates data and destroys provenance." }
+            { t: "Nothing extra. Readers prefer clean reports, and missing data can be added in the next edition.", trap: "T6", why: "Presents partial work as complete." },
+            { t: "Coverage annotations that separate well-supported findings from gaps caused by the failed market-data source.", ok: true, why: "Readers need to know which conclusions rest on full data and which don't." },
+            { t: "A general disclaimer at the top of the report noting that some figures may be incomplete or estimated.", why: "Too vague to tell readers which findings are affected." },
+            { t: "Estimated market figures from the model's own knowledge, clearly labeled as estimates, to fill the gap.", why: "Unsourced figures in a financial report, however labeled, undermine trust." }
           ]
         }
       ]

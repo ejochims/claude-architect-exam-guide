@@ -85,100 +85,100 @@ window.LESSONS.m13 = {
           id: "q13-1", ts: "5.2", scenario: 1,
           stem: "A customer writes, “I need to speak to a human, please.” Their issue (updating a billing email) is something the agent can do in seconds. What should the agent do?",
           options: [
-            { t: "Escalate to a human immediately.", ok: true, why: "Explicit requests for a human are honored right away." },
-            { t: "Fix the email first, then offer a human if they still want one.", why: "This overrides the customer's explicit choice." },
-            { t: "Explain that the agent can handle it, and only escalate if they insist twice.", why: "That's the pattern for frustration, not for an explicit request." },
-            { t: "Ask diagnostic questions to prepare a better handoff.", why: "Investigating before honoring an explicit request delays them." }
+            { t: "Escalate to a human immediately.", ok: true, why: "Honor an explicit request for a human without investigating or resolving first." },
+            { t: "Update the billing email first, since it takes seconds, then offer the transfer if they still want it.", why: "Overrides an explicit request. Speed doesn't change what the customer asked for." },
+            { t: "Explain that the agent can handle this right now, and escalate only if they ask a second time.", why: "That's the approach for frustration, not for an explicit request for a person." },
+            { t: "Ask a few diagnostic questions first, so the handoff to the human agent is more complete.", why: "Delays the transfer the customer explicitly asked for." }
           ]
         },
         {
           id: "q13-2", ts: "5.2", scenario: 1,
           stem: "A customer writes angrily that their order is late “AGAIN.” They haven't asked for a person. The agent can see the package arrives tomorrow and a delay credit is within policy. Best response?",
           options: [
-            { t: "Escalate to a human right away, because the customer's sentiment is strongly negative.", trap: "T4", why: "Sentiment isn't complexity." },
-            { t: "Acknowledge the frustration, give the arrival date and apply the credit; escalate if they ask for a person.", ok: true, why: "Resolve what's within capability, and keep the door open." },
-            { t: "Respond neutrally with the tracking information only.", why: "This ignores both the frustration and the available remedy." },
-            { t: "Ask them to rate their frustration from 1 to 10 first so the agent can calibrate its tone.", why: "Unhelpful friction." }
+            { t: "Escalate to a human right away, because the customer's sentiment is strongly negative.", trap: "T4", why: "Anger isn't complexity, and they haven't asked for a person." },
+            { t: "Acknowledge the frustration, give the arrival date and apply the credit.", ok: true, why: "Resolve what's within the agent's ability while acknowledging how the customer feels." },
+            { t: "Reply neutrally with the tracking link and arrival date, keeping the response short and factual.", why: "Ignores the frustration and misses the credit that's within policy." },
+            { t: "Ask them to rate their frustration from 1 to 10 first, so the agent can match its tone.", why: "Adds friction and solves nothing." }
           ]
         },
         {
           id: "q13-3", ts: "5.2", scenario: 1,
           stem: "A customer asks to be reimbursed for a taxi they took because a delivery window was missed. Policy covers refunds and redelivery but says nothing about incidental expenses. What should the agent do?",
           options: [
-            { t: "Deny it, since it isn't in policy.", why: "Silence in policy isn't a prohibition. A human should decide." },
-            { t: "Approve a reasonable amount to keep the customer happy.", why: "This improvises policy with real money." },
-            { t: "Escalate, because policy is silent on this specific request.", ok: true, why: "Policy gaps are a valid escalation trigger." },
-            { t: "Offer redelivery and ignore the taxi request.", why: "This drops part of the request." }
+            { t: "Deny it, since incidental expenses aren't listed among the covered remedies.", why: "Silence in the policy isn't a denial; a human should decide." },
+            { t: "Approve a reasonable amount, such as up to $40, to keep the customer happy.", why: "Improvises policy the agent isn't authorized to set." },
+            { t: "Escalate to a human, since policy covers refunds and redelivery but says nothing about expenses like this.", ok: true, why: "Policy gaps are a valid escalation trigger." },
+            { t: "Offer redelivery, which policy covers, and leave the taxi request unaddressed.", why: "Ignores what the customer actually asked for." }
           ]
         },
         {
           id: "q13-4", ts: "5.2", scenario: 1,
           stem: "<code>get_customer(\"Chris Lee\")</code> returns three accounts. The agent picks the one with the most recent order and processes a refund. What should it do instead?",
           options: [
-            { t: "Ask the customer for an additional identifier (email, order number, postal code) before acting.", ok: true, why: "Multiple matches need clarification, not heuristic selection." },
-            { t: "Pick the account with the highest lifetime value, since it's most likely the caller.", why: "Also a heuristic, and still a guess." },
-            { t: "Process the refund on all three accounts to be safe.", why: "This creates financial errors." },
-            { t: "Escalate every multiple-match case to a human.", why: "Overkill. One clarifying question resolves it." }
+            { t: "Ask the customer for a second identifier like an email or order number and wait for it.", ok: true, why: "Multiple matches need clarification, not a heuristic choice." },
+            { t: "Pick the account with the highest lifetime value, since that customer is the most likely caller.", why: "Still a guess, and wrong guesses act on someone else's account." },
+            { t: "Pick the account whose location matches the caller's IP address and continue the refund.", why: "Another heuristic. Ask the customer instead." },
+            { t: "Escalate every multiple-match case to a human agent, since identity is involved.", why: "Overkill. A clarifying question resolves it." }
           ]
         },
         {
           id: "q13-5", ts: "5.2", scenario: 1,
           stem: "Which is the most appropriate escalation trigger for a support agent?",
           options: [
-            { t: "The customer's sentiment score drops below a threshold.", trap: "T4", why: "Unreliable proxy." },
-            { t: "The model's self-rated confidence falls below 6 out of 10.", trap: "T4", why: "Poorly calibrated." },
-            { t: "The agent can't make meaningful progress after targeted attempts.", ok: true, why: "One of the blueprint's explicit triggers, alongside customer requests and policy gaps." },
-            { t: "The conversation goes past 10 turns.", why: "Length doesn't measure need." }
+            { t: "The customer's sentiment score drops below −0.6 on the analytics model.", trap: "T4", why: "Sentiment doesn't measure complexity." },
+            { t: "The model's raw self-rated confidence in its answer falls below 6 out of 10.", trap: "T4", why: "Uncalibrated self-ratings don't track case difficulty." },
+            { t: "The agent still can't make meaningful progress after a few focused attempts.", ok: true, why: "Inability to progress is a valid trigger, alongside explicit requests and policy gaps." },
+            { t: "The conversation passes 10 turns without the customer confirming a resolution.", why: "Length doesn't measure difficulty; some complex cases take 20 productive turns." }
           ]
         },
         {
           id: "q13-6", ts: "5.5", scenario: 6,
           stem: "An extraction pipeline is 97% accurate across 20,000 documents. Leadership proposes removing human review for high-confidence extractions. What should you do first?",
           options: [
-            { t: "Check accuracy by document type and by field to confirm performance is consistent.", ok: true, why: "Aggregate accuracy can mask poor performance on specific types or fields." },
-            { t: "Approve the change, since 97% is above the accuracy target.", why: "The aggregate may hide a 75% segment." },
-            { t: "Raise the confidence threshold to 0.99 so only near-certain extractions skip review.", why: "This is uncalibrated, and still doesn't check segments." },
-            { t: "Run the pipeline twice on the same documents and compare.", why: "Consistency isn't accuracy." }
+            { t: "Break the 97% down by document type and by field before deciding.", ok: true, why: "An aggregate can hide weak segments. Validate per segment before cutting review." },
+            { t: "Approve the change, since 97% exceeds the 95% accuracy target agreed with leadership.", why: "97% overall can include 80% on one document type or critical field." },
+            { t: "Raise the confidence threshold to 0.99 so only near-certain extractions skip review.", why: "A threshold isn't meaningful until confidence is calibrated and segments are checked." },
+            { t: "Run the pipeline twice on the same 20,000 documents and compare the two sets of outputs.", why: "Measures consistency, not accuracy." }
           ]
         },
         {
           id: "q13-7", ts: "5.5", scenario: 6,
           stem: "You've automated high-confidence extractions. How do you keep measuring the error rate and detect new error patterns?",
           options: [
-            { t: "Stratified random sampling of high-confidence extractions across document types and fields.", ok: true, why: "It measures ongoing error rates and surfaces novel patterns." },
-            { t: "Review only the low-confidence extractions going forward.", why: "Errors in the high-confidence group go unseen." },
-            { t: "Rely on downstream teams to report errors when they find them.", why: "This is reactive and biased." },
-            { t: "Review the first 100 extractions each month.", why: "Not random and not stratified." }
+            { t: "Stratified random sampling of high-confidence extractions across document types and fields.", ok: true, why: "Measures error rates where review was removed and catches new error patterns." },
+            { t: "Review only the low-confidence extractions from now on, since that's where errors concentrate.", why: "Never checks the automated, high-confidence stream." },
+            { t: "Rely on downstream teams to report extraction errors through the existing ticket queue.", why: "Reactive, and many errors go unnoticed." },
+            { t: "Review the first 100 extractions each month as a quick quality check.", why: "Not random or stratified, so it can miss whole segments." }
           ]
         },
         {
           id: "q13-8", ts: "5.5", scenario: 6,
           stem: "Reviewers can check 300 of 5,000 daily extractions. How should you choose which ones?",
           options: [
-            { t: "Send low calibrated field-confidence extractions, and ambiguous or contradictory sources, to reviewers first.", ok: true, why: "This puts limited capacity where errors are likeliest." },
-            { t: "Pick a uniform random 300 so every extraction has an equal chance of review.", why: "Useful for measurement, but it wastes capacity on easy cases." },
-            { t: "Review the 300 longest documents, since they're most likely to contain errors.", why: "Length is a weak proxy." },
-            { t: "Review whatever the model flags using its raw self-reported confidence.", trap: "T4", why: "It must be calibrated against labeled data first." }
+            { t: "Low calibrated field confidence, plus ambiguous or contradictory sources.", ok: true, why: "Calibrated confidence and source ambiguity route scarce reviewer time to likely errors." },
+            { t: "A uniform random 300 each day, so every extraction has the same chance of being reviewed.", why: "Good for measuring error rates, but wastes scarce capacity on easy cases." },
+            { t: "The 300 longest documents each day, since longer documents contain more fields to get wrong.", why: "Length is a weak proxy for error risk." },
+            { t: "Whatever the model flags, using its raw self-reported confidence with a 0.5 cutoff.", trap: "T4", why: "Uncalibrated, the cutoff doesn't track actual error risk." }
           ]
         },
         {
           id: "q13-9", ts: "5.6", scenario: 3,
           stem: "Two credible industry reports give different market-share figures for the same segment and year. What should the synthesis do?",
           options: [
-            { t: "Pick the more recent report's figure.", why: "Both are the same year, and choosing hides the disagreement." },
-            { t: "Average the two figures into one estimate.", why: "This invents a number neither source reports." },
-            { t: "Include both, each with its source, and annotate the conflict.", ok: true, why: "Preserve the conflict and let the reader or coordinator weigh the sources." },
-            { t: "Leave the figure out of the report entirely.", why: "This loses information the reader needs." }
+            { t: "Use the more recent report's figure, since newer data usually supersedes older data.", why: "Recency doesn't settle disagreement between credible sources for the same year." },
+            { t: "Average the two figures and report the result as a single best estimate.", why: "Creates a number neither source supports." },
+            { t: "Include both figures with their sources and add a note explaining the conflict.", ok: true, why: "Preserve conflicting values with attribution; don't resolve them arbitrarily." },
+            { t: "Leave the figure out of the report to avoid presenting contradictory data.", why: "Hides information the reader needs." }
           ]
         },
         {
           id: "q13-10", ts: "5.6", scenario: 3,
           stem: "The synthesis flagged “contradictory” telehealth adoption rates: 22% and 58%. They're from 2019 and 2024 studies. What upstream change prevents this?",
           options: [
-            { t: "Require subagents to include publication or collection dates in their structured outputs.", ok: true, why: "Dates let synthesis read trends correctly instead of seeing contradictions." },
-            { t: "Tell the synthesis agent to ignore sources older than a few years.", why: "This loses the trend." },
-            { t: "Use only one source per statistic to avoid apparent contradictions.", why: "Arbitrary, and it loses corroboration." },
-            { t: "Average the two rates to report a single adoption figure.", why: "Meaningless." }
+            { t: "Require subagents to include publication or collection dates in their structured outputs.", ok: true, why: "With dates attached, different time periods aren't mistaken for contradictions." },
+            { t: "Tell the synthesis agent to discard any source older than three years before comparing figures.", why: "Throws away the trend the two figures show." },
+            { t: "Allow only one source per statistic, so apparent contradictions can't arise.", why: "Hides real disagreements and reduces coverage." },
+            { t: "Have the synthesis average the 22% and 58% rates into one adoption figure.", why: "Meaningless across different years." }
           ]
         }
       ]

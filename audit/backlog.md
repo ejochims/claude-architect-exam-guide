@@ -48,6 +48,26 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | Note | Inserting m05 step 0 shifts m05's step indices by one. Saved step-completion for m05 may be off by one, and older audit references to `m05:i` mean the pre-batch numbering. |
 | Still open | P5: move the m00 quiz and trap spotter to a capstone. P7: "Why it exists" panels for the remaining primitives below 10/12. The 4 preparation exercises as in-app labs. |
 
+### Batch 4 (2026-10-31): all 120 questions rewritten (backlog Q1–Q7)
+
+| Metric (whole bank) | Before | After | Target |
+|---|---|---|---|
+| Correct option is the longest | 81.7% | **24.2%** | ≤ 30% |
+| Correct option's length rank (longest / 2nd / 3rd / shortest) | 98 / 15 / 4 / 3 | **29 / 32 / 30 / 29** | about even |
+| Correct-to-longest-distractor ratio above 1.25 | 56 items | **1** | 0–few |
+| pick-longest | 81.3% | **22.9%** | ≤ 35% |
+| pick-most-clauses | 54.9% | **22.8%** | ≤ 35% |
+| pick-most-concrete (new) | 53.6% | **25.1%** | ≤ 35% |
+| pick-enforce-in-code (new) | 36.9% | **27.7%** | ≤ 35% |
+| pick-shortest / pick-least-concrete (new, catch over-correction) | — | 24.4% / 16.5% | ≤ 35% |
+| Absolute wording, correct vs distractors | 20.8% vs 28.9% | **28.3% vs 31.4%** | within 5 points |
+
+- **Q5:** done. All 9 SAMPLE-CLOSE items now test different decisions: q00-1, q02-1, q04-3, q06-5, q08-7, q10-1, q11-3, b1-1, b5-1.
+- **Q2:** done. AMB items are disambiguated in their stems: b1-2 (non-idempotent), b2-5 (fixes interact), q09-4 (locale-ambiguous dates). q11-4 and q13-1 keep their keys, with clarified explanations. b5-4 was fixed in batch 1.
+- **Q3 / Q7:** the `why` and trap issues are applied during the rewrites. Terminology notes are added where keys rely on exam framing.
+- **Method.** Items were rewritten inline, domain by domain, with `scripts/audit/apply-rewrites.mjs`. Each domain was gated with `cue-baselines.mjs --ts N` before committing.
+- **Still owed:** Phase 8 runs a fresh options-only solver and a blind solver on the rewritten bank, to confirm with a model and not just heuristics.
+
 ## R: Readiness and exam-format risks (need your action, or affect the booking decision)
 
 | ID | Sev | Item | Evidence | Action |

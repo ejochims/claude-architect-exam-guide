@@ -243,10 +243,10 @@ window.BANK = [
     id: "b3-1", ts: "5.6", scenario: 3,
     stem: "The final research report converts everything (quarterly revenue figures, news developments, technical specifications) into uniform bullet prose. Readers find the financials hard to compare. What should synthesis do?",
     options: [
-      { t: "Render each type to fit: financial data as tables, news as prose, technical findings as lists.", ok: true, why: "Format should fit the content." },
-      { t: "Use tables for everything so all content types are easy to compare.", why: "News and narrative don't fit tables." },
-      { t: "Shorten the report so readers can scan it faster.", why: "This doesn't fix comparability." },
-      { t: "Add an appendix containing all the raw data behind the report.", why: "It helps a little, but the main report stays hard to use." }
+      { t: "Use tables for the financial data, prose for news and lists for technical findings.", ok: true, why: "Format should follow content type." },
+      { t: "Use tables for everything, so all content types are equally easy to scan and compare.", why: "News and narrative findings don't fit tables." },
+      { t: "Shorten the report to a one-page executive summary so readers can scan it faster.", why: "Doesn't solve the comparison problem, and loses detail." },
+      { t: "Add an appendix with all the raw revenue data in CSV form behind the report.", why: "Pushes the work to the reader." }
     ]
   },
   {
