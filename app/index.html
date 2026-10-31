@@ -237,6 +237,34 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 .opt .opt-body { min-width: 0; }
 .opt .opt-why { display: block; font: 400 15px/1.5 var(--serif); color: var(--muted); margin-top: 6px; }
 .opt.is-right .opt-why, .opt.is-wrong .opt-why { color: var(--fg); }
+/* Study plan */
+.plan-ok { color: var(--good); }
+.plan-behind { color: var(--bad); }
+.plan-rows { border-top: 1px solid var(--line); }
+.plan-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.plan-mark { width: 20px; height: 20px; border: 1.5px solid var(--line); border-radius: 5px; display: grid; place-items: center; font: 700 13px/1 var(--sans); color: var(--on-accent); }
+.plan-row.done .plan-mark { background: var(--good); border-color: var(--good); }
+.plan-week { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.plan-week p { margin: 4px 0 0; }
+.review-link { margin-left: auto; }
+/* Exam-day playbook */
+.ed-sec { margin-bottom: 14px; }
+.ed-sec h2 { font-size: 19px; margin: 0 0 10px; }
+.ed-facts { display: grid; grid-template-columns: minmax(130px, max-content) 1fr; gap: 8px 16px; margin: 0; }
+.ed-facts dt { font-weight: 650; }
+.ed-facts dd { margin: 0; color: var(--muted); }
+.ed-list { margin: 0; padding-left: 20px; }
+.ed-list li { margin: 6px 0; line-height: 1.5; }
+@media (max-width: 560px) { .ed-facts { grid-template-columns: 1fr; } .ed-facts dd { margin-bottom: 6px; } }
+.print-btn { margin-left: auto; }
+/* Print: a clean, light, paper cram sheet of the reference pages. */
+@media print {
+  :root:not(#print) { --bg: #fff; --surface: #fff; --sunk: #f3f3f3; --fg: #111; --muted: #333; --faint: #555; --line: #ccc; color-scheme: light; }
+  .top, .foot, .crumb, .pr-tools, .print-btn, #gq, .sync { display: none !important; }
+  body { background: #fff; }
+  .pr-card, .bp-row, .panel, .ed-list li { break-inside: avoid; box-shadow: none; }
+  a { color: inherit; text-decoration: none; }
+}
 /* Principles page: one card per rule, grouped by theme; "rules only" collapses to a scan list. */
 .pr-tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 18px; }
 .pr-tools .sel { margin: 0; flex: 1 1 220px; max-width: none; }
@@ -485,6 +513,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
     </a>
     <nav class="nav" aria-label="Main">
       <a href="#path" data-nav="path">Path</a>
+      <a href="#plan" data-nav="plan">Plan</a>
       <a href="#practice" data-nav="practice">Practice</a>
       <a href="#cards" data-nav="cards">Cards</a>
       <a href="#blueprint" data-nav="blueprint">Blueprint</a>
@@ -543,6 +572,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
 <script src="content/l03.js"></script>
 <script src="content/l04.js"></script>
 <script src="content/principles.js"></script>
+<script src="content/examday.js"></script>
 <script src="content/bank.js"></script>
 <script src="content/holdout.js"></script>
 <script src="app.js"></script>

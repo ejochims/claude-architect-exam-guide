@@ -410,3 +410,39 @@ All five are now within ±2 points of target.
 
 **Layout fix.** A sixth nav link overflowed the page by 60px at 390px wide. On screens 560px or narrower, the nav now scrolls sideways, and the active link scrolls into view.
 
+## Batch 18: study workflow, exam-day playbook, backup, print (2026-10-31)
+
+**Why.** A read-only audit by a Sonnet subagent found the content close to self-contained. The biggest remaining gap was the study workflow:
+- no route from a wrong answer back to its lesson;
+- no way to re-drill misses outside a mock;
+- no in-app plan;
+- the countdown fixed at Dec 31.
+
+It also flagged:
+- thin exam technique and logistics;
+- no way to back up progress;
+- no print view;
+- a stale count of 144 practice questions in `exam-preparation-guide.md`.
+
+**What.**
+- **Review links.** Every wrong answer outside its own lesson links to the module that teaches it ("Review Module N"). This includes the post-mock review.
+- **Retry my misses** (`#drill-misses`). It holds practice questions missed on the first attempt and not yet answered right. A question leaves the list once it's answered right. Holdout items are never included, and readiness still counts first attempts only. It's linked from Practice and the Plan.
+- **Study plan** (`#plan`, with a nav link). It covers:
+  - the learner's own exam date, which also drives the home countdown and title;
+  - a pace check (on track or behind, and the minutes a day needed to finish the lessons three weeks out);
+  - today's tasks;
+  - five dated milestones: lessons, mock 1 at day −14, mock 2 at −7, the Readiness Check at −5, and the official practice exam at −4, with a field to record that result;
+  - a week-by-week lesson schedule.
+
+  The plan is stored in `state.plan` and merged across devices.
+- **Exam-day playbook** (`#exam-day`, in `content/examday.js`). It covers the numbers, a pacing plan, how to read a scenario, elimination by trap pattern, multiple-response technique, and logistics.
+  - Facts come only from sources the app already cites: 120 minutes, about 135 minutes of seat time, the formats, 720/1,000, and 4 attempts in 12 months.
+  - Proctoring details are phrased as "confirm in your Pearson VUE confirmation", not as rules.
+- **Back up your progress.** Download progress as JSON, and import it, which merges with `merge()` and keeps the earliest Readiness Check attempt.
+- **Print.** A Print button on Principles, Glossary, Exam vs. today and the playbook. Print CSS forces a light page and hides navigation. Rules only plus Print gives a cram sheet.
+- **Doc fix:** `exam-preparation-guide.md` now gives the current counts.
+
+**Not built, by the audit's own ranking:** score trends over time (planned next), terminal labs, site-wide search, offline mode, a keyboard-accessibility pass, and tags for the 15 unlinked bullets. Prompt caching was suggested but isn't among the 240 blueprint bullets, so it wasn't added.
+
+**Checks.** `content-check`: invariants OK. `browser-suite`: 306 checks, no problems. New checks cover the playbook, the misses drill, the review link, a corrected miss leaving the list, saving the exam date (and the home page following it), and the export-import round trip. Screenshots checked at 390px dark, plus the print view.
+

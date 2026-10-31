@@ -3,7 +3,7 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
@@ -44,6 +44,7 @@
     // The Readiness Check counts once: keep the earliest attempt from either device.
     out.readiness = !a.readiness ? b.readiness || null : !b.readiness ? a.readiness : a.readiness.at <= b.readiness.at ? a.readiness : b.readiness;
     out.last = later(a.last, b.last);
+    out.plan = later(a.plan, b.plan);
     const seen = new Map();
     for (const r of [...(a.mocks || []), ...(b.mocks || [])]) seen.set(r.startedAt, r);
     out.mocks = [...seen.values()].sort((x, y) => y.at - x.at).slice(0, 10);
@@ -88,7 +89,7 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const domOfTask = t => B.domains.find(d => t.startsWith(d.n + "."));
   const taskChip = t => `<span class="chip dom-${domOfTask(t).id}" title="${esc(B.tasks[t])}">${t}</span>`;
-  const daysLeft = () => Math.max(0, Math.ceil((new Date(B.examDate + "T23:59:59") - new Date()) / 86400000));
+  const daysLeft = () => Math.max(0, Math.ceil((new Date(examDate() + "T23:59:59") - new Date()) / 86400000));
   const ready = id => !!L[id];
   const hashStr = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -214,6 +215,9 @@
           again.addEventListener("click", () => { delete state.answers[q.id]; pick = multi ? [] : null; touch(); draw(); });
           res.append(again);
         }
+        // Route a miss back to the lesson that teaches it (unless that lesson is already open).
+        const mod = !a.ok && MODS.find(x => x.id === q.module);
+        if (mod && !location.hash.startsWith(`#${mod.id}`)) res.insertAdjacentHTML("beforeend", `<a class="linkbtn review-link" href="#${mod.id}">Review Module ${mod.n}: ${esc(mod.title)} →</a>`);
         card.append(res);
       }
     };
@@ -229,17 +233,18 @@
     const answered = QUESTIONS.filter(q => state.first[q.id]).length;
     const weak = weakest(1)[0];
     const lastMock = state.mocks[0];
+    const plan = planModel();
     app.innerHTML = `
 <section class="hero">
   <div>
     <div class="eyebrow">Claude Certified Architect – Foundations</div>
-    <h1>Exam-ready by <em>December 31</em></h1>
+    <h1>Exam-ready by <em>${fmtLong(plan.ex)}</em></h1>
     <p>Three foundation lessons, fourteen modules that build from first principles to exam judgment, and four hands-on labs, mapped to every task statement in the official blueprint. No other material needed.</p>
   </div>
   <div class="goal">
     <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
     <div>
-      <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your Dec 31 goal</div>
+      <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your exam on ${fmtLong(plan.ex)} · <a href="#plan">${plan.left < 1 ? "lessons done" : plan.behind ? "behind pace" : "on track"}: open your study plan →</a></div>
       <div class="goal-v">${pct}% ready</div><div class="goal-k">First-attempt accuracy on the ${answered} practice questions you've tried, weighted by domain. Retries don't count. Practice scores alone don't justify booking: book when a cold Readiness Check and the official practice exam both clear 80%.</div>
     </div>
   </div>
@@ -284,13 +289,124 @@ ${nm ? `<section class="cont">
   function viewGlossary() {
     const modOf = id => MODS.find(m => m.id === id);
     app.innerHTML = `${pageHead("Glossary", "Every term in one place", "Each entry links to the lesson that explains it.")}
-<input id="gq" class="sel" type="search" placeholder="Search terms" aria-label="Search terms" style="width:100%;margin-bottom:16px">
+<input id="gq" class="sel" type="search" placeholder="Search terms" aria-label="Search terms" style="width:100%;margin-bottom:10px">${printBtn()}
 <div class="bp-rows" id="gl"></div>`;
     const list = document.getElementById("gl");
     const draw = q => { const t = q.trim().toLowerCase(); list.innerHTML = GLOSS.filter(([k, , d]) => !t || (k + " " + d).toLowerCase().includes(t)).sort((a, b) => a[0].localeCompare(b[0])).map(([k, id, d]) => { const m = modOf(id); return `<div class="bp-row"><span><strong>${esc(k)}</strong><br><span class="small">${esc(d)}</span></span><span class="bp-mod">${m ? `<a href="#${m.id}">Module ${m.n} →</a>` : ""}</span></div>`; }).join("") || `<p class="small">No matching terms.</p>`; };
     document.getElementById("gq").addEventListener("input", e => draw(e.target.value));
+    wirePrint();
     draw("");
   }
+  // ---------- Print ----------
+  const printBtn = () => `<button type="button" class="btn ghost print-btn" data-print>Print</button>`;
+  const wirePrint = () => app.querySelectorAll("[data-print]").forEach(b => b.addEventListener("click", () => window.print()));
+
+  // ---------- Study plan ----------
+  // Counted back from the learner's exam date: lessons done 3 weeks out, mocks at -14 and -7 days,
+  // the Readiness Check at -5 and the official practice exam within 48 hours of it.
+  const examDate = () => (state.plan && state.plan.examDate) || B.examDate;
+  const isoToday = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  const dateAt = iso => new Date(iso + "T12:00:00");
+  const fmtLong = iso => dateAt(iso).toLocaleDateString(undefined, { month: "long", day: "numeric" });
+  const addDays = (iso, n) => { const d = dateAt(iso); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const missedQs = () => QUESTIONS.filter(q => state.first[q.id] && !state.first[q.id].ok && !(state.answers[q.id] && state.answers[q.id].ok));
+  function planModel() {
+    const lessons = MODS.filter(m => L[m.id]);
+    const total = lessons.reduce((a, m) => a + (m.minutes || 0), 0);
+    const left = lessons.reduce((a, m) => a + (m.minutes || 0) * (1 - modProgress(m.id)), 0);
+    const ex = examDate(), today = isoToday(), D = daysLeft();
+    const firstAt = Math.min(...Object.values(state.first).map(f => f.at || Infinity));
+    const start = (state.plan && state.plan.start) || (isFinite(firstAt) ? new Date(firstAt).toISOString().slice(0, 10) : today);
+    const learnBy = addDays(ex, -21);
+    const mocks = state.mocks.filter(r => (r.kind || "mock") === "mock");
+    const good = mocks.filter(r => (r.wpct ?? r.pct) >= BAR).sort((a, b) => a.at - b.at);
+    const rc = state.readiness, rcPass = !!rc && rc.pct >= BAR && B.domains.every(d => !rc.dom[d.id] || rc.dom[d.id][0] / rc.dom[d.id][1] >= 0.7);
+    const off = (state.plan && state.plan.official) || {};
+    const steps = [
+      { label: "Finish the lessons and labs", by: learnBy, done: left < 1, note: left < 1 ? "Done" : `About ${Math.round(left)} minutes of lessons left`, href: "#path" },
+      { label: "First mock exam at 80% or more", by: addDays(ex, -14), done: good.length >= 1, note: mocks.length ? `Best so far: ${Math.round(Math.max(...mocks.map(r => r.wpct ?? r.pct)) * 100)}%` : "No mock yet", href: "#mock" },
+      { label: "Second mock at 80% or more, about a week after the first", by: addDays(ex, -7), done: good.length >= 2 && good[good.length - 1].at - good[0].at >= 6 * DAY, note: `${good.length} mock${good.length === 1 ? "" : "s"} at 80% or more so far`, href: "#mock" },
+      { label: "Readiness Check, once, at the booking bar", by: addDays(ex, -5), done: rcPass, note: rc ? `${Math.round(rc.pct * 100)}%${rcPass ? "" : ", below the bar (80% overall, every domain 70%)"}` : "Not taken", href: "#readiness" },
+      { label: "Official practice exam, within 48 hours of the Readiness Check", by: addDays(ex, -4), done: !!off.done, note: off.score ? `Your score: ${off.score}` : "Record it below when you've taken it" }
+    ];
+    // Pace: the share of lesson minutes done should keep up with the share of the learning window that has passed.
+    const span = Math.max(1, (dateAt(learnBy) - dateAt(start)) / DAY);
+    const gone = Math.min(1, Math.max(0, (dateAt(today) - dateAt(start)) / DAY / span));
+    const daysToLearn = Math.max(0, Math.round((dateAt(learnBy) - dateAt(today)) / DAY));
+    const behind = left >= 1 && (daysToLearn <= 0 || (total ? 1 - left / total : 1) + 0.05 < gone);
+    return { ex, today, D, start, left, steps, behind, daysToLearn, learnBy, lessons, off, perDay: left < 1 ? 0 : Math.ceil(left / Math.max(1, daysToLearn)) };
+  }
+  function planWeeks(p) {
+    const todo = p.lessons.filter(m => modProgress(m.id) < 1), weeks = [];
+    const n = Math.max(1, Math.ceil(p.daysToLearn / 7)), per = p.left / n;
+    let w = 0, acc = 0;
+    for (const m of todo) {
+      const mins = (m.minutes || 0) * (1 - modProgress(m.id));
+      if (!weeks[w]) weeks[w] = { from: addDays(p.today, w * 7), items: [], mins: 0 };
+      weeks[w].items.push(m); weeks[w].mins += mins; acc += mins;
+      if (acc >= per * (w + 1) - 1 && w < n - 1) w++;
+    }
+    return weeks;
+  }
+  function viewPlan() {
+    const p = planModel(), weeks = planWeeks(p), misses = missedQs().length, next = nextUp(), nm = next && MODS.find(m => m.id === next.m);
+    const pace = p.left < 1 ? "<strong>Lessons done.</strong> Move on to mocks, misses and flashcards."
+      : p.daysToLearn > 0 ? `<strong>${p.behind ? "Behind pace." : "On track."}</strong> About ${p.perDay} minutes a day finishes the lessons by ${fmtLong(p.learnBy)}, three weeks before the exam.`
+      : `<strong>Behind pace.</strong> The three-week practice window has started with about ${Math.round(p.left)} minutes of lessons left. Finish the modules for your weakest domains first, or move the exam date.`;
+    app.innerHTML = `${pageHead("Study plan", `${p.D} days to ${fmtLong(p.ex)}`, "Counted back from your exam date: lessons done three weeks out, then two mocks a week apart, the Readiness Check, and the official practice exam. It updates as you work.")}
+<div class="read">
+<div class="panel"><label class="small" for="exd">Your exam date</label>
+<div class="row-btns" style="margin-top:6px"><input id="exd" class="sel" type="date" value="${p.ex}" style="max-width:200px;margin:0"><button class="btn" type="button" id="exsave">Save date</button></div>
+<p class="${p.behind ? "plan-behind" : "plan-ok"}" style="margin-bottom:0">${pace}</p></div>
+<div class="sec-head" style="margin-top:26px"><h2>Today</h2></div>
+<ul class="rules">
+${nm ? `<li><a href="#${nm.id}-${next.s + 1}">${modProgress(nm.id) > 0 ? "Continue" : "Start"} Module ${nm.n}: ${esc(nm.title)}</a></li>` : `<li>Lessons complete. <a href="#mock">Take a mock exam</a> or drill a scenario.</li>`}
+<li><a href="#cards">${dueCount()} flashcard${dueCount() === 1 ? "" : "s"} due</a></li>
+${misses ? `<li><a href="#drill-misses">Retry ${misses} missed question${misses === 1 ? "" : "s"}</a></li>` : ""}
+</ul>
+<div class="sec-head" style="margin-top:26px"><h2>Milestones</h2><span class="small">book when all five are done</span></div>
+<div class="plan-rows">${p.steps.map(st => `<div class="plan-row${st.done ? " done" : ""}"><span class="plan-mark" aria-label="${st.done ? "done" : "not done"}">${st.done ? "✓" : ""}</span><span>${st.href ? `<a href="${st.href}">${esc(st.label)}</a>` : esc(st.label)}<br><span class="small">${esc(st.note)}</span></span><span class="small mono">by ${fmtDate(dateAt(st.by))}</span></div>`).join("")}</div>
+<div class="panel" style="margin-top:12px"><label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="offdone"${p.off.done ? " checked" : ""}> I've passed the official practice exam</label>
+<input id="offscore" class="sel" type="text" placeholder="Score as shown (e.g. 820 or 85%)" value="${esc(p.off.score || "")}" aria-label="Official practice exam score" style="margin:10px 0 0"></div>
+<div class="sec-head" style="margin-top:26px"><h2>Lesson schedule</h2><span class="small">remaining lessons, spread to finish three weeks out</span></div>
+${weeks.length ? weeks.map(w => `<div class="plan-week"><div class="eyebrow">Week of ${fmtDate(dateAt(w.from))} · about ${Math.round(w.mins)} min</div><p>${w.items.map(m => `<a href="#${m.id}">${m.n}: ${esc(m.title)}</a>`).join(" · ")}</p></div>`).join("") : `<p class="small">All lessons done.</p>`}
+<p class="small">The last three weeks: a mock, review its misses and weak modules, a second mock a week later, then the Readiness Check and the official practice exam. Flashcards daily throughout.</p>
+<div class="sec-head" style="margin-top:26px"><h2>Exam day</h2></div>
+<p><a href="#exam-day">Read the exam-day playbook →</a></p>
+<div class="sec-head" style="margin-top:26px"><h2>Back up your progress</h2></div>
+<div class="panel"><p class="small" style="margin-top:0">Progress is saved in this browser${remoteRef ? " and synced to your account" : ""}. Download a copy before switching devices or clearing browser data. Importing merges a copy with what's here and keeps your earliest Readiness Check attempt.</p>
+<div class="row-btns"><button class="btn ghost" type="button" id="pexport">Download progress</button><label class="btn ghost" for="pimport">Import progress</label><input type="file" id="pimport" accept="application/json,.json" hidden></div>
+<p class="small" id="pmsg" role="status"></p></div>
+</div>`;
+    const savePlan = patch => { state.plan = Object.assign({ start: p.start }, state.plan || {}, patch, { at: Date.now() }); touch(); };
+    document.getElementById("exsave").addEventListener("click", () => { const v = document.getElementById("exd").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { savePlan({ examDate: v }); toast("Exam date saved"); viewPlan(); } });
+    const saveOff = () => savePlan({ official: { done: document.getElementById("offdone").checked, score: document.getElementById("offscore").value.trim().slice(0, 40) } });
+    document.getElementById("offdone").addEventListener("change", () => { saveOff(); viewPlan(); });
+    document.getElementById("offscore").addEventListener("change", saveOff);
+    const msg = document.getElementById("pmsg");
+    document.getElementById("pexport").addEventListener("click", () => {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" }));
+      const a = document.createElement("a"); a.href = url; a.download = `cca-progress-${isoToday()}.json`; document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000); msg.textContent = "Downloaded.";
+    });
+    document.getElementById("pimport").addEventListener("change", e => {
+      const f = e.target.files[0]; if (!f) return;
+      f.text().then(t => { const d = JSON.parse(t); if (!d || d.v !== 1 || typeof d.answers !== "object") throw new Error("format"); state = merge(state, d); touch(); viewPlan(); toast("Progress imported"); })
+        .catch(() => { msg.textContent = "That file isn't a progress backup from this app."; });
+    });
+  }
+
+  // ---------- Exam-day playbook ----------
+  function viewExamDay() {
+    const ED = window.EXAM_DAY || [];
+    app.innerHTML = `${pageHead("Exam day", "The exam-day playbook", "Pacing, reading and eliminating, multiple-response technique, and logistics. Proctoring details vary by delivery method: confirm them in your Pearson VUE confirmation.")}
+<div class="read">${printBtn()}${ED.map(sec => `<div class="panel ed-sec"><h2>${esc(sec.title)}</h2>${sec.kind === "facts"
+      ? `<dl class="ed-facts">${sec.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`
+      : `<${sec.kind === "steps" ? "ol" : "ul"} class="ed-list">${sec.items.map(([k, v]) => `<li><strong>${esc(k)}.</strong> ${esc(v)}</li>`).join("")}</${sec.kind === "steps" ? "ol" : "ul"}>`}</div>`).join("")}
+<p class="small"><a href="#principles">Principles</a> · <a href="#plan">Study plan</a> · <a href="#mock">Mock exam</a></p></div>`;
+    wirePrint();
+  }
+
   // Principles: the design beliefs behind the right answers. Search, filter by theme, or collapse to rules only.
   let princState = { q: "", theme: "", compact: false };
   function viewPrinciples() {
@@ -299,7 +415,7 @@ ${nm ? `<section class="cont">
 <div class="read"><div class="pr-tools">
 <input id="pq" class="sel" type="search" placeholder="Search principles" aria-label="Search principles" value="${esc(princState.q)}">
 <select id="pt" class="sel" aria-label="Theme" style="flex:0 1 240px"><option value="">All themes</option>${PTHEMES.map(t => `<option value="${t.id}"${princState.theme === t.id ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select>
-<label><input type="checkbox" id="pc"${princState.compact ? " checked" : ""}> Rules only</label></div>
+<label><input type="checkbox" id="pc"${princState.compact ? " checked" : ""}> Rules only</label>${printBtn()}</div>
 <div id="pl"></div></div>`;
     const list = document.getElementById("pl");
     const draw = () => {
@@ -321,6 +437,7 @@ ${nm ? `<section class="cont">
     document.getElementById("pq").addEventListener("input", e => { princState.q = e.target.value; draw(); });
     document.getElementById("pt").addEventListener("change", e => { princState.theme = e.target.value; draw(); });
     document.getElementById("pc").addEventListener("change", e => { princState.compact = e.target.checked; draw(); });
+    wirePrint();
     draw();
   }
   function viewToday() {
@@ -330,6 +447,7 @@ ${nm ? `<section class="cont">
   <p><strong>Exam:</strong> ${esc(r.exam)}</p>
   <p><strong>Today:</strong> ${esc(r.today)}</p>
   <p class="small"><a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a></p></div>`).join("")}</div>`;
+    app.querySelector(".page-head").insertAdjacentHTML("beforeend", printBtn()); wirePrint();
   }
   function viewBlueprint() {
     const tm = taskMastery();
@@ -429,6 +547,22 @@ ${HOLDOUT.length ? `<section class="mock-card">
   </div>
   <a class="btn ghost" href="#readiness">${state.readiness ? "See result" : "About the check"} →</a>
 </section>` : ""}
+<section class="mock-card">
+  <div>
+    <div class="eyebrow">Retry my misses</div>
+    <h2>${missedQs().length ? `${missedQs().length} question${missedQs().length === 1 ? "" : "s"} to retry` : "Nothing to retry yet"}</h2>
+    <p>Questions you got wrong on the first try stay here until you answer them right. Each wrong answer links to the module that teaches it.</p>
+  </div>
+  <a class="btn ghost" href="#drill-misses">Retry →</a>
+</section>
+<section class="mock-card">
+  <div>
+    <div class="eyebrow">Exam-day playbook</div>
+    <h2>Pacing, technique and logistics</h2>
+    <p>How to split 120 minutes, read a scenario, eliminate options, handle multiple-response questions, and what to confirm before the day.</p>
+  </div>
+  <a class="btn ghost" href="#exam-day">Read →</a>
+</section>
 ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="small" href="#mock-result">Latest review →</a></div>
 <div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span></div>`).join("")}</div>` : ""}
 <div class="sec-head" style="margin-top:34px"><h2>Scenario drills</h2><span class="small">the exam draws 4 of these 6</span></div>
@@ -450,7 +584,9 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
 
   let drill = null;
   function viewDrill(n) {
-    const s = B.scenarios.find(x => x.n === n);
+    const misses = n === "misses";
+    const s = misses ? { name: "Retry my misses" } : B.scenarios.find(x => x.n === n);
+    if (misses && (!drill || drill.n !== n)) drill = { n, order: shuffle(missedQs()).map(q => q.id), i: 0, right: 0, answered: 0 };
     if (!drill || drill.n !== n) {
       const qs = QUESTIONS.filter(q => q.scenario === n);
       const un = shuffle(qs.filter(q => !state.answers[q.id])), wrong = shuffle(qs.filter(q => state.answers[q.id] && !state.answers[q.id].ok)), ok = shuffle(qs.filter(q => state.answers[q.id] && state.answers[q.id].ok));
@@ -458,14 +594,14 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     }
     const d = drill;
     if (d.i >= d.order.length) {
-      app.innerHTML = `${pageHead(`Scenario ${n} drill`, esc(s.name))}
-<div class="read"><div class="panel"><div class="big-num">${d.right}/${d.answered} correct</div><p class="small">Drill complete. Every answer counts toward your readiness score.</p>
+      app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name))}
+<div class="read"><div class="panel">${misses && !d.order.length ? `<p>No misses to retry. Questions you get wrong on the first try collect here until you answer them right.</p>` : `<div class="big-num">${d.right}/${d.answered} correct</div><p class="small">${misses ? "Questions you answered right have left the list. Readiness still counts first attempts only." : "Drill complete. Readiness counts your first attempt at each question."}</p>`}
 <div class="row-btns"><button class="btn" type="button" id="again">Drill again</button><a class="btn ghost" href="#practice">Back to practice</a></div></div></div>`;
       document.getElementById("again").addEventListener("click", () => { drill = null; viewDrill(n); });
       return;
     }
     const q = QBYID[d.order[d.i]];
-    app.innerHTML = `${pageHead(`Scenario ${n} drill`, esc(s.name))}
+    app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name))}
 <div class="read"><div class="drill-bar"><span class="bar"><span style="width:${d.i / d.order.length * 100}%;background:var(--accent)"></span></span><span class="small">${d.right} correct so far</span></div><div id="dq"></div>
 <nav class="l-nav"><a class="btn ghost" href="#practice">End drill</a><button class="btn accent" type="button" id="dnext" disabled>Next →</button></nav></div>`;
     const nextBtn = document.getElementById("dnext");
@@ -654,15 +790,15 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
       else { s = L[m[1]].steps.findIndex((_, i) => !state.steps[`${m[1]}:${i}`]); if (s < 0) s = 0; }
       return { lesson: m[1], step: s };
     }
-    const d = h.match(/^drill-([1-6])$/);
-    if (d) return { drill: Number(d[1]), page: "practice" };
-    if (["blueprint", "today", "glossary", "principles", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
+    const d = h.match(/^drill-([1-6]|misses)$/);
+    if (d) return { drill: d[1] === "misses" ? "misses" : Number(d[1]), page: "practice" };
+    if (["blueprint", "today", "glossary", "principles", "plan", "exam-day", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
     return { page: "path" };
   }
   function render() {
     const r = route();
     clearInterval(ticker); document.onkeydown = null;
-    const navKey = ["mock", "mock-result", "readiness"].includes(r.page) ? "practice" : r.page === "today" ? "blueprint" : r.page;
+    const navKey = ["mock", "mock-result", "readiness", "exam-day"].includes(r.page) ? "practice" : r.page === "today" ? "blueprint" : r.page;
     document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("on", !r.lesson && a.dataset.nav === navKey));
     // On narrow screens the nav scrolls sideways; keep the active link in view.
     const onLink = document.querySelector(".nav a.on"), navEl = onLink && onLink.parentElement;
@@ -673,6 +809,8 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     else if (r.page === "today") viewToday();
     else if (r.page === "glossary") viewGlossary();
     else if (r.page === "principles") viewPrinciples();
+    else if (r.page === "plan") viewPlan();
+    else if (r.page === "exam-day") viewExamDay();
     else if (r.page === "practice") viewPractice();
     else if (r.page === "mock") viewMock();
     else if (r.page === "mock-result") viewMockResult();
