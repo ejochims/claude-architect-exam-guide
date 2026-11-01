@@ -165,6 +165,23 @@ async function studyChecks(page, tag, visit) {
     await page.locator("#pimport").setInputFiles(file); await page.waitForTimeout(200);
     if (((await page.locator("#pmsg").textContent()) || "").includes("isn't")) problems.push(`${tag}: importing an exported backup failed`);
   }
+  // Progress over time and trap profile: weekly first attempts, a mock row, and a tagged wrong pick.
+  await page.evaluate(KEY => {
+    const qs = window.BANK.filter(x => !x.holdout && x.type !== "multi");
+    const t = qs.find(x => x.options.some(o => !o.ok && o.trap)), ti = t.options.findIndex(o => !o.ok && o.trap);
+    const now = Date.now(), first = {}, answers = { [t.id]: { ok: false, choice: ti, at: now } };
+    qs.slice(0, 12).forEach((x, i) => { first[x.id] = { ok: i % 3 !== 0, at: now - (i % 2) * 8 * 864e5 }; });
+    first[t.id] = { ok: false, at: now };
+    const mock = { kind: "mock", at: now, startedAt: now - 3600e3, correct: 40, total: 60, pct: 0.67, wpct: 0.68, ci: [0.54, 0.77], scen: [1, 2, 3, 4], dom: { d1: [12, 16], d2: [8, 11], d3: [8, 12], d4: [7, 12], d5: [5, 9] }, wrong: [[t.id, ti]], multi: [0, 0], mins: 60 };
+    localStorage.setItem(KEY, JSON.stringify({ v: 1, first, answers, mocks: [mock] }));
+  }, KEY);
+  await page.goto(URL + "#practice"); await page.reload(); await page.waitForTimeout(100); checks++;
+  if ((await page.locator(".trend-table").count()) < 2) problems.push(`${tag}: progress tables missing (weekly and mock)`);
+  if ((await page.locator(".trap-row").count()) < 1) problems.push(`${tag}: trap profile shows no rows for a tagged wrong pick`);
+  await page.goto(URL + "#mock-result"); await page.reload(); await page.waitForTimeout(100);
+  if ((await page.locator(".trap-row").count()) < 1) problems.push(`${tag}: mock result shows no trap patterns`);
+  const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  if (over > 1) problems.push(`${tag}: mock result overflows by ${over}px`);
   await page.evaluate(KEY => localStorage.removeItem(KEY), KEY);
 }
 

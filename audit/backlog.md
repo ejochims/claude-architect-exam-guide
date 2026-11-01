@@ -446,3 +446,17 @@ It also flagged:
 
 **Checks.** `content-check`: invariants OK. `browser-suite`: 306 checks, no problems. New checks cover the playbook, the misses drill, the review link, a corrected miss leaving the list, saving the exam date (and the home page following it), and the export-import round trip. Screenshots checked at 390px dark, plus the print view.
 
+## Batch 19: progress over time and trap profile (2026-11-01)
+
+**What.** Two new sections on the Practice page.
+- **Progress over time.** Weekly first-attempt accuracy, overall and per domain (the last 8 weeks), plus each mock's weighted score and per-domain scores, oldest first. Colors match the booking bar: green at 80% or more, amber at 70–79%, red below 70%. First attempts seeded from old saves are left out.
+- **Your trap profile.** The trap patterns you pick most when wrong. It's built from every mock's and the Readiness Check's wrong answers, plus current wrong answers from drills and lessons, with each question-option pair counted once. Multiple-response picks count each wrong option.
+  - It states its own coverage: only some distractors carry a trap tag (125 of 834 single-answer distractors), so it's a hint, not a full picture.
+  - It links to the Principles page.
+
+Each mock result also shows "Trap patterns in this sitting".
+
+**Checks.** `content-check`: invariants OK. `browser-suite`: 308 checks, no problems. The new checks cover both progress tables, the trap rows on Practice and on the mock result, and no overflow on the mock result. The phone layout was checked by screenshot.
+
+**Next (fresh session).** `audit/work/prompt-multi-blind-check.md` is a self-contained prompt for the independent blind check of `mr-01` to `mr-15`. It runs an options-only pass, then a blind pass, then key-informed fixes. The export and scoring commands in it were tested in this session.
+
