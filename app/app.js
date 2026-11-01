@@ -526,6 +526,57 @@ ${B.domains.map(d => `<section class="bp-dom">
     });
   }
 
+  // ---------- Progress over time and trap profile ----------
+  // Weekly first-attempt accuracy (overall and per domain) and per-domain mock scores, so you can see
+  // whether each domain is improving before you book.
+  const pctCell = (k, n) => n ? `<td class="${k / n >= BAR ? "t-good" : k / n >= 0.7 ? "t-mid" : "t-bad"}">${Math.round(k / n * 100)}%</td>` : `<td class="t-none">–</td>`;
+  function weeklyTrend() {
+    const wk = {};
+    for (const q of QUESTIONS) {
+      const f = state.first[q.id]; if (!f || !f.at || f.seeded) continue;
+      const d = new Date(f.at); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      const k = d.toISOString().slice(0, 10), w = (wk[k] = wk[k] || { n: 0, k: 0, dom: {} });
+      const dm = domOfTask(q.ts).id, x = (w.dom[dm] = w.dom[dm] || [0, 0]);
+      w.n++; x[1]++; if (f.ok) { w.k++; x[0]++; }
+    }
+    return Object.entries(wk).sort((a, b) => a[0].localeCompare(b[0])).slice(-8);
+  }
+  function trendHtml() {
+    const weeks = weeklyTrend(), mocks = [...state.mocks].filter(r => (r.kind || "mock") === "mock").reverse();
+    if (!weeks.length && !mocks.length) return `<p class="small">Answer some questions and your weekly first-attempt accuracy by domain will appear here.</p>`;
+    const head = label => `<tr><th>${label}</th><th>All</th>${B.domains.map(d => `<th><span class="chip dom-${d.id}">D${d.n}</span></th>`).join("")}</tr>`;
+    return `${weeks.length ? `<div class="trend-wrap"><table class="trend-table"><caption>First attempts by week</caption>${head("Week of")}${weeks.map(([k, w]) => `<tr><td>${fmtDate(dateAt(k))} <span class="small">(${w.n})</span></td>${pctCell(w.k, w.n)}${B.domains.map(d => pctCell(...(w.dom[d.id] || [0, 0]))).join("")}</tr>`).join("")}</table></div>` : ""}
+${mocks.length ? `<div class="trend-wrap"><table class="trend-table"><caption>Mock exams, oldest first</caption>${head("Mock")}${mocks.map(r => `<tr><td>${fmtDate(r.at)}</td><td class="${(r.wpct ?? r.pct) >= BAR ? "t-good" : "t-bad"}">${Math.round((r.wpct ?? r.pct) * 100)}%</td>${B.domains.map(d => pctCell(...(r.dom[d.id] || [0, 0]))).join("")}</tr>`).join("")}</table></div>` : ""}
+<p class="small">Green is at the 80% bar, amber is 70–79%, red is below 70%. Weekly figures count only your first attempt at each question, so they show learning rather than retries.</p>`;
+  }
+  // Which distractor patterns you pick when you're wrong. Sources: every mock's and the Readiness Check's
+  // wrong answers, plus current wrong answers from drills and lessons. Only some distractors carry a trap tag.
+  function trapProfile(pairs) {
+    const c = {}, seen = new Set(); let tagged = 0, wrong = 0;
+    for (const [id, ch] of pairs) {
+      const q = QBYID[id]; if (!q || ch == null || ch === -1) continue;
+      for (const i of [].concat(ch)) {
+        const o = q.options[i], key = `${id}:${i}`;
+        if (!o || o.ok || seen.has(key)) continue;
+        seen.add(key); wrong++;
+        if (o.trap && TRAPS[o.trap]) { tagged++; c[o.trap] = (c[o.trap] || 0) + 1; }
+      }
+    }
+    return { rows: Object.entries(c).sort((a, b) => b[1] - a[1]), tagged, wrong };
+  }
+  const allWrongPicks = () => [
+    ...state.mocks.flatMap(r => r.wrong || []),
+    ...((state.readiness && state.readiness.wrong) || []),
+    ...Object.entries(state.answers).filter(([, a]) => a && !a.ok).map(([id, a]) => [id, a.choice])
+  ];
+  function trapHtml(prof, empty) {
+    if (!prof.wrong) return `<p class="small">${empty}</p>`;
+    if (!prof.rows.length) return `<p class="small">None of your ${prof.wrong} wrong picks so far were on a tagged trap, so there's no pattern to show yet.</p>`;
+    const max = prof.rows[0][1];
+    return `<div class="bp-rows">${prof.rows.map(([t, n]) => `<div class="trap-row"><span><strong>${esc(TRAPS[t].name)}</strong><br><span class="small">${esc(TRAPS[t].tell)}</span></span><span class="bar"><span style="width:${n / max * 100}%;background:var(--bad)"></span></span><span class="mono">${n}</span></div>`).join("")}</div>
+<p class="small">${prof.tagged} of your ${prof.wrong} wrong picks were on a distractor tagged with a trap pattern; the rest aren't tagged, so treat this as a hint, not a full picture. <a href="#principles">Principles that beat each trap →</a></p>`;
+  }
+
   function viewPractice() {
     const by = n => QUESTIONS.filter(q => q.scenario === n);
     const weak = weakest(5);
@@ -579,7 +630,11 @@ ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="sma
   }).join("")}
 </section>
 <div class="sec-head" style="margin-top:34px"><h2>Weakest areas</h2><span class="small">biggest weighted gaps among tasks you've practiced</span></div>
-${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span class="mono">${w.t}</span><span>${esc(B.tasks[w.t])}</span><span class="bp-mod"><a href="#${w.mod.id}">Module ${w.mod.n} →</a></span><span class="bp-pct">${Math.round(w.pct * 100)}%</span></div>`).join("")}</div>` : `<p class="small">Answer some questions first. Your weakest task statements will show up here.</p>`}`;
+${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span class="mono">${w.t}</span><span>${esc(B.tasks[w.t])}</span><span class="bp-mod"><a href="#${w.mod.id}">Module ${w.mod.n} →</a></span><span class="bp-pct">${Math.round(w.pct * 100)}%</span></div>`).join("")}</div>` : `<p class="small">Answer some questions first. Your weakest task statements will show up here.</p>`}
+<div class="sec-head" style="margin-top:34px"><h2>Progress over time</h2><span class="small">is each domain improving?</span></div>
+${trendHtml()}
+<div class="sec-head" style="margin-top:34px"><h2>Your trap profile</h2><span class="small">the wrong-answer patterns you pick most</span></div>
+${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most frequent trap patterns will show up here.")}`;
   }
 
   let drill = null;
@@ -720,6 +775,8 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
     app.innerHTML = `${pageHead(`${ready ? "Readiness Check" : "Mock exam"} · ${fmtDate(r.at)}`, `${Math.round((ready ? r.pct : w) * 100)}% <span class="score-of">${ready ? "first attempt" : "domain-weighted"}</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}% raw, 95% range ${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%) in ${r.mins} minutes.${r.multi && r.multi[1] ? ` Multiple-response: ${r.multi[0]} of ${r.multi[1]} correct.` : ""} ${verdict}`)}
 <div class="sec-head"><h2>By domain</h2></div>
 <div class="bp-rows">${B.domains.map(d => { const v = r.dom[d.id]; if (!v) return ""; return `<div class="bp-row"><span class="chip dom-${d.id}">D${d.n}</span><span>${esc(d.name)}</span><span class="bar"><span class="dom-bg-${d.id}" style="width:${v[0] / v[1] * 100}%"></span></span><span class="bp-pct">${v[0]}/${v[1]}</span></div>`; }).join("")}</div>
+<div class="sec-head" style="margin-top:30px"><h2>Trap patterns in this sitting</h2></div>
+${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
 <div class="sec-head" style="margin-top:30px"><h2>Review missed questions</h2><span class="small">${r.wrong.length} to review</span></div>
 <div class="read qs" id="missed"></div>
 <div class="row-btns" style="margin-top:24px"><a class="btn" href="#practice">Back to practice</a></div>`;
