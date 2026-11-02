@@ -1,5 +1,7 @@
 window.LESSONS.m07 = {
   cards: [
+    { f: "Sliding window or progressive summarization?", b: "Sliding window keeps the last N turns verbatim and forgets early ones. Progressive summarization compresses older turns but loses exact numbers and dates, so keep those in a case-facts block either way." },
+    { f: "What does the Explore subagent do, and why is it read-only?", b: "It searches and reads a codebase in its own context and returns a summary, so discovery noise stays out of the main session. Its job is finding things, so it can't change files." },
     { f: "What does progressive summarization tend to lose?", b: "Exact numbers, percentages, dates, order IDs and customer-stated expectations. They get compressed into vague prose." },
     { f: "The fix for losing exact transactional facts?", b: "A persistent “case facts” block (amounts, dates, IDs, statuses) included in every prompt, outside the summarized history." },
     { f: "Lost in the middle: what is it, and the mitigation?", b: "Models use the start and end of long inputs most reliably. Put a key-findings summary first and use explicit section headers." },

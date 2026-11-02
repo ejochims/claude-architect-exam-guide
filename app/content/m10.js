@@ -13,6 +13,7 @@ window.LESSONS.m10 = {
       title: "First principle: latency is a requirement",
       html: `
 <p class="lede">The Message Batches API halves the cost of a call in exchange for time: a batch may take <strong>up to 24 hours</strong>, with <strong>no latency guarantee</strong>. Whether that's acceptable depends only on whether something is waiting.</p>
+<p class="small">Why it's cheaper: you give up immediacy, so Anthropic can run batch requests whenever it has spare capacity, and passes the savings on as the discount.</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Good fit for batch</th><th>Wrong fit for batch</th></tr></thead>
 <tbody>

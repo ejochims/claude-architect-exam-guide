@@ -47,6 +47,7 @@ window.LESSONS.f03 = {
       title: "Where each exam domain lives",
       html: `
 <p class="lede">Knowing which product a question is about tells you which mechanisms are available.</p>
+<p class="small">This map previews names that later modules teach properly: hooks (Module 3), subagents and the Task tool (Module 6), the Explore subagent (Module 7), CLAUDE.md, path-scoped rules, skills and plan mode (Module 11), and sessions and <code>claude -p</code> (Module 12). Skim them now; you don't need them yet.</p>
 <ul>
 <li><strong>Raw API (Domain 1, agentic architecture; Domain 4, prompt engineering and structured output).</strong> The agentic loop and <code>stop_reason</code>, tool definitions and <code>tool_choice</code>, structured output with JSON Schema, the Message Batches API. If a question shows request JSON or a loop in your code, you're here.</li>
 <li><strong>Agent SDK (Domain 1, agentic architecture).</strong> Coordinators and subagents (<code>AgentDefinition</code>, the Task tool), hooks such as <code>PreToolUse</code> and <code>PostToolUse</code> for enforcement and normalization, and sessions you can resume or fork.</li>

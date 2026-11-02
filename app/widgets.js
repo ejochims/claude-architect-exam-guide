@@ -23,7 +23,9 @@
           h("span", { class: "scen-n" }, String(s.n)),
           h("div", {},
             h("div", { class: "scen-name" }, s.name),
-            h("div", { class: "chips" }, s.domains.map(d => h("span", { class: `chip dom-${d}` }, `D${domainOf(d).n}`))))));
+            h("div", { class: "chips" }, s.domains.map(d => h("span", { class: `chip dom-${d}` }, `D${domainOf(d).n}`))),
+            s.brief ? h("p", { class: "scen-brief" }, s.brief) : null,
+            s.mods ? h("div", { class: "scen-mods" }, "Study: ", ...s.mods.flatMap((id, i) => { const m = window.MODULES.find(x => x.id === id); return m ? [i ? ", " : "", h("a", { href: `#${id}` }, `Module ${m.n}`)] : []; })) : null)));
       }
       el.append(list);
     },

@@ -1,5 +1,6 @@
 window.LESSONS.m09 = {
   cards: [
+    { f: "Why add detected_pattern to each review finding?", b: "So you can see which code patterns produce the findings developers dismiss, and tune or turn off those checks." },
     { f: "Most reliable way to get schema-compliant structured output?", b: "Define an extraction tool whose input schema is your target schema, set tool_choice so it's called, and read tool_use.input. (Exam answer. Today strict: true or structured outputs guarantee the schema.)" },
     { f: "What does a strict JSON schema NOT prevent?", b: "Semantic errors: line items that don't sum to the total, values in the wrong field, fabricated values." },
     { f: "A field may be absent from the source. Schema choice?", b: "Make it optional or nullable and instruct the model to return null, so it isn't pressured to fabricate." },

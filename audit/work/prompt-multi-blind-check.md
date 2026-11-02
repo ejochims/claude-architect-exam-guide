@@ -57,7 +57,7 @@ You're working in the repo `ejochims/claude-architect-exam-guide`, a study app f
    - `node scripts/audit/cue-baselines.mjs`: every multiple-response heuristic must be at or below 25%;
    - `node scripts/audit/browser-suite.mjs`: must report no problems.
 
-7. **Record the results.** Add "Batch 20: blind check of multiple-response items" to `audit/backlog.md`, with both scores, the flags and the changes. In `audit/SUMMARY.md`, residual risk #4, mark the open item for this check as done.
+7. **Record the results.** Add a new batch, numbered after the last one in `audit/backlog.md` and titled "blind check of multiple-response items",, with both scores, the flags and the changes. In `audit/SUMMARY.md`, residual risk #4, mark the open item for this check as done.
 
 8. **Ship.** Commit, push and open a draft PR. Don't merge it or republish the app unless I ask.
 

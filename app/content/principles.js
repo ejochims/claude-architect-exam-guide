@@ -135,6 +135,11 @@ window.PRINCIPLES = [
     why: "Each built-in tool has one job. Edit needs a unique text match, so the fallback is a full Read and Write.",
     wrong: "Glob for a function name, or keep retrying a failing Edit." },
 
+  { id: "tools-7", theme: "tools", ts: "2.4", bl: ["2.4-K4", "2.4-S5"], trap: null,
+    rule: "Expose actions as MCP tools, reference data as resources, and reusable workflows as prompts.",
+    why: "Each primitive is controlled by whoever should decide: the model calls tools, the application attaches resources, the user invokes prompts. A resource catalog also saves exploratory tool calls.",
+    wrong: "Wrap everything, including static reference data, as tools." },
+
   // ---------- Errors ----------
   { id: "err-1", theme: "err", ts: "2.2", bl: ["2.2-K1", "2.2-K2", "2.2-K3", "2.2-K4", "2.2-S1", "2.2-S2"], trap: "T6",
     rule: "Return structured errors: isError, a category, whether it's retryable, and a readable message.",
@@ -170,6 +175,14 @@ window.PRINCIPLES = [
     rule: "Partition the scope, then check coverage and re-delegate the gaps.",
     why: "Overly narrow decomposition is the usual cause of missing coverage, not the subagents that did what they were asked.",
     wrong: "Blame the search or synthesis subagent for the gap." },
+  { id: "multi-9", theme: "multi", ts: "1.4", bl: ["1.4-S2"], trap: null,
+    rule: "Split a multi-concern request, investigate the parts, then answer once.",
+    why: "Each concern gets the right tools and checks, independent parts can run in parallel, and the customer gets one coherent reply instead of three partial ones.",
+    wrong: "Handle only the first concern, or answer each in a separate message." },
+  { id: "multi-10", theme: "multi", ts: "1.6", bl: ["1.6-K1", "1.6-S1"], trap: null,
+    rule: "Use a generate-and-evaluate loop when quality can be checked against criteria, and give it a stop rule.",
+    why: "An evaluator with explicit criteria catches what one pass misses, and a round limit or a “good enough” test keeps it from looping forever.",
+    wrong: "Loop until the model says it's satisfied." },
   { id: "multi-5", theme: "multi", ts: "1.3", bl: ["1.3-S4"], trap: null,
     rule: "Give subagents goals and quality criteria, not step-by-step procedures.",
     why: "Goals let the subagent adapt to what it finds; a procedure breaks on the first surprise.",

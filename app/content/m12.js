@@ -64,6 +64,7 @@ window.LESSONS.m12 = {
 <tr><td>Prior tool results are largely stale</td><td><strong>Start fresh</strong> with a structured summary injected. It's more reliable than reasoning over stale results</td></tr>
 </tbody></table></div>
 <p>When comparing two implementations, fork the session <em>and</em> use separate branches or worktrees, so the conversations diverge and the file edits don't collide.</p>
+<p class="small">In the Agent SDK the same choices are options: <code>ClaudeAgentOptions(resume=session_id)</code> continues a session, adding <code>fork_session=True</code> branches a new one from it, and <code>continue_conversation=True</code> picks up the most recent.</p>
 <!-- ex:m12-sessions -->
 <h3>At the command line</h3>
 <pre class="code"><code>claude --continue                                   <span class="c"># resume the most recent session here</span>
