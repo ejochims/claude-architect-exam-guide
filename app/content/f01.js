@@ -14,6 +14,7 @@ window.LESSONS.f01 = {
       html: `
 <p class="lede">Everything in this course rests on one fact: each call to Claude is like calling a function. You send a request, you get a response, and the model keeps nothing afterwards.</p>
 <p>Your application talks to Claude through the <strong>Messages API</strong>, an HTTP endpoint. You authenticate with an API key and send JSON. Most teams use an <strong>SDK</strong> (a client library for Python, TypeScript and other languages) so they don't hand-write HTTP calls. Either way, the request has the same parts:</p>
+<div class="callout note"><div class="callout-label">Reading the code samples</div><p>Samples are short Python. You need to read them, not write them: <code>def</code> defines a function, <code>async def</code> and <code>await</code> mark code that waits on the network, <code>{...}</code> is a dictionary (like JSON), <code>[...]</code> is a list, and a line starting with <code>@</code> above a function registers it with a library. Shell commands start with <code>claude</code> or <code>git</code>. Later modules mention a <em>pull request</em> (PR: a proposed change to a shared repository) and a <em>diff</em> (the lines a change adds and removes).</p></div>
 <pre class="code"><code>{
   <span class="s">"model"</span>: <span class="s">"claude-…"</span>,            <span class="c"># which model answers</span>
   <span class="s">"max_tokens"</span>: <span class="k">1024</span>,             <span class="c"># cap on the length of the reply</span>

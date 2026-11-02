@@ -1,5 +1,7 @@
 window.LESSONS.m11 = {
   cards: [
+    { f: "Path rule or a CLAUDE.md in the directory?", b: "A path rule (.claude/rules with a paths glob) when the files are scattered by type, such as all tests; a directory CLAUDE.md when the convention belongs to one folder." },
+    { f: "Does @import load a file only when it's needed?", b: "No. An imported file loads in full with the CLAUDE.md that imports it. For on-demand loading, use path-scoped rules or skills." },
     { f: "A new teammate doesn't get the team's conventions. Common cause?", b: "The conventions live in someone's user-level ~/.claude/CLAUDE.md, which isn't shared. Move them to the project CLAUDE.md." },
     { f: "How do you diagnose which memory files are loaded?", b: "The /memory command (exam term; today /context lists what loaded and /memory opens the files)." },
     { f: "Conventions for test files spread across every directory?", b: ".claude/rules/ file with YAML frontmatter paths: [\"**/*.test.tsx\"]. It loads only when matching files are edited." },

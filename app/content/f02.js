@@ -81,6 +81,7 @@ window.LESSONS.f02 = {
   {<span class="s">"type"</span>: <span class="s">"tool_result"</span>, <span class="s">"tool_use_id"</span>: <span class="s">"toolu_01"</span>,
    <span class="s">"content"</span>: <span class="s">"status: shipped; delivery: Friday"</span>}
 ]}</code></pre>
+<p><strong>Why a user message?</strong> The API has only two roles. Anything that isn't Claude's own output comes from your side, so tool results travel in a <code>user</code> turn, matched to each request by <code>tool_use_id</code>.</p>
 <p>If the lookup fails, send the <code>tool_result</code> with <code>"is_error": true</code> and a message saying what went wrong, so Claude can retry, ask the customer, or explain.</p>
 <!-- ex:f02-error-parallel -->
 

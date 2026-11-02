@@ -26,7 +26,7 @@ window.LESSONS.m13 = {
 <li><strong>Sentiment.</strong> Anger isn't complexity. A furious customer with a tracking question is a simple case.</li>
 <li><strong>Raw self-reported confidence</strong> (“rate yourself 1–10”) as a measure of case complexity. Uncalibrated, it doesn't reliably separate the cases the agent is mishandling from the ones it handles well, so it's a poor escalation trigger.</li>
 </ul>
-<p>The proportionate fix for miscalibrated escalation is <strong>explicit escalation criteria in the system prompt with few-shot examples</strong> of escalate versus resolve. Try that before building classifiers.</p>
+<p>The proportionate fix for miscalibrated escalation is <strong>explicit escalation criteria in the system prompt with few-shot examples</strong> of escalate versus resolve (sample cases written into the prompt; Module 8 covers them). Try that before building classifiers.</p>
 <p>When a lookup returns <strong>several matching customers</strong>, ask for another identifier (email, order number, postal code). Never choose by heuristic.</p>`
     },
     {
@@ -50,6 +50,7 @@ window.LESSONS.m13 = {
       title: "Human review and confidence calibration",
       html: `
 <p class="lede">For extraction at scale, the question is which outputs a human should check, and how you know the rest are safe.</p>
+<!-- panel:m13-calibration --><div class="callout key"><div class="callout-label">Why it exists: calibration</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> models report confidence, but a raw score isn't a probability. On one document type 0.9 may be right 99% of the time, on another 70%. Routing on raw numbers sends wrong records straight through.</li><li><strong>The mechanism.</strong> run a labeled sample and measure how often each confidence level is actually right, per document type and per field. Set thresholds from those measurements.</li><li><strong>Why keep sampling.</strong> inputs drift after launch: new suppliers, new layouts. Sampling the high-confidence stream, segment by segment, catches failure patterns that scores don't.</li><li><strong>Not the same as.</strong> validation (Module 9 checks rules such as totals, not how likely a value is to be right) or self-review (Module 8: the same model judging its own work).</li></ul></div>
 <ul>
 <li><strong>Aggregate accuracy hides weak segments.</strong> 97% overall can include 80% on handwritten forms or one critical field. Validate accuracy <strong>by document type and by field</strong> before reducing review.</li>
 <li><strong>Field-level confidence, calibrated.</strong> Have the model output a confidence for each field, then set review thresholds using a <strong>labeled validation set</strong>. Raw scores mean nothing until calibrated. Raw scores aren't probabilities until calibrated: a 0.9 may not mean 90% correct.</li>
@@ -80,6 +81,7 @@ window.LESSONS.m13 = {
       title: "Provenance across synthesis",
       html: `
 <p class="lede">Every time findings are summarized, attribution is at risk. A synthesis that can't say where a claim came from can't be trusted or checked.</p>
+<!-- panel:m13-provenance --><div class="callout key"><div class="callout-label">Why it exists: provenance</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> a summary is new prose. Each time findings are summarized, the link between a claim and its source is the first thing to go, because nothing forces the summary to carry it.</li><li><strong>An example.</strong> A subagent finds “adoption rose to 41% (industry survey, March 2026)”. Two summaries later the report says “adoption is around 40%”. The source and date are gone, and an older 28% figure now looks like a contradiction instead of a trend.</li><li><strong>The mechanism.</strong> keep every claim as a structured record (claim, source, date, excerpt) through every hop, and have synthesis merge records instead of rewriting prose.</li><li><strong>What it enables.</strong> conflicts reported with both sources and dates, and coverage notes on what's well supported, so readers can check anything.</li></ul></div>
 <ul>
 <li><strong>Structured claim–source mappings.</strong> Subagents output each claim with its source URL or document name, location and the relevant excerpt, and downstream agents must preserve and merge these mappings.</li>
 <li><strong>Conflicts are information.</strong> When two credible sources disagree, keep both values with attribution and annotate the conflict. The analysis agent reports it; the coordinator decides how to reconcile it.</li>

@@ -1,5 +1,7 @@
 window.LESSONS.m03 = {
   cards: [
+    { f: "Blocked, pending or handoff: what's the difference?", b: "Blocked: refused for a reason the agent can fix (“verify identity first”). Pending: accepted but waiting on someone, so return an explicit pending status. Handoff: a person takes over, with a structured summary." },
+    { f: "A message raises three separate problems. What's the recipe?", b: "Split it into the separate concerns, investigate each (in parallel where independent) using the shared context, then send one combined reply." },
     { f: "Prompt vs code: the decision rule?", b: "If one miss has financial, legal, safety or irreversible consequences, enforce it in code. Otherwise guide it with the prompt." },
     { f: "Prerequisite gate?", b: "Code that blocks a downstream tool (process_refund) until an upstream step (get_customer verified) has succeeded." },
     { f: "Tool-call interception hook?", b: "e.g. PreToolUse: inspect outgoing calls and deny or redirect policy violations (refund > $500 → escalate_to_human)." },
@@ -12,7 +14,7 @@ window.LESSONS.m03 = {
       title: "First principle: probability × volume",
       html: `
 <p class="lede">A prompt changes the <em>probability</em> of a behavior. Code changes whether it's <em>possible</em>. The exam tests this distinction often, across Domains 1 and 4.</p>
-<p>Suppose a well-written instruction is followed 99.5% of the time. That's excellent for tone, phrasing, or deciding when to offer a coupon. Now apply it to “never refund more than $500 without a manager” across 200,000 conversations a year: <strong>about 1,000 unauthorized refunds</strong>. More emphasis, capital letters or few-shot examples can raise 99.5%, but never to 100%.</p>
+<p>Suppose a well-written instruction is followed 99.5% of the time. That's excellent for tone, phrasing, or deciding when to offer a coupon. Now apply it to “never refund more than $500 without a manager” across 200,000 conversations a year: <strong>about 1,000 unauthorized refunds</strong>. More emphasis, capital letters or few-shot examples (sample cases written into the prompt; Module 8) can raise 99.5%, but never to 100%.</p>
 <div class="callout key"><div class="callout-label">Decision rule</div><p>If one miss has financial, legal, safety or irreversible consequences, enforce it in code: a hook, a prerequisite gate, or logic inside the tool. If a miss just makes a reply less good, guide it with the prompt.</p></div>
 <p>Next, watch the arithmetic play out.</p>`
     },

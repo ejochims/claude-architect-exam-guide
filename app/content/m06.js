@@ -1,5 +1,6 @@
 window.LESSONS.m06 = {
   cards: [
+    { f: "What is the evaluator-optimizer pattern?", b: "One step generates, another judges the output against criteria and sends back what's missing; repeat until it passes or a stop rule (such as a round limit) fires." },
     { f: "A coordinator says it is delegating, but no subagent runs. Likely cause?", b: "Exam answer: its allowedTools doesn't include \"Task\" (the subagent-spawning tool). Today the tool is called Agent and allowedTools only pre-approves tools, so check the subagent's description too." },
     { f: "How do you run subagents in parallel?", b: "Emit multiple Task calls in a single coordinator response, not one per turn." },
     { f: "What does a subagent know about the coordinator's conversation?", b: "Nothing automatically. Its context is its AgentDefinition plus the prompt the coordinator writes, so include prior findings explicitly." },

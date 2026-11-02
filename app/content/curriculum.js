@@ -43,12 +43,18 @@ window.BLUEPRINT = {
     "5.6": "Preserve provenance across synthesis"
   },
   scenarios: [
-    { n: 1, name: "Customer Support Resolution Agent", domains: ["d1", "d2", "d5"] },
-    { n: 2, name: "Code Generation with Claude Code", domains: ["d3", "d5"] },
-    { n: 3, name: "Multi-Agent Research System", domains: ["d1", "d2", "d5"] },
-    { n: 4, name: "Developer Productivity with Claude", domains: ["d2", "d3", "d1"] },
-    { n: 5, name: "Claude Code for Continuous Integration", domains: ["d3", "d4"] },
-    { n: 6, name: "Structured Data Extraction", domains: ["d4", "d5"] }
+    { n: 1, name: "Customer Support Resolution Agent", domains: ["d1", "d2", "d5"], mods: ["m01", "m02", "m03", "m04", "m07", "m13"],
+      brief: "An agent that resolves customer issues (orders, refunds, account changes) through tools backed by business systems, and hands off to people when it should. Expect questions on enforcing policy in code versus the prompt, tool design and errors, escalation, and keeping facts straight in long conversations." },
+    { n: 2, name: "Code Generation with Claude Code", domains: ["d3", "d5"], mods: ["m11", "m07", "m12"],
+      brief: "A team using Claude Code to write and change code in its repository. Expect questions on CLAUDE.md and rules, commands and skills, plan mode versus direct execution, iterative refinement, and managing context in a large codebase." },
+    { n: 3, name: "Multi-Agent Research System", domains: ["d1", "d2", "d5"], mods: ["m06", "m04", "m07", "m13"],
+      brief: "A coordinator that splits a research question across subagents (search, analysis, synthesis) and produces a cited report. Expect questions on decomposition and coverage, passing context to subagents, error propagation, and keeping claims tied to their sources." },
+    { n: 4, name: "Developer Productivity with Claude", domains: ["d2", "d3", "d1"], mods: ["m02", "m05", "m11", "m12", "m06"],
+      brief: "Engineers using Claude Code, the Agent SDK and MCP tools to explore codebases, automate chores and connect internal systems. Expect questions on built-in tools, MCP configuration and scopes, tool distribution, subagents and sessions." },
+    { n: 5, name: "Claude Code for Continuous Integration", domains: ["d3", "d4"], mods: ["m12", "m08", "m09", "m10"],
+      brief: "Claude Code running unattended in a CI pipeline to review or generate code. Expect questions on non-interactive runs and structured output, explicit review criteria and examples, independent review, and batch versus synchronous processing." },
+    { n: 6, name: "Structured Data Extraction", domains: ["d4", "d5"], mods: ["m09", "m10", "m08", "m13"],
+      brief: "A pipeline that pulls structured fields out of documents at volume. Expect questions on schemas and tool use, validation and retries, batch processing, confidence calibration and human review, and provenance." }
   ]
 };
 
@@ -114,6 +120,11 @@ window.EXAM_VS_TODAY = [
 
 // Searchable glossary: every term links to the lesson that teaches it, so nothing needs an outside lookup.
 window.GLOSSARY = [
+  ["Pull request (PR)", "f01", "A proposed change to a shared code repository, reviewed before it is merged. CI jobs often run on each one."],
+  ["Diff", "f01", "The lines a change adds and removes, shown side by side or line by line."],
+  ["OAuth", "m05", "A standard way to let an app act on your behalf with a scoped token, without handing over your password."],
+  ["Claude Desktop", "m05", "Anthropic's desktop chat app. It can act as an MCP host and connect to MCP servers."],
+  ["Evaluator-optimizer", "m06", "A loop where one step generates, another judges against criteria and sends feedback, until it passes or a stop rule fires."],
   ["Messages API", "f03", "Anthropic's HTTP API for Claude: send a request (system prompt, messages, tools), get one response. Stateless."],
   ["SDK", "f01", "A client library (Python, TypeScript and others) that calls the API for you."],
   ["Token", "f01", "The unit models read and write in: a chunk of a few characters. Limits and costs are counted in tokens."],

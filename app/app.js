@@ -649,14 +649,14 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     }
     const d = drill;
     if (d.i >= d.order.length) {
-      app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name))}
+      app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
 <div class="read"><div class="panel">${misses && !d.order.length ? `<p>No misses to retry. Questions you get wrong on the first try collect here until you answer them right.</p>` : `<div class="big-num">${d.right}/${d.answered} correct</div><p class="small">${misses ? "Questions you answered right have left the list. Readiness still counts first attempts only." : "Drill complete. Readiness counts your first attempt at each question."}</p>`}
 <div class="row-btns"><button class="btn" type="button" id="again">Drill again</button><a class="btn ghost" href="#practice">Back to practice</a></div></div></div>`;
       document.getElementById("again").addEventListener("click", () => { drill = null; viewDrill(n); });
       return;
     }
     const q = QBYID[d.order[d.i]];
-    app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name))}
+    app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
 <div class="read"><div class="drill-bar"><span class="bar"><span style="width:${d.i / d.order.length * 100}%;background:var(--accent)"></span></span><span class="small">${d.right} correct so far</span></div><div id="dq"></div>
 <nav class="l-nav"><a class="btn ghost" href="#practice">End drill</a><button class="btn accent" type="button" id="dnext" disabled>Next →</button></nav></div>`;
     const nextBtn = document.getElementById("dnext");

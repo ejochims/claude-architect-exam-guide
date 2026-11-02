@@ -460,3 +460,48 @@ Each mock result also shows "Trap patterns in this sitting".
 
 **Next (fresh session).** `audit/work/prompt-multi-blind-check.md` is a self-contained prompt for the independent blind check of `mr-01` to `mr-15`. It runs an options-only pass, then a blind pass, then key-informed fixes. The export and scoring commands in it were tested in this session.
 
+## Batch 20: teaching fixes from the pedagogy audit (2026-11-02)
+
+**Why.** A read-only audit by a Sonnet subagent read the course in path order as a technical newcomer. It found the course close to standalone and first-principles: the earlier "used before defined" issues were confirmed fixed. Its top gap was synthesis: nothing after Module 13 puts the layers back together. It also flagged:
+- thin scenario context;
+- labs that don't exercise everything they cite;
+- missing flashcards;
+- two primitives taught as rules only;
+- a handful of terms previewed or used without definition.
+
+**What.**
+- **Capstone synthesis** (new `m14:1`, "Put it together: where each rule lives"):
+  - the five layers, from the model call to Claude Code;
+  - one support request traced through all of them;
+  - a 14-row "where does this requirement live?" table;
+  - a five-question placement test.
+- **Scenario briefs.** Each of the six scenarios has a short brief (written in our own words, not the guide's) and links to the modules to study. They're shown in Module 0's scenario list and on each drill page.
+- **Labs consolidate their modules:**
+  - L1 has a new "Version 2: the same gates as hooks" step: Agent SDK `PreToolUse` and `PostToolUse` hooks, compared with checks inside the tool.
+  - L3 has "Part 2: route by confidence, keep sampling": per-field confidence, calibrated thresholds, an audit sample, few-shot examples for hard layouts, and provenance.
+  - L4 has "Part 2: survive long runs and crashes": a case-facts block, a manifest and restart, findings in files, phase summaries, forking for alternatives, and coverage notes.
+- **Retention.** 10 new flashcards (124 in total), in M3, M5, M6, M7, M9 and M11. 3 new Principles (74 in total): MCP primitives by who controls them, splitting a multi-concern request, and an evaluator loop with a stop rule.
+- **Why-it-exists panels in M13:** calibration (raw scores aren't probabilities; measure per segment; keep sampling) and provenance (summaries drop sources, with a worked before/after example).
+- **Previews and glosses:**
+  - F3 labels its preview names with the modules that teach them;
+  - few-shot (M3, M13) and prompt chaining (M1) are glossed where they first appear;
+  - Claude Desktop and OAuth are glossed in M5;
+  - F2 explains why a `tool_result` travels in a user message;
+  - M10 explains why batches are cheaper;
+  - M12 gives the Agent SDK `resume`, `fork_session` and `continue_conversation` options;
+  - F1 has a "Reading the code samples" note covering Python basics, PR and diff;
+  - 5 new glossary terms.
+- **Not done, by design:**
+  - splitting M6's dense step (readability only);
+  - configuring hooks and permissions in Claude Code (not among the blueprint bullets);
+  - a fifth lab.
+
+**Verified.** The Agent SDK details were checked against claude-agent-sdk 0.2.176 in a scratch virtual environment:
+- `ClaudeAgentOptions` has `resume`, `fork_session`, `continue_conversation` and `hooks`;
+- `HookMatcher` has `matcher` and `hooks`;
+- hook inputs carry `session_id` and `tool_input`.
+
+**Note.** Inserting steps shifts step indices in M14 (after step 0) and in L1, L3 and L4 (before "Debug it"). Saved step-completion in those modules may be off by one.
+
+**Checks.** `content-check`: invariants OK (124 cards, 74 principles). `browser-suite`: 320 checks, no problems. It now visits every new step and checks that all 6 scenario briefs render. Screenshots at 390px.
+

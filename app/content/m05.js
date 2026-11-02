@@ -1,5 +1,7 @@
 window.LESSONS.m05 = {
   cards: [
+    { f: "Who controls each MCP primitive?", b: "Tools: the model decides to call them. Resources: the application attaches them as context. Prompts: the user invokes them (slash commands in Claude Code)." },
+    { f: "stdio or HTTP transport?", b: "stdio: a local server launched as a subprocess on your machine. HTTP: a hosted server many clients share, with authentication in headers or OAuth." },
     { f: "Team-shared MCP server config lives where?", b: "Project scope: .mcp.json at the repo root, committed to version control." },
     { f: "Personal or experimental MCP server, available in all your projects?", b: "User scope in ~/.claude.json (e.g. claude mcp add --scope user). Not shared with teammates." },
     { f: "How do you keep secrets out of a committed .mcp.json?", b: "Environment variable expansion: \"${GITHUB_TOKEN}\" (also ${VAR:-default})." },
@@ -49,7 +51,7 @@ window.LESSONS.m05 = {
       kind: "read",
       title: "First principle: integrate once",
       html: `
-<p class="lede">The Model Context Protocol is a standard way to expose a system to any AI client. Write an MCP server for your ticketing system once, and Claude Code, an Agent SDK app and Claude Desktop can all use it.</p>
+<p class="lede">The Model Context Protocol is a standard way to expose a system to any AI client. Write an MCP server for your ticketing system once, and Claude Code, an Agent SDK app and Claude Desktop (Anthropic's desktop chat app, which can also connect to MCP servers) can all use it.</p>
 <p>A server offers three kinds of capability:</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Primitive</th><th>Controlled by</th><th>Use it for</th></tr></thead>
@@ -109,7 +111,7 @@ mcp = MCPServer(<span class="s">"docs"</span>)
 }</code></pre>
 <p><strong>MCP tools compete with built-ins.</strong> If the agent keeps using <code>Grep</code> instead of your dependency-aware code-search tool, the description is usually too thin. Explain what it can do (transitive callers, ranking, cross-repo results) and what it returns, so Claude can see why it's the better choice.</p>
 <!-- panel:m05-transports -->
-<div class="callout key"><div class="callout-label">Transports: how a client reaches a server</div><ul style="margin:0;padding-left:18px"><li><strong>stdio.</strong> the client starts the server as a local process and talks to it over standard input and output. It suits tools that run on your machine; each user runs their own copy, and credentials come from local environment variables. In <code>.mcp.json</code> it's an entry with a <code>command</code>.</li><li><strong>HTTP.</strong> the server runs remotely at a URL, and many clients connect to it. It suits shared, hosted services; authentication goes in headers or OAuth. In <code>.mcp.json</code> it's an entry with <code>"type": "http"</code> and a <code>url</code>. (The older SSE transport is deprecated.)</li><li><strong>Why two.</strong> local tools need no network service, while shared services shouldn't be installed on every laptop.</li><li><strong>On the exam.</strong> the transport doesn't change what a tool does. Choose it by where the server runs, and choose the scope (project, user, local) by who should get it.</li></ul></div>
+<div class="callout key"><div class="callout-label">Transports: how a client reaches a server</div><ul style="margin:0;padding-left:18px"><li><strong>stdio.</strong> the client starts the server as a local process and talks to it over standard input and output. It suits tools that run on your machine; each user runs their own copy, and credentials come from local environment variables. In <code>.mcp.json</code> it's an entry with a <code>command</code>.</li><li><strong>HTTP.</strong> the server runs remotely at a URL, and many clients connect to it. It suits shared, hosted services; authentication goes in headers or OAuth (a standard way to let an app act on your behalf without handing over your password). In <code>.mcp.json</code> it's an entry with <code>"type": "http"</code> and a <code>url</code>. (The older SSE transport is deprecated.)</li><li><strong>Why two.</strong> local tools need no network service, while shared services shouldn't be installed on every laptop.</li><li><strong>On the exam.</strong> the transport doesn't change what a tool does. Choose it by where the server runs, and choose the scope (project, user, local) by who should get it.</li></ul></div>
 
 <!-- panel:m05-scopes-notes -->
 <div class="callout key"><div class="callout-label">Reading the configuration</div><ul style="margin:0;padding-left:18px"><li><strong>User vs. local.</strong> both live in <code>~/.claude.json</code>. Local entries are stored under the current project's path, so they apply only there; user entries apply in every project.</li><li><strong><code>npx -y</code>.</strong> runs an npm package without installing it first, answering “yes” to the prompt. It's a common way to launch a community stdio server.</li><li><strong><code>&#36;{VAR:-default}</code>.</strong> uses the environment variable if it's set, otherwise the default after <code>:-</code>.</li></ul></div>

@@ -34,6 +34,10 @@ async function run(viewport, colorScheme) {
     const opt = page.locator("#app .q .opt").first();
     if (await opt.count()) await opt.click();
   }
+  // Scenario briefs: all six render in Module 0's scenario list.
+  await visit("#m00-1");
+  const briefs = await page.locator(".scen-brief").count(); checks++;
+  if (briefs !== 6) problems.push(`${tag}: expected 6 scenario briefs in m00, got ${briefs}`);
   for (const h of ["#", "#plan", "#practice", "#blueprint", "#today", "#glossary", "#principles", "#exam-day", "#cards"]) await visit(h);
   // Principles: every entry renders, search narrows, rules-only hides the detail.
   await visit("#principles");
