@@ -3,7 +3,7 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
@@ -33,7 +33,7 @@
     const out = blank();
     out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
     for (const k of ["steps", "widgets"]) out[k] = Object.assign({}, b[k] || {}, a[k] || {});
-    for (const k of ["answers", "cards"]) {
+    for (const k of ["answers", "cards", "lessonAns"]) {
       const m = Object.assign({}, b[k] || {});
       for (const [id, v] of Object.entries(a[k] || {})) m[id] = later(v, m[id]);
       out[k] = m;
@@ -156,8 +156,12 @@
     ? Array.isArray(c) && c.length === keyCount(q) && c.every(i => q.options[i] && q.options[i].ok)
     : !!(q.options[c] && q.options[c].ok);
   const chose = (a, k) => a && (Array.isArray(a.choice) ? a.choice.includes(k) : a.choice === k);
-  // mode "learn": reveal on answer, remembers prior answer. "drill": fresh each time, reveal on answer. "exam": select only.
-  function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered } = {}) {
+  // mode "learn": a lesson quiz; shows only answers given in lessons (state.lessonAns), so answers from drills,
+  // mocks or the Readiness Check never pre-fill it. "drill": fresh each time. "exam": select only.
+  // "review": shows the given `reveal` answer read-only.
+  const lessonAnswer = id => { const la = state.lessonAns[id]; return la && !la.cleared ? la : null; };
+  const clearLessonAnswer = id => { state.lessonAns[id] = { cleared: true, at: Date.now() }; };
+  function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered, reveal } = {}) {
     const card = document.createElement("div"); card.className = "q";
     const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
     const order = optionOrder(q);
@@ -167,10 +171,11 @@
     const answer = choice => {
       const rec = { ok: isRight(q, choice), choice, at: Date.now() };
       state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
+      if (mode === "learn") state.lessonAns[q.id] = rec;
       touch(); draw(); onAnswered && onAnswered(rec);
     };
     const draw = () => {
-      const a = mode === "learn" ? state.answers[q.id] : mode === "drill" ? local : null;
+      const a = mode === "learn" ? lessonAnswer(q.id) : mode === "drill" ? local : mode === "review" ? reveal : null;
       card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${multi ? `<span class="chip multi-chip">Select ${need}</span>` : ""}${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
         <p class="q-stem">${q.stem}</p><div class="opts" role="${multi ? "group" : mode === "exam" ? "radiogroup" : "group"}"></div>`;
       const opts = card.querySelector(".opts");
@@ -184,7 +189,8 @@
         if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (chose(a, k)) b.classList.add("is-wrong"); if (multi && o.ok && !chose(a, k)) b.classList.add("is-missed"); }
         b.innerHTML = `<span class="letter">${"ABCDEF"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
         b.addEventListener("click", () => {
-          if (mode === "learn" && state.answers[q.id]) return;
+          if (mode === "learn" && lessonAnswer(q.id)) return;
+          if (mode === "review") return;
           if (mode === "drill" && local) return;
           if (multi) {
             pick = pick.includes(k) ? pick.filter(x => x !== k) : pick.length < need ? [...pick, k] : pick;
@@ -212,7 +218,7 @@
         res.innerHTML = `<span>${a.ok ? "Correct" : multi ? "Not this time. Scoring is all-or-nothing: every keyed option, and only those. The explanations show why." : "Not this time. The explanations show why."}</span>`;
         if (mode === "learn") {
           const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
-          again.addEventListener("click", () => { delete state.answers[q.id]; pick = multi ? [] : null; touch(); draw(); });
+          again.addEventListener("click", () => { clearLessonAnswer(q.id); pick = multi ? [] : null; touch(); draw(); });
           res.append(again);
         }
         // Route a miss back to the lesson that teaches it (unless that lesson is already open).
@@ -505,7 +511,16 @@ ${B.domains.map(d => `<section class="bp-dom">
       window.WIDGETS[step.widget](panel, { done: () => { const k = `${id}:${i}`; if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } }, step.config);
     } else if (step.kind === "quiz") {
       const wrap = document.createElement("div"); wrap.className = "qs";
-      step.questions.forEach((q, n) => wrap.append(questionCard(q, { n: n + 1, total: step.questions.length })));
+      const drawQuiz = () => {
+        wrap.innerHTML = "";
+        if (step.questions.some(q => lessonAnswer(q.id))) {
+          const reset = document.createElement("button"); reset.type = "button"; reset.className = "linkbtn quiz-reset"; reset.textContent = "Clear my answers and start this quiz over";
+          reset.addEventListener("click", () => { step.questions.forEach(q => clearLessonAnswer(q.id)); touch(); drawQuiz(); });
+          wrap.append(reset);
+        }
+        step.questions.forEach((q, n) => wrap.append(questionCard(q, { n: n + 1, total: step.questions.length, onAnswered: () => { if (!wrap.querySelector(".quiz-reset")) drawQuiz(); } })));
+      };
+      drawQuiz();
       el.append(wrap);
     } else if (step.kind === "recap") {
       const ol = document.createElement("ol"); ol.className = "recap";
@@ -783,10 +798,7 @@ ${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
     const box = document.getElementById("missed");
     r.wrong.forEach(([id, c], k) => {
       const q = QBYID[id]; if (!q) return;
-      const saved = state.answers[id];
-      state.answers[id] = { ok: false, choice: c, at: saved ? saved.at : Date.now() };
-      const card = questionCard(q, { n: k + 1, total: r.wrong.length });
-      if (saved) state.answers[id] = saved; else delete state.answers[id];
+      const card = questionCard(q, { n: k + 1, total: r.wrong.length, mode: "review", reveal: { ok: false, choice: c } });
       card.querySelector(".q-res")?.remove();
       if (c === -1) card.querySelector(".q-meta").insertAdjacentHTML("beforeend", `<span class="chip">unanswered</span>`);
       box.append(card);
