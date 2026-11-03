@@ -33,7 +33,7 @@ window.EXAM_DAY = [
     ["Pick exactly the number asked", "“Select TWO” means two. Treat scoring as all-or-nothing unless told otherwise: one wrong pick costs the whole question."],
     ["Judge each option on its own", "Ask of each: is this right for this scenario? Don't pick a pair because they sound good together."],
     ["Expect one true-but-irrelevant distractor", "Often one option is good practice that doesn't address what the stem asks. Two options that fix different stated problems are a common correct pair."],
-    ["Practice them", "The app's 15 multiple-response questions appear in drills and mocks, and the “Select 2” chip marks them."]
+    ["Practice them", "The app's 30 multiple-response questions appear in drills, and every mock includes at least 6, and a “Select 2” or “Select 3” chip marks them."]
   ] },
   { id: "logistics", title: "Before and on exam day", kind: "check", items: [
     ["The week before", "Take your Readiness Check and the official practice exam (see your Study plan). Re-read the Principles page in “Rules only” mode. Stop adding new material in the last two days."],

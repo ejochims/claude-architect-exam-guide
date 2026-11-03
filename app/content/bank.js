@@ -1426,5 +1426,170 @@ window.BANK = [
       { t: "Leave the failed subtopic out of the final report entirely, so the report doesn't look incomplete to readers.", why: "Silent suppression hides the gap from the reader." },
       { t: "Keep returning \"no results\" to the coordinator, but add a generic <code>status: \"error\"</code> field alongside it.", why: "A generic status still hides what failed and whether a retry could help." }
     ]
+  },
+  {
+    id: "mr-16", ts: "1.6", scenario: 4, type: "multi", bl: ["1.6-K1","1.6-S1","1.6-K3"],
+    stem: "A developer-productivity agent handles two kinds of work. Every pull request gets the same three checks (style, security, documentation). Separately, engineers ask it to find out why a nightly import job corrupts a few records on some nights but not others. Which two decomposition choices fit? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Run the pull-request checks as a fixed prompt chain, one step per check, in the same order every time.", ok: true, why: "Right. The steps are known and identical for every PR, so a fixed chain is predictable and cheap." },
+      { t: "For the import bug, let the agent plan as it goes, creating each next subtask from what the last step found.", ok: true, why: "Right. An intermittent bug is open-ended: what to look at next depends on what the previous step revealed." },
+      { t: "Let the agent decompose each pull request dynamically, skipping checks it judges irrelevant to that change.", why: "Dynamic decomposition suits open-ended investigation. For a standard review, it adds variability and risks skipped checks." },
+      { t: "Write a fixed twelve-step debugging checklist for the import bug and have the agent run every step each time.", why: "A pre-written checklist for an intermittent bug tends to miss the real cause and wastes effort on irrelevant steps." },
+      { t: "Send both kinds of work to one agent in a single long prompt so it can share context between them.", why: "Mixing unrelated tasks dilutes attention and doesn't choose a decomposition pattern for either." }
+    ]
+  },
+  {
+    id: "mr-17", ts: "1.7", scenario: 4, type: "multi", bl: ["1.7-S1","1.7-S4","1.7-S2"],
+    stem: "Yesterday a developer analyzed a billing module in a session named <code>billing-map</code>. Overnight a teammate changed two of its files; the rest of the analysis still holds. Today the developer wants to continue, then compare two refactoring approaches. Which two steps should they take? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Resume with <code>claude --resume billing-map</code> and name the two changed files so Claude re-reads just those.", ok: true, why: "Right. Most of the context is still valid, so resume and point Claude at the specific changes instead of re-exploring." },
+      { t: "Fork from the resumed analysis (<code>--fork-session</code>) for each approach, so both start from the same baseline.", ok: true, why: "Right. Forks give independent branches from one shared analysis, so neither approach contaminates the other." },
+      { t: "Start a fresh session and have Claude re-explore the whole billing module from scratch.", why: "Starting fresh suits stale context. Here only two files changed, so a full re-exploration wastes the valid analysis." },
+      { t: "Resume the same <code>billing-map</code> session in two terminals at once, one per approach.", why: "Both processes would append to one history, mixing the approaches. Fork instead." },
+      { t: "Run <code>claude --continue</code> in each terminal so each picks up the most recent session.", why: "<code>--continue</code> takes the most recent session in the directory, which may not be <code>billing-map</code>, and it doesn't branch." }
+    ]
+  },
+  {
+    id: "mr-18", ts: "2.3", scenario: 3, type: "multi", bl: ["2.3-K2","2.3-S1","2.3-S2"],
+    stem: "A research system's document-analysis subagent was given all 16 research tools \"for flexibility.\" Logs show it sometimes emails source authors with <code>send_email</code>, and its generic <code>fetch_url</code> often lands on login pages and tracking links instead of documents. Which two changes should the architect make? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Restrict the subagent to the few tools its analysis role needs, which removes <code>send_email</code>.", ok: true, why: "Right. Tools outside an agent's role get misused, and fewer tools also make selection more reliable." },
+      { t: "Replace <code>fetch_url</code> with a <code>load_document</code> tool that only accepts document URLs.", ok: true, why: "Right. A constrained tool prevents the wrong fetches structurally instead of relying on the model's judgment." },
+      { t: "Add a system-prompt rule that the subagent must never send email or open login pages.", why: "The tools stay available, so this relies on prompt compliance. Removing or constraining the tools is structural." },
+      { t: "Set <code>tool_choice: \"any\"</code> so the subagent always calls a tool instead of answering in text.", why: "This forces a tool call but does nothing about which tools it has or what they fetch." },
+      { t: "Move the subagent to a larger model that is better at judging which of its 16 tools to use.", why: "Capability doesn't fix the tool distribution. The extra tools are the cause." }
+    ]
+  },
+  {
+    id: "mr-19", ts: "2.5", scenario: 4, type: "multi", bl: ["2.5-S1","2.5-S2","2.5-S3"],
+    stem: "An engineer asks the agent to do three things in a large repo: find every place the error code <code>E_QUOTA_42</code> is raised; list every file named <code>*_migration.sql</code> across 30 service folders; and change a config block whose text appears three times, identically, in one file (Edit keeps failing). Which three tool choices are right? <strong>Select THREE.</strong>",
+    options: [
+      { t: "Grep the codebase for <code>E_QUOTA_42</code>.", ok: true, why: "Right. Finding a string inside files is a content search, which is Grep's job." },
+      { t: "Glob for <code>**/*_migration.sql</code>.", ok: true, why: "Right. Matching files by name pattern is Glob's job." },
+      { t: "Read the whole config file, then Write the corrected version.", ok: true, why: "Right. When Edit can't find a unique anchor, Read followed by Write is the reliable fallback." },
+      { t: "Glob for <code>E_QUOTA_42</code> to find the files that raise it.", why: "Glob matches paths and names, not the contents of files." },
+      { t: "Retry the same Edit until one of the three matching blocks is accepted.", why: "The anchor is still not unique, so the same Edit fails the same way." }
+    ]
+  },
+  {
+    id: "mr-20", ts: "3.2", scenario: 2, type: "multi", bl: ["3.2-S2","3.2-S4","3.2-K4"],
+    stem: "The team's <code>/audit-deps</code> skill dumps about 20,000 tokens of listings into the main conversation. Developers often run it without naming a package, and it guesses. One developer also wants a version with extra checks just for themselves. Which three changes fit? <strong>Select THREE.</strong>",
+    options: [
+      { t: "Add <code>context: fork</code> to the skill's frontmatter.", ok: true, why: "Right. The skill runs in an isolated sub-agent context, and only its result returns to the main conversation." },
+      { t: "Add <code>argument-hint: \"[package-name]\"</code> to the frontmatter.", ok: true, why: "Right. It prompts for the missing parameter instead of letting the skill guess." },
+      { t: "Create the personal version in <code>~/.claude/skills/</code> under a different name.", ok: true, why: "Right. A personal variant with its own name leaves the team's skill unchanged for everyone else." },
+      { t: "Move the skill's instructions into the project <code>CLAUDE.md</code> so they're always loaded.", why: "That loads a task-specific workflow on every turn and doesn't contain its output." },
+      { t: "Edit the team's <code>SKILL.md</code> locally and simply avoid committing the change.", why: "Fragile: it's easy to commit by accident, and it changes the shared skill's name and behavior in your checkout." }
+    ]
+  },
+  {
+    id: "mr-21", ts: "3.3", scenario: 2, type: "multi", bl: ["3.3-S2","3.3-S3","3.3-K3"],
+    stem: "A monorepo has two conventions to encode. GraphQL resolver files (<code>*.resolver.ts</code>) sit in 25 different packages and must all follow one pattern. Separately, every task in the repo should use structured JSON logging. Where should each go? <strong>Select TWO.</strong>",
+    options: [
+      { t: "A <code>.claude/rules/resolvers.md</code> file with <code>paths: [\"**/*.resolver.ts\"]</code> frontmatter.", ok: true, why: "Right. A glob-scoped rule follows the file type across every package and loads only when a resolver is edited." },
+      { t: "The structured-logging rule in the project's root <code>CLAUDE.md</code>.", ok: true, why: "Right. A universal standard for every task belongs in always-loaded project memory, shared through git." },
+      { t: "A <code>CLAUDE.md</code> in each of the 25 packages, each repeating the resolver conventions.", why: "Directory files are bound to one folder, so this duplicates the rule 25 times and drifts." },
+      { t: "Both conventions in each developer's <code>~/.claude/CLAUDE.md</code>.", why: "User-level memory isn't shared through version control, so teammates won't get either convention." },
+      { t: "A <code>/resolver-conventions</code> skill that developers run before editing a resolver.", why: "Skills load on demand. The requirement is automatic application whenever a resolver is edited." }
+    ]
+  },
+  {
+    id: "mr-22", ts: "3.5", scenario: 2, type: "multi", bl: ["3.5-S1","3.5-S5","3.5-K4"],
+    stem: "A developer is iterating with Claude Code on two problems. A prose description of how to normalize legacy date strings is being interpreted differently on each attempt. And three bugs remain in a shared parser, where fixing one changes how the other two behave. What should the developer do? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Give two or three concrete input-to-output examples of the date normalization.", ok: true, why: "Right. Concrete examples communicate a transformation better than prose that keeps being read differently." },
+      { t: "Describe all three parser bugs together in one detailed message.", ok: true, why: "Right. When fixes interact, Claude needs to see them together, or fixing one may undo another." },
+      { t: "Fix the three parser bugs one message at a time, checking each fix before raising the next.", why: "Sequential iteration suits independent issues. These interact, so one-at-a-time fixes can fight each other." },
+      { t: "Rewrite the date description at much greater length so there's less room to misread it.", why: "More prose was already being interpreted inconsistently. Examples are the effective lever." },
+      { t: "Switch to plan mode so Claude works out on its own what the date format should be.", why: "Plan mode helps with large or architectural changes. It doesn't clarify what output you want." }
+    ]
+  },
+  {
+    id: "mr-23", ts: "4.1", scenario: 5, type: "multi", bl: ["4.1-S2","4.1-S3","4.1-K3"],
+    stem: "A CI review bot has two problems. Its \"style\" category is wrong about 70% of the time, and developers have started ignoring all of its comments, including security findings. Separately, the same kind of bug is labeled \"critical\" in one PR and \"minor\" in another. Its prompt already says \"only report high-confidence issues.\" Which two changes help most? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Temporarily turn off the style category while you rework its prompt.", ok: true, why: "Right. Removing the noisy category restores trust in the accurate ones while you fix it." },
+      { t: "Define each severity level explicitly, with a concrete code example for each.", ok: true, why: "Right. Explicit criteria with examples anchor severity so the same bug gets the same label." },
+      { t: "Tighten the instruction to \"only report issues you are extremely confident about.\"", why: "A general exhortation. It barely changes precision because it doesn't say which findings matter." },
+      { t: "Have the model rate each finding from 1 to 10 and post only those rated 8 or above.", why: "Raw self-ratings aren't calibrated, so the filter doesn't track which findings are valid." },
+      { t: "Post a finding only when two identical review runs both report it.", why: "Consensus voting suppresses real findings that appear intermittently, and doesn't fix the labels." }
+    ]
+  },
+  {
+    id: "mr-24", ts: "4.2", scenario: 5, type: "multi", bl: ["4.2-S2","4.2-S3","4.2-K1"],
+    stem: "A CI reviewer's findings come back in inconsistent shapes: some lack line numbers or a suggested fix, although the instructions list the required fields. It also flags a safe, team-approved <code>Promise.all</code> batching pattern as a bug in about a quarter of PRs, despite criteria that exclude it. Which two changes help most? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Add few-shot examples of complete findings in the exact format: location, issue, severity, suggested fix.", ok: true, why: "Right. Examples are the most reliable way to get consistent output when instructions alone vary." },
+      { t: "Add few-shot examples contrasting the approved pattern with a genuine bug, with a line of reasoning for each.", ok: true, why: "Right. Showing acceptable versus problematic code cuts that false positive and helps the model generalize." },
+      { t: "Repeat the list of required fields three times in the prompt, in capitals.", why: "Repetition isn't demonstration. It's a try-harder fix for a format problem." },
+      { t: "Lower the temperature to 0 so the format comes out the same every time.", why: "A deterministic answer isn't necessarily a correctly formatted one, and it won't teach the pattern distinction." },
+      { t: "Disable the bug-detection category until the false positives stop.", why: "Bug findings are the most valuable category. Fix the one misjudged pattern instead." }
+    ]
+  },
+  {
+    id: "mr-25", ts: "4.3", scenario: 6, type: "multi", bl: ["4.3-S2","4.3-S4","4.3-S5"],
+    stem: "An insurance-claim extraction pipeline has three extraction tools (auto, property, travel), and claims arrive unlabeled. About 3% of responses are prose instead of tool calls. <code>policy_end_date</code> is required, and claims that don't state it come back with plausible invented dates. New damage types keep getting forced into the nearest <code>damage_type</code> enum value. Which three changes fix these? <strong>Select THREE.</strong>",
+    options: [
+      { t: "Set <code>tool_choice: \"any\"</code>.", ok: true, why: "Right. A tool call is guaranteed, and Claude still picks the schema that matches the claim." },
+      { t: "Make <code>policy_end_date</code> nullable and tell the model to return null when the claim doesn't state it.", ok: true, why: "Right. A required field pressures the model to fabricate; nullable removes the pressure." },
+      { t: "Add <code>\"other\"</code> with a <code>damage_detail</code> string, plus <code>\"unclear\"</code>, to the enum.", ok: true, why: "Right. New and ambiguous types get recorded honestly instead of being misfiled." },
+      { t: "Force <code>extract_auto_claim</code> on every request, since auto claims are the most common.", why: "This applies the wrong schema to property and travel claims." },
+      { t: "Ask the model to rate its confidence in each date and drop dates rated below 0.7.", why: "Self-ratings are uncalibrated, and the cause is the required field forcing a value." }
+    ]
+  },
+  {
+    id: "mr-26", ts: "4.4", scenario: 6, type: "multi", bl: ["4.4-S2","4.4-K2","4.4-S1"],
+    stem: "Validation flags five kinds of failure in an invoice-extraction pipeline. A retry that sends the document, the failed extraction and the specific error is cheap. For which two will that retry most likely fix the problem? <strong>Select TWO.</strong>",
+    options: [
+      { t: "The invoice date came back as \"March 3rd\" when the schema wants YYYY-MM-DD.", ok: true, why: "Right. A format error is exactly what specific feedback fixes." },
+      { t: "The shipping charge was placed in the <code>tax</code> field.", ok: true, why: "Right. Wrong field placement is a structural error that feedback can correct." },
+      { t: "The PO number appears only on a separate purchase order that isn't sent to the pipeline.", why: "The information isn't in the input. Retrying invites a fabricated PO number; supply the document or return null." },
+      { t: "The approval signature box on the scan is blank.", why: "There's nothing to extract. Return null or \"unclear\" rather than retrying." },
+      { t: "The invoice's own line items and printed total disagree with each other.", why: "The source is inconsistent. Flag the conflict for review instead of retrying until the numbers match." }
+    ]
+  },
+  {
+    id: "mr-27", ts: "4.5", scenario: 6, type: "multi", bl: ["4.5-S1","4.5-K2","4.5-K3"],
+    stem: "A claims team runs five extraction workloads and wants to cut costs with the Message Batches API. Which two are good fits for batch processing? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Re-extracting 40,000 archived contracts for a newly required field, due by the end of next week.", ok: true, why: "Right. High volume with a multi-day deadline: nothing waits on it, so take the 50% savings." },
+      { t: "A weekly audit report of extraction errors, reviewed every Monday morning.", ok: true, why: "Right. Weekly and non-blocking, it fits easily inside the 24-hour batch window." },
+      { t: "Extracting fields from an intake form while the customer waits on the confirmation page.", why: "Someone is waiting. Batch processing has no latency guarantee." },
+      { t: "An extraction agent that calls <code>lookup_vendor</code> partway through each document.", why: "A batch request can't execute tools mid-request and continue, so the lookup can't run." },
+      { t: "Flagging suspected fraudulent claims within 15 minutes of submission.", why: "A 15-minute deadline is far inside the batch API's up-to-24-hour window." }
+    ]
+  },
+  {
+    id: "mr-28", ts: "4.6", scenario: 5, type: "multi", bl: ["4.6-S1","4.6-S2","4.6-K1"],
+    stem: "In a CI pipeline, the same Claude Code session that writes a fix then reviews its own diff, and reviewers keep finding bugs it approved. Separately, single-pass reviews of 25-file PRs give detailed comments on some files, skim others, and contradict themselves. Which two changes address the causes? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Review the fix in a separate Claude instance that sees the diff but not the fixing session's reasoning.", ok: true, why: "Right. The generating session keeps its own reasoning and tends to approve it. An independent instance doesn't." },
+      { t: "Review each file in its own pass for local issues, then run one pass for cross-file data flow.", ok: true, why: "Right. Focused passes avoid diluted attention, and the integration pass catches cross-file problems." },
+      { t: "Turn on extended thinking for the self-review in the same session.", why: "More reasoning in the same context still anchors on the earlier choices." },
+      { t: "Review all 25 files in one pass on a model with a larger context window.", why: "More room isn't even attention. The single pass is the cause." },
+      { t: "Run the single-pass review three times and keep only findings that appear at least twice.", why: "Voting suppresses real but intermittent findings and doesn't fix the shallow passes." }
+    ]
+  },
+  {
+    id: "mr-29", ts: "5.5", scenario: 6, type: "multi", bl: ["5.5-S2","5.5-S3","5.5-S4"],
+    stem: "An extraction pipeline is 96% accurate overall across 30,000 documents, and leadership wants to stop human review. Reviewers can check only about 5% of documents. Which two steps should come first? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Break accuracy down by document type and by field before reducing any review.", ok: true, why: "Right. An overall 96% can hide a weak document type or a critical field well below the bar." },
+      { t: "Calibrate field-level confidence on a labeled set, then send low-confidence and contradictory documents to reviewers.", ok: true, why: "Right. Calibrated routing spends scarce reviewer time where errors are likeliest." },
+      { t: "Approve the change now, since 96% is above the 95% target.", why: "The aggregate may hide segments that fail badly. Check the breakdown first." },
+      { t: "Skip review for any extraction the model rates above 0.9 confidence on its own.", why: "Raw self-reported confidence isn't calibrated until it's checked against labeled data." },
+      { t: "Review the first 5% of documents processed each day.", why: "That sample isn't random or stratified, so it can miss whole document types and new error patterns." }
+    ]
+  },
+  {
+    id: "mr-30", ts: "5.6", scenario: 3, type: "multi", bl: ["5.6-S1","5.6-S3","5.6-S4"],
+    stem: "A multi-agent research report has three problems. Citations disappear after the summarization step. Two credible analyst reports give different market sizes for the same year, and the report silently uses one. And adoption figures from 2020 and 2025 are flagged as \"contradictory.\" Which three changes fix these? <strong>Select THREE.</strong>",
+    options: [
+      { t: "Have subagents output claim-to-source mappings that synthesis must preserve and merge.", ok: true, why: "Right. Structured claim-source records keep attribution intact through every summarization step." },
+      { t: "Keep both market sizes, each with its source, and mark the conflict in the report.", ok: true, why: "Right. Annotate conflicts rather than picking one; the coordinator or reader can weigh the sources." },
+      { t: "Require publication or collection dates on every finding.", ok: true, why: "Right. With dates attached, 2020 versus 2025 reads as a trend, not a contradiction." },
+      { t: "Use the market size from whichever report is larger or better known.", why: "Picking one hides the disagreement and the reader's basis for judging it." },
+      { t: "Average the two market sizes into a single figure for the report.", why: "That invents a number neither source reports." }
+    ]
   }
 ];

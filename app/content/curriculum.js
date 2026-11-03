@@ -2,7 +2,7 @@
 window.LESSONS = window.LESSONS || {};
 
 window.BLUEPRINT = {
-  examDate: "2026-12-31",
+  examDate: "2026-12-04", // booked sitting; the Plan page can override it
   domains: [
     { id: "d1", n: 1, name: "Agentic Architecture & Orchestration", short: "Agentic architecture", weight: 27 },
     { id: "d2", n: 2, name: "Tool Design & MCP Integration", short: "Tools & MCP", weight: 18 },

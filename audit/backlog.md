@@ -539,7 +539,7 @@ The guide's own change log says v1.0 contains "Formatting and layout updates" ov
 - **Mock composition.** `startMock()` now seats about 10% multiple-response items per domain, at least 6 per sitting; before, the count was left to chance, anywhere from 0 to 8. Across 15 test draws: 6–9 multiple-response items, with domain quotas exactly 16/11/12/12/9.
 
 **Still open:**
-- Only 15 multiple-response items exist, and only 1 is in D4. Scenarios 2 and 6 have 1 each.
+- ~~Only 15 multiple-response items exist, and only 1 is in D4. Scenarios 2 and 6 have 1 each.~~ **Done 2026-11-03:** added mr-16 to mr-30 (now 30 items: D1 7, D2 5, D3 6, D4 7, D5 5; every scenario has 4–6). Four ask for THREE. Every multiple-response cue heuristic is at or under 25% (chance is 10%).
 - The Readiness Check (holdout) has none.
 
 The official guide doesn't give the proportion of multiple-response items.
