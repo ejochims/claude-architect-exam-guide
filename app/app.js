@@ -695,8 +695,13 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     const picked = new Set(), fams = new Set();
     for (const d of B.domains) {
       const need = Math.round(d.weight * 0.6), ofD = q => domOfTask(q.ts).id === d.id;
+      // The exam guide (v1.0) confirms multiple-response items but not how many. Seat about 10% per
+      // domain (1-2 each, about 6 a sitting) so every mock practices the format.
+      const multiCap = Math.max(1, Math.round(need * 0.1));
+      const pool = [...inDraw.filter(ofD), ...outside.filter(ofD)];
+      const first = pool.filter(isMulti).slice(0, multiCap);
       let n = 0;
-      for (const q of [...inDraw.filter(ofD), ...outside.filter(ofD)]) {
+      for (const q of [...first, ...pool.filter(q => !first.includes(q))]) {
         if (n === need) break;
         if (q.family && fams.has(q.family)) continue;
         picked.add(q); if (q.family) fams.add(q.family); n++;
@@ -740,7 +745,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
   }
   function viewMock() {
     if (!state.mock) {
-      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, no feedback until you submit. Most questions have one best answer; a few are multiple-response (\"Select 2\"), scored all-or-nothing, as on the real exam.")}
+      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: 60 questions, 120 minutes, 4 of the 6 scenarios chosen at random, no feedback until you submit. Most questions have one best answer; a few are multiple-response (\"Select 2\"), scored all-or-nothing, as on the real exam.")}
 <div class="read"><div class="panel">
 <ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>The 60 questions always match the blueprint's domain weights. If the four drawn scenarios can't fill a domain's share, a few questions come from another scenario.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
 <button class="btn accent" type="button" id="begin">Begin the exam</button></div></div>`;

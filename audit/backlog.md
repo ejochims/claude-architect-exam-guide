@@ -116,8 +116,8 @@ The backlog fills in as each phase completes. Claims in the D1, D3, D4 and D5 do
 | ID | Sev | Item | Evidence | Action |
 |---|---|---|---|---|
 | R0 | S1 | No access yet to the official practice exam, the only external calibration signal | Guide v0.1 preparation step 8 | **You:** ask your Partner Network or Academy contact for the practice-exam link. Save it for the final pre-booking check. |
-| R1 | S1 | The current official certification FAQ says the exams use "multiple choice and scenario-based multiple response questions". Guide v0.1 says every question has one correct answer and three distractors. The app models only single-answer items, so its chance baseline and readiness math assume that format. | `audit/work/coverage-A1-notes.md` §4 (FMT-1); https://anthropic-partners.skilljar.com/page/faq-certifications | **Done in Batch 16:** the FAQ was re-checked on 2026-10-31 and still says this. A `multi` type and 15 practice items are built. **You:** check whether the current CCAR-F guide on the Partner Academy describes multiple-response items. If it says single-answer only, the items can stay as extra practice. |
-| R2 | S1 | Exam content may be updated. Pearson VUE announces updated content from 2026-12-07 for the other Claude exams, and there are unconfirmed mentions of updated guides on 2026-11-17. The audit uses Guide v0.1, dated Feb 2025. | `coverage-A1-notes.md` §4 (FMT-2) | **You:** check the current CCAR-F exam guide version on the Partner Academy after Nov 17, and before booking. If it changed, re-parse it and re-run Phase 1 coverage against the diff. |
+| R1 | S1 · **Resolved 2026-11-03** (see "Exam Guide v1.0 review") | The current official certification FAQ says the exams use "multiple choice and scenario-based multiple response questions". Guide v0.1 says every question has one correct answer and three distractors. The app models only single-answer items, so its chance baseline and readiness math assume that format. | `audit/work/coverage-A1-notes.md` §4 (FMT-1); https://anthropic-partners.skilljar.com/page/faq-certifications | **Done in Batch 16:** the FAQ was re-checked on 2026-10-31 and still says this. A `multi` type and 15 practice items are built. **You:** check whether the current CCAR-F guide on the Partner Academy describes multiple-response items. If it says single-answer only, the items can stay as extra practice. |
+| R2 | S1 · **Resolved 2026-11-03** (see "Exam Guide v1.0 review") | Exam content may be updated. Pearson VUE announces updated content from 2026-12-07 for the other Claude exams, and there are unconfirmed mentions of updated guides on 2026-11-17. The audit uses Guide v0.1, dated Feb 2025. | `coverage-A1-notes.md` §4 (FMT-2) | **You:** check the current CCAR-F exam guide version on the Partner Academy after Nov 17, and before booking. If it changed, re-parse it and re-run Phase 1 coverage against the diff. |
 | R3 | S2 | "60 questions" is stated only on third-party sites. The 120-minute limit is official. | `coverage-A1-notes.md` §4 | Show the question count in the app as "about 60 (unofficial)" until it's confirmed. Keep the 60-item mock, which costs nothing if the real count differs. |
 | R4 | S2 | The app doesn't mention the 4-attempts-per-12-months limit, the retake waiting periods, or the 12-month validity. | FAQ | Add these to the in-app logistics page (the Foundations track). |
 | R5 | S1 | The readiness signal is inflated in several ways. "Try again" deletes the earlier answer, so readiness can reach 100% by retrying. Every answer overwrites the stored one. There's no holdout set. The mock can't meet its domain quotas in any of the 15 draws. The mock shows task-statement chips. The scaled score shows false precision. | `audit/readiness-review.md` (E1–E10) | Implement the design and booking rule in readiness-review.md (Phase 7, step 5). |
@@ -505,3 +505,41 @@ Each mock result also shows "Trap patterns in this sitting".
 
 **Checks.** `content-check`: invariants OK (124 cards, 74 principles). `browser-suite`: 320 checks, no problems. It now visits every new step and checks that all 6 scenario briefs render. Screenshots at 390px.
 
+
+## Exam Guide v1.0 review (2026-11-03)
+
+The owner downloaded **Exam Guide v1.0** (effective July 2026, exam code CCAR-F, 39 pages) from the Partner Academy at registration. It was compared with v0.1 by extracting the text of both and diffing them item by item. As with v0.1, the guide's text stays outside the repo.
+
+**Unchanged from v0.1, word for word:**
+- the 5 domains and their weights;
+- all 30 task statements and every "Knowledge of" and "Skills in" bullet;
+- the 6 scenarios and their primary domains;
+- "How to prepare" and the 4 preparation exercises;
+- the 12 sample questions (only the answer-letter punctuation changed);
+- the technologies list, and the in-scope and out-of-scope lists.
+
+The guide's own change log says v1.0 contains "Formatting and layout updates" over 0.2 (June 2026) and 0.1 (February 2026). **No blueprint coverage work is needed.**
+
+**New and now official (sections 3 and 10–16):**
+- **Format.** 60 items: multiple-choice and multiple-response, and each item states how many responses to select. This resolves **R1**. It also confirms the 60-question count, which the app had labeled unofficial.
+- **Scoring.** Criterion-referenced, with the cut score set by a standard-setting study. The score report gives pass/fail, the scaled score, and percent-correct by domain; the domain figures don't decide the result.
+- **Logistics.**
+  - Cancel or reschedule up to 24 hours before; later changes and no-shows forfeit the fee.
+  - Retake waits are 14 days, then 30, then 90, with up to 4 attempts in a rolling 12 months.
+  - ID must be government-issued, unexpired, with a photo, and the name must match exactly.
+  - An NDA is accepted at the start of the session.
+  - Prohibited items are listed; scratch paper is allowed only if Pearson VUE provides it.
+  - Accommodations must be approved before scheduling.
+- **Recertification.** The credential is valid 12 months. On-time renewal is a free, non-proctored assessment; a lapse means retaking the full exam.
+
+**R2 is resolved.** The guide was updated, and the update changed no content.
+
+**App changes:**
+- **Logistics text.** m00's logistics callout and flashcards, the exam-day playbook and the mock intro now state the v1.0 facts. The "unofficial count" and "check the FAQ" caveats are removed.
+- **Mock composition.** `startMock()` now seats about 10% multiple-response items per domain, at least 6 per sitting; before, the count was left to chance, anywhere from 0 to 8. Across 15 test draws: 6–9 multiple-response items, with domain quotas exactly 16/11/12/12/9.
+
+**Still open:**
+- Only 15 multiple-response items exist, and only 1 is in D4. Scenarios 2 and 6 have 1 each.
+- The Readiness Check (holdout) has none.
+
+The official guide doesn't give the proportion of multiple-response items.
