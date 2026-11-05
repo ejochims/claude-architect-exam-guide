@@ -129,11 +129,15 @@
   }
   // Domain-weighted first-attempt accuracy over the domains you've practiced.
   const readiness = () => { const ds = domainStats().filter(d => d.tried), w = ds.reduce((a, d) => a + d.weight, 0); return w ? ds.reduce((a, d) => a + d.weight * d.mastery, 0) / w : 0; };
-  const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => state.steps[`${id}:${i}`]).length / L[id].steps.length;
+  // A lesson can carry `revised: "YYYY-MM-DD"`: step completions and lesson-quiz answers from before that
+  // date stop counting, so a rewritten module shows as not done. First-attempt records are untouched.
+  const revAt = id => (L[id] && L[id].revised) ? Date.parse(L[id].revised + "T00:00:00Z") : 0;
+  const stepDone = (id, i) => { const t = state.steps[`${id}:${i}`]; return !!t && t > revAt(id); };
+  const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => stepDone(id, i)).length / L[id].steps.length;
   function nextUp() {
     if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
     for (const m of MODS) if (L[m.id] && modProgress(m.id) < 1) {
-      const s = L[m.id].steps.findIndex((_, i) => !state.steps[`${m.id}:${i}`]);
+      const s = L[m.id].steps.findIndex((_, i) => !stepDone(m.id, i));
       return { m: m.id, s: Math.max(0, s) };
     }
     return null;
@@ -161,7 +165,7 @@
   // mode "learn": a lesson quiz; shows only answers given in lessons (state.lessonAns), so answers from drills,
   // mocks or the Readiness Check never pre-fill it. "drill": fresh each time. "exam": select only.
   // "review": shows the given `reveal` answer read-only.
-  const lessonAnswer = id => { const la = state.lessonAns[id]; return la && !la.cleared ? la : null; };
+  const lessonAnswer = id => { const la = state.lessonAns[id], q = QBYID[id]; return la && !la.cleared && la.at > revAt(q && q.module) ? la : null; };
   const clearLessonAnswer = id => { state.lessonAns[id] = { cleared: true, at: Date.now() }; };
   function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered, reveal } = {}) {
     const card = document.createElement("div"); card.className = "q";
@@ -493,7 +497,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     <p class="l-principle">${esc(mod.principle)}</p>
     <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
   </header>
-  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : state.steps[`${id}:${k}`] ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
+  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : stepDone(id, k) ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
   <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
   <article class="step" id="step"></article>
   <nav class="l-nav" aria-label="Step navigation">
@@ -885,7 +889,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     if (m && L[m[1]]) {
       let s;
       if (m[2]) s = Number(m[2]) - 1;
-      else { s = L[m[1]].steps.findIndex((_, i) => !state.steps[`${m[1]}:${i}`]); if (s < 0) s = 0; }
+      else { s = L[m[1]].steps.findIndex((_, i) => !stepDone(m[1], i)); if (s < 0) s = 0; }
       return { lesson: m[1], step: s };
     }
     const d = h.match(/^drill-([1-6]|misses)$/);

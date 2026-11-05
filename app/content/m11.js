@@ -1,4 +1,5 @@
 window.LESSONS.m11 = {
+  revised: "2026-11-05",
   cards: [
     { f: "Path rule or a CLAUDE.md in the directory?", b: "A path rule (.claude/rules with a paths glob) when the files are scattered by type, such as all tests; a directory CLAUDE.md when the convention belongs to one folder." },
     { f: "Does @import load a file only when it's needed?", b: "No. An imported file loads in full with the CLAUDE.md that imports it. For on-demand loading, use path-scoped rules or skills." },
@@ -12,6 +13,113 @@ window.LESSONS.m11 = {
     { f: "Prose description of a transformation is interpreted inconsistently. Fix?", b: "Give 2–3 concrete input/output examples." }
   ],
   steps: [
+    {
+      kind: "read",
+      title: "Start here: Claude Code from a Salesforce builder's seat",
+      html: `
+<p class="lede">You already know the agent half of this. Claude Code is the same agentic loop you build for service agents, pointed at a different job: helping a developer change code. What's new is <em>where</em> it runs and <em>how a team shares its setup</em>.</p>
+<h3>What Claude Code is</h3>
+<p>Claude Code is an agent that a developer runs on their own computer, from a terminal or an editor, inside one project folder. Its tools are Read, Edit, Write, Grep, Glob and Bash, so it can read the code, change files and run commands such as the test suite. The "user" is the developer typing requests; the "backend" is the project's files.</p>
+<h3>Three words you need: repository, git, home folder</h3>
+<ul>
+<li><strong>Repository (repo).</strong> The project folder: all the code plus its configuration files. Everyone on the team works from a copy of the same repo.</li>
+<li><strong>git.</strong> The version-control system that tracks every change to the repo. A developer <em>commits</em> a change (records it), <em>pushes</em> it to the shared copy on GitHub, and teammates <em>pull</em> it. <em>Cloning</em> means downloading your own copy. Anything committed to the repo reaches the whole team.</li>
+<li><strong>Home folder, written <code>~</code>.</strong> Your personal folder on your own laptop (for example <code>/Users/priya</code>). It is never part of the repo, so nothing in it reaches anyone else.</li>
+</ul>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>A repo is like an SFDX project in source control. Metadata lives as files, the team pulls the same source, and DevOps Center (or a change set) moves reviewed changes forward. Your <code>~</code> folder is like your personal user settings: your list views and preferences come with you everywhere, but they're never deployed to anyone else's org.</p></div>
+<h3>The one rule behind every configuration question</h3>
+<p>Claude Code's team setup is just <strong>files</strong>. Two things about a file decide what it does:</p>
+<ol class="moves">
+<li><strong>Where it lives decides WHO gets it.</strong> In the repo means the whole team, through git. In <code>~</code>, or in a gitignored file, means only you.</li>
+<li><strong>What kind of file it is decides WHEN it loads.</strong> Always, at the start of every session; only when Claude touches matching files; or only when someone invokes it by name.</li>
+</ol>
+<h3>The Salesforce map</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Claude Code</th><th>Closest Salesforce idea</th><th>Who / when</th></tr></thead>
+<tbody>
+<tr><td>Project <code>CLAUDE.md</code> (in the repo)</td><td>Org-wide standards shipped as metadata in source control</td><td>Whole team · every session</td></tr>
+<tr><td><code>~/.claude/CLAUDE.md</code></td><td>Your personal user settings</td><td>Only you · every project</td></tr>
+<tr><td><code>CLAUDE.md</code> in a subfolder</td><td>Settings for one app or package</td><td>Team · when working in that folder</td></tr>
+<tr><td><code>.claude/rules/</code> file with <code>paths:</code></td><td>Guidance scoped to one object or record type</td><td>Team · only when matching files are touched</td></tr>
+<tr><td>Slash command or skill</td><td>A quick action or flow a user launches</td><td>Team (or you) · only when invoked</td></tr>
+<tr><td>Skill with <code>context: fork</code></td><td>A subflow that runs on its own and hands back a result</td><td>Keeps the main conversation clean</td></tr>
+<tr><td>Skill <code>allowed-tools</code></td><td>A permission set scoped to that flow</td><td>What the skill may use while it runs</td></tr>
+<tr><td><code>.mcp.json</code> with <code>\${JIRA_TOKEN}</code></td><td>A Named Credential: endpoint in metadata, secret stored outside it</td><td>Team shares the config; each person supplies the secret</td></tr>
+<tr><td>Plan mode</td><td>A design review plus a validate-only deployment</td><td>Look and propose before anything changes</td></tr>
+</tbody></table></div>
+<div class="callout note"><div class="callout-label">Where the analogy breaks</div><p>A Salesforce validation rule <em>enforces</em>. <code>CLAUDE.md</code> and rules files only <em>instruct</em>: they're text added to Claude's context, which it follows most of the time. Something that must never happen still needs a hook, which you already know from Module 3. The exam tests this line: memory files guide behavior; hooks and permissions guarantee it.</p></div>`
+    },
+    {
+      kind: "read",
+      title: "A tour of one team's repository",
+      html: `
+<p class="lede">Here is a realistic repo for a billing service, and one developer's laptop. Read the tree once, then follow Priya through a day.</p>
+<pre class="code"><code>acme-billing/                    <span class="c">← the repository, shared through git</span>
+├── CLAUDE.md                    <span class="c">← team standards: loaded at the start of every session</span>
+├── CLAUDE.local.md              <span class="c">← gitignored: one person's private notes for this repo</span>
+├── .mcp.json                    <span class="c">← team MCP servers (Jira, GitHub); secrets written as \${VARS}</span>
+├── .claude/
+│   ├── rules/
+│   │   ├── testing.md           <span class="c">← paths: ["**/*.test.ts"]: loads when a test file is touched</span>
+│   │   └── api.md               <span class="c">← paths: ["src/api/**/*"]: loads for API code only</span>
+│   ├── commands/
+│   │   └── release-notes.md     <span class="c">← becomes /release-notes; runs only when typed</span>
+│   └── skills/
+│       └── audit-deps/SKILL.md  <span class="c">← becomes /audit-deps; context: fork</span>
+└── src/payments/CLAUDE.md       <span class="c">← extra conventions for the payments folder</span>
+
+~/ (Priya's laptop, never shared)
+├── .claude/CLAUDE.md            <span class="c">← her personal preferences, every project</span>
+├── .claude/skills/audit-deps-plus/  <span class="c">← her personal variant of the team skill</span>
+└── .claude.json                 <span class="c">← her personal MCP servers (user and local scope)</span></code></pre>
+<h3>A day with Priya</h3>
+<ol class="moves">
+<li><strong>She clones the repo.</strong> She now has every committed file: <code>CLAUDE.md</code>, the rules, the command, the skill and <code>.mcp.json</code>. Nothing from a teammate's <code>~</code> folder comes with it.</li>
+<li><strong>She starts Claude Code in <code>acme-billing/</code>.</strong> Loaded straight away:
+  <ul>
+  <li>the root <code>CLAUDE.md</code>, plus any file it pulls in with <code>@import</code>;</li>
+  <li>her own <code>~/.claude/CLAUDE.md</code>, and her <code>CLAUDE.local.md</code> if she has one;</li>
+  <li>any rules file with no <code>paths</code>.</li>
+  </ul>
+  They're all added to the context together; one file doesn't replace another. If two disagree, Claude has to reconcile them, so keep team and personal files consistent. The MCP servers in <code>.mcp.json</code> and in her <code>~/.claude.json</code> all connect together. Jira's token comes from her own <code>JIRA_TOKEN</code> environment variable.</li>
+<li><strong>She asks Claude to fix a bug in <code>src/api/invoices.ts</code>.</strong> When Claude opens that file, <code>api.md</code> loads because its glob matches. <code>testing.md</code> doesn't load until Claude opens <code>invoices.test.ts</code>.</li>
+<li><strong>Claude moves into <code>src/payments/</code>.</strong> That folder's <code>CLAUDE.md</code> loads now, on top of the root one.</li>
+<li><strong>She types <code>/release-notes</code>.</strong> The command's instructions run once, now. She types <code>/audit-deps</code>: it runs in a forked sub-agent and only its summary comes back, so 20,000 lines of dependency output never land in her conversation.</li>
+<li><strong>Her new teammate Sam says Claude ignores the logging standard.</strong> The standard lives in Priya's <code>~/.claude/CLAUDE.md</code>, so it never reached Sam. The fix is to move it into the root <code>CLAUDE.md</code> and commit. The diagnostic the exam names is <code>/memory</code>, which shows what's loaded (today <code>/context</code> lists it).</li>
+</ol>
+<h3>Two questions place any piece of configuration</h3>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Always</th><th>Only for certain files</th><th>Only when asked</th></tr></thead>
+<tbody>
+<tr><td><strong>Whole team</strong> (in the repo)</td><td>Root <code>CLAUDE.md</code> (or a <code>.claude/rules/</code> file with no <code>paths</code>)</td><td><code>.claude/rules/</code> with a <code>paths</code> glob; or a folder's <code>CLAUDE.md</code> if it's one folder</td><td><code>.claude/commands/</code> or <code>.claude/skills/</code></td></tr>
+<tr><td><strong>Just me</strong> (not shared)</td><td><code>~/.claude/CLAUDE.md</code>, or <code>CLAUDE.local.md</code> for one repo</td><td><code>~/.claude/rules/</code></td><td><code>~/.claude/commands/</code> or <code>~/.claude/skills/</code></td></tr>
+</tbody></table></div>
+<div class="callout key"><div class="callout-label">The exam's favorite traps</div><ul style="margin:0;padding-left:18px">
+<li><strong>Team rule in a personal file:</strong> it works for its author and nobody else.</li>
+<li><strong>A file type scattered across many folders</strong> (tests, stories, migrations): use one glob rule, not a <code>CLAUDE.md</code> in every folder.</li>
+<li><strong>A long, occasional workflow in <code>CLAUDE.md</code>:</strong> it costs tokens on every turn. Make it a skill.</li>
+<li><strong>Invented mechanisms</strong> such as a <code>.claude/config.json</code> "commands array" don't exist.</li>
+</ul></div>`
+    },
+    {
+      kind: "widget",
+      title: "Who gets it, and when?",
+      intro: "For each piece of configuration, decide who should get it and when it should load. The explanation names the file.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "always", label: "Team, always" }, { id: "files", label: "Team, matching files only" }, { id: "invoked", label: "Team, when invoked" }, { id: "me", label: "Only me" }],
+        items: [
+          ["Every service must log in structured JSON.", "always", "Root CLAUDE.md, committed. Loaded for everyone, every session."],
+          ["Conventions for *.sql migration files spread across 12 service folders.", "files", ".claude/rules/migrations.md with paths: [\"**/*.sql\"]. One rule follows the file type everywhere."],
+          ["A /changelog workflow developers run before each release.", "invoked", ".claude/commands/changelog.md (or a skill). It runs only when someone types it."],
+          ["Your preference for one-line commit messages.", "me", "~/.claude/CLAUDE.md. Personal and every project; teammates never see it."],
+          ["Terraform conventions that matter only under infra/.", "files", "A rule with paths: [\"infra/**/*\"], or infra/CLAUDE.md, since it's one folder."],
+          ["The URL of your personal test sandbox for this repo.", "me", "CLAUDE.local.md, which is gitignored: you, this repo only."],
+          ["A dependency audit that dumps thousands of lines and shouldn't clutter the chat.", "invoked", "A skill in .claude/skills/ with context: fork, so only the summary returns."],
+          ["Your personal calendar MCP server.", "me", "User scope in ~/.claude.json. It's available in all your projects and invisible to teammates."]
+        ]
+      }
+    },
     {
       kind: "read",
       title: "First principle: scope decides who gets it, and when",
@@ -97,6 +205,7 @@ argument-hint: <span class="s">"[module-path]"</span>
       title: "Plan mode and iterative refinement",
       html: `
 <h3>Plan mode vs direct execution</h3>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>Plan mode is a design review plus a validate-only deployment. Claude reads the code and proposes a plan, but changes nothing until you approve it. Use it when a change is large, touches many files or has more than one reasonable approach. Run a small, well-understood fix directly, the way you'd edit one field without a design review.</p></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Plan mode</th><th>Direct execution</th></tr></thead>
 <tbody>

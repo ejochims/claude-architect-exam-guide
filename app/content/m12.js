@@ -1,4 +1,5 @@
 window.LESSONS.m12 = {
+  revised: "2026-11-05",
   cards: [
     { f: "Claude Code hangs in CI waiting for input. Fix?", b: "Run it with -p (--print) for non-interactive mode." },
     { f: "Machine-parseable, schema-shaped CI output?", b: "--output-format json together with --json-schema." },
@@ -9,6 +10,101 @@ window.LESSONS.m12 = {
     { f: "Resume or start fresh?", b: "Resume when prior context is mostly valid (and say which files changed). Start fresh with a structured summary when tool results are stale." }
   ],
   steps: [
+    {
+      kind: "read",
+      title: "Start here: what CI/CD is, from zero",
+      html: `
+<p class="lede">CI/CD is how software teams stop one person's change from quietly breaking everyone else's work. It's a robot that checks every proposed change automatically, before a human approves it. Claude Code can be one of the checks that robot runs.</p>
+<h3>The problem it solves</h3>
+<p>Ten developers change the same code every day. If each change goes straight into the shared copy, nobody knows which one broke the billing page until a customer finds out. The answer is a gated path: <strong>propose, check automatically, review, then merge</strong>.</p>
+<h3>The pieces, in order</h3>
+<div class="flow" aria-label="The path of a code change">
+<span class="box">Developer pushes a branch</span><span class="arr">→</span>
+<span class="box">Pull request opened</span><span class="arr">→</span>
+<span class="box">CI runner starts</span><span class="arr">→</span>
+<span class="box">Checks run: tests, linters, Claude review</span><span class="arr">→</span>
+<span class="box">Results posted on the PR</span><span class="arr">→</span>
+<span class="box">Human approves and merges</span><span class="arr">→</span>
+<span class="box">CD deploys</span>
+</div>
+<ul>
+<li><strong>Branch.</strong> A developer's private line of changes, separate from the shared <code>main</code> copy.</li>
+<li><strong>Pull request (PR).</strong> "Please review and merge my branch." Reviewers see exactly what changed (the <em>diff</em>) and comment on specific lines.</li>
+<li><strong>CI, Continuous Integration.</strong> Every time a PR is opened or updated, a robot automatically builds the code and runs the checks, then reports pass or fail on the PR. Required checks can block merging until they pass.</li>
+<li><strong>CD, Continuous Delivery or Deployment.</strong> After merge, the robot ships the change automatically, to a test environment or to production.</li>
+<li><strong>The robot.</strong> A CI service such as GitHub Actions, GitLab CI or Jenkins. A <em>workflow file</em> committed in the repo (for example <code>.github/workflows/review.yml</code>) says: "when a PR opens, start a fresh machine, copy the code, run these commands."</li>
+<li><strong>The runner.</strong> That fresh machine: temporary, empty and unattended. It's thrown away when the job ends.</li>
+</ul>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div>
+<ul style="margin:0;padding-left:18px">
+<li><strong>A PR</strong> is like a DevOps Center work item, or a change set waiting for review before promotion.</li>
+<li><strong>CI</strong> is like automatically deploying every proposed change to a scratch org and running all the Apex tests, on every change rather than once before release.</li>
+<li><strong>The workflow file</strong> is like a record-triggered flow: a trigger (PR opened), then steps. The difference is that it runs on a throwaway machine.</li>
+<li><strong>CD</strong> is the pipeline promoting the change to the next stage on its own.</li>
+</ul></div>
+<h3>The one fact that drives every exam question here</h3>
+<p><strong>Nobody is sitting at the runner.</strong> There's no keyboard, no screen and nobody to click "Allow." Whatever runs there must finish without asking anything, and leave its results in a form another program can read and post on the PR. Every Claude Code CI flag exists because of this.</p>
+<div class="callout key"><div class="callout-label">Blocking vs. non-blocking jobs</div><p>A <strong>pre-merge check</strong> blocks developers until it finishes, so it must be fast: use synchronous Claude calls. A <strong>nightly or weekly job</strong> (a test-gap report, a debt audit) blocks nobody, so it can use the Message Batches API for half the price (Module 10).</p></div>`
+    },
+    {
+      kind: "read",
+      title: "Claude Code in a pipeline, line by line",
+      html: `
+<p class="lede">Here's a complete, minimal GitHub Actions workflow that has Claude Code review every pull request. Read the file, then the table that explains each piece.</p>
+<pre class="code"><code><span class="c"># .github/workflows/claude-review.yml (committed in the repo)</span>
+on: pull_request                     <span class="c"># trigger: a PR is opened or updated</span>
+jobs:
+  review:
+    runs-on: ubuntu-latest           <span class="c"># a fresh, temporary machine</span>
+    steps:
+      - uses: actions/checkout@v4    <span class="c"># copy the repo, CLAUDE.md included</span>
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: |
+          claude -p "Review this PR's changes using the review criteria in CLAUDE.md. Report only new or unaddressed issues." \\
+            --output-format json \\
+            --json-schema "$(cat .github/review-schema.json)" \\
+            --allowedTools "Read,Grep,Glob" > review.json
+        env:
+          ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}  <span class="c"># from the CI secret store, never in the repo</span>
+      - run: node scripts/post-comments.js review.json   <span class="c"># turn each finding into an inline PR comment</span></code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>Piece</th><th>What it does</th><th>Why it's needed</th></tr></thead>
+<tbody>
+<tr><td><code>-p</code> (<code>--print</code>)</td><td>Runs one request, prints the result and exits</td><td>Without it, Claude Code opens an interactive session and waits for typing that never comes, so the job hangs until it times out.</td></tr>
+<tr><td><code>--output-format json</code></td><td>Prints machine-readable JSON instead of chat text</td><td>The next step is a program, not a person. It needs fields it can read.</td></tr>
+<tr><td><code>--json-schema</code></td><td>Makes the final answer match your schema (file, line, severity, message)</td><td>The comment-posting script won't break when Claude phrases things differently. This is the same idea as Module 9's extraction schemas.</td></tr>
+<tr><td><code>--allowedTools</code></td><td>Pre-approves the tools the run may use</td><td>No one is there to approve a tool. Grant only what the review needs, here read-only tools.</td></tr>
+<tr><td>Project <code>CLAUDE.md</code></td><td>Read automatically, because checkout copied the repo</td><td>It's where the team's review criteria, testing standards and fixtures belong. The runner's own home folder is empty, so a <code>~/.claude/</code> file there would be wrong.</td></tr>
+<tr><td><code>secrets.ANTHROPIC_API_KEY</code></td><td>Injects the key from the CI service's encrypted secret store</td><td>Keys never sit in the repo. This is the same principle as <code>\${VAR}</code> in <code>.mcp.json</code>.</td></tr>
+</tbody></table></div>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>You've seen this pattern with the Salesforce CLI. In a script you run <code>sf project deploy start --json</code>, not the interactive Setup UI. <code>--json</code> gives the pipeline structured output it can parse, and a stored auth credential stands in for a person logging in. <code>claude -p … --output-format json</code> is the same move for Claude Code.</p></div>
+<h3>Three design rules the exam tests</h3>
+<ol class="moves">
+<li><strong>Re-runs shouldn't repeat themselves.</strong> When new commits arrive, the workflow runs again. Include the previous findings in the prompt and ask for only new or still-unaddressed issues, or every push reposts the same comments.</li>
+<li><strong>Test generation needs to see what exists.</strong> Give Claude the existing test files, so it doesn't propose tests you already have. Document what makes a test valuable, and the available fixtures, in <code>CLAUDE.md</code>.</li>
+<li><strong>The reviewer shouldn't be the author.</strong> If one job has Claude write a fix, review it in a separate Claude Code run that sees only the diff and the criteria. The session that wrote the code keeps its own reasoning and tends to approve it, much as an author is a weaker reviewer of their own work than a fresh pair of eyes.</li>
+</ol>
+<div class="callout today"><div class="callout-label">Real world today</div><p>Anthropic also publishes a ready-made GitHub Action for Claude Code. It wraps this same pattern. The exam asks about the flags and the design rules, not about any particular CI product.</p></div>`
+    },
+    {
+      kind: "widget",
+      title: "Which piece does the job?",
+      intro: "Match each job to the part of the pipeline that does it.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "pr", label: "Pull request" }, { id: "wf", label: "CI workflow / runner" }, { id: "flag", label: "Claude Code flag" }, { id: "md", label: "Project CLAUDE.md" }, { id: "secret", label: "CI secret store" }],
+        items: [
+          ["Where reviewers see the diff, comment on lines and approve the change.", "pr", "The pull request is the review surface. CI posts its results there."],
+          ["Starts a fresh machine every time a PR is opened or updated.", "wf", "The workflow file's trigger (on: pull_request) starts a runner."],
+          ["Stops Claude Code from waiting for someone to type.", "flag", "-p (print mode): run once, print, exit."],
+          ["Makes the findings come back in one fixed JSON shape.", "flag", "--output-format json with --json-schema."],
+          ["Tells the CI reviewer what counts as a real bug and what to skip.", "md", "Review criteria in the project CLAUDE.md, which the runner reads after checkout."],
+          ["Holds the Anthropic API key so it never sits in the repo.", "secret", "An encrypted CI secret, injected as an environment variable at run time."],
+          ["Lists the test fixtures Claude should use when it generates tests.", "md", "Testing standards and fixtures belong in CLAUDE.md, so every run sees them."],
+          ["Lets the run use Read, Grep and Glob without a person approving each one.", "flag", "--allowedTools pre-approves tools, which matters because no one is there to click Allow."]
+        ]
+      }
+    },
     {
       kind: "read",
       title: "First principle: automation can't answer questions",
@@ -54,6 +150,12 @@ window.LESSONS.m12 = {
       title: "Sessions: resume, fork, or start fresh",
       html: `
 <p class="lede">Sessions store conversation history, not the state of your files. That shapes when it's safe to pick one up again.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><ul style="margin:0;padding-left:18px">
+<li><strong>A session</strong> is a saved transcript, like a case's activity history. It records what was said and done. It is not a snapshot of the org.</li>
+<li><strong>Resume</strong> (<code>claude --resume &lt;session-name&gt;</code>) is like reopening a case. Safe when nothing important changed since, or when you tell Claude exactly what changed.</li>
+<li><strong>Fork</strong> is like cloning two sandboxes from the same baseline to try two designs side by side.</li>
+<li><strong>A fresh session with a summary</strong> is like opening a new case with a handoff note. Prefer it when the files changed a lot or the old transcript is full of stale tool results.</li>
+</ul></div>
 <div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> real tasks span several sittings, and re-explaining context every time is slow and lossy.</li><li><strong>How sessions work.</strong> Claude Code saves each conversation's transcript locally. <code>--resume</code> reloads one (by name or ID) so it continues with full history; forking copies that history into a new session that then diverges.</li><li><strong>The catch.</strong> a resumed session also brings back old tool results, which may describe code that has since changed.</li><li><strong>Which to use.</strong> resume when nothing relevant changed; tell it what changed when a few files did; fork to explore alternatives; start fresh with a summary when most earlier results are stale.</li></ul></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Situation</th><th>Use</th></tr></thead>

@@ -179,6 +179,12 @@ a.mod:hover { background: var(--surface); }
 .callout.key .callout-label { color: var(--accent-ink); }
 .callout.today { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .callout.today .callout-label::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d3); margin-right: 7px; vertical-align: 1px; }
+.callout.sf { background: color-mix(in srgb, var(--d3) 9%, var(--surface)); box-shadow: inset 3px 0 0 var(--d3); }
+.callout.sf .callout-label { color: var(--d3); }
+.callout ul li { margin-bottom: 6px; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 20px; font: 500 14px/1.35 var(--sans); }
+.flow .box { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; max-width: 100%; }
+.flow .arr { color: var(--faint); font-weight: 600; }
 .code { font: 400 13.2px/1.6 var(--mono); background: var(--sunk); border-radius: var(--r); padding: 14px 16px; overflow-x: auto; margin: 0 0 16px; color: var(--fg); }
 .code code { background: none; padding: 0; font-size: 1em; }
 .code .k { color: var(--d4); } .code .s { color: var(--d2); } .code .c { color: var(--faint); font-style: italic; }
