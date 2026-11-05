@@ -28,28 +28,39 @@
     saving = false;
     if (dirty) flush();
   }
-  const later = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) >= (y[k] || 0) ? x : y;
+  // Compare states by content, not key order: the database stores keys alphabetically, so a plain
+  // JSON.stringify comparison never matched and every save triggered another save.
+  const sortKeys = v => Array.isArray(v) ? v.map(sortKeys) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])])) : v;
+  const canon = v => JSON.stringify(sortKeys(v));
+  // merge() must give the same result whichever side is local, or two open devices push their
+  // own values at each other forever. So every choice is by value, with ties broken by content.
+  const later = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) > (y[k] || 0) ? x : y) : canon(x) >= canon(y) ? x : y;
+  const earlier = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) < (y[k] || 0) ? x : y) : canon(x) <= canon(y) ? x : y;
   function merge(a, b) {
     const out = blank();
     out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
-    for (const k of ["steps", "widgets"]) out[k] = Object.assign({}, b[k] || {}, a[k] || {});
+    for (const k of ["steps", "widgets"]) {
+      const m = Object.assign({}, b[k] || {});
+      for (const [id, t] of Object.entries(a[k] || {})) m[id] = Math.max(t || 0, m[id] || 0);
+      out[k] = m;
+    }
     for (const k of ["answers", "cards", "lessonAns"]) {
       const m = Object.assign({}, b[k] || {});
       for (const [id, v] of Object.entries(a[k] || {})) m[id] = later(v, m[id]);
       out[k] = m;
     }
     const fm = Object.assign({}, b.first || {});
-    for (const [id, v] of Object.entries(a.first || {})) fm[id] = !fm[id] || (v.at || 0) < (fm[id].at || 0) ? v : fm[id];
+    for (const [id, v] of Object.entries(a.first || {})) fm[id] = earlier(v, fm[id]);
     out.first = fm;
     // The Readiness Check counts once: keep the earliest attempt from either device.
-    out.readiness = !a.readiness ? b.readiness || null : !b.readiness ? a.readiness : a.readiness.at <= b.readiness.at ? a.readiness : b.readiness;
+    out.readiness = earlier(a.readiness, b.readiness) || null;
     out.last = later(a.last, b.last);
     out.plan = later(a.plan, b.plan);
     const seen = new Map();
     // Removed mocks stay removed on every device: keep the union of tombstones and drop those records.
-    out.removedMocks = [...new Set([...(a.removedMocks || []), ...(b.removedMocks || [])])];
-    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) if (!out.removedMocks.includes(r.startedAt)) seen.set(r.startedAt, r);
-    out.mocks = [...seen.values()].sort((x, y) => y.at - x.at).slice(0, 10);
+    out.removedMocks = [...new Set([...(a.removedMocks || []), ...(b.removedMocks || [])])].sort((x, y) => x - y);
+    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) if (!out.removedMocks.includes(r.startedAt)) seen.set(r.startedAt, later(r, seen.get(r.startedAt)));
+    out.mocks = [...seen.values()].sort((x, y) => (y.at - x.at) || (y.startedAt - x.startedAt)).slice(0, 10);
     const m = later(a.mock, b.mock, "startedAt");
     out.mock = m && !seen.has(m.startedAt) ? m : null;
     return out;
@@ -65,8 +76,8 @@
       remoteRef.onSnapshot(snap => {
         const remote = snap.exists ? snap.data() : null;
         const merged = remote ? merge(state, remote) : state;
-        const changedLocal = JSON.stringify(merged) !== JSON.stringify(state);
-        const needsPush = !remote || JSON.stringify(merged) !== JSON.stringify(merge(blank(), remote));
+        const changedLocal = canon(merged) !== canon(state);
+        const needsPush = !remote || canon(merged) !== canon(merge(blank(), remote));
         state = merged;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
         if (needsPush && state.updatedAt) { dirty = true; flush(); }

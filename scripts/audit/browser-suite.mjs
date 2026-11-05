@@ -200,6 +200,33 @@ async function rings(page, tag) {
   if (JSON.stringify(f1) !== JSON.stringify(f2)) problems.push(`${tag}: retry changed a first attempt`);
 }
 
+// Sync must settle. The database stores keys alphabetically, and two open devices can hold different
+// timestamps for the same step; either used to make the app save in an endless loop.
+async function syncSettles() {
+  const browser = await chromium.launch();
+  const sortKeys = v => Array.isArray(v) ? v.map(sortKeys) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])])) : v;
+  const now = Date.now(), base = { v: 1, updatedAt: now - 5000, steps: { "m09:0": now - 9000 }, widgets: {}, answers: { "q09-1": { ok: true, choice: 0, at: now - 8000 } }, first: {}, lessonAns: {}, cards: {}, last: { m: "m08", s: 1, at: now - 7000 }, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [] };
+  const other = JSON.parse(JSON.stringify(base)); other.steps["m09:0"] = now - 1000;
+  let stored = sortKeys(base), saves = 0; const pages = [];
+  for (const seed of [base, other]) {
+    const p = await (await browser.newContext()).newPage(); pages.push(p);
+    p.on("pageerror", e => problems.push(`sync pageerror: ${e.message}`));
+    await p.exposeFunction("__set", d => { saves++; stored = sortKeys(d); setTimeout(() => pages.forEach(q => q.evaluate(s => window.__emit(s), stored).catch(() => {})), 30); });
+    await p.addInitScript(seed => {
+      const subs = []; window.__emit = s => subs.forEach(f => f({ exists: true, data: () => s }));
+      window.claude = { use: async n => n === "user" ? { id: async () => "u1" } : { doc: () => ({ set: d => window.__set(JSON.parse(JSON.stringify(d))), onSnapshot: f => { subs.push(f); } }) } };
+      if (!sessionStorage.getItem("seeded")) { localStorage.setItem("cca-study-progress-v1", JSON.stringify(seed)); sessionStorage.setItem("seeded", "1"); }
+    }, seed);
+  }
+  for (const p of pages) { await p.goto(URL + "#m09"); await p.evaluate(s => window.__emit(s), stored); }
+  await pages[0].waitForTimeout(2500); const s1 = saves; await pages[0].waitForTimeout(2500); checks++;
+  if (saves > s1) problems.push(`sync: still saving after 2.5s (${saves - s1} more saves): it never settles`);
+  const t = await Promise.all(pages.map(p => p.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")).steps["m09:0"])));
+  if (t[0] !== t[1] || t[0] !== now - 1000) problems.push(`sync: devices disagree on a step timestamp (${t.join(" vs ")})`);
+  await browser.close();
+}
+
+await syncSettles();
 await run({ width: 1280, height: 900 }, "light");
 await run({ width: 390, height: 844 }, "dark");
 console.log(`${checks} checks · ${problems.length ? `${problems.length} problems:\n  ` + problems.join("\n  ") : "no problems"}`);
