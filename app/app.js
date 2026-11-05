@@ -132,7 +132,10 @@
   // A lesson can carry `revised: "YYYY-MM-DD"`: step completions and lesson-quiz answers from before that
   // date stop counting, so a rewritten module shows as not done. First-attempt records are untouched.
   const revAt = id => (L[id] && L[id].revised) ? Date.parse(L[id].revised + "T00:00:00Z") : 0;
-  const stepDone = (id, i) => { const t = state.steps[`${id}:${i}`]; return !!t && t > revAt(id); };
+  // A step's storage key. Steps added later carry their own `key`, so inserting one doesn't shift
+  // the keys of existing steps (which stay numbered by their position among unkeyed steps).
+  const skey = (id, i) => { const st = L[id].steps; if (st[i] && st[i].key) return `${id}:${st[i].key}`; let n = 0; for (let k = 0; k < i; k++) if (!st[k].key) n++; return `${id}:${n}`; };
+  const stepDone = (id, i) => { const t = state.steps[skey(id, i)]; return !!t && t > revAt(id); };
   const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => stepDone(id, i)).length / L[id].steps.length;
   function nextUp() {
     if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
@@ -514,7 +517,7 @@ ${B.domains.map(d => `<section class="bp-dom">
       const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
       const panel = document.createElement("div"); panel.className = "panel";
       el.append(intro, panel);
-      window.WIDGETS[step.widget](panel, { done: () => { const k = `${id}:${i}`; if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } }, step.config);
+      window.WIDGETS[step.widget](panel, { done: () => { const k = skey(id, i); if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } }, step.config);
     } else if (step.kind === "quiz") {
       const wrap = document.createElement("div"); wrap.className = "qs";
       const drawQuiz = () => {
@@ -537,7 +540,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
     document.getElementById("prev").addEventListener("click", () => go(i - 1));
     document.getElementById("next").addEventListener("click", () => {
-      state.steps[`${id}:${i}`] = Date.now(); touch();
+      state.steps[skey(id, i)] = Date.now(); touch();
       if (i < steps.length - 1) go(i + 1);
       else {
         const nextMod = MODS.find(m => m.n === mod.n + 1 && ready(m.id));

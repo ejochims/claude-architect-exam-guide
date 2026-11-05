@@ -6,7 +6,8 @@ window.LESSONS.m06 = {
     { f: "What does a subagent know about the coordinator's conversation?", b: "Nothing automatically. Its context is its AgentDefinition plus the prompt the coordinator writes, so include prior findings explicitly." },
     { f: "Every subagent succeeded but the report misses whole subtopics. Root cause?", b: "The coordinator's task decomposition was too narrow." },
     { f: "Prompt chaining vs dynamic decomposition?", b: "Chaining for predictable, fixed multi-step work (e.g. per-file review, then an integration pass). Dynamic for open-ended investigation where findings change the plan." },
-    { f: "Hub-and-spoke means…", b: "The coordinator routes all communication between subagents, giving observability, consistent error handling and controlled information flow." }
+    { f: "Hub-and-spoke means…", b: "The coordinator routes all communication between subagents, giving observability, consistent error handling and controlled information flow." },
+    { f: "What goes in a subagent's brief?", b: "The goal, the scope (and what's already covered), prior findings as structured records with sources, quality criteria, and the output shape. Not a step-by-step procedure." }
   ],
   steps: [
     {
@@ -31,6 +32,69 @@ window.LESSONS.m06 = {
       title: "What does each agent see?",
       intro: "A research coordinator, two research subagents and a synthesis subagent. Toggle the three settings and watch what lands in each context window.",
       widget: "contextViewer"
+    },
+    {
+      kind: "read", key: "brief",
+      title: "Writing the brief: the prompt is the subagent's whole world",
+      html: `
+<p class="lede">A subagent doesn't overhear anything. It gets its own definition plus one message from the coordinator. If something isn't in that message, the subagent doesn't know it, however obvious it is to the coordinator.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>A subagent works like a subflow or an invocable action. A flow you call from another flow sees only the input variables you map into it. It can't read the parent flow's variables, and it hands back only its output variables. The coordinator's Task prompt is the input mapping, and the subagent's final answer is the output. "Synthesize the findings into a report with sources," with no findings passed in, is like calling a subflow and forgetting to map its inputs: it runs, but on nothing.</p></div>
+<h3>What a subagent has, and what it doesn't</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Has automatically</th><th>Has only if the coordinator writes it in</th></tr></thead>
+<tbody>
+<tr><td>Its definition: description, system prompt, tools</td><td>The user's original question</td></tr>
+<tr><td>The Task prompt the coordinator wrote</td><td>What's already been covered, and what to skip</td></tr>
+<tr><td>Whatever its own tools fetch while it works</td><td>Other subagents' findings, with their sources</td></tr>
+<tr><td></td><td>Constraints the user gave earlier (audience, date range, length)</td></tr>
+<tr><td></td><td>What "good enough" means for this task</td></tr>
+</tbody></table></div>
+<h3>What a good brief carries</h3>
+<ol class="moves">
+<li><strong>The goal:</strong> the question to answer, who it's for and why it matters.</li>
+<li><strong>The scope:</strong> this subagent's subtopic, plus what's already covered or out of bounds. This prevents duplicate work across subagents.</li>
+<li><strong>The inputs, in full and structured:</strong> prior findings as records (claim, source URL, page, date), not a prose summary. Each time findings are retold as prose, sources drop out, like a game of telephone.</li>
+<li><strong>Quality criteria:</strong> what counts as a good source, and when the job is done ("primary sources from 2024 on; two independent sources for each key claim").</li>
+<li><strong>The output shape:</strong> return the same record structure, so the coordinator can pass results on without losing attribution.</li>
+</ol>
+<p><strong>What not to send: a step-by-step procedure.</strong> You'd brief an experienced consultant with the goal, the constraints and what good looks like, not a 14-step click path. A click path breaks the first time the best source is one its author never imagined, such as a government dataset when the steps only mention journals. Goals and criteria let the subagent adapt to what it finds.</p>
+<h3>Before and after</h3>
+<pre class="code"><code><span class="c"># Weak: the subagent has no findings and no sources to cite</span>
+<span class="s">"Synthesize the findings from the research phase into a report with sources."</span>
+
+<span class="c"># Strong: goal, inputs with sources, criteria, output</span>
+<span class="s">"Goal: a one-page brief for a hospital CIO on EU AI Act obligations, 2024-2026.
+Findings (use only these; each carries its source):
+[{claim: 'High-risk systems need a conformity assessment', source: 'eur-lex.europa.eu/...',
+  page: 12, date: '2024-07-12'}, ...]
+Criteria: cite the source of every claim. If two findings conflict, show both with
+their sources. Don't add claims that aren't in the findings.
+Return: the brief, then a list of gaps you noticed."</span></code></pre>
+<p>Notice what the synthesis subagent does <em>not</em> get: a web-search tool. Its job is to write from the findings. If it could search, it would re-research and might cite sources the findings never came from.</p>
+<div class="callout key"><div class="callout-label">The exam's pattern</div><ul style="margin:0;padding-left:18px">
+<li><strong>Symptom:</strong> a subagent ignores context, repeats work, can't cite, or misses a constraint.</li>
+<li><strong>Wrong fixes:</strong> tell it to try harder ("attach a source to every claim"), give it more tools, or let it "read the shared memory". There's no shared memory: contexts are isolated.</li>
+<li><strong>Right fix:</strong> put what it needs into the coordinator's prompt, as structured data, with goals and criteria rather than a procedure.</li>
+</ul></div>`
+    },
+    {
+      kind: "widget", key: "brief-sort",
+      title: "Where does the subagent get it?",
+      intro: "A coordinator delegates to a web-researcher subagent (tools: WebSearch, WebFetch). For each piece of information, decide where the subagent gets it.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "def", label: "Its own definition" }, { id: "brief", label: "Only from the coordinator's prompt" }, { id: "tools", label: "Its own tools, while it works" }],
+        items: [
+          ["Its standing instruction to return claim, URL and date for every finding.", "def", "Part of its AgentDefinition prompt, so it has it in every run."],
+          ["Which tools it may use.", "def", "Set by tools in its AgentDefinition."],
+          ["The user's original question, word for word.", "brief", "The coordinator saw it; the subagent didn't. Quote it in the prompt if it matters."],
+          ["That FDA guidance has already been covered and should be skipped.", "brief", "Scope and exclusions must be stated, or it will redo the work."],
+          ["Another research subagent's findings.", "brief", "Subagents never talk to each other. The coordinator passes results along."],
+          ["The source and date of each earlier finding it must build on.", "brief", "Pass findings as structured records so attribution survives."],
+          ["The text of an EU regulation page it decides to read.", "tools", "It fetches that itself with WebFetch."],
+          ["The user said earlier that the audience is non-technical hospital executives.", "brief", "Constraints from the coordinator's conversation don't reach it unless written in."]
+        ]
+      }
     },
     {
       kind: "read",
