@@ -6,7 +6,7 @@
   const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [] });
 
   // ---------- State and sync ----------
-  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
+  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false, echoPushes = [];
   try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
   // First attempts drive readiness. Older saves only kept the latest answer, so seed from it once.
   const seedFirst = s => { if (!Object.keys(s.first || {}).length) s.first = Object.fromEntries(Object.entries(s.answers || {}).map(([id, a]) => [id, { ok: a.ok, at: a.at, seeded: true }])); return s; };
@@ -80,7 +80,11 @@
         const needsPush = !remote || canon(merged) !== canon(merge(blank(), remote));
         state = merged;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-        if (needsPush && state.updatedAt) { dirty = true; flush(); }
+        // Loop breaker: answering the database with a push is fine now and then (another device was
+        // behind), but a copy of an older version of this app can keep disagreeing forever. Answer at
+        // most 3 times a minute; changes made on this device still sync through touch() as usual.
+        const now = Date.now(); echoPushes = echoPushes.filter(t => now - t < 60000);
+        if (needsPush && state.updatedAt && echoPushes.length < 3) { echoPushes.push(now); dirty = true; flush(); }
         else if (!saving) setSync("synced", "Synced");
         const r = route();
         if (changedLocal && !r.lesson && !r.drill && r.page !== "mock" && r.page !== "cards") render();
