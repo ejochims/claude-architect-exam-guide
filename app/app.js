@@ -3,7 +3,7 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [] });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
@@ -46,7 +46,9 @@
     out.last = later(a.last, b.last);
     out.plan = later(a.plan, b.plan);
     const seen = new Map();
-    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) seen.set(r.startedAt, r);
+    // Removed mocks stay removed on every device: keep the union of tombstones and drop those records.
+    out.removedMocks = [...new Set([...(a.removedMocks || []), ...(b.removedMocks || [])])];
+    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) if (!out.removedMocks.includes(r.startedAt)) seen.set(r.startedAt, r);
     out.mocks = [...seen.values()].sort((x, y) => y.at - x.at).slice(0, 10);
     const m = later(a.mock, b.mock, "startedAt");
     out.mock = m && !seen.has(m.startedAt) ? m : null;
@@ -630,7 +632,8 @@ ${HOLDOUT.length ? `<section class="mock-card">
   <a class="btn ghost" href="#exam-day">Read →</a>
 </section>
 ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="small" href="#mock-result">Latest review →</a></div>
-<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span></div>`).join("")}</div>` : ""}
+<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span>${(m.kind || "mock") === "mock" ? `<button type="button" class="linkbtn hist-rm" data-rm="${m.startedAt}" aria-label="Remove the ${fmtDate(m.at)} mock from history">Remove</button>` : "<span></span>"}</div>`).join("")}</div>
+<p class="small">Remove a mock you abandoned or started by mistake. Its answers still count as first attempts.</p>` : ""}
 <div class="sec-head" style="margin-top:34px"><h2>Scenario drills</h2><span class="small">the exam draws 4 of these 6</span></div>
 <section class="drills">
   ${B.scenarios.map(s => {
@@ -650,6 +653,13 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
 ${trendHtml()}
 <div class="sec-head" style="margin-top:34px"><h2>Your trap profile</h2><span class="small">the wrong-answer patterns you pick most</span></div>
 ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most frequent trap patterns will show up here.")}`;
+    app.querySelectorAll(".hist-rm").forEach(btn => btn.addEventListener("click", () => {
+      if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "Click again to remove"; return; }
+      const at = Number(btn.dataset.rm);
+      state.removedMocks = [...new Set([...(state.removedMocks || []), at])];
+      state.mocks = state.mocks.filter(r => r.startedAt !== at);
+      touch(); toast("Mock removed from history"); viewPractice();
+    }));
   }
 
   let drill = null;
@@ -761,7 +771,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
 <button class="btn ghost" type="button" id="mflag">${m.flags[q.id] ? "Unflag" : "Flag for review"}</button>
 <button class="btn" type="button" id="mnext">${i === m.qids.length - 1 ? "Review and submit" : "Next →"}</button></div>
 <div class="palette" aria-label="Question palette">${m.qids.map((id, k) => `<button type="button" data-k="${k}" class="${k === i ? "cur " : ""}${m.ans[id] != null ? "ans " : ""}${m.flags[id] ? "flag" : ""}" aria-label="Question ${k + 1}${m.ans[id] != null ? ", answered" : ""}${m.flags[id] ? ", flagged" : ""}">${k + 1}</button>`).join("")}</div>
-<div class="submit-box" id="sbox"><p><strong>${Object.keys(m.ans).length} of ${m.qids.length}</strong> answered${Object.keys(m.flags).length ? `, ${Object.keys(m.flags).length} flagged` : ""}.</p><button class="btn accent" type="button" id="msubmit">Submit exam</button><span id="sconfirm"></span></div></div>`;
+<div class="submit-box" id="sbox"><p><strong>${Object.keys(m.ans).length} of ${m.qids.length}</strong> answered${Object.keys(m.flags).length ? `, ${Object.keys(m.flags).length} flagged` : ""}.</p><button class="btn accent" type="button" id="msubmit">Submit exam</button>${m.kind === "readiness" ? "" : `<button class="btn ghost" type="button" id="mleave">Leave without scoring</button>`}<span id="sconfirm"></span></div></div>`;
     document.getElementById("mq").append(questionCard(q, { n: i + 1, total: m.qids.length, mode: "exam", selected: m.ans[q.id], onSelect: k => { if (k == null) delete m.ans[q.id]; else m.ans[q.id] = k; touch(); const pb = app.querySelector(`.palette [data-k="${i}"]`); pb && pb.classList.toggle("ans", k != null); } }));
     const go = k => { m.cur = k; touch(); viewMock(); window.scrollTo(0, 0); };
     document.getElementById("mprev").addEventListener("click", () => go(i - 1));
@@ -774,16 +784,30 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       if (!c.dataset.armed && un > 0) { c.dataset.armed = "1"; c.innerHTML = ` <span class="small">${un} unanswered. Click submit again to finish anyway.</span>`; return; }
       submitMock();
     });
+    document.getElementById("mleave")?.addEventListener("click", () => {
+      const c = document.getElementById("sconfirm");
+      if (c.dataset.leave !== "1") { c.dataset.leave = "1"; c.innerHTML = ` <span class="small">Nothing will be scored or saved to your history. Click again to leave.</span>`; return; }
+      discardMock("Mock discarded. Nothing was scored.");
+    });
     const timerEl = document.getElementById("timer");
     const tick = () => {
       if (!state.mock) return clearInterval(ticker);
       const left = LIMIT - (Date.now() - state.mock.startedAt);
-      if (left <= 0) { clearInterval(ticker); toast("Time's up. Exam submitted."); submitMock(); return; }
+      if (left <= 0) {
+        clearInterval(ticker);
+        // A practice mock that ran out of time with nothing answered was abandoned, not attempted.
+        if (state.mock.kind !== "readiness" && !Object.keys(state.mock.ans).length) return discardMock("Time ran out on a mock with no answers, so it was discarded.");
+        toast("Time's up. Exam submitted."); submitMock(); return;
+      }
       const mm = Math.floor(left / 60000), ss = Math.floor(left % 60000 / 1000);
       timerEl.textContent = `${mm}:${String(ss).padStart(2, "0")} left`;
       timerEl.classList.toggle("low", left < 10 * 60000);
     };
     clearInterval(ticker); tick(); ticker = setInterval(tick, 1000);
+  }
+  function discardMock(msg) {
+    state.mock = null; touch(); toast(msg);
+    if (location.hash === "#practice") render(); else location.hash = "#practice";
   }
   function viewMockResult(r = state.mocks[0]) {
     if (!r) { location.hash = "#mock"; return; }
