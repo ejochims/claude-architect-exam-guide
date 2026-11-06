@@ -2,7 +2,7 @@
 window.LESSONS = window.LESSONS || {};
 
 window.BLUEPRINT = {
-  examDate: "2026-12-31",
+  examDate: "2026-12-04", // booked sitting; the Plan page can override it
   domains: [
     { id: "d1", n: 1, name: "Agentic Architecture & Orchestration", short: "Agentic architecture", weight: 27 },
     { id: "d2", n: 2, name: "Tool Design & MCP Integration", short: "Tools & MCP", weight: 18 },
@@ -65,17 +65,17 @@ window.MODULES = [
   { id: "f03", n: "F3", title: "The Claude product map", principle: "Each product exists because the layer below left work for you.", tasks: [], minutes: 12 },
   { id: "m00", n: 0, title: "How this exam thinks", principle: "Every question rewards the proportionate fix for the real root cause.", tasks: [], minutes: 15 },
   { id: "m01", n: 1, title: "The agentic loop", principle: "The model is stateless; your loop is its memory and its clock.", tasks: ["1.1", "5.1"], minutes: 20 },
-  { id: "m02", n: 2, title: "Tools are the interface", principle: "The model chooses tools by reading their descriptions.", tasks: ["2.1", "2.3", "2.5"], minutes: 25 },
+  { id: "m02", n: 2, title: "Tools are the interface", principle: "The model chooses tools by reading their descriptions.", tasks: ["2.1", "2.3", "2.5"], minutes: 35 },
   { id: "m03", n: 3, title: "Prompts guide, code guarantees", principle: "Anything that must never fail belongs in code, not in the prompt.", tasks: ["1.4", "1.5"], minutes: 20 },
   { id: "m04", n: 4, title: "Errors are information", principle: "A failure the agent can't classify is a failure it can't recover from.", tasks: ["2.2", "5.3"], minutes: 20 },
   { id: "m05", n: 5, title: "MCP: integrate once", principle: "Expose a system once; every client can use it.", tasks: ["2.4"], minutes: 20 },
-  { id: "m06", n: 6, title: "Multi-agent orchestration", principle: "Isolated context is a feature you must feed explicitly.", tasks: ["1.2", "1.3", "1.6"], minutes: 30 },
+  { id: "m06", n: 6, title: "Multi-agent orchestration", principle: "Isolated context is a feature you must feed explicitly.", tasks: ["1.2", "1.3", "1.6"], minutes: 40 },
   { id: "m07", n: 7, title: "Attention is finite", principle: "What sits in context, and where, decides what gets used.", tasks: ["5.1", "5.4"], minutes: 25 },
   { id: "m08", n: 8, title: "Prompting for precision", principle: "Specific criteria and examples beat general exhortations.", tasks: ["4.1", "4.2", "4.6"], minutes: 25 },
-  { id: "m09", n: 9, title: "Structured extraction", principle: "A schema guarantees syntax, never truth.", tasks: ["4.3", "4.4"], minutes: 25 },
+  { id: "m09", n: 9, title: "Structured extraction", principle: "A schema guarantees syntax, never truth.", tasks: ["4.3", "4.4"], minutes: 45 },
   { id: "m10", n: 10, title: "Batch processing", principle: "Latency is a requirement, not a preference.", tasks: ["4.5"], minutes: 15 },
-  { id: "m11", n: 11, title: "Configuring Claude Code", principle: "Configuration is code: scope decides who gets it, and when.", tasks: ["3.1", "3.2", "3.3", "3.4", "3.5"], minutes: 35 },
-  { id: "m12", n: 12, title: "CI/CD and sessions", principle: "Automation needs non-interactive, machine-readable runs.", tasks: ["3.6", "1.7"], minutes: 25 },
+  { id: "m11", n: 11, title: "Configuring Claude Code", principle: "Configuration is code: scope decides who gets it, and when.", tasks: ["3.1", "3.2", "3.3", "3.4", "3.5"], minutes: 60 },
+  { id: "m12", n: 12, title: "CI/CD and sessions", principle: "Automation needs non-interactive, machine-readable runs.", tasks: ["3.6", "1.7"], minutes: 45 },
   { id: "m13", n: 13, title: "Escalation, review, provenance", principle: "Human attention is scarce; route it where it changes outcomes.", tasks: ["5.2", "5.5", "5.6"], minutes: 30 },
   { id: "m14", n: 14, title: "Capstone: think like the exam", principle: "Every distractor fails one of four moves in a recognizable way.", tasks: [], minutes: 20 },
   { id: "l01", n: "L1", title: "Lab: support agent with escalation", principle: "Rules that must hold live in the tools; judgment lives in the prompt.", tasks: [], minutes: 30 },

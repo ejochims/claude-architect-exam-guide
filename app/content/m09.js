@@ -1,4 +1,5 @@
 window.LESSONS.m09 = {
+  revised: "2026-11-05",
   cards: [
     { f: "Why add detected_pattern to each review finding?", b: "So you can see which code patterns produce the findings developers dismiss, and tune or turn off those checks." },
     { f: "Most reliable way to get schema-compliant structured output?", b: "Define an extraction tool whose input schema is your target schema, set tool_choice so it's called, and read tool_use.input. (Exam answer. Today strict: true or structured outputs guarantee the schema.)" },
@@ -9,6 +10,146 @@ window.LESSONS.m09 = {
     { f: "When won't a retry help?", b: "When the information isn't in the provided source (e.g. it's in a separate document). Retries only produce fabrications." }
   ],
   steps: [
+    {
+      kind: "read",
+      title: "Start here: what structured extraction is",
+      html: `
+<p class="lede">Structured extraction turns a messy document (a PDF invoice, a claim form, an email) into a clean record your systems can use: the right fields, the right types, and values that are actually true. Claude does the reading. Your design makes the result trustworthy.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>Think of turning an inbound email or a scanned form into a Case or a custom-object record with every field filled correctly, the job Document AI or an Agentforce action does. The <strong>schema</strong> is your object definition: fields, data types, picklists, which fields are required. Everything in this module maps onto choices you already make when you design an object.</p></div>
+<h3>The pipeline</h3>
+<div class="flow" aria-label="Extraction pipeline">
+<span class="box">Document</span><span class="arr">→</span>
+<span class="box">Claude + extraction tool (your schema)</span><span class="arr">→</span>
+<span class="box">tool_use input = a draft record (JSON)</span><span class="arr">→</span>
+<span class="box">Your validation code</span><span class="arr">→</span>
+<span class="box">Save · retry with the error · or send to a human</span>
+</div>
+<p>Thousands of documents a night usually go through the Batch API (Module 10), and low-confidence records go to a human review queue (Module 13). This module covers the middle: getting a well-formed draft record, then deciding whether to trust it.</p>
+<h3>Two different guarantees</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Guarantee</th><th>Question</th><th>What provides it</th></tr></thead>
+<tbody>
+<tr><td><strong>Shape (syntax)</strong></td><td>Is every field present, with the right type and an allowed value?</td><td>The schema, enforced by <code>tool_use</code></td></tr>
+<tr><td><strong>Truth (semantics)</strong></td><td>Are the values correct, consistent, and actually in the document?</td><td>Your validation code, retries with feedback, and human review</td></tr>
+</tbody></table></div>
+<p>Nearly every exam question here is about mixing these two up: assuming a perfect schema means a correct record, or retrying a problem that's really missing information.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>A Number field stops someone saving "about twelve hundred". It can't stop them typing 1,280 when the invoice says 1,208. Field types give you shape. Validation rules, duplicate rules and an approval queue give you truth. Extraction works the same way.</p></div>`
+    },
+    {
+      kind: "read",
+      title: "How tool_use enforces the shape, step by step",
+      html: `
+<p class="lede">The reliable way to get structured output is to define a "tool" whose input <em>is</em> your record, and make Claude call it. You never actually run the tool; you just read what Claude filled in.</p>
+<p><strong>1. You send the document plus a tool whose <code>input_schema</code> is your record definition:</strong></p>
+<pre class="code"><code>tools = [{
+  "name": "record_invoice",
+  "description": "Record the fields of one supplier invoice.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "vendor":          {"type": "string"},
+      "invoice_date":    {"type": "string", "description": "YYYY-MM-DD"},
+      "po_number":       {"type": ["string", "null"]},   <span class="c"># may be absent: allow null</span>
+      "stated_total":    {"type": "number"},
+      "category":        {"enum": ["hardware", "software", "services", "other", "unclear"]},
+      "category_detail": {"type": ["string", "null"]}    <span class="c"># filled when category is "other"</span>
+    },
+    "required": ["vendor", "invoice_date", "stated_total", "category"]
+  }
+}]
+tool_choice = {"type": "tool", "name": "record_invoice"}   <span class="c"># must call this tool</span></code></pre>
+<p><strong>2. Claude answers with a <code>tool_use</code> block</strong> (and <code>stop_reason: "tool_use"</code>):</p>
+<pre class="code"><code>{"type": "tool_use", "name": "record_invoice",
+ "input": {"vendor": "Northwind Supply", "invoice_date": "2026-10-14",
+           "po_number": null, "stated_total": 1280.50,
+           "category": "hardware", "category_detail": null}}</code></pre>
+<p><strong>3. Your code takes <code>input</code> as the draft record</strong> and validates it. That's the end of the extraction; there's no tool to execute.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>The tool is like an invocable action or a flow with typed input variables. Claude has to fill a form whose fields, types and picklists you defined. Asking in the prompt to "respond only in JSON" is like asking a user to type JSON into a long text area: it usually works, sometimes doesn't, and nothing checks it. That's why the exam prefers <code>tool_use</code> over prompt-only JSON.</p></div>
+<h3>Choosing <code>tool_choice</code></h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Situation</th><th>Setting</th></tr></thead>
+<tbody>
+<tr><td>One schema, and it must be filled (or a step that must run first, like <code>extract_metadata</code>)</td><td>Named tool: <code>{"type": "tool", "name": "…"}</code></td></tr>
+<tr><td>Several schemas (invoice, receipt, contract) and the document type is unknown</td><td><code>{"type": "any"}</code>: a tool call is guaranteed, and Claude picks the matching schema</td></tr>
+<tr><td>Claude may answer in prose instead</td><td><code>{"type": "auto"}</code>: no guarantee, so it's wrong for an extraction pipeline</td></tr>
+</tbody></table></div>
+<div class="callout today"><div class="callout-label">Real world today</div><p>On the exam, forcing the tool with <code>tool_choice</code> is the reliable answer. Today the strict guarantee comes from <code>strict: true</code> on the tool or from structured outputs, and some current models reject a forced <code>tool_choice</code>. The design ideas in this module (shape vs. truth, nullable fields, validation and retry) don't change either way.</p></div>`
+    },
+    {
+      kind: "read",
+      title: "Designing the schema like an object model",
+      html: `
+<p class="lede">Schema choices change Claude's behavior, just as field settings change how people fill in a page layout.</p>
+<h3>Required vs. nullable: the "N/A" problem</h3>
+<p>Make a field required on a page layout when reps often don't have the information, and you get "N/A", "TBD" and 01/01/1900 in your data. A model behaves the same way. If <code>renewal_date</code> is required and the contract never states one, Claude produces a plausible date. That's fabrication caused by your schema. The fix is to make the field <strong>nullable</strong> and say in the prompt: "return null when the document doesn't state it."</p>
+<h3>Enums are restricted picklists</h3>
+<ul>
+<li><strong>Known, stable values:</strong> an <code>enum</code>, like a restricted picklist.</li>
+<li><strong>Values that keep growing:</strong> add <code>"other"</code> plus a free-text <code>*_detail</code> field, the classic "Other (please specify)". New types get captured honestly instead of being forced into the nearest bucket.</li>
+<li><strong>Genuinely ambiguous inputs:</strong> add <code>"unclear"</code>, and route those records to review rather than letting the model guess.</li>
+</ul>
+<h3>Normalization rules belong in the prompt</h3>
+<p>Sources write "Mar 3", "03/03/26" and "3 March 2026". The schema can say <code>string</code>; it can't say which convention to use. Put a short data standard in the prompt: dates as YYYY-MM-DD, amounts as plain numbers with no currency symbol, country as an ISO code. It's the data dictionary you'd give a data-entry team.</p>
+<h3>Build the self-check into the record</h3>
+<p>Extract <code>calculated_total</code> (the sum of the line items) alongside <code>stated_total</code> (the printed total), plus a <code>conflict_detected</code> flag. Code can then compare them automatically.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>This is a roll-up summary sitting next to a manually entered total, with a formula field that flags when they disagree.</p></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Weak schema</th><th>Better schema</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><code>renewal_date</code>: required string</td><td>Nullable, and "return null if not stated"</td><td>Removes the pressure to invent a date</td></tr>
+<tr><td><code>category</code>: enum of 6, forced choice</td><td>The 6 values plus <code>"other"</code> + <code>category_detail</code>, plus <code>"unclear"</code></td><td>New and ambiguous cases are recorded, not misfiled</td></tr>
+<tr><td><code>total</code> only</td><td><code>stated_total</code> + <code>calculated_total</code> + <code>conflict_detected</code></td><td>Inconsistencies flag themselves</td></tr>
+</tbody></table></div>`
+    },
+    {
+      kind: "read",
+      title: "Validation and retry: how a good error message works",
+      html: `
+<p class="lede">With <code>tool_use</code>, the shape is handled. What's left is checking meaning, and deciding what to do when a check fails.</p>
+<h3>Two kinds of error</h3>
+<ul>
+<li><strong>Syntax errors:</strong> a missing required field, text where a number belongs, a value outside the enum. <code>tool_use</code> with a strict schema eliminates these.</li>
+<li><strong>Semantic errors:</strong> valid types, wrong meaning. Line items don't add up to the total; shipping landed in the tax field; the due date is before the invoice date; a date sits in a string field in the wrong format. No schema can express these, so your code checks them after extraction.</li>
+</ul>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>The schema is your field types. The semantic checks are your validation rules: cross-field logic such as "close date can't be before created date," evaluated after the data comes in.</p></div>
+<h3>Retry with the error, not "try again"</h3>
+<p>A good validation rule doesn't just say "save failed"; it says <em>what</em> is wrong and <em>where</em>. A good retry does the same. Send three things back to Claude:</p>
+<ol class="moves">
+<li>the original document;</li>
+<li>the failed extraction;</li>
+<li>the specific error, for example "line items sum to 1,180.00 but stated_total is 1,280.00; re-read the line items."</li>
+</ol>
+<p>Repeating the same prompt unchanged mostly reproduces the same mistake.</p>
+<h3>When a retry can't help</h3>
+<p>Retries fix <strong>format and structure</strong> problems. They can't create information that <strong>isn't in the input</strong>. If the PO number only exists on a separate purchase order you never sent, each retry is an invitation to invent one. It's like asking a rep three times for a number they don't have: eventually they'll make one up. The right moves are to return <code>null</code> and flag the record, to fetch and supply the missing document, or to send the record to a human.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Failure</th><th>Retry with feedback?</th></tr></thead>
+<tbody>
+<tr><td>Date as "March 3rd" when the standard is YYYY-MM-DD</td><td>Yes: a format error</td></tr>
+<tr><td>Shipping cost placed in the tax field</td><td>Yes: a structural error</td></tr>
+<tr><td>Extracted line items don't sum to the extracted total, though the document's own numbers agree</td><td>Yes: an extraction mistake the error message points to</td></tr>
+<tr><td>The document's own printed numbers disagree with each other</td><td>No: flag <code>conflict_detected</code> and route to review</td></tr>
+<tr><td>The value lives in another document you didn't provide</td><td>No: return null, or supply the document</td></tr>
+</tbody></table></div>`
+    },
+    {
+      kind: "widget",
+      title: "Who catches it?",
+      intro: "For each problem, decide what catches or fixes it: the schema itself, your validation code (and a retry with the error), or a human or more input.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "schema", label: "The schema (tool_use)" }, { id: "code", label: "Validation code + retry" }, { id: "human", label: "A human or more input" }],
+        items: [
+          ["Total came back as the text \"about 1,200\" in a number field.", "schema", "A type mismatch. The schema enforced by tool_use prevents it."],
+          ["The required vendor field is missing from the output.", "schema", "Required fields are part of the shape the schema guarantees."],
+          ["Category came back as \"Hardware\" when the enum only allows \"hardware\".", "schema", "Out-of-enum values are a syntax problem a strict schema rules out."],
+          ["Extracted line items sum to $1,180, but the extracted total is $1,280.", "code", "Valid types, wrong meaning. calculated_total vs stated_total catches it, and a retry quoting the mismatch fixes it."],
+          ["The due date extracted is earlier than the invoice date.", "code", "A cross-field rule, like a validation rule. Check it in code, then retry with the specific error."],
+          ["The PO number exists only on a separate purchase order you didn't send.", "human", "The information isn't in the input. Return null and flag it, or supply the document."],
+          ["A handwritten scan where the amount is illegible.", "human", "No retry can read what isn't legible. Return null or \"unclear\" and route to review."]
+        ]
+      }
+    },
     {
       kind: "read",
       title: "First principle: syntax is not truth",

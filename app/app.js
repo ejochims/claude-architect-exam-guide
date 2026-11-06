@@ -3,10 +3,10 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [] });
 
   // ---------- State and sync ----------
-  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false;
+  let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false, echoPushes = [];
   try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
   // First attempts drive readiness. Older saves only kept the latest answer, so seed from it once.
   const seedFirst = s => { if (!Object.keys(s.first || {}).length) s.first = Object.fromEntries(Object.entries(s.answers || {}).map(([id, a]) => [id, { ok: a.ok, at: a.at, seeded: true }])); return s; };
@@ -28,26 +28,39 @@
     saving = false;
     if (dirty) flush();
   }
-  const later = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) >= (y[k] || 0) ? x : y;
+  // Compare states by content, not key order: the database stores keys alphabetically, so a plain
+  // JSON.stringify comparison never matched and every save triggered another save.
+  const sortKeys = v => Array.isArray(v) ? v.map(sortKeys) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])])) : v;
+  const canon = v => JSON.stringify(sortKeys(v));
+  // merge() must give the same result whichever side is local, or two open devices push their
+  // own values at each other forever. So every choice is by value, with ties broken by content.
+  const later = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) > (y[k] || 0) ? x : y) : canon(x) >= canon(y) ? x : y;
+  const earlier = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) < (y[k] || 0) ? x : y) : canon(x) <= canon(y) ? x : y;
   function merge(a, b) {
     const out = blank();
     out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
-    for (const k of ["steps", "widgets"]) out[k] = Object.assign({}, b[k] || {}, a[k] || {});
-    for (const k of ["answers", "cards"]) {
+    for (const k of ["steps", "widgets"]) {
+      const m = Object.assign({}, b[k] || {});
+      for (const [id, t] of Object.entries(a[k] || {})) m[id] = Math.max(t || 0, m[id] || 0);
+      out[k] = m;
+    }
+    for (const k of ["answers", "cards", "lessonAns"]) {
       const m = Object.assign({}, b[k] || {});
       for (const [id, v] of Object.entries(a[k] || {})) m[id] = later(v, m[id]);
       out[k] = m;
     }
     const fm = Object.assign({}, b.first || {});
-    for (const [id, v] of Object.entries(a.first || {})) fm[id] = !fm[id] || (v.at || 0) < (fm[id].at || 0) ? v : fm[id];
+    for (const [id, v] of Object.entries(a.first || {})) fm[id] = earlier(v, fm[id]);
     out.first = fm;
     // The Readiness Check counts once: keep the earliest attempt from either device.
-    out.readiness = !a.readiness ? b.readiness || null : !b.readiness ? a.readiness : a.readiness.at <= b.readiness.at ? a.readiness : b.readiness;
+    out.readiness = earlier(a.readiness, b.readiness) || null;
     out.last = later(a.last, b.last);
     out.plan = later(a.plan, b.plan);
     const seen = new Map();
-    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) seen.set(r.startedAt, r);
-    out.mocks = [...seen.values()].sort((x, y) => y.at - x.at).slice(0, 10);
+    // Removed mocks stay removed on every device: keep the union of tombstones and drop those records.
+    out.removedMocks = [...new Set([...(a.removedMocks || []), ...(b.removedMocks || [])])].sort((x, y) => x - y);
+    for (const r of [...(a.mocks || []), ...(b.mocks || [])]) if (!out.removedMocks.includes(r.startedAt)) seen.set(r.startedAt, later(r, seen.get(r.startedAt)));
+    out.mocks = [...seen.values()].sort((x, y) => (y.at - x.at) || (y.startedAt - x.startedAt)).slice(0, 10);
     const m = later(a.mock, b.mock, "startedAt");
     out.mock = m && !seen.has(m.startedAt) ? m : null;
     return out;
@@ -63,11 +76,15 @@
       remoteRef.onSnapshot(snap => {
         const remote = snap.exists ? snap.data() : null;
         const merged = remote ? merge(state, remote) : state;
-        const changedLocal = JSON.stringify(merged) !== JSON.stringify(state);
-        const needsPush = !remote || JSON.stringify(merged) !== JSON.stringify(merge(blank(), remote));
+        const changedLocal = canon(merged) !== canon(state);
+        const needsPush = !remote || canon(merged) !== canon(merge(blank(), remote));
         state = merged;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-        if (needsPush && state.updatedAt) { dirty = true; flush(); }
+        // Loop breaker: answering the database with a push is fine now and then (another device was
+        // behind), but a copy of an older version of this app can keep disagreeing forever. Answer at
+        // most 3 times a minute; changes made on this device still sync through touch() as usual.
+        const now = Date.now(); echoPushes = echoPushes.filter(t => now - t < 60000);
+        if (needsPush && state.updatedAt && echoPushes.length < 3) { echoPushes.push(now); dirty = true; flush(); }
         else if (!saving) setSync("synced", "Synced");
         const r = route();
         if (changedLocal && !r.lesson && !r.drill && r.page !== "mock" && r.page !== "cards") render();
@@ -127,11 +144,18 @@
   }
   // Domain-weighted first-attempt accuracy over the domains you've practiced.
   const readiness = () => { const ds = domainStats().filter(d => d.tried), w = ds.reduce((a, d) => a + d.weight, 0); return w ? ds.reduce((a, d) => a + d.weight * d.mastery, 0) / w : 0; };
-  const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => state.steps[`${id}:${i}`]).length / L[id].steps.length;
+  // A lesson can carry `revised: "YYYY-MM-DD"`: step completions and lesson-quiz answers from before that
+  // date stop counting, so a rewritten module shows as not done. First-attempt records are untouched.
+  const revAt = id => (L[id] && L[id].revised) ? Date.parse(L[id].revised + "T00:00:00Z") : 0;
+  // A step's storage key. Steps added later carry their own `key`, so inserting one doesn't shift
+  // the keys of existing steps (which stay numbered by their position among unkeyed steps).
+  const skey = (id, i) => { const st = L[id].steps; if (st[i] && st[i].key) return `${id}:${st[i].key}`; let n = 0; for (let k = 0; k < i; k++) if (!st[k].key) n++; return `${id}:${n}`; };
+  const stepDone = (id, i) => { const t = state.steps[skey(id, i)]; return !!t && t > revAt(id); };
+  const modProgress = id => !L[id] ? 0 : L[id].steps.filter((_, i) => stepDone(id, i)).length / L[id].steps.length;
   function nextUp() {
     if (state.last && L[state.last.m] && modProgress(state.last.m) < 1) return { m: state.last.m, s: state.last.s };
     for (const m of MODS) if (L[m.id] && modProgress(m.id) < 1) {
-      const s = L[m.id].steps.findIndex((_, i) => !state.steps[`${m.id}:${i}`]);
+      const s = L[m.id].steps.findIndex((_, i) => !stepDone(m.id, i));
       return { m: m.id, s: Math.max(0, s) };
     }
     return null;
@@ -156,8 +180,12 @@
     ? Array.isArray(c) && c.length === keyCount(q) && c.every(i => q.options[i] && q.options[i].ok)
     : !!(q.options[c] && q.options[c].ok);
   const chose = (a, k) => a && (Array.isArray(a.choice) ? a.choice.includes(k) : a.choice === k);
-  // mode "learn": reveal on answer, remembers prior answer. "drill": fresh each time, reveal on answer. "exam": select only.
-  function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered } = {}) {
+  // mode "learn": a lesson quiz; shows only answers given in lessons (state.lessonAns), so answers from drills,
+  // mocks or the Readiness Check never pre-fill it. "drill": fresh each time. "exam": select only.
+  // "review": shows the given `reveal` answer read-only.
+  const lessonAnswer = id => { const la = state.lessonAns[id], q = QBYID[id]; return la && !la.cleared && la.at > revAt(q && q.module) ? la : null; };
+  const clearLessonAnswer = id => { state.lessonAns[id] = { cleared: true, at: Date.now() }; };
+  function questionCard(q, { n, total, mode = "learn", selected, onSelect, onAnswered, reveal } = {}) {
     const card = document.createElement("div"); card.className = "q";
     const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
     const order = optionOrder(q);
@@ -167,10 +195,11 @@
     const answer = choice => {
       const rec = { ok: isRight(q, choice), choice, at: Date.now() };
       state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
+      if (mode === "learn") state.lessonAns[q.id] = rec;
       touch(); draw(); onAnswered && onAnswered(rec);
     };
     const draw = () => {
-      const a = mode === "learn" ? state.answers[q.id] : mode === "drill" ? local : null;
+      const a = mode === "learn" ? lessonAnswer(q.id) : mode === "drill" ? local : mode === "review" ? reveal : null;
       card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${multi ? `<span class="chip multi-chip">Select ${need}</span>` : ""}${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
         <p class="q-stem">${q.stem}</p><div class="opts" role="${multi ? "group" : mode === "exam" ? "radiogroup" : "group"}"></div>`;
       const opts = card.querySelector(".opts");
@@ -184,7 +213,8 @@
         if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (chose(a, k)) b.classList.add("is-wrong"); if (multi && o.ok && !chose(a, k)) b.classList.add("is-missed"); }
         b.innerHTML = `<span class="letter">${"ABCDEF"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
         b.addEventListener("click", () => {
-          if (mode === "learn" && state.answers[q.id]) return;
+          if (mode === "learn" && lessonAnswer(q.id)) return;
+          if (mode === "review") return;
           if (mode === "drill" && local) return;
           if (multi) {
             pick = pick.includes(k) ? pick.filter(x => x !== k) : pick.length < need ? [...pick, k] : pick;
@@ -212,7 +242,7 @@
         res.innerHTML = `<span>${a.ok ? "Correct" : multi ? "Not this time. Scoring is all-or-nothing: every keyed option, and only those. The explanations show why." : "Not this time. The explanations show why."}</span>`;
         if (mode === "learn") {
           const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
-          again.addEventListener("click", () => { delete state.answers[q.id]; pick = multi ? [] : null; touch(); draw(); });
+          again.addEventListener("click", () => { clearLessonAnswer(q.id); pick = multi ? [] : null; touch(); draw(); });
           res.append(again);
         }
         // Route a miss back to the lesson that teaches it (unless that lesson is already open).
@@ -485,7 +515,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     <p class="l-principle">${esc(mod.principle)}</p>
     <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
   </header>
-  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : state.steps[`${id}:${k}`] ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
+  <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : stepDone(id, k) ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
   <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
   <article class="step" id="step"></article>
   <nav class="l-nav" aria-label="Step navigation">
@@ -502,10 +532,19 @@ ${B.domains.map(d => `<section class="bp-dom">
       const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
       const panel = document.createElement("div"); panel.className = "panel";
       el.append(intro, panel);
-      window.WIDGETS[step.widget](panel, { done: () => { const k = `${id}:${i}`; if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } }, step.config);
+      window.WIDGETS[step.widget](panel, { done: () => { const k = skey(id, i); if (!state.widgets[k]) { state.widgets[k] = Date.now(); touch(); } } }, step.config);
     } else if (step.kind === "quiz") {
       const wrap = document.createElement("div"); wrap.className = "qs";
-      step.questions.forEach((q, n) => wrap.append(questionCard(q, { n: n + 1, total: step.questions.length })));
+      const drawQuiz = () => {
+        wrap.innerHTML = "";
+        if (step.questions.some(q => lessonAnswer(q.id))) {
+          const reset = document.createElement("button"); reset.type = "button"; reset.className = "linkbtn quiz-reset"; reset.textContent = "Clear my answers and start this quiz over";
+          reset.addEventListener("click", () => { step.questions.forEach(q => clearLessonAnswer(q.id)); touch(); drawQuiz(); });
+          wrap.append(reset);
+        }
+        step.questions.forEach((q, n) => wrap.append(questionCard(q, { n: n + 1, total: step.questions.length, onAnswered: () => { if (!wrap.querySelector(".quiz-reset")) drawQuiz(); } })));
+      };
+      drawQuiz();
       el.append(wrap);
     } else if (step.kind === "recap") {
       const ol = document.createElement("ol"); ol.className = "recap";
@@ -516,7 +555,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
     document.getElementById("prev").addEventListener("click", () => go(i - 1));
     document.getElementById("next").addEventListener("click", () => {
-      state.steps[`${id}:${i}`] = Date.now(); touch();
+      state.steps[skey(id, i)] = Date.now(); touch();
       if (i < steps.length - 1) go(i + 1);
       else {
         const nextMod = MODS.find(m => m.n === mod.n + 1 && ready(m.id));
@@ -615,7 +654,8 @@ ${HOLDOUT.length ? `<section class="mock-card">
   <a class="btn ghost" href="#exam-day">Read →</a>
 </section>
 ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="small" href="#mock-result">Latest review →</a></div>
-<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span></div>`).join("")}</div>` : ""}
+<div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span>${(m.kind || "mock") === "mock" ? `<button type="button" class="linkbtn hist-rm" data-rm="${m.startedAt}" aria-label="Remove the ${fmtDate(m.at)} mock from history">Remove</button>` : "<span></span>"}</div>`).join("")}</div>
+<p class="small">Remove a mock you abandoned or started by mistake. Its answers still count as first attempts.</p>` : ""}
 <div class="sec-head" style="margin-top:34px"><h2>Scenario drills</h2><span class="small">the exam draws 4 of these 6</span></div>
 <section class="drills">
   ${B.scenarios.map(s => {
@@ -635,6 +675,13 @@ ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span
 ${trendHtml()}
 <div class="sec-head" style="margin-top:34px"><h2>Your trap profile</h2><span class="small">the wrong-answer patterns you pick most</span></div>
 ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most frequent trap patterns will show up here.")}`;
+    app.querySelectorAll(".hist-rm").forEach(btn => btn.addEventListener("click", () => {
+      if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "Click again to remove"; return; }
+      const at = Number(btn.dataset.rm);
+      state.removedMocks = [...new Set([...(state.removedMocks || []), at])];
+      state.mocks = state.mocks.filter(r => r.startedAt !== at);
+      touch(); toast("Mock removed from history"); viewPractice();
+    }));
   }
 
   let drill = null;
@@ -680,8 +727,13 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     const picked = new Set(), fams = new Set();
     for (const d of B.domains) {
       const need = Math.round(d.weight * 0.6), ofD = q => domOfTask(q.ts).id === d.id;
+      // The exam guide (v1.0) confirms multiple-response items but not how many. Seat about 10% per
+      // domain (1-2 each, about 6 a sitting) so every mock practices the format.
+      const multiCap = Math.max(1, Math.round(need * 0.1));
+      const pool = [...inDraw.filter(ofD), ...outside.filter(ofD)];
+      const first = pool.filter(isMulti).slice(0, multiCap);
       let n = 0;
-      for (const q of [...inDraw.filter(ofD), ...outside.filter(ofD)]) {
+      for (const q of [...first, ...pool.filter(q => !first.includes(q))]) {
         if (n === need) break;
         if (q.family && fams.has(q.family)) continue;
         picked.add(q); if (q.family) fams.add(q.family); n++;
@@ -725,7 +777,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
   }
   function viewMock() {
     if (!state.mock) {
-      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: about 60 questions (the count is unofficial), 120 minutes, 4 of the 6 scenarios chosen at random, no feedback until you submit. Most questions have one best answer; a few are multiple-response (\"Select 2\"), scored all-or-nothing, as on the real exam.")}
+      app.innerHTML = `${pageHead("Mock exam", "Full mock exam", "Modeled on the real exam: 60 questions, 120 minutes, 4 of the 6 scenarios chosen at random, no feedback until you submit. Most questions have one best answer; a few are multiple-response (\"Select 2\"), scored all-or-nothing, as on the real exam.")}
 <div class="read"><div class="panel">
 <ul class="rules"><li>The timer starts when you begin and keeps running if you leave the page.</li><li>The 60 questions always match the blueprint's domain weights. If the four drawn scenarios can't fill a domain's share, a few questions come from another scenario.</li><li>You can move between questions, change answers and flag questions to revisit.</li><li>Unanswered questions count as wrong. There's no penalty for guessing.</li><li>You get a domain-weighted percentage with a 95% range, not a scaled score. Anthropic doesn't publish how raw scores map to the 720 pass mark, and it varies by exam form. The practice bar is 80%.</li></ul>
 <button class="btn accent" type="button" id="begin">Begin the exam</button></div></div>`;
@@ -741,7 +793,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
 <button class="btn ghost" type="button" id="mflag">${m.flags[q.id] ? "Unflag" : "Flag for review"}</button>
 <button class="btn" type="button" id="mnext">${i === m.qids.length - 1 ? "Review and submit" : "Next →"}</button></div>
 <div class="palette" aria-label="Question palette">${m.qids.map((id, k) => `<button type="button" data-k="${k}" class="${k === i ? "cur " : ""}${m.ans[id] != null ? "ans " : ""}${m.flags[id] ? "flag" : ""}" aria-label="Question ${k + 1}${m.ans[id] != null ? ", answered" : ""}${m.flags[id] ? ", flagged" : ""}">${k + 1}</button>`).join("")}</div>
-<div class="submit-box" id="sbox"><p><strong>${Object.keys(m.ans).length} of ${m.qids.length}</strong> answered${Object.keys(m.flags).length ? `, ${Object.keys(m.flags).length} flagged` : ""}.</p><button class="btn accent" type="button" id="msubmit">Submit exam</button><span id="sconfirm"></span></div></div>`;
+<div class="submit-box" id="sbox"><p><strong>${Object.keys(m.ans).length} of ${m.qids.length}</strong> answered${Object.keys(m.flags).length ? `, ${Object.keys(m.flags).length} flagged` : ""}.</p><button class="btn accent" type="button" id="msubmit">Submit exam</button>${m.kind === "readiness" ? "" : `<button class="btn ghost" type="button" id="mleave">Leave without scoring</button>`}<span id="sconfirm"></span></div></div>`;
     document.getElementById("mq").append(questionCard(q, { n: i + 1, total: m.qids.length, mode: "exam", selected: m.ans[q.id], onSelect: k => { if (k == null) delete m.ans[q.id]; else m.ans[q.id] = k; touch(); const pb = app.querySelector(`.palette [data-k="${i}"]`); pb && pb.classList.toggle("ans", k != null); } }));
     const go = k => { m.cur = k; touch(); viewMock(); window.scrollTo(0, 0); };
     document.getElementById("mprev").addEventListener("click", () => go(i - 1));
@@ -754,16 +806,30 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       if (!c.dataset.armed && un > 0) { c.dataset.armed = "1"; c.innerHTML = ` <span class="small">${un} unanswered. Click submit again to finish anyway.</span>`; return; }
       submitMock();
     });
+    document.getElementById("mleave")?.addEventListener("click", () => {
+      const c = document.getElementById("sconfirm");
+      if (c.dataset.leave !== "1") { c.dataset.leave = "1"; c.innerHTML = ` <span class="small">Nothing will be scored or saved to your history. Click again to leave.</span>`; return; }
+      discardMock("Mock discarded. Nothing was scored.");
+    });
     const timerEl = document.getElementById("timer");
     const tick = () => {
       if (!state.mock) return clearInterval(ticker);
       const left = LIMIT - (Date.now() - state.mock.startedAt);
-      if (left <= 0) { clearInterval(ticker); toast("Time's up. Exam submitted."); submitMock(); return; }
+      if (left <= 0) {
+        clearInterval(ticker);
+        // A practice mock that ran out of time with nothing answered was abandoned, not attempted.
+        if (state.mock.kind !== "readiness" && !Object.keys(state.mock.ans).length) return discardMock("Time ran out on a mock with no answers, so it was discarded.");
+        toast("Time's up. Exam submitted."); submitMock(); return;
+      }
       const mm = Math.floor(left / 60000), ss = Math.floor(left % 60000 / 1000);
       timerEl.textContent = `${mm}:${String(ss).padStart(2, "0")} left`;
       timerEl.classList.toggle("low", left < 10 * 60000);
     };
     clearInterval(ticker); tick(); ticker = setInterval(tick, 1000);
+  }
+  function discardMock(msg) {
+    state.mock = null; touch(); toast(msg);
+    if (location.hash === "#practice") render(); else location.hash = "#practice";
   }
   function viewMockResult(r = state.mocks[0]) {
     if (!r) { location.hash = "#mock"; return; }
@@ -783,10 +849,7 @@ ${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
     const box = document.getElementById("missed");
     r.wrong.forEach(([id, c], k) => {
       const q = QBYID[id]; if (!q) return;
-      const saved = state.answers[id];
-      state.answers[id] = { ok: false, choice: c, at: saved ? saved.at : Date.now() };
-      const card = questionCard(q, { n: k + 1, total: r.wrong.length });
-      if (saved) state.answers[id] = saved; else delete state.answers[id];
+      const card = questionCard(q, { n: k + 1, total: r.wrong.length, mode: "review", reveal: { ok: false, choice: c } });
       card.querySelector(".q-res")?.remove();
       if (c === -1) card.querySelector(".q-meta").insertAdjacentHTML("beforeend", `<span class="chip">unanswered</span>`);
       box.append(card);
@@ -844,7 +907,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     if (m && L[m[1]]) {
       let s;
       if (m[2]) s = Number(m[2]) - 1;
-      else { s = L[m[1]].steps.findIndex((_, i) => !state.steps[`${m[1]}:${i}`]); if (s < 0) s = 0; }
+      else { s = L[m[1]].steps.findIndex((_, i) => !stepDone(m[1], i)); if (s < 0) s = 0; }
       return { lesson: m[1], step: s };
     }
     const d = h.match(/^drill-([1-6]|misses)$/);

@@ -5,7 +5,8 @@ window.LESSONS.m02 = {
     { f: "tool_choice \"any\" vs a named tool?", b: "\"any\" guarantees some tool call, and Claude picks which. {\"type\":\"tool\",\"name\":X} forces that specific tool." },
     { f: "Why not give every agent all 18 tools (the exam's example)?", b: "More tools means harder selection and cross-role misuse. Give each agent the 4–5 tools its role needs, plus scoped cross-role tools for frequent needs." },
     { f: "Grep vs Glob?", b: "Grep searches file contents (function names, error strings). Glob matches file paths and names (**/*.test.tsx)." },
-    { f: "Edit fails because the anchor text isn't unique. Fallback?", b: "Read the full file, then Write the modified version. (Exam answer. Today a longer, unique old_string or replace_all also works.)" }
+    { f: "Edit fails because the anchor text isn't unique. Fallback?", b: "Read the full file, then Write the modified version. (Exam answer. Today a longer, unique old_string or replace_all also works.)" },
+    { f: "Agent calls the wrong tool. What do you check before adding instructions or examples?", b: "The input that caused the choice: names, descriptions (boundaries), input schema, system-prompt rules, how many tools, tool_choice. Fix that one." }
   ],
   steps: [
     {
@@ -35,6 +36,70 @@ lookup_order: <span class="s">"Fetch one order by order number (e.g. #48213 or O
 <li><strong>Split generic tools</strong> (exam framing; today's tool docs also endorse grouping closely related operations behind an <code>action</code> parameter) into purpose-specific ones with clear contracts: <code>analyze_document</code> becomes <code>extract_data_points</code>, <code>summarize_content</code> and <code>verify_claim_against_source</code>.</li>
 <li><strong>Check the system prompt.</strong> A line like “whenever a customer mentions their account, start with get_customer” can override a perfect description and misroute order questions.</li>
 </ul>`
+    },
+    {
+      kind: "read", key: "misroute",
+      title: "Debugging a wrong tool call: find the input that caused it",
+      html: `
+<p class="lede">When an agent calls the wrong tool, the tempting fix is a stronger instruction or a few examples. First find <em>which input</em> made Claude choose it. Claude picks a tool from six things, and the right fix changes the one that caused the problem.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>You already do this in Agentforce. The reasoning engine picks a topic from its classification description and scope, then picks an action from the action's instructions. When it picks the wrong action, you don't add "ALWAYS use the right action" to the topic. You fix the action's instructions so it's clear when to use it and when not to. A Claude tool's description plays the same role as an action's instructions: it's the only thing the model reads to decide.</p></div>
+<h3>The six inputs to tool selection</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Input</th><th>What goes wrong</th><th>Fix it there</th></tr></thead>
+<tbody>
+<tr><td><strong>Name</strong></td><td>Two names that mean the same thing: <code>analyze_content</code>, <code>analyze_document</code></td><td>Rename or split by purpose</td></tr>
+<tr><td><strong>Description</strong></td><td>Says what the tool does, not where its job ends and its neighbor's begins</td><td>Add inputs, examples, limits and "use X instead when…"</td></tr>
+<tr><td><strong>Input schema</strong></td><td>Asks for an identifier the user never has (a customer ID when they gave an order number)</td><td>Accept what users actually provide, and describe each parameter</td></tr>
+<tr><td><strong>System prompt</strong></td><td>A keyword rule ("whenever an order is mentioned, call get_customer") overrides good descriptions</td><td>Remove or narrow the rule</td></tr>
+<tr><td><strong>How many tools</strong></td><td>18 tools with overlapping jobs; tools outside the agent's role</td><td>Give the role the 4–5 tools it needs</td></tr>
+<tr><td><strong><code>tool_choice</code></strong></td><td>The agent answers in prose when a tool call had to happen</td><td><code>"any"</code>, or a named tool</td></tr>
+</tbody></table></div>
+<h3>Diagnose in this order</h3>
+<ol class="moves">
+<li><strong>Read the tool list the way Claude does:</strong> names and descriptions only. Could <em>you</em> pick correctly from those alone? If not, fix the description. "Best first fix" questions usually land here.</li>
+<li><strong>Search the system prompt</strong> for rules that name a tool or a keyword. A specific instruction beats a general description, so a stray rule can misroute an agent whose descriptions are perfect.</li>
+<li><strong>Count the tools and look for overlap.</strong> If two tools could honestly both be right, rename, split or remove one.</li>
+<li><strong>If no tool is called at all,</strong> that's <code>tool_choice</code>, not wording.</li>
+<li><strong>Only then, examples.</strong> Few-shot examples help when a boundary is subtle. They don't repair an interface that invites the wrong choice.</li>
+</ol>
+<h3>A worked example</h3>
+<p>Users ask "did my refund go through?" and the agent calls <code>refund_order</code>, which issues a new refund. That's a wrong call that moves money.</p>
+<pre class="code"><code><span class="c"># Before: purpose only, no boundary</span>
+refund_order:      <span class="s">"Processes refunds."</span>
+get_refund_status: <span class="s">"Gets refund info."</span>
+
+<span class="c"># After: what it does, what it needs, where its job ends</span>
+refund_order:      <span class="s">"Issues a NEW refund for one order (order number, e.g. ORD-48213,
+                    and amount). Do not use to check an existing refund; use
+                    get_refund_status for 'did my refund go through?' questions."</span>
+get_refund_status: <span class="s">"Looks up refunds already issued for an order: amount, date,
+                    status (pending, sent, failed). Use for any question about a
+                    refund the customer already has."</span></code></pre>
+<p>The descriptions fix the <em>routing</em>. Because <code>refund_order</code> moves money, code should still require confirmation before it runs (Module 3). Descriptions guide the choice; code guarantees the rule.</p>
+<div class="callout key"><div class="callout-label">Why "stronger wording" loses on the exam</div><ul style="margin:0;padding-left:18px">
+<li><strong>A firmer instruction</strong> lowers a failure rate. Changing the input that caused the failure removes it.</li>
+<li><strong>Examples</strong> teach Claude to imitate. They don't tell it where one tool's job ends.</li>
+<li><strong>The cue:</strong> when a question asks for the "best first fix" or the "most reliable" fix, choose the option that changes the input behind the bad choice. That's usually the description, a system-prompt rule, the tool set or <code>tool_choice</code>.</li>
+</ul></div>`
+    },
+    {
+      kind: "widget", key: "misroute-sort",
+      title: "Where does the fix go?",
+      intro: "Each agent makes a bad tool choice. Decide which input to change.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "desc", label: "Tool description" }, { id: "sys", label: "System prompt" }, { id: "set", label: "Tool set (names, splits, how many)" }, { id: "choice", label: "tool_choice" }],
+        items: [
+          ["lookup_invoice says only \"Gets invoice data.\" The agent uses it for payment-status questions that belong to get_payment.", "desc", "Purpose with no boundary. Say what it doesn't cover and which tool to use instead."],
+          ["The system prompt says \"For anything involving money, call billing_summary first.\" Refund-status questions go to billing_summary even though every description is clear.", "sys", "A keyword rule is overriding good descriptions. Narrow or remove it."],
+          ["An agent has analyze_content and analyze_document, and picks between them almost at random.", "set", "The names mean the same thing. Rename or split them by purpose."],
+          ["A pipeline with four extraction tools returns a prose summary instead of a tool call in 3% of responses.", "choice", "\"auto\" allows prose. \"any\" guarantees a call, and Claude still picks the schema."],
+          ["A synthesis agent was given web search and keeps searching instead of writing.", "set", "A tool outside its role gets used. Remove it, or give it a narrow verify_fact tool."],
+          ["search_docs never says it covers only public help articles, so the agent uses it for questions about a customer's own account.", "desc", "State the limit, and name the account tool to use instead."],
+          ["extract_metadata must run before any other step, but the agent sometimes skips it.", "choice", "Force that named tool for the first turn, then continue."],
+          ["An agent with 18 tools across billing, shipping and accounts misroutes more each time a tool is added.", "set", "Split the work across agents with 4–5 role tools each."]
+        ]
+      }
     },
     {
       kind: "read",
