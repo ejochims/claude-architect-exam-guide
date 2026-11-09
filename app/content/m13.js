@@ -159,7 +159,7 @@ window.LESSONS.m13 = {
           options: [
             { t: "Break the 97% down by document type and by field before deciding.", ok: true, why: "An aggregate can hide weak segments. Validate per segment before cutting review." },
             { t: "Approve the change, since 97% exceeds the 95% accuracy target agreed with leadership.", why: "97% overall can include 80% on one document type or critical field." },
-            { t: "Raise the confidence threshold to 0.99 so only near-certain extractions skip review.", why: "A threshold isn't meaningful until confidence is calibrated and segments are checked." },
+            { t: "Raise the confidence threshold to 0.99 so only near-certain extractions skip review.", trap: "T4", why: "A threshold isn't meaningful until confidence is calibrated and segments are checked." },
             { t: "Run the pipeline twice on the same 20,000 documents and compare the two sets of outputs.", why: "Measures consistency, not accuracy." }
           ]
         },

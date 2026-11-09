@@ -104,6 +104,19 @@
 
   // ---------- Helpers ----------
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Exam mode: hide "Real world today" notes, for final-week review in the exam's own terms.
+  // It's a per-device preference, so it lives in localStorage and not in the synced progress.
+  const EXKEY = "cca-exam-mode";
+  let examMode = false; try { examMode = localStorage.getItem(EXKEY) === "1"; } catch (e) {}
+  const applyExamMode = () => document.documentElement.classList.toggle("exam-mode", examMode);
+  const setExamMode = on => { examMode = on; try { localStorage.setItem(EXKEY, on ? "1" : "0"); } catch (e) {} applyExamMode(); };
+  applyExamMode();
+  // Mark the today notes so CSS can hide them: the callouts, and parenthetical asides that mention "today".
+  const T = html => String(html)
+    .replace(/<div class="callout today">(?=<div class="callout-label">Real world today)/g, '<div class="callout today rw">')
+    .replace(/\s*\((?:[^()]*\b[Tt]oday\b[^()]*)\)/g, m => `<span class="today-inline">${m}</span>`);
+  const examToggle = () => `<button type="button" class="linkbtn exam-toggle" data-exam-mode aria-pressed="${examMode}">${examMode ? "Exam mode is on: “today” notes are hidden. Show them" : "Exam mode: hide the “today” notes"}</button>`;
+  const wireExamToggle = () => app.querySelectorAll("[data-exam-mode]").forEach(b => b.addEventListener("click", () => { setExamMode(!examMode); render(); }));
   const domOfTask = t => B.domains.find(d => t.startsWith(d.n + "."));
   const taskChip = t => `<span class="chip dom-${domOfTask(t).id}" title="${esc(B.tasks[t])}">${t}</span>`;
   const daysLeft = () => Math.max(0, Math.ceil((new Date(examDate() + "T23:59:59") - new Date()) / 86400000));
@@ -211,7 +224,7 @@
         if (multi && !revealed) { b.setAttribute("role", "checkbox"); b.setAttribute("aria-checked", String(on)); if (on) b.classList.add("is-sel"); }
         else if (mode === "exam") { b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(on)); if (on) b.classList.add("is-sel"); }
         if (revealed) { b.disabled = true; if (o.ok) b.classList.add("is-right"); else if (chose(a, k)) b.classList.add("is-wrong"); if (multi && o.ok && !chose(a, k)) b.classList.add("is-missed"); }
-        b.innerHTML = `<span class="letter">${"ABCDEF"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${o.why}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
+        b.innerHTML = `<span class="letter">${"ABCDEF"[pos]}</span><span class="opt-body">${o.t}${revealed ? `<span class="opt-why">${T(o.why)}</span>${o.trap && !o.ok ? `<span class="trap-badge">Trap: ${esc(TRAPS[o.trap].name)}</span>` : ""}` : ""}</span>`;
         b.addEventListener("click", () => {
           if (mode === "learn" && lessonAnswer(q.id)) return;
           if (mode === "review") return;
@@ -472,12 +485,13 @@ ${weeks.length ? weeks.map(w => `<div class="plan-week"><div class="eyebrow">Wee
   }
   function viewToday() {
     app.innerHTML = `${pageHead("Exam vs. today", "Answer the exam in its own terms", "The exam blueprint was written before some product changes. On the exam, choose the blueprint's answer. At work, use what ships today. Every row links to the official source.")}
+<div class="panel" style="margin-bottom:18px"><h3 style="margin:0 0 6px">Exam mode</h3><p>For final-week review, hide the “Real world today” notes in lessons, flashcards and answer explanations, so you rehearse only the answers the exam expects. This page stays available either way.</p><p style="margin-top:8px">${examToggle()}</p></div>
 <div class="bp-rows">${TODAY.map(r => `<div class="panel" style="margin-bottom:14px">
   <h3 style="margin:0 0 6px">${esc(r.topic)} <span class="small mono">${esc(r.ts)}</span></h3>
   <p><strong>Exam:</strong> ${esc(r.exam)}</p>
   <p><strong>Today:</strong> ${esc(r.today)}</p>
   <p class="small"><a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a></p></div>`).join("")}</div>`;
-    app.querySelector(".page-head").insertAdjacentHTML("beforeend", printBtn()); wirePrint();
+    app.querySelector(".page-head").insertAdjacentHTML("beforeend", printBtn()); wirePrint(); wireExamToggle();
   }
   function viewBlueprint() {
     const tm = taskMastery();
@@ -514,6 +528,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     <h1>${esc(mod.title)}</h1>
     <p class="l-principle">${esc(mod.principle)}</p>
     <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
+    ${examToggle()}
   </header>
   <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : stepDone(id, k) ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
   <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
@@ -526,7 +541,7 @@ ${B.domains.map(d => `<section class="bp-dom">
     const el = document.getElementById("step");
     el.append(Object.assign(document.createElement("h2"), { textContent: step.title }));
     if (step.kind === "read") {
-      const p = document.createElement("div"); p.className = "prose"; p.innerHTML = step.html; el.append(p);
+      const p = document.createElement("div"); p.className = "prose"; p.innerHTML = T(step.html); el.append(p);
       p.querySelectorAll("[data-embed]").forEach(n => window.EMBEDS[n.dataset.embed] && window.EMBEDS[n.dataset.embed](n));
     } else if (step.kind === "widget") {
       const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
@@ -548,9 +563,10 @@ ${B.domains.map(d => `<section class="bp-dom">
       el.append(wrap);
     } else if (step.kind === "recap") {
       const ol = document.createElement("ol"); ol.className = "recap";
-      ol.innerHTML = step.points.map(p => `<li>${esc(p)}</li>`).join("");
+      ol.innerHTML = step.points.map(p => `<li>${T(esc(p))}</li>`).join("");
       el.append(ol);
     }
+    wireExamToggle();
     const go = k => { location.hash = `#${id}-${k + 1}`; };
     app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
     document.getElementById("prev").addEventListener("click", () => go(i - 1));
@@ -732,8 +748,13 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       const multiCap = Math.max(1, Math.round(need * 0.1));
       const pool = [...inDraw.filter(ofD), ...outside.filter(ofD)];
       const first = pool.filter(isMulti).slice(0, multiCap);
+      // Then give about half the domain's seats to option-family questions from the drawn scenarios. In those,
+      // every option is a sound practice and one constraint in the stem decides, which is the harder skill;
+      // the rest of the bank mostly tests recognizing the best practice and would let a mock read high.
+      const judg = inDraw.filter(q => ofD(q) && q.family && !first.includes(q)).slice(0, Math.ceil(need * 0.5));
+      const lead = [...first, ...judg];
       let n = 0;
-      for (const q of [...first, ...pool.filter(q => !first.includes(q))]) {
+      for (const q of [...lead, ...pool.filter(q => !lead.includes(q))]) {
         if (n === need) break;
         if (q.family && fams.has(q.family)) continue;
         picked.add(q); if (q.family) fams.add(q.family); n++;
@@ -747,13 +768,14 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
   }
   function submitMock() {
     const m = state.mock; if (!m) return;
-    let correct = 0; const dom = {}, wrong = [], multi = [0, 0];
+    let correct = 0; const dom = {}, wrong = [], multi = [0, 0], judg = [0, 0], recog = [0, 0];
     for (const id of m.qids) {
       const q = QBYID[id]; if (!q) continue;
       const d = domOfTask(q.ts).id; dom[d] = dom[d] || [0, 0]; dom[d][1]++;
       const c = m.ans[id];
       const ok = isRight(q, c);
-      if (isMulti(q)) { multi[1]++; if (ok) multi[0]++; }
+      const kindTally = isMulti(q) ? multi : q.family ? judg : recog;
+      kindTally[1]++; if (ok) kindTally[0]++;
       if (ok) { correct++; dom[d][0]++; } else wrong.push([id, c == null ? -1 : c]);
       if (c != null) { state.answers[id] = { ok, choice: c, at: Date.now() }; recordFirst(id, ok); }
     }
@@ -761,7 +783,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     // Weight each domain's accuracy by its blueprint share, so scores compare across scenario draws.
     const present = B.domains.filter(d => dom[d.id]), wsum = present.reduce((a, d) => a + d.weight, 0);
     const wpct = wsum ? present.reduce((a, d) => a + d.weight * dom[d.id][0] / dom[d.id][1], 0) / wsum : 0;
-    const rec = { kind: m.kind || "mock", at: Date.now(), startedAt: m.startedAt, correct, total, pct, wpct, ci: wilson(correct, total), scen: m.scen, dom, wrong, multi, mins: Math.round((Date.now() - m.startedAt) / 60000) };
+    const rec = { kind: m.kind || "mock", at: Date.now(), startedAt: m.startedAt, correct, total, pct, wpct, ci: wilson(correct, total), scen: m.scen, dom, wrong, multi, judg, recog, mins: Math.round((Date.now() - m.startedAt) / 60000) };
     if (rec.kind === "readiness") state.readiness = rec; else state.mocks = [rec, ...state.mocks].slice(0, 10);
     state.mock = null; touch();
     location.hash = rec.kind === "readiness" ? "#readiness" : "#mock-result";
@@ -769,9 +791,9 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
   function viewReadiness() {
     if (state.readiness) return viewMockResult(state.readiness);
     if (state.mock) { location.hash = "#mock"; return; }
-    app.innerHTML = `${pageHead("Readiness Check", "One cold attempt", `${HOLDOUT.length} questions you've never seen, 10 from each scenario, weighted like the exam. It's the app's best signal of exam readiness, so it only counts once.`)}
+    app.innerHTML = `${pageHead("Readiness Check", "One cold attempt", `${HOLDOUT.length} questions you've never seen, ${HOLDOUT.length / B.scenarios.length} from each scenario (${HOLDOUT.filter(isMulti).length} of them multiple-response), weighted like the exam. It's the app's best signal of exam readiness, so it only counts once.`)}
 <div class="read"><div class="panel">
-<ul class="rules"><li>Take it once, after you've finished the modules and practice. Your first attempt is the one that counts; it can't be reset.</li><li>120-minute timer, no feedback until you submit, unanswered questions count as wrong.</li><li>The booking bar is 80% overall with every domain at 70% or more. At ${HOLDOUT.length} questions, a score of 80% has a 95% range of about 68–88%, so treat it as one signal alongside your mocks and the official practice exam.</li></ul>
+<ul class="rules"><li>Take it once, after you've finished the modules and practice. Your first attempt is the one that counts; it can't be reset.</li><li>${HOLDOUT.length * 2}-minute timer (two minutes a question, the exam's pace), no feedback until you submit, unanswered questions count as wrong.</li><li>The booking bar is 80% overall with every domain at 70% or more. At ${HOLDOUT.length} questions, a score of 80% has a 95% range of about 68–88%, so treat it as one signal alongside your mocks and the official practice exam.</li></ul>
 <button class="btn accent" type="button" id="rbegin">Begin the Readiness Check</button></div></div>`;
     document.getElementById("rbegin").addEventListener("click", () => { startMock("readiness"); location.hash = "#mock"; });
   }
@@ -784,7 +806,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       document.getElementById("begin").addEventListener("click", () => { startMock(); viewMock(); });
       return;
     }
-    const m = state.mock, LIMIT = 120 * 60000;
+    const m = state.mock, LIMIT = (m.kind === "readiness" ? m.qids.length * 2 : 120) * 60000;
     const i = Math.min(m.cur || 0, m.qids.length - 1), q = QBYID[m.qids[i]];
     const s = B.scenarios.find(x => x.n === q.scenario);
     app.innerHTML = `<div class="exam-bar"><span class="eyebrow">${m.kind === "readiness" ? "Readiness Check · " : ""}Scenario ${s.n} · ${esc(s.name)}</span><span class="timer" id="timer"></span></div>
@@ -841,6 +863,9 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     app.innerHTML = `${pageHead(`${ready ? "Readiness Check" : "Mock exam"} · ${fmtDate(r.at)}`, `${Math.round((ready ? r.pct : w) * 100)}% <span class="score-of">${ready ? "first attempt" : "domain-weighted"}</span>`, `${r.correct} of ${r.total} correct (${Math.round(r.pct * 100)}% raw, 95% range ${Math.round(ci[0] * 100)}–${Math.round(ci[1] * 100)}%) in ${r.mins} minutes.${r.multi && r.multi[1] ? ` Multiple-response: ${r.multi[0]} of ${r.multi[1]} correct.` : ""} ${verdict}`)}
 <div class="sec-head"><h2>By domain</h2></div>
 <div class="bp-rows">${B.domains.map(d => { const v = r.dom[d.id]; if (!v) return ""; return `<div class="bp-row"><span class="chip dom-${d.id}">D${d.n}</span><span>${esc(d.name)}</span><span class="bar"><span class="dom-bg-${d.id}" style="width:${v[0] / v[1] * 100}%"></span></span><span class="bp-pct">${v[0]}/${v[1]}</span></div>`; }).join("")}</div>
+${r.judg ? `<div class="sec-head" style="margin-top:30px"><h2>By question type</h2></div>
+<p class="small" style="margin-bottom:10px">Scenario-judgment questions offer four sound practices and one detail in the question decides. Recognition questions have one best practice among weaker options. If judgment trails recognition by 10 points or more, drill reading the stem for the deciding constraint.</p>
+<div class="bp-rows">${[["Scenario judgment", r.judg], ["Recognition", r.recog], ["Multiple response", r.multi]].map(([name, v]) => v && v[1] ? `<div class="bp-row qtype-row"><span class="chip">${v[1]}</span><span>${name}</span><span class="bar"><span style="width:${v[0] / v[1] * 100}%;background:var(--accent)"></span></span><span class="bp-pct">${v[0]}/${v[1]}</span></div>` : "").join("")}</div>` : ""}
 <div class="sec-head" style="margin-top:30px"><h2>Trap patterns in this sitting</h2></div>
 ${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
 <div class="sec-head" style="margin-top:30px"><h2>Review missed questions</h2><span class="small">${r.wrong.length} to review</span></div>
@@ -872,8 +897,8 @@ ${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
 <select id="deckf" class="sel"><option value="all">All modules</option>${MODS.filter(m => (L[m.id] || {}).cards).map(m => `<option value="${m.id}" ${filter === m.id ? "selected" : ""}>Module ${m.n}: ${esc(m.title)}</option>`).join("")}</select>
 ${cur ? `<div class="flash ${deck.flipped ? "flipped" : ""}" id="flash" tabindex="0" role="button" aria-label="Flashcard. Press space to reveal.">
   <div class="flash-meta"><span class="eyebrow">Module ${cur.module.n} · ${esc(cur.module.title)}</span><span class="small">${deck.queue.length} left</span></div>
-  <div class="flash-f">${esc(cur.f)}</div>
-  ${deck.flipped ? `<div class="flash-b">${esc(cur.b)}</div>` : `<div class="flash-hint small">Tap or press space to reveal</div>`}
+  <div class="flash-f">${T(esc(cur.f))}</div>
+  ${deck.flipped ? `<div class="flash-b">${T(esc(cur.b))}</div>` : `<div class="flash-hint small">Tap or press space to reveal</div>`}
 </div>
 ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" type="button" id="again">Again <kbd>1</kbd></button><button class="btn accent" type="button" id="got">Got it <kbd>2</kbd></button></div>` : ""}`
   : `<div class="panel" style="margin-top:16px"><div class="big-num">All caught up</div><p class="small">No cards due${filter === "all" ? "" : " in this deck"}. ${deck.seen ? `You reviewed ${deck.seen} cards.` : ""} Come back tomorrow, or study ahead below.</p><button class="btn ghost" type="button" id="ahead">Study all cards in this deck now</button></div>`}

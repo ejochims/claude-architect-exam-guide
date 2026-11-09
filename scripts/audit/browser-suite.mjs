@@ -55,7 +55,7 @@ async function run(viewport, colorScheme) {
   // Each scenario drill: answer the first question and advance. A multiple-response item needs its full set, then "Check answer".
   const answerCard = async () => {
     const opts = page.locator(".q .opt"); await opts.first().click();
-    if (await page.locator(".q .multi-bar").count()) { await opts.nth(1).click(); await page.locator(".q .multi-bar .btn").click(); }
+    if (await page.locator(".q .multi-bar").count()) { const check = page.locator(".q .multi-bar .btn"); for (let k = 1; k < 5 && await check.isDisabled(); k++) await opts.nth(k).click(); await check.click(); } // "Select THREE" needs a third pick
   };
   for (let s = 1; s <= 6; s++) { await visit(`#drill-${s}`); await answerCard(); await page.locator("#dnext").click(); checks++; }
   await multiChecks(page, tag, visit);
@@ -78,14 +78,36 @@ async function run(viewport, colorScheme) {
   // Readiness Check: begin, submit, confirm it's recorded once and covers every holdout item.
   await visit("#readiness"); await page.locator("#rbegin").click(); await page.waitForTimeout(80);
   const qids = await page.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")).mock.qids);
-  if (qids.length !== 60 || !qids.every(id => id.startsWith("h"))) problems.push(`${tag}: readiness check should be the 60 holdout items, got ${qids.length}`);
+  if (qids.length !== 66 || !qids.every(id => id.startsWith("h"))) problems.push(`${tag}: readiness check should be the 66 holdout items, got ${qids.length}`);
   await page.locator(".q .opt").first().click();
   await page.locator("#msubmit").click(); await page.locator("#msubmit").click(); await page.waitForTimeout(100); checks++;
   const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")).readiness);
-  if (!rec || rec.total !== 60) problems.push(`${tag}: readiness result not recorded`);
+  if (!rec || rec.total !== 66) problems.push(`${tag}: readiness result not recorded`);
   await visit("#readiness");
   if (await page.locator("#rbegin").count()) problems.push(`${tag}: readiness check can be started a second time`);
 
+  // Exam mode hides the "Real world today" callouts and parenthetical asides; turning it off restores them.
+  await visit("#m02-4");
+  const todayShown = () => page.evaluate(() => [...document.querySelectorAll(".callout.today.rw, .today-inline")].filter(n => n.offsetParent !== null).length);
+  if (!(await todayShown())) problems.push(`${tag}: m02 step 4 should show today notes by default`);
+  await page.locator("[data-exam-mode]").first().click(); await page.waitForTimeout(60);
+  if (await todayShown()) problems.push(`${tag}: exam mode left today notes visible`);
+  await visit("#m11-5");
+  if (await todayShown()) problems.push(`${tag}: exam mode didn't carry to another lesson`);
+  await visit("#today"); await page.locator("[data-exam-mode]").first().click(); await page.waitForTimeout(60);
+  await visit("#m02-4");
+  if (!(await todayShown())) problems.push(`${tag}: turning exam mode off didn't restore today notes`);
+  // The new foundations lesson renders, and a submitted mock reports scores by question type.
+  await visit("#f04-2");
+  if (!(await page.locator("pre.code").count())) problems.push(`${tag}: f04 step 2 is missing its code sample`);
+  await visit("#mock"); if (await page.locator("#begin").count()) await page.locator("#begin").click();
+  await page.waitForTimeout(80);
+  const mq = await page.evaluate(() => { const s = JSON.parse(localStorage.getItem("cca-study-progress-v1")); return s.mock ? s.mock.qids : []; });
+  const famShare = await page.evaluate(ids => { const fam = new Set(window.BANK.filter(q => q.family).map(q => q.id)); return ids.filter(id => fam.has(id)).length; }, mq);
+  if (mq.length !== 60 || famShare < 20) problems.push(`${tag}: mock should seat 60 questions with at least 20 option-family items, got ${mq.length} and ${famShare}`);
+  await page.locator(".opt").first().click(); await page.locator("#msubmit").click(); await page.locator("#msubmit").click(); await page.waitForTimeout(120);
+  if (!(await page.locator(".qtype-row").count())) problems.push(`${tag}: mock result is missing the by-question-type rows`);
+  checks += 6;
   await browser.close();
 
   // Readiness ring: first attempts only, so retrying doesn't raise it. Fresh context, so no earlier answers.

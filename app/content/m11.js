@@ -122,9 +122,9 @@ window.LESSONS.m11 = {
     },
     {
       kind: "read",
-      title: "First principle: scope decides who gets it, and when",
+      title: "Reference: every mechanism, where it lives, when it loads",
       html: `
-<p class="lede">Every Claude Code configuration question comes down to two things: <strong>who</strong> should get this behavior (just me, or the whole team via git) and <strong>when</strong> it should load (always, for matching files only, or on demand).</p>
+<p class="lede">The tour showed one team's files in use. This step is the reference version: each mechanism defined once, then one table to come back to.</p>
 <div class="callout key"><div class="callout-label">Why it exists</div><ul style="margin:0;padding-left:18px"><li><strong>Problem before.</strong> Claude is stateless, so without help every session starts knowing nothing about your project's conventions.</li><li><strong>What CLAUDE.md is.</strong> a Markdown file of instructions that Claude Code automatically loads into the model's context at the start of a session (its “memory”). Files can live at user level (<code>~/.claude/CLAUDE.md</code>), project level (committed in the repo) and in subdirectories (loaded when Claude works there).</li><li><strong>Rules, commands, skills.</strong> <strong>rules</strong> (<code>.claude/rules/*.md</code>) are instruction files that can be scoped to file patterns; <strong>commands</strong> are saved prompts you run as <code>/name</code>; <strong>skills</strong> are folders with a <code>SKILL.md</code> (plus optional scripts) that load only when invoked or relevant.</li><li><strong>@import.</strong> pulls another file into CLAUDE.md in full, so it organizes memory but doesn't save context. Path-scoped rules and skills are what keep context small.</li></ul></div>
 <div class="table-wrap"><table>
 <thead><tr><th>Mechanism</th><th>Location</th><th>Who</th><th>When it loads</th></tr></thead>
@@ -138,7 +138,6 @@ window.LESSONS.m11 = {
 <tr><td>Skills</td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code> · <code>~/.claude/skills/</code></td><td>Team · just you</td><td>On demand</td></tr>
 </tbody></table></div>
 <ul>
-<li><strong>User-level files aren't shared.</strong> If a new teammate isn't following conventions, check whether they live in someone's <code>~/.claude/CLAUDE.md</code>.</li>
 <li><strong><code>@import</code> keeps memory modular.</strong> Each package's <code>CLAUDE.md</code> can import only the standards files relevant to it, e.g. <code>@docs/standards/api.md</code>.</li>
 <li><strong><code>/memory</code></strong> shows which memory files are loaded. It's the first diagnostic when behavior is inconsistent.</li>
 <li><strong>Split a monolithic <code>CLAUDE.md</code></strong> into topic files in <code>.claude/rules/</code>, such as <code>testing.md</code>, <code>api-conventions.md</code> and <code>deployment.md</code>.</li>

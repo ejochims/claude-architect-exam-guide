@@ -39,7 +39,7 @@ The blueprint was written in early 2026, and Claude Code has since evolved. **An
 | Skill `allowed-tools` restricts tools during the skill | `allowed-tools` now *pre-approves* tools for the turn; restricting is done with `disallowed-tools` or an agent's `tools` list |
 | Coordinators route all subagent communication (hub-and-spoke) | Still the recommended design, though subagents can now nest up to 3 levels by default |
 | Guaranteed structured output = `tool_use` + JSON Schema + `tool_choice` | Also available: `output_config.format` JSON structured outputs. The exam's canonical answer is still `tool_use` |
-| `tool_choice: "any"` or a named tool guarantees a call | On Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1 these return 400; use `auto` with `strict: true` tools, or structured outputs |
+| `tool_choice: "any"` or a named tool guarantees a call | On Claude Opus 5.5, Sonnet 5.5, and Fable and Mythos 5.1 and 5.2 these return 400; use `auto` with `strict: true` tools, or structured outputs |
 | Skill `argument-hint` prompts for a required parameter | It's an autocomplete hint only; it doesn't block invoking the skill without the argument |
 | `/memory` shows which memory files are loaded | `/memory` opens memory files for editing; `/context` shows what's loaded |
 | Missing or invalid MCP tool arguments are JSON-RPC protocol errors (older guides) | Since MCP spec 2025-11-25 they're tool execution errors (`isError: true`) so the model can self-correct |

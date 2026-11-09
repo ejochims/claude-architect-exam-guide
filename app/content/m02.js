@@ -120,7 +120,7 @@ get_refund_status: <span class="s">"Looks up refunds already issued for an order
 <tr><td><code>{"type": "tool", "name": "…"}</code></td><td>That exact tool is called</td><td>A step that must run first (e.g. <code>extract_metadata</code>), with later steps in follow-up turns</td></tr>
 <tr><td><code>"none"</code></td><td>No tool is called</td><td>A text-only step</td></tr>
 </tbody></table></div>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Not every model accepts forced tool use. On Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and with manual extended thinking, <code>"any"</code> and a named tool return a 400 error. The documented alternative is <code>"auto"</code> plus <code>strict: true</code> tool definitions, or structured outputs. The exam's answer is still the table above, so use it on the exam. See <a href="#today">Exam vs. today</a>.</p></div>
+<div class="callout today"><div class="callout-label">Real world today</div><p>Not every model accepts forced tool use. On Claude Opus 5.5, Sonnet 5.5, and Fable and Mythos 5.1 and 5.2, and with manual extended thinking, <code>"any"</code> and a named tool return a 400 error. The documented alternative is <code>"auto"</code> plus <code>strict: true</code> tool definitions, or structured outputs. The exam's answer is still the table above, so use it on the exam. See <a href="#today">Exam vs. today</a>.</p></div>
 <!-- ex:m02-tool-choice -->
 <h3>The four <code>tool_choice</code> settings</h3>
 <p>Set it in the request next to <code>tools</code>:</p>
@@ -249,7 +249,7 @@ get_refund_status: <span class="s">"Looks up refunds already issued for an order
             { t: "Retry the same Edit; the match may succeed on another attempt.", trap: "T6", why: "The text is still duplicated, so the match fails the same way." },
             { t: "Read the full file, then Write the modified version.", ok: true, why: "Exam framing: when Edit can't find a unique anchor, fall back to Read + Write. (Today a longer, unique old_string or replace_all also works; see Exam vs. today.)" },
             { t: "Run <code>sed -i</code> through Bash to replace the block in place, since sed doesn't need a unique match.", why: "sed changes all three handlers, but only one should change." },
-            { t: "Use Grep with a replacement pattern to change only the first occurrence of the block.", why: "Grep searches; it doesn't edit files." }
+            { t: "Use Grep with a replacement pattern to change only the first occurrence of the block.", trap: "T8", why: "Grep searches; it doesn't edit files." }
           ]
         }
       ]

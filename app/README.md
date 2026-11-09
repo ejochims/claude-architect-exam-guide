@@ -11,15 +11,21 @@ Interactive study path for the Claude Certified Architect – Foundations exam. 
 | `content/bank.js` | Extra scenario questions used by drills and the mock exam. |
 | `content/examday.js` | The exam-day playbook (`#exam-day`): the numbers, pacing, reading and eliminating, multiple-response technique, and logistics to confirm. Load it before `app.js`. |
 | `content/principles.js` | The Principles page (`#principles`): the design beliefs behind the right answers, grouped by theme. Each has a rule, why it holds, the wrong answer it beats, its trap pattern, task statement and bullet IDs. Load it before `app.js`. |
-| `content/holdout.js` | The 60-item Readiness Check (`holdout: true`), 10 per scenario. Never shown in lessons, drills or mocks; taken once. Load it after `bank.js`. |
-| `content/f01.js`–`f03.js` | Foundations lessons that come before Module 0 (ids `f01`–`f03`). |
+| `content/holdout.js` | The 66-item Readiness Check (`holdout: true`), 11 per scenario: 10 single-answer option-family questions and 1 multiple-response question. Never shown in lessons, drills or mocks; taken once. Load it after `bank.js`. |
+| `content/f01.js`–`f04.js` | Foundations lessons that come before Module 0 (ids `f01`–`f04`). F4 covers what a model is and the out-of-scope terms an answer option can lean on (fine-tuning, RAG, temperature, caching and so on). |
 | `widgets.js`, `widgets2.js` | Interactive widgets (`WIDGETS`) and inline embeds (`EMBEDS`). `sorter` is the generic, config-driven one. |
 
 **Question format.** Each question has an `id` and a task statement `ts`, and optionally a `scenario`. It has four `options`, each with text `t`, an explanation `why`, and optionally `ok: true` (exactly one per question) or a `trap` id. Options are shuffled for display using a seed from the question id. Set `holdout: true` to sequester an item from lessons, drills, mocks and readiness; it's reserved for the one-time Readiness Check. An optional `family` id links a holdout question to a practice twin in `bank.js` that has the same four options but a different correct one. Generate families with `scripts/audit/build-families.mjs`; `content-check.mjs` enforces the rules, and a mock never draws two members of the same family.
 
-**Scoring.** Readiness and mastery use each question's *first* attempt (`state.first`), so retries don't inflate them. Mock exams report a domain-weighted percentage with a 95% Wilson interval, not a scaled score, because Anthropic doesn't publish its raw-to-scaled mapping. The 80% practice bar comes from `audit/readiness-review.md`. Multiple-response items (`type: "multi"`: 5 options, 2–3 keyed, and a stem that says "Select TWO") are scored all-or-nothing, so each still yields one right-or-wrong result. They're practice only; the Readiness Check stays single-answer.
+**Scoring.** Readiness and mastery use each question's *first* attempt (`state.first`), so retries don't inflate them. Mock exams report a domain-weighted percentage with a 95% Wilson interval, not a scaled score, because Anthropic doesn't publish its raw-to-scaled mapping. The 80% practice bar comes from `audit/readiness-review.md`. Multiple-response items (`type: "multi"`: 5 options, 2–3 keyed, and a stem that says "Select TWO") are scored all-or-nothing, so each still yields one right-or-wrong result. The Readiness Check has six of them (`hm-1` to `hm-6`), one per scenario; they aren't in option families.
 
 **Adding a module.**
 1. Create `content/mNN.js` registering `window.LESSONS.mNN`.
 2. Add a `<script>` tag for it in `index.html`, before `app.js`.
 3. Include the file in the artifact publish's `files` map.
+
+**Mock composition.** `startMock()` meets the blueprint's domain quotas exactly, seats about 10% multiple-response items, and gives about half of each domain's seats to option-family questions from the drawn scenarios. The result page reports scores by question type (scenario judgment, recognition, multiple response), because the non-family questions mostly test recognizing the best practice and read higher.
+
+**Exam mode.** A per-device toggle (in each lesson header and on the Exam vs. today page, stored in `localStorage` under `cca-exam-mode`) hides the "Real world today" callouts and any parenthetical aside that mentions "today" in lessons, flashcards and answer explanations. `T()` in `app.js` marks those notes at render time; the content files aren't changed.
+
+**Step keys.** Step completion is saved under `module:key`. A step without a `key` uses its position among the unkeyed steps, so removing or inserting an unkeyed step shifts the ones after it. When you remove a step, give the later steps an explicit `key` equal to their old position (as in `m09.js` and `m12.js`) so saved progress still lines up.

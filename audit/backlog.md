@@ -543,3 +543,23 @@ The guide's own change log says v1.0 contains "Formatting and layout updates" ov
 - The Readiness Check (holdout) has none.
 
 The official guide doesn't give the proportion of multiple-response items.
+
+## Batch 21: outside-vocabulary lesson, readiness signal, exam mode, de-duplication (2026-11-09)
+
+**Why.** A read-through of every lesson against the blueprint found coverage complete, and four gaps around it.
+
+**What.**
+- **New lesson F4, "What a model is, and the fixes that miss"** (`f04.js`): how a model is trained and how it answers, why it invents values, temperature and extended thinking, then one line each on the out-of-scope terms an option can lean on (fine-tuning, RAG, embeddings, prompt caching, streaming), plus rate limits, idempotency and Pydantic. It has a sorter, 5 questions, 9 flashcards and 12 glossary terms. The questions are tagged to real task statements (4.3, 1.5, 5.1, 4.6, 2.1), with the blueprint's fix as the key and the outside terms as distractors.
+- **Readiness Check.** Six multiple-response items (`hm-1` to `hm-6`), one per scenario, so it is now 66 questions at two minutes each (132 minutes). `content-check.mjs` no longer forbids multiple-response holdout items.
+- **Mock composition.** About half of each domain's seats go to option-family questions from the drawn scenarios, and the result page reports scenario-judgment, recognition and multiple-response scores separately.
+- **Trap tags.** 41 more wrong options tagged where a trap pattern clearly fits, mostly in the multiple-response items. The remaining untagged options were read one by one; nearly all are one-off misconceptions (a wrong flag, a wrong scope, a wrong number) that fit none of the nine patterns, so they were left untagged on purpose.
+- **Exam mode.** A toggle hides the "Real world today" notes for final-week review. Model names in those notes now include Fable and Mythos 5.2.
+- **De-duplication.** M9's second "first principle" step is removed and its retry step cut to the code and `detected_pattern`; M12's "Exam summary" step is removed and its CI terms moved up; M11's reference step is retitled and trimmed. Later steps carry explicit keys, so saved step completion is unaffected.
+
+**Not done.**
+- The 114 recognition-style practice questions weren't rewritten as option families. The mock change reduces how much they inflate a score; it doesn't change the questions.
+- No independent blind-solver pass on the 11 new questions. They were written and checked in one session, which is the same limitation recorded for `mr-01` to `mr-30`.
+- If the Readiness Check was already taken, its recorded result stands and the six new items are never shown.
+
+**Checks.** `content-check`: invariants OK (319 questions, 139 cards). `cue-baselines`: every heuristic within target. `browser-suite`: 395 checks, no problems, run twice. The suite's drill helper now handles a "Select THREE" item drawn first, which used to fail at random.
+

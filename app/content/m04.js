@@ -116,7 +116,7 @@ window.LESSONS.m04 = {
           stem: "<code>search_archive</code> returns <code>[]</code> both when nothing matches and when the archive service is unreachable. The coordinator concludes some topics have no coverage. Fix?",
           options: [
             { t: "Return an empty success only for true no-matches, and an <code>isError</code> result marked transient when the service is down.", ok: true, why: "An access failure and an empty result mean different things and need different handling." },
-            { t: "Retry every empty <code>[]</code> result twice inside the tool before returning it, in case the service was down.", why: "Slows down every genuine no-match and still can't tell the agent which case it is." },
+            { t: "Retry every empty <code>[]</code> result twice inside the tool before returning it, in case the service was down.", trap: "T6", why: "Slows down every genuine no-match and still can't tell the agent which case it is." },
             { t: "Have the coordinator treat every empty result as a possible outage and re-run that query later.", trap: "T7", why: "Fixes the wrong component. The tool should say what happened." },
             { t: "Return placeholder results with default values when the service is down, so downstream steps still have data.", trap: "T6", why: "Fabricated data is worse than an honest error." }
           ]
@@ -137,7 +137,7 @@ window.LESSONS.m04 = {
           options: [
             { t: "Nothing extra. Readers prefer clean reports, and missing data can be added in the next edition.", trap: "T6", why: "Presents partial work as complete." },
             { t: "Coverage annotations that separate well-supported findings from gaps caused by the failed market-data source.", ok: true, why: "Readers need to know which conclusions rest on full data and which don't." },
-            { t: "A general disclaimer at the top of the report noting that some figures may be incomplete or estimated.", why: "Too vague to tell readers which findings are affected." },
+            { t: "A general disclaimer at the top of the report noting that some figures may be incomplete or estimated.", trap: "T6", why: "Too vague to tell readers which findings are affected." },
             { t: "Estimated market figures from the model's own knowledge, clearly labeled as estimates, to fill the gap.", why: "Unsourced figures in a financial report, however labeled, undermine trust." }
           ]
         }

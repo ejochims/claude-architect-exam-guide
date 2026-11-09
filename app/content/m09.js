@@ -151,37 +151,10 @@ tool_choice = {"type": "tool", "name": "record_invoice"}   <span class="c"># mus
       }
     },
     {
-      kind: "read",
-      title: "First principle: syntax is not truth",
+      kind: "read", key: "6",
+      title: "In code: the retry, and closing the loop",
       html: `
-<p class="lede">A schema can guarantee that <code>total</code> is a number. It can't guarantee that the number is right, or that the document mentioned a total at all. Separate the two problems.</p>
-<h3>Syntax: use tool_use with a schema</h3>
-<p>Define an extraction tool whose <code>input_schema</code> is the shape you want, make sure it gets called (<code>tool_choice</code>: <code>"any"</code> across several schemas, or a named tool for one), and read the <code>tool_use</code> input. On the exam, this is the most reliable way to get schema-compliant output and avoid JSON syntax errors. (A strict guarantee takes <code>strict: true</code> or structured outputs; see the note below.) Prompt-only “respond in JSON” does not.</p>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Today only <code>strict: true</code> on a tool, or structured outputs (<code>output_config.format</code>), <em>guarantees</em> schema-valid output; plain tool use is very reliable but not guaranteed. Forced <code>tool_choice</code> returns a 400 error on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1. The exam's answer remains tool use + JSON Schema + <code>tool_choice</code>. See <a href="#today">Exam vs. today</a>.</p></div>
-<h3>Schema design shapes behavior</h3>
-<ul>
-<li><strong>Required fields create pressure to fabricate.</strong> If the source might not contain a value, make it optional or nullable and tell the model to return <code>null</code>.</li>
-<li><strong>Use enum + <code>"other"</code> + a detail string</strong> for category sets that grow, and add <code>"unclear"</code> for genuinely ambiguous inputs.</li>
-<li><strong>Put format normalization rules in the prompt</strong> (“dates as YYYY-MM-DD; currency as numbers without symbols”) to handle inconsistent source formatting alongside the strict schema.</li>
-</ul>
-<pre class="code"><code>{
-  <span class="s">"vendor"</span>: {<span class="s">"type"</span>: <span class="s">"string"</span>},
-  <span class="s">"po_number"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},           <span class="c"># may be absent</span>
-  <span class="s">"category"</span>: {<span class="s">"enum"</span>: [<span class="s">"hardware"</span>, <span class="s">"software"</span>, <span class="s">"services"</span>, <span class="s">"other"</span>, <span class="s">"unclear"</span>]},
-  <span class="s">"category_detail"</span>: {<span class="s">"type"</span>: [<span class="s">"string"</span>, <span class="s">"null"</span>]},     <span class="c"># filled when "other"</span>
-  <span class="s">"stated_total"</span>: {<span class="s">"type"</span>: <span class="s">"number"</span>},
-  <span class="s">"calculated_total"</span>: {<span class="s">"type"</span>: <span class="s">"number"</span>},               <span class="c">// sum of line items</span>
-  <span class="s">"conflict_detected"</span>: {<span class="s">"type"</span>: <span class="s">"boolean"</span>}
-}</code></pre>`
-    },
-    {
-      kind: "read",
-      title: "Semantics: validate, then retry with feedback",
-      html: `
-<p class="lede">Check meaning in code: totals sum, dates are in order, values sit in the right fields. When validation fails, retry <em>with the evidence</em>.</p>
-<p>A useful retry sends three things: <strong>the original document, the failed extraction, and the specific validation errors</strong> (“line items sum to 1,180.00 but total is 1,280.00”). Retrying the same prompt unchanged mostly reproduces the same mistake.</p>
-<p><strong>Know when retries can't help.</strong> They fix format mismatches and structural slips. They can't conjure information that isn't in the source. If the PO number lives in a separate purchase order you didn't provide, every retry is an invitation to invent one. Return <code>null</code>, flag it, or fetch the other document.</p>
-<p><strong>Build self-checks into the schema.</strong> Extract <code>calculated_total</code> alongside <code>stated_total</code>, and add a <code>conflict_detected</code> flag for inconsistent sources. Then code can flag mismatches automatically.</p>
+<p class="lede">Here is the retry from the previous step as code, plus one more field that lets you learn from your reviewers.</p>
 <p><strong>Close the loop.</strong> In review pipelines, add a <code>detected_pattern</code> field to each finding so that when developers dismiss findings you can see <em>which code constructs</em> generate false positives.</p>
 <!-- ex:m09-retry -->
 <h3>In code: retry with the specific error</h3>
@@ -201,7 +174,7 @@ elif errors:
     send_to_human_review(document, errors)        <span class="c"># retries can't find what isn't there</span></code></pre>`
     },
     {
-      kind: "widget",
+      kind: "widget", key: "7",
       title: "Will a retry fix it?",
       intro: "Each extraction failed validation. Decide whether a retry with error feedback can fix it.",
       widget: "sorter",
@@ -218,7 +191,7 @@ elif errors:
       }
     },
     {
-      kind: "quiz",
+      kind: "quiz", key: "8",
       title: "Check your understanding",
       questions: [
         {
@@ -294,7 +267,7 @@ elif errors:
       ]
     },
     {
-      kind: "recap",
+      kind: "recap", key: "9",
       title: "Recap",
       points: [
         "tool_use with a JSON schema is the exam's reliable path to valid structure (today strict: true guarantees it); read the tool_use input.",
