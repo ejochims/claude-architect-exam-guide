@@ -75,7 +75,7 @@ window.MODULES = [
   { id: "m09", n: 9, title: "Structured extraction", principle: "A schema guarantees syntax, never truth.", tasks: ["4.3", "4.4"], minutes: 45 },
   { id: "m10", n: 10, title: "Batch processing", principle: "Latency is a requirement, not a preference.", tasks: ["4.5"], minutes: 15 },
   { id: "m11", n: 11, title: "Configuring Claude Code", principle: "Configuration is code: scope decides who gets it, and when.", tasks: ["3.1", "3.2", "3.3", "3.4", "3.5"], minutes: 60 },
-  { id: "m12", n: 12, title: "CI/CD and sessions", principle: "Automation needs non-interactive, machine-readable runs.", tasks: ["3.6", "1.7"], minutes: 45 },
+  { id: "m12", n: 12, title: "CI/CD and sessions", principle: "Automation needs non-interactive, machine-readable runs.", tasks: ["3.6", "1.7"], minutes: 80 },
   { id: "m13", n: 13, title: "Escalation, review, provenance", principle: "Human attention is scarce; route it where it changes outcomes.", tasks: ["5.2", "5.5", "5.6"], minutes: 30 },
   { id: "m14", n: 14, title: "Capstone: think like the exam", principle: "Every distractor fails one of four moves in a recognizable way.", tasks: [], minutes: 20 },
   { id: "l01", n: "L1", title: "Lab: support agent with escalation", principle: "Rules that must hold live in the tools; judgment lives in the prompt.", tasks: [], minutes: 30 },
@@ -174,5 +174,15 @@ window.GLOSSARY = [
   ["Escalation", "m13", "Handing a case to a human: on explicit request, a policy gap, or no meaningful progress."],
   ["Calibration", "m13", "Checking confidence scores against labeled data so a threshold means something. Required before routing on confidence."],
   ["Stratified sampling", "m13", "Reviewing a random sample from each segment (document type, field) to measure error rates where aggregates hide them."],
-  ["Provenance", "m13", "Keeping each claim linked to its source (document, location, date) through every summarization step."]
+  ["Provenance", "m13", "Keeping each claim linked to its source (document, location, date) through every summarization step."],
+  ["Commit", "m12", "A saved snapshot of a change in git, with a message, author, time and unique ID (hash)."],
+  ["Branch", "m12", "Your own line of commits that runs alongside main, so work in progress can't break the shared version."],
+  ["main", "m12", "The shared, official branch of a repository: what the team agrees is true and usually what gets released."],
+  ["Merge conflict", "m12", "Two branches changed the same lines; a person must decide how to combine them before the merge can finish."],
+  ["CI (continuous integration)", "m12", "Automatically running checks (build, tests, lint, AI review) on every push or pull request, before changes join main."],
+  ["CD (continuous delivery / deployment)", "m12", "Automatically shipping merged changes through environments. Delivery: a person releases to production. Deployment: production is automatic."],
+  ["Runner", "m12", "The fresh, temporary machine a CI job runs on. Nobody is logged in, so nothing on it can wait for input or approval."],
+  ["Workflow file", "m12", "A file in the repo (e.g. .github/workflows/review.yml) that defines a pipeline: triggers, jobs and steps."],
+  ["Exit code", "m12", "The number a command returns when it ends: 0 means success (green check), anything else means failure (red X)."],
+  ["Required check", "m12", "A CI check that must pass before a pull request can merge into a protected branch."]
 ];

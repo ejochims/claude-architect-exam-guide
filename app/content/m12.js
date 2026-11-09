@@ -7,44 +7,246 @@ window.LESSONS.m12 = {
     { f: "Re-review after new commits posts duplicate comments. Fix?", b: "Include prior findings in context; instruct Claude to report only new or still-unaddressed issues." },
     { f: "Continue yesterday's named investigation?", b: "claude --resume <session-name>." },
     { f: "Compare two refactoring approaches from the same analysis?", b: "fork_session (--fork-session) to branch from the shared baseline." },
-    { f: "Resume or start fresh?", b: "Resume when prior context is mostly valid (and say which files changed). Start fresh with a structured summary when tool results are stale." }
+    { f: "Resume or start fresh?", b: "Resume when prior context is mostly valid (and say which files changed). Start fresh with a structured summary when tool results are stale." },
+    { f: "What decides whether a CI step is green or red?", b: "Its exit code: 0 is success (green), anything else is failure (red). Claude finishing a review exits 0 even if it found bugs; a later step must fail the job on serious findings." },
+    { f: "What turns a CI check into a real gate?", b: "Branch protection on main with the check marked required: the merge button stays disabled until it passes." },
+    { f: "Continuous delivery vs continuous deployment?", b: "Both auto-deploy merged changes to staging. Delivery: a person releases to production. Deployment: production is automatic when every check passes." },
+    { f: "The four runner constraints and their Claude Code settings?", b: "No input: -p. Program-readable output: --output-format json (+ --json-schema). No one to approve: --allowedTools. Knowledge from the repo: project CLAUDE.md." }
   ],
   steps: [
     {
-      kind: "read",
-      title: "Start here: what CI/CD is, from zero",
+      kind: "read", key: "cd-vc",
+      title: "CI/CD from zero, part 1: version control and commits",
       html: `
-<p class="lede">CI/CD is how software teams stop one person's change from quietly breaking everyone else's work. It's a robot that checks every proposed change automatically, before a human approves it. Claude Code can be one of the checks that robot runs.</p>
-<h3>The problem it solves</h3>
-<p>Ten developers change the same code every day. If each change goes straight into the shared copy, nobody knows which one broke the billing page until a customer finds out. The answer is a gated path: <strong>propose, check automatically, review, then merge</strong>.</p>
-<h3>The pieces, in order</h3>
-<div class="flow" aria-label="The path of a code change">
-<span class="box">Developer pushes a branch</span><span class="arr">→</span>
-<span class="box">Pull request opened</span><span class="arr">→</span>
-<span class="box">CI runner starts</span><span class="arr">→</span>
-<span class="box">Checks run: tests, linters, Claude review</span><span class="arr">→</span>
-<span class="box">Results posted on the PR</span><span class="arr">→</span>
-<span class="box">Human approves and merges</span><span class="arr">→</span>
-<span class="box">CD deploys</span>
-</div>
+<p class="lede">Before CI/CD makes sense, you need the thing it's built on: version control. It's a way for many people to change the same set of files without losing work, overwriting each other, or forgetting who changed what and why.</p>
+<h3>The problem</h3>
+<p>Imagine ten people editing one shared folder of files with no history. Someone's edit breaks the checkout page. Which edit? Who made it? What did the file look like yesterday, when it worked? Nobody knows, and there's no undo for the whole folder. Version control fixes exactly this.</p>
+<h3>The pieces</h3>
 <ul>
-<li><strong>Branch.</strong> A developer's private line of changes, separate from the shared <code>main</code> copy.</li>
-<li><strong>Pull request (PR).</strong> "Please review and merge my branch." Reviewers see exactly what changed (the <em>diff</em>) and comment on specific lines.</li>
-<li><strong>CI, Continuous Integration.</strong> Every time a PR is opened or updated, a robot automatically builds the code and runs the checks, then reports pass or fail on the PR. Required checks can block merging until they pass.</li>
-<li><strong>CD, Continuous Delivery or Deployment.</strong> After merge, the robot ships the change automatically, to a test environment or to production.</li>
-<li><strong>The robot.</strong> A CI service such as GitHub Actions, GitLab CI or Jenkins. A <em>workflow file</em> committed in the repo (for example <code>.github/workflows/review.yml</code>) says: "when a PR opens, start a fresh machine, copy the code, run these commands."</li>
-<li><strong>The runner.</strong> That fresh machine: temporary, empty and unattended. It's thrown away when the job ends.</li>
+<li><strong>Repository ("repo").</strong> The project folder plus its complete history. This study guide lives in one: <code>claude-architect-exam-guide</code>.</li>
+<li><strong>git.</strong> The version-control tool almost everyone uses. <strong>GitHub</strong> is a website that hosts git repositories and adds pull requests, reviews and CI on top.</li>
+<li><strong>Commit.</strong> A saved snapshot of a change, with a short message, an author, a time and a unique ID (a hash such as <code>c33a369</code>). Commits are small and frequent: "Fix the sync loop on lesson pages" is one commit.</li>
+<li><strong>History.</strong> The chain of commits. You can see who changed any line and why, compare any two points, and restore an earlier version.</li>
+<li><strong><code>main</code>.</strong> The official, shared version of the code. What's on <code>main</code> is what the team agrees is true, and usually what gets released.</li>
+<li><strong>Clone, push, pull.</strong> <em>Clone</em> downloads your own copy of the repo. <em>Push</em> uploads your new commits to GitHub. <em>Pull</em> downloads everyone else's.</li>
 </ul>
-<div class="callout sf"><div class="callout-label">If you know Salesforce</div>
-<ul style="margin:0;padding-left:18px">
-<li><strong>A PR</strong> is like a DevOps Center work item, or a change set waiting for review before promotion.</li>
-<li><strong>CI</strong> is like automatically deploying every proposed change to a scratch org and running all the Apex tests, on every change rather than once before release.</li>
-<li><strong>The workflow file</strong> is like a record-triggered flow: a trigger (PR opened), then steps. The difference is that it runs on a throwaway machine.</li>
-<li><strong>CD</strong> is the pipeline promoting the change to the next stage on its own.</li>
+<h3>What a change looks like: the diff</h3>
+<p>Every commit records exactly which lines were added and removed. That's a <strong>diff</strong>, and it's what reviewers read:</p>
+<pre class="code"><code>   module m12 minutes
+<span class="c">-  minutes: 25</span>
+<span class="s">+  minutes: 45</span></code></pre>
+<p>Lines starting with <code>-</code> were removed, and lines with <code>+</code> were added. A reviewer doesn't read the whole codebase, just the diff.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><ul style="margin:0;padding-left:18px">
+<li><strong>A repo</strong> is like an SFDX project kept in source control: the org's metadata (objects, flows, Apex) stored as files.</li>
+<li><strong>A commit</strong> is like one entry in a Setup Audit Trail, except it covers every line of every file, keeps the before-and-after, never expires, and can be undone.</li>
+<li><strong><code>main</code></strong> is like the metadata that's in production: the agreed source of truth.</li>
+<li><strong>Change sets have none of this.</strong> They don't keep line-by-line history and can't combine two people's edits. That gap is why DevOps Center is built on git underneath.</li>
+</ul></div>`
+    },
+    {
+      kind: "read", key: "cd-pr",
+      title: "CI/CD from zero, part 2: branches, pull requests and merging",
+      html: `
+<p class="lede">If everyone committed straight to <code>main</code>, one half-finished change could break it for the whole team. So changes are built on the side, reviewed, and only then joined in.</p>
+<h3>Branches</h3>
+<p>A <strong>branch</strong> is your own line of commits that starts from <code>main</code> and runs alongside it. You can commit as often as you like there without affecting anyone. When the work is ready, you ask for it to be <strong>merged</strong>: your commits are joined into <code>main</code>.</p>
+<h3>Pull requests</h3>
+<p>A <strong>pull request (PR)</strong> is that request: "please review my branch and merge it into <code>main</code>." It's the place where the change is discussed, checked and approved. Its life cycle:</p>
+<div class="flow" aria-label="Life of a pull request">
+<span class="box">Open (often as a draft)</span><span class="arr">→</span>
+<span class="box">Checks run</span><span class="arr">→</span>
+<span class="box">Reviewers comment on the diff</span><span class="arr">→</span>
+<span class="box">Author pushes fixes</span><span class="arr">→</span>
+<span class="box">Approved</span><span class="arr">→</span>
+<span class="box">Merged into main</span>
+</div>
+<h3>You've already done this</h3>
+<p>The changes to this study guide went through exactly this path, as PR #11:</p>
+<ol class="moves">
+<li>The work happened on a branch named <code>claude/awesome-gauss-7uh44a</code>, starting from <code>main</code>.</li>
+<li>Eight commits landed there between Nov 2 and Nov 5, from "Lesson quizzes start fresh" to "Add a sync loop breaker".</li>
+<li>PR #11 was opened as a <strong>draft</strong>, meaning "not ready to merge yet."</li>
+<li>When you said "merge and close," it was marked <strong>ready for review</strong> and then <strong>merged</strong>. The merge added one merge commit (<code>591cbdd</code>) to <code>main</code>, and the PR closed.</li>
+</ol>
+<p>One thing was missing: <strong>checks</strong>. PR #11 showed zero, because this repo has no CI. Before each push, I ran the guide's three test scripts by hand. Part 3 is about making a robot do that.</p>
+<h3>Merge conflicts</h3>
+<p>If your branch and <code>main</code> both changed the <em>same lines</em> since you branched, git can't know which version is right. That's a <strong>merge conflict</strong>. A person has to decide how to combine the two edits before the merge can finish. Git never silently picks one.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><ul style="margin:0;padding-left:18px">
+<li><strong>A branch</strong> is like a developer sandbox: your own space to change things without touching production.</li>
+<li><strong>A PR</strong> is like a DevOps Center work item moving to the next stage, or a change set waiting for review. DevOps Center really does create a branch per work item and promote it with pull requests.</li>
+<li><strong>A merge conflict</strong> is two admins editing the same flow in two sandboxes. With change sets the last deploy silently wins. With git you're forced to reconcile.</li>
+</ul></div>`
+    },
+    {
+      kind: "read", key: "cd-ci",
+      title: "CI/CD from zero, part 3: CI, the robot that checks every change",
+      html: `
+<p class="lede"><strong>Continuous Integration (CI)</strong> means every change is checked automatically, every time, before it joins <code>main</code>. "Continuous" because it runs on every push, not once before a big release. "Integration" because it proves your change still works when combined with everyone else's.</p>
+<h3>What a "check" actually is</h3>
+<p>A check is just a command that a machine runs, and the machine reads one number at the end: the <strong>exit code</strong>. Exit code <code>0</code> means success, and the PR shows a green check. Anything else means failure, and the PR shows a red X. That's the whole contract.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Common check</th><th>What it does</th><th>Fails when</th></tr></thead>
+<tbody>
+<tr><td><strong>Build</strong></td><td>Turns the source into a runnable app</td><td>The code doesn't compile or assemble</td></tr>
+<tr><td><strong>Tests</strong></td><td>Runs code that exercises the app and compares results to expectations</td><td>Any test's result is wrong</td></tr>
+<tr><td><strong>Lint</strong></td><td>Checks style and common mistakes</td><td>Code breaks a team rule</td></tr>
+<tr><td><strong>Security scan</strong></td><td>Looks for leaked keys and vulnerable libraries</td><td>Something risky is found</td></tr>
+<tr><td><strong>AI review</strong> (Claude Code)</td><td>Reads the diff against the team's criteria and posts findings</td><td>Only if your workflow fails it on serious findings: Claude finishing its review is itself a success</td></tr>
+</tbody></table></div>
+<h3>Making checks a gate</h3>
+<p>A check that runs but can be ignored is advice, not a gate. Teams make <code>main</code> <strong>protected</strong>: changes arrive only through a PR, and named checks are <strong>required</strong>, so the merge button stays disabled until they're green. That's the "prompts guide, code guarantees" idea from Module 3, applied to a team's code.</p>
+<h3>Why it's worth it</h3>
+<ul>
+<li><strong>You find out in minutes, not weeks,</strong> and you know which change caused it: the one that just went red.</li>
+<li><strong>Small changes are cheap to fix.</strong> Finding a break across a month of merged work is the expensive part.</li>
+<li><strong>Nobody has to remember to run the tests.</strong> For this guide, I ran <code>content-check</code>, <code>cue-baselines</code> and the 351-check browser suite by hand before each push. CI is writing those three commands into a file so a robot runs them on every push, and the PR can't merge until they pass.</li>
+</ul>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>You've met a CI gate already. Salesforce won't deploy Apex to production unless the tests pass and cover at least 75% of the code. That's a required check enforced by the platform. CI generalizes it: every proposed change runs the team's checks automatically, and the result decides whether it can merge.</p></div>`
+    },
+    {
+      kind: "read", key: "cd-cd",
+      title: "CI/CD from zero, part 4: CD, getting changes to users",
+      html: `
+<p class="lede">CI answers "is this change safe to join <code>main</code>?" <strong>CD</strong> answers "how does <code>main</code> reach users?" Once changes are merged and checked, the same robot can ship them, stage by stage.</p>
+<h3>Environments</h3>
+<div class="flow" aria-label="Environments a change moves through">
+<span class="box">Development</span><span class="arr">→</span>
+<span class="box">Test / staging (a copy of production)</span><span class="arr">→</span>
+<span class="box">Production (real users)</span>
+</div>
+<p>Each environment is a separate running copy of the app. Staging is built to look like production, so problems show up there first.</p>
+<h3>Two meanings of CD</h3>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>Continuous Delivery</th><th>Continuous Deployment</th></tr></thead>
+<tbody>
+<tr><td>After merge</td><td>Automatically built, tested and deployed to staging</td><td>Same</td></tr>
+<tr><td>To production</td><td>A person presses "release" when the business is ready</td><td>Automatic, as soon as every check passes</td></tr>
+<tr><td>Best when</td><td>Releases need timing or sign-off</td><td>The tests are trusted enough to stand in for sign-off</td></tr>
+</tbody></table></div>
+<p>If a release goes wrong, teams <strong>roll back</strong>: they redeploy the previous version, which is easy because every version is a commit in history.</p>
+<h3>The whole path, start to finish</h3>
+<div class="flow" aria-label="The full CI/CD path">
+<span class="box">Branch + commits</span><span class="arr">→</span>
+<span class="box">Pull request</span><span class="arr">→</span>
+<span class="box">CI checks (incl. Claude review)</span><span class="arr">→</span>
+<span class="box">Human approval</span><span class="arr">→</span>
+<span class="box">Merge to main</span><span class="arr">→</span>
+<span class="box">CD: staging, then production</span>
+</div>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><ul style="margin:0;padding-left:18px">
+<li><strong>Environments</strong> are your sandbox chain: developer sandbox, then a partial or full sandbox for UAT, then production.</li>
+<li><strong>Continuous delivery</strong> is like validating a deployment against production ahead of time, then using Quick Deploy in the release window.</li>
+<li><strong>A DevOps Center pipeline</strong> is CD with stages you promote through.</li>
 </ul></div>
-<h3>The one fact that drives every exam question here</h3>
-<p><strong>Nobody is sitting at the runner.</strong> There's no keyboard, no screen and nobody to click "Allow." Whatever runs there must finish without asking anything, and leave its results in a form another program can read and post on the PR. Every Claude Code CI flag exists because of this.</p>
-<div class="callout key"><div class="callout-label">Blocking vs. non-blocking jobs</div><p>A <strong>pre-merge check</strong> blocks developers until it finishes, so it must be fast: use synchronous Claude calls. A <strong>nightly or weekly job</strong> (a test-gap report, a debt audit) blocks nobody, so it can use the Message Batches API for half the price (Module 10).</p></div>`
+<div class="callout note"><div class="callout-label">What the exam needs from this</div><p>The exam won't ask you to configure a deployment. It assumes you know this path, so that a question like "a pre-merge review that developers wait on" or "a nightly audit nobody waits on" makes sense at once. Claude Code's exam questions all sit in the CI half: the checks on a pull request, and scheduled jobs.</p></div>`
+    },
+    {
+      kind: "widget", key: "cd-sort",
+      title: "Which part of the path?",
+      intro: "Sort each moment into the part of the path where it happens.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "vc", label: "Version control (git)" }, { id: "pr", label: "Pull request & review" }, { id: "ci", label: "CI checks" }, { id: "cd", label: "CD (release)" }],
+        items: [
+          ["A developer saves a snapshot of a change with the message \"Fix rounding in invoice totals\".", "vc", "A commit: a recorded snapshot with a message, author and ID."],
+          ["You find which change broke the export, and who made it three weeks ago.", "vc", "History: every line has a commit behind it."],
+          ["A teammate comments on line 42 of the diff: \"This should handle null.\"", "pr", "Review happens on the PR, against the diff."],
+          ["Two branches changed the same lines, and someone must decide how to combine them.", "pr", "A merge conflict, settled before the PR can merge."],
+          ["The test suite runs automatically on a fresh machine within a minute of a push.", "ci", "CI: checks run on every push."],
+          ["The merge button stays grey until the tests and Claude's review job are green.", "ci", "Required checks turn CI into a gate on main."],
+          ["After merge, the app is deployed to staging automatically, and someone releases it to production on Tuesday.", "cd", "Continuous delivery: automatic to staging, with a human release step."],
+          ["A bad release is fixed by redeploying the previous version.", "cd", "Rollback, which works because every version is in history."]
+        ]
+      }
+    },
+    {
+      kind: "read", key: "cd-anat",
+      title: "CI/CD from zero, part 5: anatomy of a pipeline",
+      html: `
+<p class="lede">A <strong>pipeline</strong> is the set of jobs the robot runs, written down in a <strong>workflow file</strong> that lives in the repo itself. Here's a minimal one for GitHub Actions, with no Claude yet: it just runs the tests.</p>
+<pre class="code"><code><span class="c"># .github/workflows/tests.yml</span>
+name: tests
+on:                                  <span class="c"># TRIGGERS: when does this run?</span>
+  pull_request:                      <span class="c">#   every time a PR is opened or updated</span>
+  push:
+    branches: [main]                 <span class="c">#   every merge to main</span>
+jobs:
+  test:                              <span class="c"># a JOB: one unit of work, on one machine</span>
+    runs-on: ubuntu-latest           <span class="c"># the RUNNER: a fresh, empty, temporary computer</span>
+    steps:                           <span class="c"># STEPS: commands, in order</span>
+      - uses: actions/checkout@v4    <span class="c">#   copy the repo onto the runner</span>
+      - run: npm ci                  <span class="c">#   install dependencies</span>
+      - run: npm test                <span class="c">#   exit code 0 = green, anything else = red</span></code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>Piece</th><th>Plain meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Trigger</strong> (<code>on:</code>)</td><td>The event that starts it: a PR, a merge to <code>main</code>, a schedule (<code>schedule: cron: "0 2 * * *"</code> is 2 a.m. daily, UTC), or a manual button (<code>workflow_dispatch</code>)</td></tr>
+<tr><td><strong>Job</strong></td><td>A unit of work on its own runner. Jobs can run in parallel or wait for each other.</td></tr>
+<tr><td><strong>Runner</strong></td><td>A clean machine created for this job and thrown away afterward. Nothing from the last run survives, and nobody is logged in.</td></tr>
+<tr><td><strong>Step</strong></td><td>One command. The first step to exit non-zero stops the job and turns it red.</td></tr>
+<tr><td><strong>Secrets</strong></td><td>Keys stored encrypted in the CI service and injected as environment variables at run time (<code>\${{ secrets.NAME }}</code>), so they never sit in the repo.</td></tr>
+<tr><td><strong>Logs and artifacts</strong></td><td>Everything a step prints is saved, so you can read why it failed. Files can be saved too, such as a report.</td></tr>
+</tbody></table></div>
+<h3>The one fact that drives every Claude Code CI question</h3>
+<p><strong>Nobody is sitting at the runner.</strong> There's no keyboard, no screen and nobody to click "Allow." So anything that runs there must:</p>
+<ol class="moves">
+<li><strong>Never wait for input.</strong> A program that pauses for a person hangs until the job times out.</li>
+<li><strong>Produce output another program can read,</strong> because the next step is a script, not a person.</li>
+<li><strong>Already have every permission it needs,</strong> because nobody can approve anything mid-run.</li>
+<li><strong>Get its knowledge from the repo,</strong> because the runner's own home folder is empty. Whatever <code>checkout</code> copied is all there is.</li>
+</ol>
+<p>Each of those four becomes a specific Claude Code setting on the next pages.</p>
+<div class="callout sf"><div class="callout-label">If you know Salesforce</div><p>A workflow file is a record-triggered flow for code. The trigger is "PR opened" instead of "record created," and the steps are commands instead of elements. Unlike a flow, it runs on a throwaway machine with no running user, which is why it can't stop and ask anyone anything.</p></div>`
+    },
+    {
+      kind: "read", key: "cd-claude",
+      title: "Where Claude Code fits in the pipeline",
+      html: `
+<p class="lede">Claude Code is the same agent a developer runs at their desk, run by the robot instead. It reads the repo, uses its tools and reports back. What changes is when it runs, who waits for it, and what it's allowed to do.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Trigger</th><th>Claude Code's job</th><th>Who waits?</th><th>What that implies</th></tr></thead>
+<tbody>
+<tr><td>PR opened or updated</td><td>Review the diff against the team's criteria; post findings as inline comments</td><td>The developer, before merging</td><td>Must be fast: synchronous calls</td></tr>
+<tr><td>PR opened or updated</td><td>Suggest or write tests for the changed code</td><td>The developer</td><td>Needs to see the existing tests, or it proposes duplicates</td></tr>
+<tr><td>New commits on the same PR</td><td>Re-review</td><td>The developer</td><td>Pass in the previous findings and ask for only new or unaddressed issues</td></tr>
+<tr><td>A check failed</td><td>Read the logs and propose a fix</td><td>The developer</td><td>A separate run should review that fix: the author is a weak reviewer of its own work</td></tr>
+<tr><td>Nightly or weekly schedule</td><td>Test-gap report, dependency or tech-debt audit</td><td>Nobody</td><td>Latency doesn't matter; many independent requests can go through the Message Batches API at half price (Module 10)</td></tr>
+</tbody></table></div>
+<h3>The four constraints become four settings</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Constraint from the runner</th><th>Claude Code setting</th></tr></thead>
+<tbody>
+<tr><td>Never wait for input</td><td><code>claude -p "…"</code> (print mode): run once, print, exit</td></tr>
+<tr><td>Output a program can read</td><td><code>--output-format json</code>, plus <code>--json-schema</code> for an exact shape</td></tr>
+<tr><td>Permissions granted in advance</td><td><code>--allowedTools</code> pre-approves only what the job needs; read-only for a review</td></tr>
+<tr><td>Knowledge comes from the repo</td><td>The project <code>CLAUDE.md</code>, read automatically after checkout: review criteria, testing standards, fixtures</td></tr>
+</tbody></table></div>
+<h3>Pass or fail is your decision</h3>
+<p>When Claude finishes a review, the command succeeds and exits <code>0</code>, even if it found a serious bug. If you want serious findings to block the merge, add a step that reads Claude's JSON and exits non-zero when, say, any finding has <code>severity: "high"</code>. Then mark that job as a required check.</p>
+<div class="callout key"><div class="callout-label">How the exam frames it</div><ul style="margin:0;padding-left:18px">
+<li><strong>Symptoms point to a missing setting.</strong> "Hangs in CI" means <code>-p</code>. "The parser breaks on rephrased output" means <code>--output-format json</code> with <code>--json-schema</code>. "Doesn't follow our standards in CI" means project <code>CLAUDE.md</code>.</li>
+<li><strong>Invented mechanisms are wrong.</strong> There's no <code>CLAUDE_HEADLESS</code> variable and no <code>--batch</code> flag, and piping <code>/dev/null</code> into it isn't the fix.</li>
+<li><strong>Design questions test the re-run, test and reviewer rules</strong> from the table above, and blocking versus nightly.</li>
+</ul></div>`
+    },
+    {
+      kind: "widget", key: "cd-decide",
+      title: "What decides it?",
+      intro: "Each question is answered by one part of the pipeline. Sort them.",
+      widget: "sorter",
+      config: {
+        cats: [{ id: "exit", label: "The exit code" }, { id: "req", label: "A required check" }, { id: "trig", label: "The trigger" }, { id: "secret", label: "A CI secret" }],
+        items: [
+          ["Whether a step shows a green check or a red X.", "exit", "0 is green; anything else is red."],
+          ["Claude reported a critical bug, but its step is green.", "exit", "Claude finished successfully, so it exited 0. A later step must read the findings and exit non-zero."],
+          ["Whether a red check actually stops the merge button.", "req", "Only checks marked required on a protected branch block merging."],
+          ["main can only change through a PR whose tests passed.", "req", "Branch protection plus required checks."],
+          ["The Claude review runs on every PR, but the dependency audit runs at 2 a.m.", "trig", "on: pull_request versus on: schedule."],
+          ["A job someone starts by clicking a button before a release.", "trig", "A manual trigger: workflow_dispatch."],
+          ["How the runner authenticates to the Anthropic API without a key in the repo.", "secret", "An encrypted secret injected as ANTHROPIC_API_KEY at run time."],
+          ["Rotating the API key without changing any workflow file.", "secret", "Update the stored secret; the workflow only references its name."]
+        ]
+      }
     },
     {
       kind: "read",
@@ -107,7 +309,7 @@ jobs:
     },
     {
       kind: "read",
-      title: "First principle: automation can't answer questions",
+      title: "Exam summary: the flags and the design rules",
       html: `
 <p class="lede">A CI runner has no human to type at a prompt and no human to read free text. Claude Code in a pipeline must run <strong>non-interactively</strong> and emit <strong>machine-readable</strong> output.</p>
 <div class="table-wrap"><table>
@@ -272,6 +474,9 @@ claude                                              <span class="c"># fresh star
       kind: "recap",
       title: "Recap",
       points: [
+        "The path: commits on a branch, a pull request, CI checks, human approval, merge to main, then CD to staging and production.",
+        "A CI check is a command; its exit code decides green (0) or red. Required checks on a protected main turn checks into a gate.",
+        "Nobody is at the runner: no input, program-readable output, permissions granted up front, knowledge from the repo.",
         "CI: -p for non-interactive; --output-format json + --json-schema for parseable, shaped output.",
         "CI reads the project CLAUDE.md. Put review criteria, testing standards and fixtures there.",
         "Re-reviews: include prior findings and report only new or unaddressed issues.",
