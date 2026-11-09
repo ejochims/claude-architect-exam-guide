@@ -22,7 +22,6 @@ for (const q of Q) {
     const word = { 2: "TWO", 3: "THREE" }[ok];
     if (!new RegExp(`Select ${word}\\b`).test(plain(q.stem))) errors.push(`${q.id}: multi stem must say "Select ${word}"`);
     if (q.family) errors.push(`${q.id}: multi items can't be in an option family`);
-    if (q.holdout) errors.push(`${q.id}: multi items are practice only (the Readiness Check stays single-answer)`);
     if (q.scenario == null) errors.push(`${q.id}: multi item needs a scenario`);
   } else {
     if (q.type) errors.push(`${q.id}: unknown type ${q.type}`);

@@ -201,7 +201,7 @@ mcp = MCPServer(<span class="s">"docs"</span>)
           id: "q05-5", ts: "2.4", scenario: 4,
           stem: "The team needs the agent to read and update GitHub issues, and also run a proprietary release checklist unique to your company. What's the sensible approach?",
           options: [
-            { t: "Build one custom MCP server covering both the GitHub issues and the release checklist.", why: "Reinvents a standard integration that already exists." },
+            { t: "Build one custom MCP server covering both the GitHub issues and the release checklist.", trap: "T2", why: "Reinvents a standard integration that already exists." },
             { t: "Use an existing GitHub MCP server, and write a small custom one only for the checklist.", ok: true, why: "Reuse standard servers; build custom only for what's unique to you." },
             { t: "Have the agent call GitHub's REST API with curl through Bash, authenticating with a token.", why: "Bypasses typed tools and descriptions, and is brittle." },
             { t: "Describe the checklist in CLAUDE.md and skip MCP, letting Claude follow it manually.", why: "Loses structured, reliable tool access for the checklist." }

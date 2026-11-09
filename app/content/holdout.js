@@ -601,5 +601,73 @@ window.BANK.push(
       { t: "Record the document version and date alongside each extracted value.", why: "Right when values change across versions. These are two different documents." },
       { t: "Route low-confidence values to a person for review.", why: "Right for uncertain values. Both values here were read clearly." }
     ]
+  },
+  // Multiple-response items, one per scenario. The real exam mixes them in, so the Readiness Check does too.
+  // They're scored all-or-nothing and aren't in option families (five options, two keyed).
+  {
+    id: "hm-1", ts: "1.4", scenario: 1, holdout: true, type: "multi",
+    stem: "A telecom support agent can waive late fees. Two things must be true: a waiver over $50 never goes through without a supervisor, and when a case is escalated the supervisor, who can't see the chat, can act without re-asking the customer anything. Which two changes achieve this? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Have <code>waive_fee</code> refuse amounts over $50 and return a reason that points to escalation.", ok: true, why: "A limit on money needs a guarantee. The check is in code, so it holds on every call, and the reason tells Claude what to do next." },
+      { t: "State the $50 limit in the system prompt, with three examples of escalating correctly.", trap: "T1", why: "Examples make judgment calls more consistent. A money limit that must never be exceeded can't rest on a prompt." },
+      { t: "Send the supervisor a structured summary: account, verified status, the fee, what was checked and a recommended action.", ok: true, why: "The supervisor gets the facts and the next step in a form they can act on at once." },
+      { t: "Attach the full conversation transcript to the escalation, so that nothing is left out.", why: "Nothing is lost, but the supervisor has to read the whole chat to find the facts. That isn't acting without digging." },
+      { t: "Escalate every fee waiver, whatever its amount, so that the limit can never be exceeded.", why: "It does guarantee the limit, by removing the agent's ability to resolve the small cases it's there for." }
+    ]
+  },
+  {
+    id: "hm-2", ts: "3.3", scenario: 2, holdout: true, type: "multi",
+    stem: "A monorepo team has two needs. SQL migration files live in <code>services/*/db/migrations/</code> across 12 services and must follow a naming and rollback convention. Separately, one engineer wants Claude Code to explain its changes in Spanish, for them alone, in every repository they work in. Which two placements fit? <strong>Select TWO.</strong>",
+    options: [
+      { t: "A <code>CLAUDE.md</code> holding the convention in each of the 12 migrations folders.", why: "It would load in the right places, but it's 12 copies to keep in step. One glob rule follows the file type wherever it lives." },
+      { t: "A <code>.claude/rules/</code> file with <code>paths: [\"services/*/db/migrations/*.sql\"]</code>.", ok: true, why: "One committed file, loaded only when Claude works on a matching migration, in all 12 services." },
+      { t: "The language preference in that engineer's <code>~/.claude/CLAUDE.md</code>.", ok: true, why: "User-level memory applies to that person in every project and reaches nobody else." },
+      { t: "The language preference in <code>CLAUDE.local.md</code> at the root of this repository.", why: "It's private to them, but only in this repository. They asked for every repository." },
+      { t: "Both items in the root <code>CLAUDE.md</code>, so that they load in every session.", why: "The whole team would get replies in Spanish, and the migration convention would load in sessions that never touch SQL." }
+    ]
+  },
+  {
+    id: "hm-3", ts: "1.3", scenario: 3, holdout: true, type: "multi",
+    stem: "A coordinator hands two independent data sets to two analyst subagents. Both run and return results, but total time is the sum of the two runs, and both reports ignore the user's requirement, stated early in the coordinator's conversation, that all figures be in 2024 dollars. Which two changes fix this? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Add <code>\"Task\"</code> to the coordinator's <code>allowedTools</code>.", why: "That's the fix when no subagent ever runs. Both ran here, so delegation already works." },
+      { t: "Emit both <code>Task</code> calls in a single coordinator response.", ok: true, why: "Calls made in one response run in parallel. One call per turn runs them back to back." },
+      { t: "Put the requirement in the coordinator's system prompt, where its subagents will pick it up.", why: "Subagents don't see the coordinator's system prompt or history. They see their own definition and the prompt written for them." },
+      { t: "State the 2024-dollars requirement in the prompt written for each subagent.", ok: true, why: "A subagent knows only what its prompt carries, so the constraint has to be written into it." },
+      { t: "Give both data sets to one analyst subagent, so the requirement is passed only once.", why: "It still has to be passed, and the work would no longer run in parallel." }
+    ]
+  },
+  {
+    id: "hm-4", ts: "2.4", scenario: 4, holdout: true, type: "multi",
+    stem: "A platform team is setting up Claude Code. Everyone who clones the repository should get the internal build-status MCP server, which needs each developer's own token. Also, at the start of every session the agent calls <code>list_services</code> and then <code>describe_service</code> about 30 times, only to learn which services exist. Which two changes fit? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Define the server in <code>.mcp.json</code> and reference the token as <code>${BUILD_TOKEN}</code>.", ok: true, why: "The committed file gives everyone the server, and each developer's environment supplies the secret." },
+      { t: "Have each developer add the server at user scope in <code>~/.claude.json</code> with their own token.", why: "Right for a personal server. Here a new clone would get nothing until its owner set it up by hand." },
+      { t: "Commit the token in <code>.mcp.json</code>, since the repository is private to the team.", why: "Secrets don't go in version control, private or not, and one shared token isn't each developer's own." },
+      { t: "Expose the service catalog as an MCP resource.", ok: true, why: "A resource lets the agent read the catalog as context, in place of dozens of exploratory tool calls." },
+      { t: "Tell the agent in <code>CLAUDE.md</code> not to explore the service list before starting a task.", why: "It would stop the calls and leave the agent not knowing which services exist." }
+    ]
+  },
+  {
+    id: "hm-5", ts: "4.1", scenario: 5, holdout: true, type: "multi",
+    stem: "A CI review bot is told to “report important issues only.” Developers dismiss most of its “possible performance issue” comments, and the same missing null check was rated “blocker” on one pull request and “nit” on another. Each run reviews a small diff in a fresh session. Which two changes address these problems? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Name the categories to report and those to skip, such as speculative performance advice.", ok: true, why: "“Important” doesn't say which findings matter. Explicit report and skip categories do." },
+      { t: "Add “only report a finding if you are at least 90% confident in it.”", trap: "T9", why: "It adds no information about which findings matter, so the same speculative comments pass the bar." },
+      { t: "Split each review into per-file passes followed by one cross-file pass.", why: "Right when a large review spreads attention thin. These diffs are small; the criteria are what's missing." },
+      { t: "Define each severity level, with a concrete code example for each.", ok: true, why: "A worked example per level pins the same construct to the same rating every time." },
+      { t: "Have a second, independent instance review each diff.", why: "Right when the reviewer also wrote the code. This reviewer is already a fresh session, and it would apply the same vague criteria." }
+    ]
+  },
+  {
+    id: "hm-6", ts: "5.5", scenario: 6, holdout: true, type: "multi",
+    stem: "A loan-application pipeline extracts income fields and sends some records to four human reviewers. The model reports a confidence for each field. Last month, pay stubs from a new payroll vendor began to arrive in an unfamiliar layout. Which two practices make the routing trustworthy? <strong>Select TWO.</strong>",
+    options: [
+      { t: "Route any record whose overall self-rated confidence is under 8 out of 10.", trap: "T4", why: "A raw, record-level score hasn't been checked against anything, so 8 out of 10 has no known meaning." },
+      { t: "Set each field's review threshold from a labeled sample, measured per document type.", ok: true, why: "Calibration turns a score into a measured accuracy, and doing it per type stops one layout hiding behind another." },
+      { t: "Stop sampling once overall accuracy has held above 97% for a month.", why: "An overall figure can hide a failing segment, and the new vendor's layout is exactly where one would appear." },
+      { t: "Keep reviewing a random sample of high-confidence records from each document type.", ok: true, why: "Stratified sampling of what passes automatically is how you catch a new failure pattern that scores don't flag." },
+      { t: "Re-run low-confidence records with the same prompt until their confidence rises.", trap: "T6", why: "A higher score on a retry isn't a more accurate value, and nothing about the request has changed." }
+    ]
   }
 );

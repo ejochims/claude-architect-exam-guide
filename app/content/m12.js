@@ -286,7 +286,9 @@ jobs:
 <li><strong>Test generation needs to see what exists.</strong> Give Claude the existing test files, so it doesn't propose tests you already have. Document what makes a test valuable, and the available fixtures, in <code>CLAUDE.md</code>.</li>
 <li><strong>The reviewer shouldn't be the author.</strong> If one job has Claude write a fix, review it in a separate Claude Code run that sees only the diff and the criteria. The session that wrote the code keeps its own reasoning and tends to approve it, much as an author is a weaker reviewer of their own work than a fresh pair of eyes.</li>
 </ol>
-<div class="callout today"><div class="callout-label">Real world today</div><p>Anthropic also publishes a ready-made GitHub Action for Claude Code. It wraps this same pattern. The exam asks about the flags and the design rules, not about any particular CI product.</p></div>`
+<div class="callout today"><div class="callout-label">Real world today</div><p>Anthropic also publishes a ready-made GitHub Action for Claude Code. It wraps this same pattern. The exam asks about the flags and the design rules, not about any particular CI product.</p></div><!-- panel:m12-ci-terms -->
+<div class="callout key"><div class="callout-label">CI terms</div><ul style="margin:0;padding-left:18px"><li><strong>CI (continuous integration).</strong> automated jobs that run on every push or pull request.</li><li><strong>Runner.</strong> the machine that runs those jobs.</li><li><strong>Headless.</strong> no person at a keyboard, so the agent can't ask questions and must not wait for input.</li><li><strong><code>&#36;{{ secrets.NAME }}</code>.</strong> GitHub Actions syntax that injects a stored secret, so API keys never appear in the workflow file.</li></ul></div>
+`
     },
     {
       kind: "widget",
@@ -308,47 +310,13 @@ jobs:
       }
     },
     {
-      kind: "read",
-      title: "Exam summary: the flags and the design rules",
-      html: `
-<p class="lede">A CI runner has no human to type at a prompt and no human to read free text. Claude Code in a pipeline must run <strong>non-interactively</strong> and emit <strong>machine-readable</strong> output.</p>
-<div class="table-wrap"><table>
-<thead><tr><th>Need</th><th>Mechanism</th></tr></thead>
-<tbody>
-<tr><td>Don't hang waiting for input</td><td><code>claude -p "…"</code> (<code>--print</code>)</td></tr>
-<tr><td>Parseable output</td><td><code>--output-format json</code></td></tr>
-<tr><td>Output in an exact shape, e.g. findings to post as inline PR comments</td><td><code>--json-schema</code> with <code>--output-format json</code></td></tr>
-<tr><td>Team standards, fixtures, review criteria</td><td>The project <code>CLAUDE.md</code>, which CI-invoked Claude Code reads</td></tr>
-</tbody></table></div>
-<p class="small">Distractors invent mechanisms: a <code>--batch</code> flag, a <code>CLAUDE_HEADLESS</code> variable, or offer shell workarounds such as piping <code>/dev/null</code> into stdin instead of the real mechanism. Know the real ones.</p>
-<h3>Review and test generation that developers trust</h3>
-<ul>
-<li><strong>Re-runs:</strong> include the previous review's findings and tell Claude to report only <em>new or still-unaddressed</em> issues. Otherwise every push re-posts the same comments.</li>
-<li><strong>Test generation:</strong> give it the existing test files so it doesn't propose duplicate scenarios, and document testing standards, what makes a test valuable, and the available fixtures in <code>CLAUDE.md</code>.</li>
-<li><strong>Independence:</strong> the session that generated the code is a weak reviewer of it. Review in a separate instance.</li>
-</ul>
-<!-- ex:m12-ci -->
-<h3>In code: a CI review step</h3>
-<p>A GitHub Actions step that runs Claude Code non-interactively. <code>-p</code> means print mode, so it never waits for input; <code>--json-schema</code> makes the result machine-readable. Claude Code also reads the repository's CLAUDE.md, so project conventions apply in CI too.</p>
-<pre class="code"><code>- name: Claude review
-  env:
-    ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}
-  run: |
-    claude -p <span class="s">"Review this PR's diff. Report only new or unresolved issues."</span> \\
-      --output-format json \\
-      --json-schema <span class="s">"$(cat .github/review-schema.json)"</span> &gt; review.json</code></pre>
-<!-- panel:m12-ci-terms -->
-<div class="callout key"><div class="callout-label">CI terms</div><ul style="margin:0;padding-left:18px"><li><strong>CI (continuous integration).</strong> automated jobs that run on every push or pull request.</li><li><strong>Runner.</strong> the machine that runs those jobs.</li><li><strong>Headless.</strong> no person at a keyboard, so the agent can't ask questions and must not wait for input.</li><li><strong><code>&#36;{{ secrets.NAME }}</code>.</strong> GitHub Actions syntax that injects a stored secret, so API keys never appear in the workflow file.</li></ul></div>
-`
-    },
-    {
-      kind: "widget",
+      kind: "widget", key: "3",
       title: "Build the CI step",
       intro: "Turn on each piece and watch the command and its behavior change.",
       widget: "ciBuilder"
     },
     {
-      kind: "read",
+      kind: "read", key: "4",
       title: "Sessions: resume, fork, or start fresh",
       html: `
 <p class="lede">Sessions store conversation history, not the state of your files. That shapes when it's safe to pick one up again.</p>
@@ -380,7 +348,7 @@ claude                                              <span class="c"># fresh star
 `
     },
     {
-      kind: "widget",
+      kind: "widget", key: "5",
       title: "Resume, fork or fresh?",
       intro: "Pick the session strategy.",
       widget: "sorter",
@@ -395,7 +363,7 @@ claude                                              <span class="c"># fresh star
       }
     },
     {
-      kind: "quiz",
+      kind: "quiz", key: "6",
       title: "Check your understanding",
       questions: [
         {
@@ -471,7 +439,7 @@ claude                                              <span class="c"># fresh star
       ]
     },
     {
-      kind: "recap",
+      kind: "recap", key: "7",
       title: "Recap",
       points: [
         "The path: commits on a branch, a pull request, CI checks, human approval, merge to main, then CD to staging and production.",

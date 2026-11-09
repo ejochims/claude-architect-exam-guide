@@ -233,7 +233,7 @@ window.BANK = [
     options: [
       { t: "As an error saying the outcome is unknown and it's unsafe to retry until the refund status is checked.", ok: true, why: "For a non-idempotent action, a timeout means “unknown”, not “failed”. Check before retrying." },
       { t: "As a transient error with <code>isRetryable: true</code>, since payment-provider timeouts are usually temporary.", trap: "T6", why: "Timeouts are usually retryable, but here a retry can refund the customer twice." },
-      { t: "As a success, since the provider probably processed it.", why: "“Probably” isn't confirmation." },
+      { t: "As a success, since the provider probably processed it.", trap: "T6", why: "“Probably” isn't confirmation." },
       { t: "As a generic “payment failed” error so the agent asks the customer to try the refund again.", trap: "T6", why: "Could trigger a duplicate refund, and hides the uncertainty." }
     ]
   },
@@ -505,7 +505,7 @@ window.BANK = [
     id: "b7-23", ts: "5.3", scenario: 3,
     stem: "A search subagent runs 10 queries. Six return results; four still time out after local retries. Its output is a single <code>status: \"partial\"</code> plus the merged results. Why is that a problem, and what's better?",
     options: [
-      { t: "It's fine: “partial” tells the coordinator enough to note a coverage gap in the report.", why: "The coordinator can't tell which queries failed, so it can't re-delegate them." },
+      { t: "It's fine: “partial” tells the coordinator enough to note a coverage gap in the report.", trap: "T6", why: "The coordinator can't tell which queries failed, so it can't re-delegate them." },
       { t: "Return per-query status: results for the six, and for the four, the query, error type and attempts made.", ok: true, why: "Granular status lets the coordinator retry or re-scope exactly what's missing." },
       { t: "Report “failed” for the whole task, so the coordinator re-runs all 10 queries.", trap: "T6", why: "Throws away six good results." },
       { t: "Retry the four queries until they succeed before returning anything.", trap: "T6", why: "Timeouts that survive local retries may not resolve; the coordinator may have alternatives." }
@@ -515,7 +515,7 @@ window.BANK = [
     id: "b7-24", ts: "5.5", scenario: 6,
     stem: "You have 2,000 labeled extractions. On the <code>tax_id</code> field, a model confidence of 0.9 corresponds to 82% observed accuracy; on <code>invoice_date</code>, 0.9 corresponds to 99%. How should review thresholds be set?",
     options: [
-      { t: "Use 0.9 for every field, since it means 90% confidence.", why: "The labeled data shows 0.9 means different accuracy on different fields." },
+      { t: "Use 0.9 for every field, since it means 90% confidence.", trap: "T4", why: "The labeled data shows 0.9 means different accuracy on different fields." },
       { t: "Set every field's threshold from the labeled accuracy, so <code>tax_id</code> needs a higher score.", ok: true, why: "Calibrate thresholds per field against labeled data." },
       { t: "Average the two fields' accuracy and use a single threshold matching that average.", why: "Averaging hides exactly the per-field difference you measured." },
       { t: "Send every <code>tax_id</code> to review and never review <code>invoice_date</code>.", why: "Ignores the scores entirely and stops measuring invoice_date." }
@@ -545,7 +545,7 @@ window.BANK = [
     id: "b8-3", ts: "4.6", scenario: 1,
     stem: "Before an agent's reply goes out in high-value disputes, a second step checks it against policy. That step is the same conversation asked to “review your reply.” It rarely catches the errors auditors later find. Better design?",
     options: [
-      { t: "Ask the same conversation to review its reply twice before sending.", why: "The same context repeats the same blind spots." },
+      { t: "Ask the same conversation to review its reply twice before sending.", trap: "T9", why: "The same context repeats the same blind spots." },
       { t: "A separate call given the reply and policy but not the agent's reasoning.", ok: true, why: "An independent reviewer isn't anchored on how the reply was produced." },
       { t: "Have the agent attach a confidence score and send low-scoring replies to a human.", trap: "T4", why: "Uncalibrated scores don't catch confident policy errors." },
       { t: "Switch the agent to a larger model for high-value disputes.", trap: "T3", why: "Doesn't add an independent check." }
@@ -596,7 +596,7 @@ window.BANK = [
     stem: "Reports sometimes include claims their cited sources don't support. A teammate proposes asking the synthesis agent to “double-check its citations” at the end. Better approach?",
     options: [
       { t: "An independent pass checking each claim against its excerpt.", ok: true, why: "An independent, source-grounded check catches what self-review misses." },
-      { t: "The synthesis agent's own double-check, run in the same conversation.", why: "Anchored on its own wording and reasoning." },
+      { t: "The synthesis agent's own double-check, run in the same conversation.", trap: "T9", why: "Anchored on its own wording and reasoning." },
       { t: "Requiring at least two sources for every claim in the report.", why: "Changes the threshold without checking support." },
       { t: "Dropping every claim that has only one source.", why: "Loses valid findings; still doesn't check support." }
     ]
@@ -1269,7 +1269,7 @@ window.BANK = [
       { t: "Loop while <code>stop_reason</code> is <code>\"tool_use\"</code>; stop on <code>\"end_turn\"</code>, not on text.", ok: true, why: "Right. <code>stop_reason</code> is the loop's termination signal. Looking for a word in the text is a known anti-pattern." },
       { t: "Append each <code>tool_result</code>, matched by <code>tool_use_id</code>, to the history before the next request.", ok: true, why: "Right. The model only knows what is in the messages you send. If the result isn't appended, the next turn can't see the order." },
       { t: "Raise the iteration cap from 5 to 25 so that long multi-step tasks have enough room to finish.", why: "A cap is a safety net, not the way a loop should end. It fixes neither bug: the text check still exits early, and the results are still missing." },
-      { t: "Tell the model in the system prompt to say \"done\" only when every tool call has finished.", why: "This is still text-as-done termination, and prompt compliance is probabilistic. The structured <code>stop_reason</code> already gives you the signal." },
+      { t: "Tell the model in the system prompt to say \"done\" only when every tool call has finished.", trap: "T1", why: "This is still text-as-done termination, and prompt compliance is probabilistic. The structured <code>stop_reason</code> already gives you the signal." },
       { t: "Replace the loop with a fixed sequence: look up the order, check the policy, then reply.", why: "A hard-coded sequence is right only when the workflow never varies. Support requests vary, so the model should choose the tools." }
     ]
   },
@@ -1279,7 +1279,7 @@ window.BANK = [
     options: [
       { t: "Split the topic into distinct subtopics (visual art, music, writing, film), one per subagent.", ok: true, why: "Right. Partitioning the scope removes the duplication, and naming each subtopic keeps the broad topic from collapsing into one area." },
       { t: "Have the coordinator check the draft for gaps and re-delegate what's missing.", ok: true, why: "Right. Evaluate, re-delegate, re-synthesize: the coordinator catches the gaps that the first decomposition left." },
-      { t: "Run the synthesis step on a larger model so it can infer what the searches missed.", why: "A bigger model can't cite sources nobody retrieved. The gap comes from the decomposition, not from synthesis quality." },
+      { t: "Run the synthesis step on a larger model so it can infer what the searches missed.", trap: "T3", why: "A bigger model can't cite sources nobody retrieved. The gap comes from the decomposition, not from synthesis quality." },
       { t: "Let the three subagents share a single conversation history so each one can see what the others have already found.", why: "Subagents have isolated contexts by design. The coordinator passes context explicitly, and partitioning prevents the overlap in the first place." },
       { t: "Route every subagent's output through the coordinator rather than between subagents.", why: "Good practice for observability and control, and this design already does it. It doesn't change what gets searched." }
     ]
@@ -1290,7 +1290,7 @@ window.BANK = [
     options: [
       { t: "Block <code>process_refund</code> in code until <code>verify_customer</code> has succeeded in this session.", ok: true, why: "Right. A programmatic prerequisite gate makes the ordering deterministic. Prompt-only rules fail at a non-zero rate." },
       { t: "On handoff, send a structured summary: customer, verification status, order, amount, what was tried, and why it's escalating.", ok: true, why: "Right. The human may not read the transcript, so the handoff carries the facts they need to act." },
-      { t: "Add three few-shot examples that show verification happening before every refund.", why: "Examples improve the odds, but this is still prompt guidance. A rule that must always hold needs enforcement in code." },
+      { t: "Add three few-shot examples that show verification happening before every refund.", trap: "T1", why: "Examples improve the odds, but this is still prompt guidance. A rule that must always hold needs enforcement in code." },
       { t: "Lower the temperature to 0 so the model follows the stated order consistently.", why: "Temperature changes sampling, not whether a tool can be called. The agent can still call the refund first." },
       { t: "Ask the human reviewer to read the full transcript before acting, so no context is lost.", why: "That pushes the work onto the human and assumes they have the transcript. A structured handoff is the protocol." }
     ]
@@ -1302,8 +1302,8 @@ window.BANK = [
       { t: "A PostToolUse hook that converts every date in tool results to ISO 8601 before the model sees them.", ok: true, why: "Right. PostToolUse runs on the result before the model reads it, so normalization is deterministic." },
       { t: "A PreToolUse hook that blocks <code>close_account</code> without an approval ID and routes the case to escalation.", ok: true, why: "Right. Interception before the call is the only point at which a violation can be prevented, not just detected." },
       { t: "A PostToolUse hook on <code>close_account</code> that flags any closure missing an approval ID for the compliance team's review.", why: "Too late: the account is already closed when PostToolUse runs. Blocking has to happen before the call." },
-      { t: "A system-prompt section listing all three date formats with conversion rules.", why: "Prompt guidance is probabilistic. Normalizing in code removes the problem before the model ever sees it." },
-      { t: "A UserPromptSubmit hook that injects a reminder of the approval rule into the context on every single turn.", why: "A reminder is still guidance the model can ignore. Compliance that must hold needs a block on the tool call." }
+      { t: "A system-prompt section listing all three date formats with conversion rules.", trap: "T1", why: "Prompt guidance is probabilistic. Normalizing in code removes the problem before the model ever sees it." },
+      { t: "A UserPromptSubmit hook that injects a reminder of the approval rule into the context on every single turn.", trap: "T1", why: "A reminder is still guidance the model can ignore. Compliance that must hold needs a block on the tool call." }
     ]
   },
   {
@@ -1323,9 +1323,9 @@ window.BANK = [
     options: [
       { t: "Rewrite both descriptions to say what each does, its input with an example, its output, and when to prefer it.", ok: true, why: "Right. The description is the model's main signal for choosing a tool. These two say almost nothing that tells them apart." },
       { t: "Reword the system prompt's \"always search\" line, which pulls the model toward the tool named <code>search</code>.", ok: true, why: "Right. A keyword in the system prompt can create an unintended association with a tool of the same name." },
-      { t: "Merge them into one <code>find</code> tool with a <code>mode</code> parameter.", why: "This creates a more generic tool and hides the distinction inside a parameter. Purpose-specific tools with clear boundaries route better." },
-      { t: "Put a small routing classifier in front of the agent that picks the right tool for each incoming request.", why: "This is extra infrastructure for a problem the descriptions should solve. Fix the tool contract first." },
-      { t: "Switch to a larger, more capable model that can infer the user's intent even from short tool descriptions.", why: "A bigger model guesses better but is still guessing. The missing information belongs in the descriptions." }
+      { t: "Merge them into one <code>find</code> tool with a <code>mode</code> parameter.", trap: "T5", why: "This creates a more generic tool and hides the distinction inside a parameter. Purpose-specific tools with clear boundaries route better." },
+      { t: "Put a small routing classifier in front of the agent that picks the right tool for each incoming request.", trap: "T2", why: "This is extra infrastructure for a problem the descriptions should solve. Fix the tool contract first." },
+      { t: "Switch to a larger, more capable model that can infer the user's intent even from short tool descriptions.", trap: "T3", why: "A bigger model guesses better but is still guessing. The missing information belongs in the descriptions." }
     ]
   },
   {
@@ -1334,9 +1334,9 @@ window.BANK = [
     options: [
       { t: "Set <code>isError</code> and return an error category, whether it's retryable, and a readable description.", ok: true, why: "Right. With structured error metadata, the agent retries only transient failures and stops wasting retries on an unknown ID or a permission denial." },
       { t: "Return an empty result only when the query ran and found nothing, and report an outage as an error.", ok: true, why: "Right. An access failure must never look like a valid empty result. That confusion produced the false \"no failing tests\"." },
-      { t: "Retry every failure up to five times with exponential backoff and jitter, so outages have time to clear.", why: "Backoff suits transient errors. An unknown ID or a permission denial will fail on every retry." },
-      { t: "Treat any failure as \"no failing tests\" so the pipeline keeps moving.", why: "That silently suppresses the error and turns an outage into a false pass." },
-      { t: "Raise an exception that aborts the whole CI job whenever the tool fails, so no result is ever trusted blindly.", why: "Aborting everything is the opposite mistake. Transient errors can be retried, and the rest should reach the agent with context." }
+      { t: "Retry every failure up to five times with exponential backoff and jitter, so outages have time to clear.", trap: "T6", why: "Backoff suits transient errors. An unknown ID or a permission denial will fail on every retry." },
+      { t: "Treat any failure as \"no failing tests\" so the pipeline keeps moving.", trap: "T6", why: "That silently suppresses the error and turns an outage into a false pass." },
+      { t: "Raise an exception that aborts the whole CI job whenever the tool fails, so no result is ever trusted blindly.", trap: "T6", why: "Aborting everything is the opposite mistake. Transient errors can be retried, and the rest should reach the agent with context." }
     ]
   },
   {
@@ -1347,7 +1347,7 @@ window.BANK = [
       { t: "Add the experimental server at user scope, in <code>~/.claude.json</code>.", ok: true, why: "Right. User scope is personal, so teammates never see it." },
       { t: "Put the token directly in <code>.mcp.json</code> and add that file to <code>.gitignore</code>.", why: "An ignored file isn't shared, which defeats the purpose. The team would also lose the shared configuration." },
       { t: "Add both servers to the project <code>.mcp.json</code> and ask teammates to disable the experimental one.", why: "Project scope affects everyone who clones the repo. Personal experiments belong at user scope." },
-      { t: "Build a custom MCP server that wraps the Jira API for the team.", why: "Prefer an existing community server for a standard integration. Build a custom one only for needs specific to your team." }
+      { t: "Build a custom MCP server that wraps the Jira API for the team.", trap: "T2", why: "Prefer an existing community server for a standard integration. Build a custom one only for needs specific to your team." }
     ]
   },
   {
@@ -1391,7 +1391,7 @@ window.BANK = [
       { t: "Don't retry when the field is absent from the source; record it as missing instead.", ok: true, why: "Right. Retries can't produce information the document doesn't contain. Tell retry-fixable failures from retry-futile ones." },
       { t: "Make the PO number required in the schema so the model must always fill it.", why: "That forces the model to invent a value for invoices that have none. Make it nullable." },
       { t: "Overwrite the stated total with the sum of the line items, so validation passes.", why: "That hides a real discrepancy. Record both totals and flag the conflict for review." },
-      { t: "Raise the retry limit from 2 to 5 attempts, keeping the original prompt so results stay comparable.", why: "More identical retries add cost without adding information. The fix is what goes into the retry." }
+      { t: "Raise the retry limit from 2 to 5 attempts, keeping the original prompt so results stay comparable.", trap: "T6", why: "More identical retries add cost without adding information. The fix is what goes into the retry." }
     ]
   },
   {
@@ -1402,7 +1402,7 @@ window.BANK = [
       { t: "Trim each lookup result to the fields this task needs before adding it to the context.", ok: true, why: "Right. Tool results take up a disproportionate share of tokens. Keep only the relevant fields." },
       { t: "Summarize more aggressively instead, so there's more room left for new turns.", why: "More compression loses more of the facts customers are complaining about." },
       { t: "Move the key facts into the middle of the prompt, between the summarized history and the customer's latest turn.", why: "Models recall the middle of long inputs worst. Put key facts at the start, under clear headers." },
-      { t: "Switch to a model with a much larger context window instead of summarizing older turns.", why: "This postpones the problem. The 40-field results still dominate, and recall in very long contexts still degrades." }
+      { t: "Switch to a model with a much larger context window instead of summarizing older turns.", trap: "T3", why: "This postpones the problem. The 40-field results still dominate, and recall in very long contexts still degrades." }
     ]
   },
   {
@@ -1413,7 +1413,7 @@ window.BANK = [
       { t: "Escalate the second case, because the policy is silent on it.", ok: true, why: "Right. A policy gap is a valid escalation trigger, however calm the customer sounds." },
       { t: "Ask the first customer for their order number and try to resolve it before escalating.", why: "That delays an explicit request. Offering to resolve first applies when the customer hasn't asked for a human." },
       { t: "Resolve the second case using the agent's best reading of the policy's intent, since the customer is calm.", why: "Calmness says nothing about whether the policy covers the case. Guessing at intent risks an unauthorized decision." },
-      { t: "Escalate any conversation whose sentiment score falls below a threshold.", why: "Sentiment is an unreliable proxy for whether escalation is needed. Use explicit criteria." }
+      { t: "Escalate any conversation whose sentiment score falls below a threshold.", trap: "T4", why: "Sentiment is an unreliable proxy for whether escalation is needed. Use explicit criteria." }
     ]
   },
   {
@@ -1422,9 +1422,9 @@ window.BANK = [
     options: [
       { t: "Retry the timeout a few times in the subagent; if it still fails, return the failure type, attempts and partial results.", ok: true, why: "Right. Recover transient errors locally, and propagate the rest with enough context for the coordinator to decide what to do." },
       { t: "Annotate the report to show which subtopics are well supported and which have gaps from failed sources.", ok: true, why: "Right. Coverage annotations keep a failed source from reading as an absence of research." },
-      { t: "Abort the whole research run whenever any subagent fails.", why: "Aborting everything throws away the good results. Recover or propagate instead." },
-      { t: "Leave the failed subtopic out of the final report entirely, so the report doesn't look incomplete to readers.", why: "Silent suppression hides the gap from the reader." },
-      { t: "Keep returning \"no results\" to the coordinator, but add a generic <code>status: \"error\"</code> field alongside it.", why: "A generic status still hides what failed and whether a retry could help." }
+      { t: "Abort the whole research run whenever any subagent fails.", trap: "T6", why: "Aborting everything throws away the good results. Recover or propagate instead." },
+      { t: "Leave the failed subtopic out of the final report entirely, so the report doesn't look incomplete to readers.", trap: "T6", why: "Silent suppression hides the gap from the reader." },
+      { t: "Keep returning \"no results\" to the coordinator, but add a generic <code>status: \"error\"</code> field alongside it.", trap: "T6", why: "A generic status still hides what failed and whether a retry could help." }
     ]
   },
   {
@@ -1435,7 +1435,7 @@ window.BANK = [
       { t: "For the import bug, let the agent plan as it goes, creating each next subtask from what the last step found.", ok: true, why: "Right. An intermittent bug is open-ended: what to look at next depends on what the previous step revealed." },
       { t: "Let the agent decompose each pull request dynamically, skipping checks it judges irrelevant to that change.", why: "Dynamic decomposition suits open-ended investigation. For a standard review, it adds variability and risks skipped checks." },
       { t: "Write a fixed twelve-step debugging checklist for the import bug and have the agent run every step each time.", why: "A pre-written checklist for an intermittent bug tends to miss the real cause and wastes effort on irrelevant steps." },
-      { t: "Send both kinds of work to one agent in a single long prompt so it can share context between them.", why: "Mixing unrelated tasks dilutes attention and doesn't choose a decomposition pattern for either." }
+      { t: "Send both kinds of work to one agent in a single long prompt so it can share context between them.", trap: "T5", why: "Mixing unrelated tasks dilutes attention and doesn't choose a decomposition pattern for either." }
     ]
   },
   {
@@ -1455,9 +1455,9 @@ window.BANK = [
     options: [
       { t: "Restrict the subagent to the few tools its analysis role needs, which removes <code>send_email</code>.", ok: true, why: "Right. Tools outside an agent's role get misused, and fewer tools also make selection more reliable." },
       { t: "Replace <code>fetch_url</code> with a <code>load_document</code> tool that only accepts document URLs.", ok: true, why: "Right. A constrained tool prevents the wrong fetches structurally instead of relying on the model's judgment." },
-      { t: "Add a system-prompt rule that the subagent must never send email or open login pages.", why: "The tools stay available, so this relies on prompt compliance. Removing or constraining the tools is structural." },
+      { t: "Add a system-prompt rule that the subagent must never send email or open login pages.", trap: "T1", why: "The tools stay available, so this relies on prompt compliance. Removing or constraining the tools is structural." },
       { t: "Set <code>tool_choice: \"any\"</code> so the subagent always calls a tool instead of answering in text.", why: "This forces a tool call but does nothing about which tools it has or what they fetch." },
-      { t: "Move the subagent to a larger model that is better at judging which of its 16 tools to use.", why: "Capability doesn't fix the tool distribution. The extra tools are the cause." }
+      { t: "Move the subagent to a larger model that is better at judging which of its 16 tools to use.", trap: "T3", why: "Capability doesn't fix the tool distribution. The extra tools are the cause." }
     ]
   },
   {
@@ -1510,8 +1510,8 @@ window.BANK = [
     options: [
       { t: "Temporarily turn off the style category while you rework its prompt.", ok: true, why: "Right. Removing the noisy category restores trust in the accurate ones while you fix it." },
       { t: "Define each severity level explicitly, with a concrete code example for each.", ok: true, why: "Right. Explicit criteria with examples anchor severity so the same bug gets the same label." },
-      { t: "Tighten the instruction to \"only report issues you are extremely confident about.\"", why: "A general exhortation. It barely changes precision because it doesn't say which findings matter." },
-      { t: "Have the model rate each finding from 1 to 10 and post only those rated 8 or above.", why: "Raw self-ratings aren't calibrated, so the filter doesn't track which findings are valid." },
+      { t: "Tighten the instruction to \"only report issues you are extremely confident about.\"", trap: "T9", why: "A general exhortation. It barely changes precision because it doesn't say which findings matter." },
+      { t: "Have the model rate each finding from 1 to 10 and post only those rated 8 or above.", trap: "T4", why: "Raw self-ratings aren't calibrated, so the filter doesn't track which findings are valid." },
       { t: "Post a finding only when two identical review runs both report it.", why: "Consensus voting suppresses real findings that appear intermittently, and doesn't fix the labels." }
     ]
   },
@@ -1521,7 +1521,7 @@ window.BANK = [
     options: [
       { t: "Add few-shot examples of complete findings in the exact format: location, issue, severity, suggested fix.", ok: true, why: "Right. Examples are the most reliable way to get consistent output when instructions alone vary." },
       { t: "Add few-shot examples contrasting the approved pattern with a genuine bug, with a line of reasoning for each.", ok: true, why: "Right. Showing acceptable versus problematic code cuts that false positive and helps the model generalize." },
-      { t: "Repeat the list of required fields three times in the prompt, in capitals.", why: "Repetition isn't demonstration. It's a try-harder fix for a format problem." },
+      { t: "Repeat the list of required fields three times in the prompt, in capitals.", trap: "T9", why: "Repetition isn't demonstration. It's a try-harder fix for a format problem." },
       { t: "Lower the temperature to 0 so the format comes out the same every time.", why: "A deterministic answer isn't necessarily a correctly formatted one, and it won't teach the pattern distinction." },
       { t: "Disable the bug-detection category until the false positives stop.", why: "Bug findings are the most valuable category. Fix the one misjudged pattern instead." }
     ]
@@ -1534,7 +1534,7 @@ window.BANK = [
       { t: "Make <code>policy_end_date</code> nullable and tell the model to return null when the claim doesn't state it.", ok: true, why: "Right. A required field pressures the model to fabricate; nullable removes the pressure." },
       { t: "Add <code>\"other\"</code> with a <code>damage_detail</code> string, plus <code>\"unclear\"</code>, to the enum.", ok: true, why: "Right. New and ambiguous types get recorded honestly instead of being misfiled." },
       { t: "Force <code>extract_auto_claim</code> on every request, since auto claims are the most common.", why: "This applies the wrong schema to property and travel claims." },
-      { t: "Ask the model to rate its confidence in each date and drop dates rated below 0.7.", why: "Self-ratings are uncalibrated, and the cause is the required field forcing a value." }
+      { t: "Ask the model to rate its confidence in each date and drop dates rated below 0.7.", trap: "T4", why: "Self-ratings are uncalibrated, and the cause is the required field forcing a value." }
     ]
   },
   {
@@ -1566,7 +1566,7 @@ window.BANK = [
       { t: "Review the fix in a separate Claude instance that sees the diff but not the fixing session's reasoning.", ok: true, why: "Right. The generating session keeps its own reasoning and tends to approve it. An independent instance doesn't." },
       { t: "Review each file in its own pass for local issues, then run one pass for cross-file data flow.", ok: true, why: "Right. Focused passes avoid diluted attention, and the integration pass catches cross-file problems." },
       { t: "Turn on extended thinking for the self-review in the same session.", why: "More reasoning in the same context still anchors on the earlier choices." },
-      { t: "Review all 25 files in one pass on a model with a larger context window.", why: "More room isn't even attention. The single pass is the cause." },
+      { t: "Review all 25 files in one pass on a model with a larger context window.", trap: "T3", why: "More room isn't even attention. The single pass is the cause." },
       { t: "Run the single-pass review three times and keep only findings that appear at least twice.", why: "Voting suppresses real but intermittent findings and doesn't fix the shallow passes." }
     ]
   },
@@ -1577,7 +1577,7 @@ window.BANK = [
       { t: "Break accuracy down by document type and by field before reducing any review.", ok: true, why: "Right. An overall 96% can hide a weak document type or a critical field well below the bar." },
       { t: "Calibrate field-level confidence on a labeled set, then send low-confidence and contradictory documents to reviewers.", ok: true, why: "Right. Calibrated routing spends scarce reviewer time where errors are likeliest." },
       { t: "Approve the change now, since 96% is above the 95% target.", why: "The aggregate may hide segments that fail badly. Check the breakdown first." },
-      { t: "Skip review for any extraction the model rates above 0.9 confidence on its own.", why: "Raw self-reported confidence isn't calibrated until it's checked against labeled data." },
+      { t: "Skip review for any extraction the model rates above 0.9 confidence on its own.", trap: "T4", why: "Raw self-reported confidence isn't calibrated until it's checked against labeled data." },
       { t: "Review the first 5% of documents processed each day.", why: "That sample isn't random or stratified, so it can miss whole document types and new error patterns." }
     ]
   },

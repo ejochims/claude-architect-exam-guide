@@ -129,7 +129,7 @@ Do not flag wording, grammar, or comments that are merely incomplete.</span></co
             { t: "Ask the same session to review “critically, as a skeptical senior engineer.”", trap: "T9", why: "The session still holds the reasoning that produced the code, so it shares its blind spots." },
             { t: "Turn on extended thinking for the self-review, so it reasons through each possible concurrency issue in more depth.", why: "More reasoning in the same context doesn't remove the anchoring on its own decisions." },
             { t: "Review with an independent instance that gets the diff and criteria but not the generator's reasoning.", ok: true, why: "An independent reviewer isn't anchored on the reasoning that produced the code." },
-            { t: "Run the same self-review twice and merge the two lists of findings.", why: "Two passes from the same context share the same blind spots." }
+            { t: "Run the same self-review twice and merge the two lists of findings.", trap: "T9", why: "Two passes from the same context share the same blind spots." }
           ]
         },
         {

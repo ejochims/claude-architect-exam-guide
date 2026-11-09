@@ -167,7 +167,7 @@ options = ClaudeAgentOptions(
           stem: "Two research subagents are independent, yet total research time equals the sum of both. Logs show the coordinator issues one Task call, waits for the result, then issues the next. How do you get parallel execution?",
           options: [
             { t: "Have the coordinator emit both Task calls together in a single response.", ok: true, why: "Several Task calls in a single response run in parallel." },
-            { t: "Give each research thread its own coordinator, so the two subagents run inside separate agent loops.", why: "Adds orchestration layers without fixing the cause: the coordinator issues calls one at a time." },
+            { t: "Give each research thread its own coordinator, so the two subagents run inside separate agent loops.", trap: "T2", why: "Adds orchestration layers without fixing the cause: the coordinator issues calls one at a time." },
             { t: "Send the subagent calls through the Message Batches API so they're processed together.", why: "Batches can take up to 24 hours and don't run multi-turn tool loops. Wrong tool for interactive research." },
             { t: "Lower each subagent's <code>max_tokens</code> so that each one returns sooner.", why: "They'd still run back to back, and their answers might be cut off." }
           ]
@@ -179,7 +179,7 @@ options = ClaudeAgentOptions(
             { t: "Instruct the synthesis agent to attach a source to every claim it makes in the report.", trap: "T9", why: "It can't cite sources it was never given." },
             { t: "Pass all the findings in the synthesis prompt as structured records with source, page and date.", ok: true, why: "Subagents only know what they're passed. Structured records keep attribution intact." },
             { t: "Give the synthesis agent a <code>web_search</code> tool, so it can find a source and add a structured citation for each claim itself.", trap: "T5", why: "It would redo research and could attach sources that differ from where the findings came from." },
-            { t: "Let it read the research subagents' session transcripts through the coordinator's shared memory to recover sources.", why: "Subagents have isolated contexts. Nothing is shared unless the coordinator passes it." }
+            { t: "Let it read the research subagents' session transcripts through the coordinator's shared memory to recover sources.", trap: "T8", why: "Subagents have isolated contexts. Nothing is shared unless the coordinator passes it." }
           ]
         },
         {

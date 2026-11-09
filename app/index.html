@@ -179,6 +179,8 @@ a.mod:hover { background: var(--surface); }
 .callout.key .callout-label { color: var(--accent-ink); }
 .callout.today { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .callout.today .callout-label::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d3); margin-right: 7px; vertical-align: 1px; }
+.exam-mode .callout.today.rw, .exam-mode .today-inline { display: none; }
+.exam-toggle { display: inline-block; margin-top: 10px; font-size: 13.5px; }
 .callout.sf { background: color-mix(in srgb, var(--d3) 9%, var(--surface)); box-shadow: inset 3px 0 0 var(--d3); }
 .callout.sf .callout-label { color: var(--d3); }
 .callout ul li { margin-bottom: 6px; }
@@ -280,7 +282,7 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 /* Print: a clean, light, paper cram sheet of the reference pages. */
 @media print {
   :root:not(#print) { --bg: #fff; --surface: #fff; --sunk: #f3f3f3; --fg: #111; --muted: #333; --faint: #555; --line: #ccc; color-scheme: light; }
-  .top, .foot, .crumb, .pr-tools, .print-btn, #gq, .sync { display: none !important; }
+  .top, .foot, .crumb, .pr-tools, .print-btn, .exam-toggle, #gq, .sync { display: none !important; }
   body { background: #fff; }
   .pr-card, .bp-row, .panel, .ed-list li { break-inside: avoid; box-shadow: none; }
   a { color: inherit; text-decoration: none; }
@@ -550,7 +552,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
   <div>
     <div class="eyebrow">Claude Certified Architect · Foundations</div>
     <h1>From first principles to <em>exam-ready</em></h1>
-    <p>Agentic loops, tools and MCP, Claude Code, prompt design and context management. 18 lessons, 4 labs, 218 practice questions and a one-time 60-question Readiness Check.</p>
+    <p>Agentic loops, tools and MCP, Claude Code, prompt design and context management. 19 lessons, 4 labs, 253 practice questions and a one-time 66-question Readiness Check.</p>
   </div>
   <div class="goal">
     <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="42"/><circle class="val" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="52.8"/><text x="50" y="58" text-anchor="middle">720</text></svg>
@@ -573,6 +575,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
 <script src="content/f01.js"></script>
 <script src="content/f02.js"></script>
 <script src="content/f03.js"></script>
+<script src="content/f04.js"></script>
 <script src="content/m00.js"></script>
 <script src="content/m01.js"></script>
 <script src="content/m02.js"></script>
