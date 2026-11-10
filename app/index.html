@@ -179,6 +179,61 @@ a.mod:hover { background: var(--surface); }
 .callout.key .callout-label { color: var(--accent-ink); }
 .callout.today { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .callout.today .callout-label::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d3); margin-right: 7px; vertical-align: 1px; }
+.coach { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+.coach-label { font: 650 11.5px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--d4); }
+.coach-in { width: 100%; font: 400 16px/1.45 var(--serif); padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical; }
+.coach .row-btns { margin-top: 2px; }
+.coach-out { font: 400 16px/1.5 var(--serif); }
+.coach-out p { margin: 8px 0 0; }
+.coach-v { display: inline-block; font: 650 12px/1 var(--sans); padding: 5px 8px; border-radius: 5px; }
+.coach-v.v-solid { background: var(--good-bg); color: var(--good); }
+.coach-v.v-partly { background: color-mix(in srgb, var(--d5) 16%, transparent); color: var(--d5); }
+.coach-v.v-off { background: var(--bad-bg); color: var(--bad); }
+.q.variant { margin-top: 10px; border-style: dashed; }
+/* Today's session card, confidence mark, compact lesson header, stacked tables, phone tab bar */
+.today-card { display: block; }
+.today-head { display: flex; gap: 18px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.today-list { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid color-mix(in srgb, var(--bg) 22%, transparent); }
+.today-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--bg) 22%, transparent); }
+.today-list a { color: var(--bg); text-decoration: none; font-weight: 550; }
+.today-list a:hover { text-decoration: underline; }
+.today-list li.done a { color: color-mix(in srgb, var(--bg) 60%, transparent); }
+.today-mark { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--bg) 50%, transparent); display: grid; place-items: center; font: 700 11px/1 var(--sans); }
+.today-list li.done .today-mark { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.today-list li.cur .today-mark { border-color: var(--accent); }
+.today-prog { font: 500 12.5px var(--mono); color: color-mix(in srgb, var(--bg) 65%, transparent); white-space: nowrap; }
+.unsure-btn { margin-left: auto; font: 600 12px var(--sans); background: none; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.unsure-btn[aria-pressed="true"] { border-style: solid; border-color: var(--d5); color: var(--d5); background: color-mix(in srgb, var(--d5) 12%, transparent); }
+.task-list { gap: 6px 14px; }
+.task-pair { display: inline-flex; gap: 6px; align-items: baseline; min-width: 0; }
+.l-head.compact .l-principle, .l-head.compact .task-list { display: none; }
+.l-head.compact h1 { font-size: clamp(20px, 3vw, 26px); margin-bottom: 4px; }
+.step-next { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.step-meta > span:first-child { white-space: nowrap; }
+.mock-card.once { border-left-color: var(--d5); border-style: dashed; border-left-style: solid; }
+.exam-clock { display: inline-flex; align-items: center; gap: 10px; }
+.pace { font: 600 12px var(--sans); color: var(--muted); white-space: nowrap; }
+.pace.late { color: var(--bad); }
+.more-list .mock-card { text-decoration: none; color: var(--fg); margin-bottom: 12px; padding: 16px 18px; }
+.more-list .mock-card h2 { margin-top: 0; font-size: 17px; }
+.tabbar { display: none; }
+@media (max-width: 560px) {
+  .prose table.stack thead { display: none; }
+  .prose table.stack tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .prose table.stack td { display: block; border: 0; padding: 2px 0; }
+  .prose table.stack td:first-child { font-weight: 650; font-size: 15.5px; padding-bottom: 4px; }
+  .prose table.stack td:not(:first-child)::before { content: attr(data-th); display: block; font: 600 10.5px/1.5 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+  .top .nav { display: none; }
+  .top .sync { margin-left: auto; }
+  .brand > span:last-child { display: inline !important; }
+  .tabbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .tabbar a { text-align: center; padding: 12px 4px 11px; text-decoration: none; color: var(--muted); font: 600 13px var(--sans); }
+  .tabbar a.on { color: var(--accent-ink); box-shadow: inset 0 2px 0 var(--accent); }
+  .focus .tabbar { display: none; }
+  html:not(.focus) main { padding-bottom: 120px; }
+  html:not(.focus) .toast { bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .exam-bar .eyebrow { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
 .exam-mode .callout.today.rw, .exam-mode .today-inline { display: none; }
 .exam-toggle { display: inline-block; margin-top: 10px; font-size: 13.5px; }
 .callout.sf { background: color-mix(in srgb, var(--d3) 9%, var(--surface)); box-shadow: inset 3px 0 0 var(--d3); }
@@ -282,7 +337,7 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: v
 /* Print: a clean, light, paper cram sheet of the reference pages. */
 @media print {
   :root:not(#print) { --bg: #fff; --surface: #fff; --sunk: #f3f3f3; --fg: #111; --muted: #333; --faint: #555; --line: #ccc; color-scheme: light; }
-  .top, .foot, .crumb, .pr-tools, .print-btn, .exam-toggle, #gq, .sync { display: none !important; }
+  .top, .foot, .crumb, .pr-tools, .print-btn, .exam-toggle, .tabbar, #gq, .sync { display: none !important; }
   body { background: #fff; }
   .pr-card, .bp-row, .panel, .ed-list li { break-inside: avoid; box-shadow: none; }
   a { color: inherit; text-decoration: none; }
@@ -546,6 +601,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
     <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
   </div>
 </header>
+<nav class="tabbar" aria-label="Sections"><a href="#path" data-tab="path">Today</a><a href="#practice" data-tab="practice">Practice</a><a href="#cards" data-tab="cards">Cards</a><a href="#more" data-tab="more">More</a></nav>
 <main id="app" class="wrap">
 <!-- Static cover: shown until app.js renders (and in previews and thumbnails). -->
 <section class="hero">

@@ -86,6 +86,70 @@ async function run(viewport, colorScheme) {
   await visit("#readiness");
   if (await page.locator("#rbegin").count()) problems.push(`${tag}: readiness check can be started a second time`);
 
+  // Today's session: the home card lists three parts; the mixed set draws only from finished modules;
+  // a right answer marked "not sure" lands in the confidence drill and leaves once confirmed.
+  await page.evaluate(() => {
+    const now = Date.now(), steps = {};
+    for (const id of ["f01", "m01"]) window.LESSONS[id].steps.forEach((s, i) => { steps[`${id}:${s.key || i}`] = now - 2 * 86400000; });
+    localStorage.setItem("cca-study-progress-v1", JSON.stringify({ v: 1, updatedAt: now, steps, answers: {}, first: {}, lessonAns: {}, widgets: {}, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], last: null }));
+  });
+  await visit("#path"); await page.reload(); await page.waitForTimeout(80);
+  if ((await page.locator(".today-list li").count()) !== 3) problems.push(`${tag}: home should list three session parts`);
+  await visit("#drill-today");
+  const sq = await page.evaluate(() => document.querySelector(".q .q-stem")?.textContent || "");
+  const fromM01 = await page.evaluate(t => window.LESSONS.m01.steps.flatMap(s => s.questions || []).concat(window.BANK.filter(q => ["1.1", "5.1"].includes(q.ts))).some(q => q.stem.replace(/<[^>]+>/g, "").slice(0, 40) === t.slice(0, 40)), sq);
+  if (!sq || !fromM01) problems.push(`${tag}: session question isn't from a finished module`);
+  await page.locator(".q .unsure-btn").click();
+  const rightPos = await page.evaluate(() => { const st = JSON.parse(localStorage.getItem("cca-study-progress-v1")); const stem = document.querySelector(".q .q-stem").innerHTML; const all = [...Object.values(window.LESSONS).flatMap(l => l.steps.flatMap(s => s.questions || [])), ...window.BANK]; const q = all.find(x => x.stem === stem); if (!q || q.type === "multi") return -1; const t = q.options.find(o => o.ok).t; return [...document.querySelectorAll(".q .opt .opt-body")].findIndex(n => n.innerHTML === t); });
+  if (rightPos >= 0) {
+    await page.locator(".q .opt").nth(rightPos).click(); await page.waitForTimeout(60);
+    const shaky = () => page.evaluate(() => { const s = JSON.parse(localStorage.getItem("cca-study-progress-v1")); return Object.values(s.first).filter(f => f.ok && f.sure === false).length; });
+    if ((await shaky()) !== 1) problems.push(`${tag}: a right answer marked not sure wasn't recorded as one`);
+    await visit("#drill-shaky");
+    if (!(await page.locator(".q .opt").count())) problems.push(`${tag}: confidence drill is empty after a lucky guess`);
+    else { const pos2 = await page.evaluate(() => { const stem = document.querySelector(".q .q-stem").innerHTML; const all = [...Object.values(window.LESSONS).flatMap(l => l.steps.flatMap(s => s.questions || [])), ...window.BANK]; const q = all.find(x => x.stem === stem); const t = q.options.find(o => o.ok).t; return [...document.querySelectorAll(".q .opt .opt-body")].findIndex(n => n.innerHTML === t); });
+      await page.locator(".q .opt").nth(pos2).click(); await page.waitForTimeout(60); await visit("#practice");
+      if (!(await page.locator("text=No lucky guesses waiting").count())) problems.push(`${tag}: confirmed guess still listed`); }
+  }
+  // Phone: the tab bar replaces the top nav, and hides inside a lesson. Desktop: no tab bar.
+  const tabVisible = () => page.evaluate(() => { const t = document.querySelector(".tabbar"); return !!t && getComputedStyle(t).display !== "none"; });
+  await visit("#more");
+  if ((await tabVisible()) !== (viewport.width <= 560)) problems.push(`${tag}: tab bar visibility is wrong on #more`);
+  if ((await page.locator(".more-list a").count()) !== 6) problems.push(`${tag}: More page should list 6 links`);
+  await visit("#m06-2");
+  if (await tabVisible()) problems.push(`${tag}: tab bar should hide inside a lesson`);
+  if (!(await page.locator(".l-head.compact").count())) problems.push(`${tag}: lesson header should be compact after step 1`);
+  await visit("#m09-1");
+  if (!(await page.locator(".prose table.stack").count())) problems.push(`${tag}: three-column table wasn't marked for stacking`);
+  checks += 8;
+  // Coach (the `sample` capability), with Claude stubbed: a graded explanation renders a verdict, a wrong
+  // answer offers a fresh variant, and a declined permission removes the coach without breaking the card.
+  for (const declined of [false, true]) {
+    const cp = await browser.newPage({ viewport, colorScheme });
+    cp.on("pageerror", e => problems.push(`${tag} coach pageerror: ${e.message}`));
+    await cp.addInitScript(declined => {
+      const fn = async () => ({ text: "x", truncated: false });
+      fn.json = async prompt => { if (declined) throw { code: "not_granted", message: "no" }; return prompt.startsWith("Write one new") ? { stem: "A <b>new</b> question?", options: [{ t: "one", ok: true, why: "yes" }, { t: "two", ok: false, why: "no" }, { t: "three", ok: false, why: "no" }, { t: "four", ok: false, why: "no" }] } : { verdict: "solid", feedback: "You named the real reason.", missing: "" }; };
+      window.claude = { use: async name => name === "sample" ? fn : null };
+    }, declined);
+    await cp.goto(URL + "#m01-5"); await cp.waitForTimeout(150);
+    const wrongPos = await cp.evaluate(() => { const q = window.LESSONS.m01.steps[4].questions[0]; const t = q.options.find(o => !o.ok).t; return [...document.querySelectorAll(".q")][0].querySelectorAll(".opt .opt-body").length && [...[...document.querySelectorAll(".q")][0].querySelectorAll(".opt .opt-body")].findIndex(n => n.innerHTML === t); });
+    const card = cp.locator(".q").first();
+    await card.locator(".opt").nth(wrongPos).click(); await cp.waitForTimeout(60);
+    if (!(await card.locator(".coach").count())) { problems.push(`${tag}: coach missing after an answer`); await cp.close(); continue; }
+    await card.locator(".coach-in").fill("Because stop_reason is the structured signal and text can contain the word done.");
+    await card.locator(".coach-go").click(); await cp.waitForTimeout(80);
+    if (declined) { if (await card.locator(".coach-go").count()) problems.push(`${tag}: declined coach should remove its controls`); }
+    else {
+      if (!(await card.locator(".coach-v.v-solid").count())) problems.push(`${tag}: coach verdict didn't render`);
+      await card.locator(".coach-var").click(); await cp.waitForTimeout(80);
+      if ((await card.locator(".q.variant .opt").count()) !== 4) problems.push(`${tag}: fresh variant didn't render four options`);
+      if (await card.locator(".q.variant .q-stem b").count()) problems.push(`${tag}: variant text wasn't escaped`);
+      await card.locator(".q.variant .opt").first().click();
+      if (!(await card.locator(".q.variant .opt.is-right").count())) problems.push(`${tag}: variant didn't reveal its answer`);
+    }
+    checks += 2; await cp.close();
+  }
   // Exam mode hides the "Real world today" callouts and parenthetical asides; turning it off restores them.
   await visit("#m02-4");
   const todayShown = () => page.evaluate(() => [...document.querySelectorAll(".callout.today.rw, .today-inline")].filter(n => n.offsetParent !== null).length);
