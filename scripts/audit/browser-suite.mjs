@@ -86,6 +86,42 @@ async function run(viewport, colorScheme) {
   await visit("#readiness");
   if (await page.locator("#rbegin").count()) problems.push(`${tag}: readiness check can be started a second time`);
 
+  // Today's session: the home card lists three parts; the mixed set draws only from finished modules;
+  // a right answer marked "not sure" lands in the confidence drill and leaves once confirmed.
+  await page.evaluate(() => {
+    const now = Date.now(), steps = {};
+    for (const id of ["f01", "m01"]) window.LESSONS[id].steps.forEach((s, i) => { steps[`${id}:${s.key || i}`] = now - 2 * 86400000; });
+    localStorage.setItem("cca-study-progress-v1", JSON.stringify({ v: 1, updatedAt: now, steps, answers: {}, first: {}, lessonAns: {}, widgets: {}, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], last: null }));
+  });
+  await visit("#path"); await page.reload(); await page.waitForTimeout(80);
+  if ((await page.locator(".today-list li").count()) !== 3) problems.push(`${tag}: home should list three session parts`);
+  await visit("#drill-today");
+  const sq = await page.evaluate(() => document.querySelector(".q .q-stem")?.textContent || "");
+  const fromM01 = await page.evaluate(t => window.LESSONS.m01.steps.flatMap(s => s.questions || []).concat(window.BANK.filter(q => ["1.1", "5.1"].includes(q.ts))).some(q => q.stem.replace(/<[^>]+>/g, "").slice(0, 40) === t.slice(0, 40)), sq);
+  if (!sq || !fromM01) problems.push(`${tag}: session question isn't from a finished module`);
+  await page.locator(".q .unsure-btn").click();
+  const rightPos = await page.evaluate(() => { const st = JSON.parse(localStorage.getItem("cca-study-progress-v1")); const stem = document.querySelector(".q .q-stem").innerHTML; const all = [...Object.values(window.LESSONS).flatMap(l => l.steps.flatMap(s => s.questions || [])), ...window.BANK]; const q = all.find(x => x.stem === stem); if (!q || q.type === "multi") return -1; const t = q.options.find(o => o.ok).t; return [...document.querySelectorAll(".q .opt .opt-body")].findIndex(n => n.innerHTML === t); });
+  if (rightPos >= 0) {
+    await page.locator(".q .opt").nth(rightPos).click(); await page.waitForTimeout(60);
+    const shaky = () => page.evaluate(() => { const s = JSON.parse(localStorage.getItem("cca-study-progress-v1")); return Object.values(s.first).filter(f => f.ok && f.sure === false).length; });
+    if ((await shaky()) !== 1) problems.push(`${tag}: a right answer marked not sure wasn't recorded as one`);
+    await visit("#drill-shaky");
+    if (!(await page.locator(".q .opt").count())) problems.push(`${tag}: confidence drill is empty after a lucky guess`);
+    else { const pos2 = await page.evaluate(() => { const stem = document.querySelector(".q .q-stem").innerHTML; const all = [...Object.values(window.LESSONS).flatMap(l => l.steps.flatMap(s => s.questions || [])), ...window.BANK]; const q = all.find(x => x.stem === stem); const t = q.options.find(o => o.ok).t; return [...document.querySelectorAll(".q .opt .opt-body")].findIndex(n => n.innerHTML === t); });
+      await page.locator(".q .opt").nth(pos2).click(); await page.waitForTimeout(60); await visit("#practice");
+      if (!(await page.locator("text=No lucky guesses waiting").count())) problems.push(`${tag}: confirmed guess still listed`); }
+  }
+  // Phone: the tab bar replaces the top nav, and hides inside a lesson. Desktop: no tab bar.
+  const tabVisible = () => page.evaluate(() => { const t = document.querySelector(".tabbar"); return !!t && getComputedStyle(t).display !== "none"; });
+  await visit("#more");
+  if ((await tabVisible()) !== (viewport.width <= 560)) problems.push(`${tag}: tab bar visibility is wrong on #more`);
+  if ((await page.locator(".more-list a").count()) !== 6) problems.push(`${tag}: More page should list 6 links`);
+  await visit("#m06-2");
+  if (await tabVisible()) problems.push(`${tag}: tab bar should hide inside a lesson`);
+  if (!(await page.locator(".l-head.compact").count())) problems.push(`${tag}: lesson header should be compact after step 1`);
+  await visit("#m09-1");
+  if (!(await page.locator(".prose table.stack").count())) problems.push(`${tag}: three-column table wasn't marked for stacking`);
+  checks += 8;
   // Exam mode hides the "Real world today" callouts and parenthetical asides; turning it off restores them.
   await visit("#m02-4");
   const todayShown = () => page.evaluate(() => [...document.querySelectorAll(".callout.today.rw, .today-inline")].filter(n => n.offsetParent !== null).length);

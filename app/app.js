@@ -133,7 +133,7 @@
   // Anthropic doesn't publish its raw-to-scaled mapping, so scores are shown as percentages with a 95% Wilson interval.
   const wilson = (k, n) => { if (!n) return [0, 0]; const z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d; return [Math.max(0, c - h), Math.min(1, c + h)]; };
   const BAR = 0.8; // practice bar from audit/readiness-review.md, not an official cut score
-  const recordFirst = (id, ok) => { if (!state.first[id]) state.first[id] = { ok, at: Date.now() }; };
+  const recordFirst = (id, ok, sure = true) => { if (!state.first[id]) state.first[id] = { ok, at: Date.now(), sure }; };
 
   // ---------- Derived progress ----------
   function taskMastery() {
@@ -203,19 +203,20 @@
     const scen = q.scenario ? B.scenarios.find(s => s.n === q.scenario) : null;
     const order = optionOrder(q);
     const multi = isMulti(q), need = keyCount(q);
-    let local = null;
+    let local = null, unsure = false;
     let pick = multi ? (Array.isArray(selected) ? selected.slice() : []) : null;
     const answer = choice => {
-      const rec = { ok: isRight(q, choice), choice, at: Date.now() };
-      state.answers[q.id] = rec; recordFirst(q.id, rec.ok); if (mode === "drill") local = rec;
+      const rec = { ok: isRight(q, choice), choice, at: Date.now(), sure: !unsure };
+      state.answers[q.id] = rec; recordFirst(q.id, rec.ok, !unsure); if (mode === "drill") local = rec;
       if (mode === "learn") state.lessonAns[q.id] = rec;
       touch(); draw(); onAnswered && onAnswered(rec);
     };
     const draw = () => {
       const a = mode === "learn" ? lessonAnswer(q.id) : mode === "drill" ? local : mode === "review" ? reveal : null;
-      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${multi ? `<span class="chip multi-chip">Select ${need}</span>` : ""}${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}</div>
+      card.innerHTML = `<div class="q-meta"><span class="eyebrow">Question ${n} of ${total}</span>${multi ? `<span class="chip multi-chip">Select ${need}</span>` : ""}${mode !== "exam" ? taskChip(q.ts) : ""}${scen && mode !== "exam" ? `<span class="chip">${esc(scen.name)}</span>` : ""}${(mode === "learn" || mode === "drill") && !a ? `<button type="button" class="unsure-btn" aria-pressed="${unsure}" title="Mark this before you answer if you're guessing. Right answers you weren't sure of come back for review.">${unsure ? "Marked not sure" : "Not sure?"}</button>` : ""}</div>
         <p class="q-stem">${q.stem}</p><div class="opts" role="${multi ? "group" : mode === "exam" ? "radiogroup" : "group"}"></div>`;
       const opts = card.querySelector(".opts");
+      card.querySelector(".unsure-btn")?.addEventListener("click", () => { unsure = !unsure; draw(); });
       order.forEach((k, pos) => {
         const o = q.options[k];
         const b = document.createElement("button"); b.type = "button"; b.className = "opt";
@@ -255,7 +256,7 @@
         res.innerHTML = `<span>${a.ok ? "Correct" : multi ? "Not this time. Scoring is all-or-nothing: every keyed option, and only those. The explanations show why." : "Not this time. The explanations show why."}</span>`;
         if (mode === "learn") {
           const again = document.createElement("button"); again.className = "linkbtn"; again.type = "button"; again.textContent = "Try again";
-          again.addEventListener("click", () => { clearLessonAnswer(q.id); pick = multi ? [] : null; touch(); draw(); });
+          again.addEventListener("click", () => { clearLessonAnswer(q.id); pick = multi ? [] : null; unsure = false; touch(); draw(); });
           res.append(again);
         }
         // Route a miss back to the lesson that teaches it (unless that lesson is already open).
@@ -276,26 +277,27 @@
     const answered = QUESTIONS.filter(q => state.first[q.id]).length;
     const weak = weakest(1)[0];
     const lastMock = state.mocks[0];
-    const plan = planModel();
+    const plan = planModel(), ses = sessionModel();
     app.innerHTML = `
 <section class="hero">
   <div>
     <div class="eyebrow">Claude Certified Architect – Foundations</div>
     <h1>Exam-ready by <em>${fmtLong(plan.ex)}</em></h1>
-    <p>Three foundation lessons, fourteen modules that build from first principles to exam judgment, and four hands-on labs, mapped to every task statement in the official blueprint. No other material needed.</p>
+    <p>${MODS.filter(m => m.id[0] === "f").length} foundation lessons, ${MODS.filter(m => m.id[0] === "m").length} modules that build from first principles to exam judgment, and ${MODS.filter(m => m.id[0] === "l").length} hands-on labs, mapped to every task statement in the official blueprint. No other material needed.</p>
   </div>
   <div class="goal">
     <svg class="ring" viewBox="0 0 100 100" aria-label="Estimated readiness ${pct}%"><circle class="track" cx="50" cy="50" r="40"/><circle class="val" cx="50" cy="50" r="40" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - r)}"/><text x="50" y="58" text-anchor="middle">${pct}%</text></svg>
     <div>
       <div class="goal-v">${daysLeft()} days</div><div class="goal-k">to your exam on ${fmtLong(plan.ex)} · <a href="#plan">${plan.left < 1 ? "lessons done" : plan.behind ? "behind pace" : "on track"}: open your study plan →</a></div>
-      <div class="goal-v">${pct}% ready</div><div class="goal-k">First-attempt accuracy on the ${answered} practice questions you've tried, weighted by domain. Retries don't count. Practice scores alone don't justify booking: book when a cold Readiness Check and the official practice exam both clear 80%.</div>
+      <div class="goal-v">${pct}% ready</div><div class="goal-k">First-attempt accuracy on the ${answered} practice questions you've tried, weighted by domain. Retries don't count. Practice scores alone don't justify booking: wait for a cold Readiness Check at 80% or more. The official practice exam is optional, and the only outside check on that bar.</div>
     </div>
   </div>
 </section>
-${nm ? `<section class="cont">
-  <div><div class="eyebrow">${modProgress(nm.id) > 0 ? "Continue" : "Start here"} · Module ${nm.n}</div><h2>${esc(nm.title)}</h2><p>${esc(L[nm.id].steps[next.s].title)}</p></div>
-  <a class="btn" href="#${nm.id}-${next.s + 1}">${modProgress(nm.id) > 0 ? "Resume" : "Begin"} →</a>
-</section>` : `<section class="cont"><div><div class="eyebrow">All modules complete</div><h2>Switch to exam practice</h2><p>Drill your weakest scenarios, then sit a full timed mock exam.</p></div><a class="btn" href="#practice">Practice →</a></section>`}
+<section class="cont today-card">
+  <div class="today-head"><div><div class="eyebrow">Today's session${ses.mins ? ` · about ${ses.mins} min` : ""}</div><h2>${ses.cur ? "Review first, then new material" : "Done for today"}</h2></div>
+  <a class="btn" href="${ses.cur ? ses.cur.href : "#practice"}" ${ses.cur && ses.cur.id === "cards" ? "data-session-cards" : ""}>${ses.cur ? (ses.parts.some(x => x.done && !x.skip) ? "Continue" : "Begin") : "Extra practice"} →</a></div>
+  <ol class="today-list">${ses.parts.map(x => `<li class="${x.done ? "done" : x === ses.cur ? "cur" : ""}"><span class="today-mark" aria-hidden="true">${x.done ? "✓" : ""}</span><a href="${x.href}" ${x.id === "cards" ? "data-session-cards" : ""}>${esc(x.label)}</a><span class="today-prog">${x.skip ? "" : x.done ? "done" : x.prog}</span></li>`).join("")}</ol>
+</section>
 <section class="quick">
   <a class="qk" href="#practice"><span class="qk-n">${answered}<small>/${QUESTIONS.length}</small></span><span class="qk-l">practice questions answered</span></a>
   <a class="qk" href="#cards"><span class="qk-n">${dueCount()}</span><span class="qk-l">flashcards due today</span></a>
@@ -317,11 +319,14 @@ ${nm ? `<section class="cont">
     const p = modProgress(m.id), isReady = ready(m.id);
     const status = !isReady ? `<span class="status soon">Coming soon</span>` : p >= 1 ? `<span class="status done">Done</span>` : p > 0 ? `<span class="status prog">In progress</span>` : `<span class="status new">Start</span>`;
     const inner = `<span class="mod-n">${m.n}</span>
-      <span><span class="mod-title">${esc(m.title)}</span><p class="mod-p">${esc(m.principle)}</p><span class="chips">${m.tasks.map(taskChip).join("") || '<span class="chip">exam strategy</span>'}</span></span>
+      <span><span class="mod-title">${esc(m.title)}</span><p class="mod-p">${esc(m.principle)}</p><span class="chips">${m.tasks.map(taskChip).join("") || `<span class="chip">${{ f: "foundations", l: "lab" }[m.id[0]] || "exam strategy"}</span>`}</span></span>
       <span class="mod-side">${status}<span>${m.minutes} min</span>${isReady && p > 0 && p < 1 ? `<span class="mini"><span style="width:${p * 100}%"></span></span>` : ""}</span>`;
     return isReady ? `<a class="mod ready" href="#${m.id}">${inner}</a>` : `<div class="mod soon">${inner}</div>`;
   }).join("")}
 </section>`;
+    // On a phone the session comes first: it's the thing to do, and the countdown can wait a scroll.
+    if (window.matchMedia("(max-width: 760px)").matches) app.prepend(app.querySelector(".today-card"));
+    app.querySelectorAll("[data-session-cards]").forEach(x => x.addEventListener("click", () => { sessionDeck = true; deck = null; }));
   }
 
   function pageHead(eyebrow, title, sub) {
@@ -352,6 +357,38 @@ ${nm ? `<section class="cont">
   const dateAt = iso => new Date(iso + "T12:00:00");
   const fmtLong = iso => dateAt(iso).toLocaleDateString(undefined, { month: "long", day: "numeric" });
   const addDays = (iso, n) => { const d = dateAt(iso); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  // Right on the first try but marked "not sure": a lucky guess until it's answered right again without the mark.
+  const shakyQs = () => QUESTIONS.filter(q => { const f = state.first[q.id], a = state.answers[q.id]; return f && f.ok && f.sure === false && !(a && a.ok && a.sure !== false && a.at > f.at); });
+  const sureWrong = () => QUESTIONS.filter(q => { const f = state.first[q.id]; return f && !f.ok && f.sure === true; }).length;
+  // ---------- Today's session: review first, then mixed questions, then new material ----------
+  const dayStart = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const SESSION = { cards: 12, questions: 10, steps: 3 };
+  // Ten mixed questions: misses and lucky guesses first, then unseen questions from finished modules,
+  // spread across domains (weakest first), then the right answers you gave longest ago.
+  function sessionQuestions() {
+    const learned = new Set(MODS.filter(m => L[m.id] && modProgress(m.id) >= 1).map(m => m.id));
+    const pool = QUESTIONS.filter(q => learned.has(q.module));
+    const lead = [...shuffle(missedQs()).slice(0, 4), ...shuffle(shakyQs()).slice(0, 2)];
+    const ds = domainStats().sort((a, b) => a.mastery - b.mastery).map(d => d.id);
+    const byDom = Object.fromEntries(ds.map(d => [d, shuffle(pool.filter(q => !state.first[q.id] && domOfTask(q.ts).id === d))]));
+    const fresh = [];
+    for (let k = 0; fresh.length < SESSION.questions && ds.some(d => byDom[d].length); k++) { const d = ds[k % ds.length]; if (byDom[d].length) fresh.push(byDom[d].shift()); }
+    const old = pool.filter(q => state.answers[q.id] && state.answers[q.id].ok).sort((a, b) => state.answers[a.id].at - state.answers[b.id].at);
+    return [...new Set([...lead, ...fresh, ...old])].slice(0, SESSION.questions);
+  }
+  function sessionModel() {
+    const t0 = dayStart(), next = nextUp(), nm = next && MODS.find(m => m.id === next.m);
+    const cardsToday = Object.values(state.cards).filter(c => c && c.at >= t0).length, due = dueCount();
+    const ansToday = Object.values(state.answers).filter(a => a && a.at >= t0).length, qs = sessionQuestions();
+    const stepsToday = Object.values(state.steps).filter(t => t >= t0).length;
+    const parts = [
+      { id: "cards", label: due || cardsToday ? `Review ${Math.min(SESSION.cards, Math.max(due, cardsToday))} flashcards` : "No flashcards due", mins: 8, done: !due || cardsToday >= SESSION.cards, prog: `${Math.min(cardsToday, SESSION.cards)}/${SESSION.cards}`, href: "#cards", skip: !due && !cardsToday },
+      { id: "questions", label: qs.length ? `Answer ${qs.length} mixed questions` : "Mixed questions unlock after your first finished module", mins: 15, done: !qs.length || ansToday >= SESSION.questions, prog: `${Math.min(ansToday, SESSION.questions)}/${SESSION.questions}`, href: "#drill-today", skip: !qs.length },
+      { id: "lesson", label: nm ? `${modProgress(nm.id) > 0 ? "Continue" : "Start"} Module ${nm.n}: ${nm.title}` : "All modules complete", mins: 15, done: !nm || stepsToday >= SESSION.steps, prog: `${Math.min(stepsToday, SESSION.steps)}/${SESSION.steps} steps`, href: nm ? `#${nm.id}-${next.s + 1}` : "#practice", skip: !nm }
+    ];
+    return { parts, cur: parts.find(x => !x.done), mins: parts.filter(x => !x.skip && !x.done).reduce((a, x) => a + x.mins, 0) };
+  }
+  let sessionDeck = false;
   const missedQs = () => QUESTIONS.filter(q => state.first[q.id] && !state.first[q.id].ok && !(state.answers[q.id] && state.answers[q.id].ok));
   function planModel() {
     const lessons = MODS.filter(m => L[m.id]);
@@ -483,6 +520,10 @@ ${weeks.length ? weeks.map(w => `<div class="plan-week"><div class="eyebrow">Wee
     wirePrint();
     draw();
   }
+  function viewMore() {
+    const links = [["#plan", "Study plan", "Your exam date and week-by-week pace"], ["#blueprint", "Blueprint", "All 30 task statements and your score on each"], ["#principles", "Principles", "The design rules behind the right answers"], ["#glossary", "Glossary", "Every term, linked to its lesson"], ["#today", "Exam vs. today", "Where the exam's answers differ from current products, and exam mode"], ["#exam-day", "Exam-day playbook", "Pacing, technique and logistics"]];
+    app.innerHTML = `${pageHead("More", "Reference and planning", "")}<div class="read more-list">${links.map(([h, t, d]) => `<a class="mock-card" href="${h}"><div><h2>${t}</h2><p>${d}</p></div><span aria-hidden="true">→</span></a>`).join("")}</div>`;
+  }
   function viewToday() {
     app.innerHTML = `${pageHead("Exam vs. today", "Answer the exam in its own terms", "The exam blueprint was written before some product changes. On the exam, choose the blueprint's answer. At work, use what ships today. Every row links to the official source.")}
 <div class="panel" style="margin-bottom:18px"><h3 style="margin:0 0 6px">Exam mode</h3><p>For final-week review, hide the “Real world today” notes in lessons, flashcards and answer explanations, so you rehearse only the answers the exam expects. This page stays available either way.</p><p style="margin-top:8px">${examToggle()}</p></div>
@@ -523,15 +564,15 @@ ${B.domains.map(d => `<section class="bp-dom">
     app.innerHTML = `
 <div class="read">
   <a class="crumb" href="#path">← Study path</a>
-  <header class="l-head">
+  <header class="l-head${i > 0 ? " compact" : ""}">
     <div class="eyebrow">Module ${mod.n} · ${mod.minutes} min</div>
     <h1>${esc(mod.title)}</h1>
     <p class="l-principle">${esc(mod.principle)}</p>
-    <div class="chips">${mod.tasks.map(t => taskChip(t) + `<span class="small" style="margin-right:8px">${esc(B.tasks[t])}</span>`).join("")}</div>
+    <div class="chips task-list">${mod.tasks.map(t => `<span class="task-pair">${taskChip(t)}<span class="small">${esc(B.tasks[t])}</span></span>`).join("")}</div>
     ${examToggle()}
   </header>
   <div class="steps" role="tablist" aria-label="Lesson steps">${steps.map((s, k) => `<button type="button" role="tab" aria-selected="${k === i}" aria-label="Step ${k + 1}: ${esc(s.title)}" title="${esc(s.title)}" class="${k === i ? "cur" : stepDone(id, k) ? "done" : ""}" data-go="${k}"></button>`).join("")}</div>
-  <div class="step-meta"><span>Step ${i + 1} of ${steps.length}</span><span>${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span></div>
+  <div class="step-meta"><span>Step ${i + 1} of ${steps.length} · ${{ read: "Read", widget: "Interactive", quiz: "Practice", recap: "Recap" }[step.kind]}</span><span class="step-next">${i < steps.length - 1 ? `Next: ${esc(steps[i + 1].title)}` : "Last step"}</span></div>
   <article class="step" id="step"></article>
   <nav class="l-nav" aria-label="Step navigation">
     <button class="btn ghost" type="button" id="prev" ${i === 0 ? "disabled" : ""}>← Back</button>
@@ -542,6 +583,8 @@ ${B.domains.map(d => `<section class="bp-dom">
     el.append(Object.assign(document.createElement("h2"), { textContent: step.title }));
     if (step.kind === "read") {
       const p = document.createElement("div"); p.className = "prose"; p.innerHTML = T(step.html); el.append(p);
+      // On a phone, a table of three or more columns reads as one small card per row (see .stack in the CSS).
+      p.querySelectorAll("table").forEach(t => { const th = [...t.querySelectorAll("thead th")].map(x => x.textContent.trim()); if (th.length < 3) return; t.classList.add("stack"); t.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, k) => { td.dataset.th = th[k] || ""; })); });
       p.querySelectorAll("[data-embed]").forEach(n => window.EMBEDS[n.dataset.embed] && window.EMBEDS[n.dataset.embed](n));
     } else if (step.kind === "widget") {
       const intro = document.createElement("p"); intro.className = "widget-intro"; intro.textContent = step.intro;
@@ -574,7 +617,7 @@ ${B.domains.map(d => `<section class="bp-dom">
       state.steps[skey(id, i)] = Date.now(); touch();
       if (i < steps.length - 1) go(i + 1);
       else {
-        const nextMod = MODS.find(m => m.n === mod.n + 1 && ready(m.id));
+        const nextMod = MODS.slice(MODS.indexOf(mod) + 1).find(m => ready(m.id));
         location.hash = nextMod ? `#${nextMod.id}` : "#practice";
         toast(`Module ${mod.n} complete`);
       }
@@ -645,14 +688,6 @@ ${mocks.length ? `<div class="trend-wrap"><table class="trend-table"><caption>Mo
   </div>
   <a class="btn" href="#mock">${running ? "Resume exam" : "Start mock exam"} →</a>
 </section>
-${HOLDOUT.length ? `<section class="mock-card">
-  <div>
-    <div class="eyebrow">Readiness Check</div>
-    <h2>${state.readiness ? `Taken ${fmtDate(state.readiness.at)}: ${Math.round(state.readiness.pct * 100)}%` : `${HOLDOUT.length} unseen questions · one attempt`}</h2>
-    <p>${state.readiness ? "Your one cold attempt. Review it against the booking bar." : "Questions held back from every lesson, drill and mock. Take it once, when you think you're ready."}</p>
-  </div>
-  <a class="btn ghost" href="#readiness">${state.readiness ? "See result" : "About the check"} →</a>
-</section>` : ""}
 <section class="mock-card">
   <div>
     <div class="eyebrow">Retry my misses</div>
@@ -663,11 +698,11 @@ ${HOLDOUT.length ? `<section class="mock-card">
 </section>
 <section class="mock-card">
   <div>
-    <div class="eyebrow">Exam-day playbook</div>
-    <h2>Pacing, technique and logistics</h2>
-    <p>How to split 120 minutes, read a scenario, eliminate options, handle multiple-response questions, and what to confirm before the day.</p>
+    <div class="eyebrow">Confidence check</div>
+    <h2>${shakyQs().length ? `${shakyQs().length} lucky guess${shakyQs().length === 1 ? "" : "es"} to confirm` : "No lucky guesses waiting"}</h2>
+    <p>Tap “Not sure?” on a question before you answer when you're guessing (in a mock, flag it). Right answers you weren't sure of come back here. ${sureWrong() ? `You've also been wrong ${sureWrong()} time${sureWrong() === 1 ? "" : "s"} without marking doubt: those are the ones to study hardest, and they're in your misses.` : ""}</p>
   </div>
-  <a class="btn ghost" href="#exam-day">Read →</a>
+  <a class="btn ghost" href="#drill-shaky">Confirm →</a>
 </section>
 ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="small" href="#mock-result">Latest review →</a></div>
 <div class="hist">${state.mocks.map(m => `<div class="hist-row"><span>${fmtDate(m.at)}</span><span class="mono">${m.correct}/${m.total}</span><span class="bar"><span style="width:${(m.wpct ?? m.pct) * 100}%;background:${(m.wpct ?? m.pct) >= BAR ? "var(--good)" : "var(--bad)"}"></span></span><span class="hist-s ${(m.wpct ?? m.pct) >= BAR ? "pass" : "fail"}">${Math.round((m.wpct ?? m.pct) * 100)}%</span>${(m.kind || "mock") === "mock" ? `<button type="button" class="linkbtn hist-rm" data-rm="${m.startedAt}" aria-label="Remove the ${fmtDate(m.at)} mock from history">Remove</button>` : "<span></span>"}</div>`).join("")}</div>
@@ -684,6 +719,23 @@ ${state.mocks.length ? `<div class="sec-head"><h2>Mock history</h2><a class="sma
       <span class="small">${right.length}/${qs.length} correct · ${qs.length - tried.length} unanswered</span>
     </a>`;
   }).join("")}
+</section>
+<div class="sec-head" style="margin-top:34px"><h2>Before you book</h2><span class="small">once, near the end</span></div>
+${HOLDOUT.length ? `<section class="mock-card once">
+  <div>
+    <div class="eyebrow">Readiness Check</div>
+    <h2>${state.readiness ? `Taken ${fmtDate(state.readiness.at)}: ${Math.round(state.readiness.pct * 100)}%` : `${HOLDOUT.length} unseen questions · one attempt`}</h2>
+    <p>${state.readiness ? "Your one cold attempt. Review it against the booking bar." : "Questions held back from every lesson, drill and mock. Take it once, when you think you're ready."}</p>
+  </div>
+  <a class="btn ghost" href="#readiness">${state.readiness ? "See result" : "About the check"} →</a>
+</section>` : ""}
+<section class="mock-card">
+  <div>
+    <div class="eyebrow">Exam-day playbook</div>
+    <h2>Pacing, technique and logistics</h2>
+    <p>How to split 120 minutes, read a scenario, eliminate options, handle multiple-response questions, and what to confirm before the day.</p>
+  </div>
+  <a class="btn ghost" href="#exam-day">Read →</a>
 </section>
 <div class="sec-head" style="margin-top:34px"><h2>Weakest areas</h2><span class="small">biggest weighted gaps among tasks you've practiced</span></div>
 ${weak.length ? `<div class="bp-rows">${weak.map(w => `<div class="bp-row"><span class="mono">${w.t}</span><span>${esc(B.tasks[w.t])}</span><span class="bp-mod"><a href="#${w.mod.id}">Module ${w.mod.n} →</a></span><span class="bp-pct">${Math.round(w.pct * 100)}%</span></div>`).join("")}</div>` : `<p class="small">Answer some questions first. Your weakest task statements will show up here.</p>`}
@@ -702,9 +754,10 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
 
   let drill = null;
   function viewDrill(n) {
-    const misses = n === "misses";
-    const s = misses ? { name: "Retry my misses" } : B.scenarios.find(x => x.n === n);
-    if (misses && (!drill || drill.n !== n)) drill = { n, order: shuffle(missedQs()).map(q => q.id), i: 0, right: 0, answered: 0 };
+    const special = { misses: ["Review", "Retry my misses", () => shuffle(missedQs())], shaky: ["Review", "Confirm your lucky guesses", () => shuffle(shakyQs())], today: ["Today's session", "Mixed questions", sessionQuestions] }[n];
+    const misses = !!special;
+    const s = special ? { name: special[1] } : B.scenarios.find(x => x.n === n);
+    if (special && (!drill || drill.n !== n)) drill = { n, order: special[2]().map(q => q.id), i: 0, right: 0, answered: 0 };
     if (!drill || drill.n !== n) {
       const qs = QUESTIONS.filter(q => q.scenario === n);
       const un = shuffle(qs.filter(q => !state.answers[q.id])), wrong = shuffle(qs.filter(q => state.answers[q.id] && !state.answers[q.id].ok)), ok = shuffle(qs.filter(q => state.answers[q.id] && state.answers[q.id].ok));
@@ -712,14 +765,14 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     }
     const d = drill;
     if (d.i >= d.order.length) {
-      app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
-<div class="read"><div class="panel">${misses && !d.order.length ? `<p>No misses to retry. Questions you get wrong on the first try collect here until you answer them right.</p>` : `<div class="big-num">${d.right}/${d.answered} correct</div><p class="small">${misses ? "Questions you answered right have left the list. Readiness still counts first attempts only." : "Drill complete. Readiness counts your first attempt at each question."}</p>`}
-<div class="row-btns"><button class="btn" type="button" id="again">Drill again</button><a class="btn ghost" href="#practice">Back to practice</a></div></div></div>`;
+      app.innerHTML = `${pageHead(special ? special[0] : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
+<div class="read"><div class="panel">${misses && !d.order.length ? `<p>${n === "misses" ? "No misses to retry. Questions you get wrong on the first try collect here until you answer them right." : n === "shaky" ? "Nothing to confirm. Right answers you marked “not sure” collect here until you get them right without the mark." : "Finish a module first: mixed questions are drawn from the modules you've completed."}</p>` : `<div class="big-num">${d.right}/${d.answered} correct</div><p class="small">${n === "today" ? "That's today's mixed set. Anything you missed is now in Retry my misses." : misses ? "Questions you answered right have left the list. Readiness still counts first attempts only." : "Drill complete. Readiness counts your first attempt at each question."}</p>`}
+<div class="row-btns">${n === "today" ? `<a class="btn" href="#path">Back to today's session</a>` : ""}<button class="btn${n === "today" ? " ghost" : ""}" type="button" id="again">${n === "today" ? "Ten more" : "Drill again"}</button><a class="btn ghost" href="#practice">Back to practice</a></div></div></div>`;
       document.getElementById("again").addEventListener("click", () => { drill = null; viewDrill(n); });
       return;
     }
     const q = QBYID[d.order[d.i]];
-    app.innerHTML = `${pageHead(misses ? "Review" : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
+    app.innerHTML = `${pageHead(special ? special[0] : `Scenario ${n} drill`, esc(s.name), s.brief ? esc(s.brief) : "")}
 <div class="read"><div class="drill-bar"><span class="bar"><span style="width:${d.i / d.order.length * 100}%;background:var(--accent)"></span></span><span class="small">${d.right} correct so far</span></div><div id="dq"></div>
 <nav class="l-nav"><a class="btn ghost" href="#practice">End drill</a><button class="btn accent" type="button" id="dnext" disabled>Next →</button></nav></div>`;
     const nextBtn = document.getElementById("dnext");
@@ -777,7 +830,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       const kindTally = isMulti(q) ? multi : q.family ? judg : recog;
       kindTally[1]++; if (ok) kindTally[0]++;
       if (ok) { correct++; dom[d][0]++; } else wrong.push([id, c == null ? -1 : c]);
-      if (c != null) { state.answers[id] = { ok, choice: c, at: Date.now() }; recordFirst(id, ok); }
+      if (c != null) { const sure = !m.flags[id]; state.answers[id] = { ok, choice: c, at: Date.now(), sure }; recordFirst(id, ok, sure); }
     }
     const total = m.qids.length, pct = correct / total;
     // Weight each domain's accuracy by its blueprint share, so scores compare across scenario draws.
@@ -809,7 +862,7 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
     const m = state.mock, LIMIT = (m.kind === "readiness" ? m.qids.length * 2 : 120) * 60000;
     const i = Math.min(m.cur || 0, m.qids.length - 1), q = QBYID[m.qids[i]];
     const s = B.scenarios.find(x => x.n === q.scenario);
-    app.innerHTML = `<div class="exam-bar"><span class="eyebrow">${m.kind === "readiness" ? "Readiness Check · " : ""}Scenario ${s.n} · ${esc(s.name)}</span><span class="timer" id="timer"></span></div>
+    app.innerHTML = `<div class="exam-bar"><span class="eyebrow">${m.kind === "readiness" ? "Readiness Check · " : ""}Scenario ${s.n} · ${esc(s.name)}</span><span class="exam-clock"><span class="pace" id="pace"></span><span class="timer" id="timer"></span></span></div>
 <div class="read"><div id="mq"></div>
 <div class="exam-nav"><button class="btn ghost" type="button" id="mprev" ${i === 0 ? "disabled" : ""}>← Previous</button>
 <button class="btn ghost" type="button" id="mflag">${m.flags[q.id] ? "Unflag" : "Flag for review"}</button>
@@ -846,6 +899,9 @@ ${trapHtml(trapProfile(allWrongPicks()), "No wrong answers yet. Your most freque
       const mm = Math.floor(left / 60000), ss = Math.floor(left % 60000 / 1000);
       timerEl.textContent = `${mm}:${String(ss).padStart(2, "0")} left`;
       timerEl.classList.toggle("low", left < 10 * 60000);
+      // Pace: how many questions the clock says you should have answered by now, against how many you have.
+      const behind = Math.floor((LIMIT - left) / (LIMIT / state.mock.qids.length)) - Object.keys(state.mock.ans).length, paceEl = document.getElementById("pace");
+      if (paceEl) { paceEl.textContent = behind <= 0 ? "on pace" : `${behind} behind pace`; paceEl.classList.toggle("late", behind >= 3); }
     };
     clearInterval(ticker); tick(); ticker = setInterval(tick, 1000);
   }
@@ -886,7 +942,8 @@ ${trapHtml(trapProfile(r.wrong), "No wrong answers in this sitting.")}
     const filter = deck ? deck.filter : "all";
     if (!deck || deck.done) {
       const pool = CARDS.filter(c => (filter === "all" || c.module.id === filter) && isDue(c));
-      deck = { filter, queue: shuffle(pool).map(c => c.id), flipped: false, seen: 0, done: false };
+      deck = { filter, queue: shuffle(pool).map(c => c.id).slice(0, sessionDeck ? SESSION.cards : undefined), flipped: false, seen: 0, done: false, session: sessionDeck };
+      sessionDeck = false;
     }
     const byId = Object.fromEntries(CARDS.map(c => [c.id, c]));
     const mastered = CARDS.filter(c => (state.cards[c.id] || {}).b >= 4).length;
@@ -901,7 +958,7 @@ ${cur ? `<div class="flash ${deck.flipped ? "flipped" : ""}" id="flash" tabindex
   ${deck.flipped ? `<div class="flash-b">${T(esc(cur.b))}</div>` : `<div class="flash-hint small">Tap or press space to reveal</div>`}
 </div>
 ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" type="button" id="again">Again <kbd>1</kbd></button><button class="btn accent" type="button" id="got">Got it <kbd>2</kbd></button></div>` : ""}`
-  : `<div class="panel" style="margin-top:16px"><div class="big-num">All caught up</div><p class="small">No cards due${filter === "all" ? "" : " in this deck"}. ${deck.seen ? `You reviewed ${deck.seen} cards.` : ""} Come back tomorrow, or study ahead below.</p><button class="btn ghost" type="button" id="ahead">Study all cards in this deck now</button></div>`}
+  : `<div class="panel" style="margin-top:16px"><div class="big-num">All caught up</div><p class="small">No cards due${filter === "all" ? "" : " in this deck"}. ${deck.seen ? `You reviewed ${deck.seen} cards.` : ""} ${deck.session ? "That's today's set." : "Come back tomorrow, or study ahead below."}</p>${deck.session ? `<a class="btn" href="#path" style="margin-right:10px">Back to today's session</a>${dueCount() ? `<button class="btn ghost" type="button" id="moredue" style="margin-right:10px">Keep going: ${dueCount()} more due</button>` : ""}` : ""}<button class="btn ghost" type="button" id="ahead">Study all cards in this deck now</button></div>`}
 </div>`;
     document.getElementById("deckf").addEventListener("change", e => { deck = { filter: e.target.value, done: true }; viewCards(); });
     const flip = () => { if (!deck.flipped) { deck.flipped = true; viewCards(); } };
@@ -916,6 +973,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     if (f) { f.addEventListener("click", flip); f.focus({ preventScroll: true }); }
     document.getElementById("again")?.addEventListener("click", () => rate(false));
     document.getElementById("got")?.addEventListener("click", () => rate(true));
+    document.getElementById("moredue")?.addEventListener("click", () => { deck = null; viewCards(); });
     document.getElementById("ahead")?.addEventListener("click", () => { deck = { filter, queue: shuffle(CARDS.filter(c => filter === "all" || c.module.id === filter)).map(c => c.id), flipped: false, seen: 0 }; viewCards(); });
     document.onkeydown = e => {
       if (route().page !== "cards" || !deck.queue.length || e.target.tagName === "SELECT") return;
@@ -935,8 +993,9 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
       else { s = L[m[1]].steps.findIndex((_, i) => !stepDone(m[1], i)); if (s < 0) s = 0; }
       return { lesson: m[1], step: s };
     }
-    const d = h.match(/^drill-([1-6]|misses)$/);
-    if (d) return { drill: d[1] === "misses" ? "misses" : Number(d[1]), page: "practice" };
+    const d = h.match(/^drill-([1-6]|misses|shaky|today)$/);
+    if (d) return { drill: /^\d$/.test(d[1]) ? Number(d[1]) : d[1], page: "practice" };
+    if (h === "more") return { page: "more" };
     if (["blueprint", "today", "glossary", "principles", "plan", "exam-day", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
     return { page: "path" };
   }
@@ -948,6 +1007,10 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     // On narrow screens the nav scrolls sideways; keep the active link in view.
     const onLink = document.querySelector(".nav a.on"), navEl = onLink && onLink.parentElement;
     if (navEl && navEl.scrollWidth > navEl.clientWidth) navEl.scrollLeft = Math.max(0, onLink.offsetLeft - navEl.offsetLeft - (navEl.clientWidth - onLink.offsetWidth) / 2);
+    const more = ["plan", "blueprint", "today", "glossary", "principles", "exam-day", "more"].includes(r.page);
+    document.querySelectorAll("[data-tab]").forEach(a => a.classList.toggle("on", !r.lesson && (a.dataset.tab === "more" ? more : a.dataset.tab === navKey)));
+    document.documentElement.classList.toggle("focus", !!r.lesson || !!r.drill || r.page === "mock");
+    if (r.page === "more") return viewMore();
     if (r.lesson) viewLesson(r.lesson, r.step);
     else if (r.drill) viewDrill(r.drill);
     else if (r.page === "blueprint") viewBlueprint();
