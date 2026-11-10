@@ -563,3 +563,22 @@ The official guide doesn't give the proportion of multiple-response items.
 
 **Checks.** `content-check`: invariants OK (319 questions, 139 cards). `cue-baselines`: every heuristic within target. `browser-suite`: 395 checks, no problems, run twice. The suite's drill helper now handles a "Select THREE" item drawn first, which used to fail at random.
 
+## Batch 22: daily session, confidence mark, coach, phone layout (2026-11-10)
+
+**Why.** The content was complete, but the app left the learner to choose what to do each day, tested recognition only, and was awkward on a phone.
+
+**What.**
+- **Today's session** on the home page: due flashcards, ten mixed questions from finished modules, then the next lesson steps.
+- **Confidence mark** ("Not sure?", or a flag in a mock) and a drill for right answers that were guesses.
+- **Coach**, using the artifact's `sample` capability: Claude grades a typed explanation against the question's own explanations, and writes a fresh variant after a miss. Unscored, unsaved, labeled as unreviewed.
+- **Phone layout:** bottom tab bar with a More page, compact lesson header, stacked tables, a next-step label.
+- **Practice page** reordered; the one-time Readiness Check sits under "Before you book". **Mock exam** shows a pace cue.
+- **Fixes:** finishing a Foundations lesson went to Practice instead of the next lesson; the home copy and tags for Foundations lessons were wrong.
+- The home page now calls the official practice exam optional, and still says it is the only outside check on the 80% bar.
+
+**Not done.** Time-per-question tracking, new questions for the thin task statements, a runnable lab, and CI for this repo.
+
+**Limits.** The coach's grading and variants are model output with no review; the tests stub Claude, so real responses were not exercised here. The confidence mark is opt-in, so "wrong without marking doubt" overstates confidence for anyone who rarely uses it.
+
+**Checks.** `content-check`: invariants OK. `browser-suite`: 431 checks, no problems.
+

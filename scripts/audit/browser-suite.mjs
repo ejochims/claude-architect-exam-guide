@@ -122,6 +122,34 @@ async function run(viewport, colorScheme) {
   await visit("#m09-1");
   if (!(await page.locator(".prose table.stack").count())) problems.push(`${tag}: three-column table wasn't marked for stacking`);
   checks += 8;
+  // Coach (the `sample` capability), with Claude stubbed: a graded explanation renders a verdict, a wrong
+  // answer offers a fresh variant, and a declined permission removes the coach without breaking the card.
+  for (const declined of [false, true]) {
+    const cp = await browser.newPage({ viewport, colorScheme });
+    cp.on("pageerror", e => problems.push(`${tag} coach pageerror: ${e.message}`));
+    await cp.addInitScript(declined => {
+      const fn = async () => ({ text: "x", truncated: false });
+      fn.json = async prompt => { if (declined) throw { code: "not_granted", message: "no" }; return prompt.startsWith("Write one new") ? { stem: "A <b>new</b> question?", options: [{ t: "one", ok: true, why: "yes" }, { t: "two", ok: false, why: "no" }, { t: "three", ok: false, why: "no" }, { t: "four", ok: false, why: "no" }] } : { verdict: "solid", feedback: "You named the real reason.", missing: "" }; };
+      window.claude = { use: async name => name === "sample" ? fn : null };
+    }, declined);
+    await cp.goto(URL + "#m01-5"); await cp.waitForTimeout(150);
+    const wrongPos = await cp.evaluate(() => { const q = window.LESSONS.m01.steps[4].questions[0]; const t = q.options.find(o => !o.ok).t; return [...document.querySelectorAll(".q")][0].querySelectorAll(".opt .opt-body").length && [...[...document.querySelectorAll(".q")][0].querySelectorAll(".opt .opt-body")].findIndex(n => n.innerHTML === t); });
+    const card = cp.locator(".q").first();
+    await card.locator(".opt").nth(wrongPos).click(); await cp.waitForTimeout(60);
+    if (!(await card.locator(".coach").count())) { problems.push(`${tag}: coach missing after an answer`); await cp.close(); continue; }
+    await card.locator(".coach-in").fill("Because stop_reason is the structured signal and text can contain the word done.");
+    await card.locator(".coach-go").click(); await cp.waitForTimeout(80);
+    if (declined) { if (await card.locator(".coach-go").count()) problems.push(`${tag}: declined coach should remove its controls`); }
+    else {
+      if (!(await card.locator(".coach-v.v-solid").count())) problems.push(`${tag}: coach verdict didn't render`);
+      await card.locator(".coach-var").click(); await cp.waitForTimeout(80);
+      if ((await card.locator(".q.variant .opt").count()) !== 4) problems.push(`${tag}: fresh variant didn't render four options`);
+      if (await card.locator(".q.variant .q-stem b").count()) problems.push(`${tag}: variant text wasn't escaped`);
+      await card.locator(".q.variant .opt").first().click();
+      if (!(await card.locator(".q.variant .opt.is-right").count())) problems.push(`${tag}: variant didn't reveal its answer`);
+    }
+    checks += 2; await cp.close();
+  }
   // Exam mode hides the "Real world today" callouts and parenthetical asides; turning it off restores them.
   await visit("#m02-4");
   const todayShown = () => page.evaluate(() => [...document.querySelectorAll(".callout.today.rw, .today-inline")].filter(n => n.offsetParent !== null).length);

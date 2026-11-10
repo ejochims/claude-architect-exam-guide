@@ -184,6 +184,54 @@
   const isDue = c => { const s = state.cards[c.id]; return !s || s.d <= Date.now(); };
   const dueCount = () => CARDS.filter(isDue).length;
 
+  // ---------- Coach: Claude grades an explanation, or writes a fresh variant (the `sample` capability) ----------
+  // Runs on the viewer's own Claude account, only on a click. Where it's unavailable or declined, the coach
+  // never appears and the rest of the app is unchanged. Nothing it returns is scored or saved.
+  let askClaude = null, coachOff = false;
+  if (window.claude && window.claude.use) window.claude.use("sample").then(fn => { askClaude = fn || null; }).catch(() => {});
+  const plainText = h => { const d = document.createElement("div"); d.innerHTML = h; return d.textContent.replace(/\s+/g, " ").trim(); };
+  const coachError = e => { const c = e && e.code; if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(c)) { coachOff = true; return "Claude isn't available for this page, so the coach is off."; } return c === "rate_limited" ? "Claude is rate-limited right now. Try again in a few minutes." : c === "session_expired" ? "Sign in again to use the coach." : c === "cancelled" ? "" : "That didn't go through. Try again."; };
+  const refText = q => `Task statement ${q.ts}: ${B.tasks[q.ts]}\nQuestion: ${plainText(q.stem)}\nOptions:\n${q.options.map((o, i) => `${i + 1}. [${o.ok ? "CORRECT" : "wrong"}] ${plainText(o.t)}\n   Why: ${plainText(o.why)}`).join("\n")}`;
+  function coachBlock(q, a) {
+    const box = document.createElement("div"); box.className = "coach";
+    box.innerHTML = `<div class="coach-label">Coach</div>
+<label class="small" for="ex-${q.id}">Explain it back: in two sentences, why is the right answer right here, and why does the most tempting wrong one fail?</label>
+<textarea id="ex-${q.id}" class="coach-in" rows="3" maxlength="1200"></textarea>
+<div class="row-btns"><button type="button" class="btn ghost small-btn coach-go" style="margin-left:0">Check my reasoning</button>${a.ok ? "" : `<button type="button" class="btn ghost small-btn coach-var" style="margin-left:0">Try a fresh question on this idea</button>`}</div>
+<div class="coach-out" aria-live="polite"></div><div class="coach-variant"></div>`;
+    const out = box.querySelector(".coach-out"), go = box.querySelector(".coach-go"), ta = box.querySelector(".coach-in"), vbtn = box.querySelector(".coach-var"), vbox = box.querySelector(".coach-variant");
+    const fail = (el, e) => { el.textContent = coachError(e); if (coachOff) box.querySelectorAll("button, textarea, label").forEach(n => n.remove()); };
+    go.addEventListener("click", async () => {
+      const mine = ta.value.trim();
+      if (mine.length < 20) { out.textContent = "Write a sentence or two first."; return; }
+      go.disabled = true; out.textContent = "Thinking…";
+      try {
+        const r = await askClaude.json(`You are grading a learner's explanation of a certification practice question. Judge it ONLY against the reference below, which gives the exam's expected answer and the reason each option is right or wrong. Do not bring in outside facts or newer product behavior.\n\n${refText(q)}\n\nThe learner's explanation:\n"""${mine}"""\n\nReply with only a JSON object: {"verdict": "solid" | "partly" | "off", "feedback": string, "missing": string}. "solid" means they gave the real reason the correct option works; "partly" means the idea is right but the reasoning is incomplete or vague; "off" means the reasoning is wrong even if they picked correctly. "feedback" is two or three direct sentences to the learner ("you"), naming what they got right and what they got wrong. "missing" is the one idea they left out, in one sentence, or "" if nothing. Example: {"verdict": "partly", "feedback": "You named the right fix. You didn't say why the prompt-only option fails.", "missing": "A prompt changes the odds; code changes what is possible."}`);
+        const v = ["solid", "partly", "off"].includes(r && r.verdict) ? r.verdict : "partly";
+        out.innerHTML = `<span class="coach-v v-${v}">${{ solid: "Solid reasoning", partly: "Partly there", off: "Reasoning is off" }[v]}</span><p>${esc(String((r && r.feedback) || ""))}</p>${r && r.missing ? `<p class="small"><strong>Missing:</strong> ${esc(String(r.missing))}</p>` : ""}`;
+      } catch (e) { fail(out, e); }
+      go.disabled = false;
+    });
+    vbtn && vbtn.addEventListener("click", async () => {
+      vbtn.disabled = true; vbox.textContent = "Writing a new question…";
+      try {
+        const r = await askClaude.json(`Write one new multiple-choice practice question that tests the SAME idea as the reference question below, in a different concrete situation (different company, system and numbers). Keep to the reference's framing of what is correct; do not bring in outside facts or newer product behavior. Four options of similar length, exactly one correct, each wrong option a plausible mistake. The correct option must not be the longest.\n\n${refText(q)}\n\nReply with only a JSON object: {"stem": string, "options": [{"t": string, "ok": boolean, "why": string}, ...4 items]}. Plain text only, no Markdown or HTML.`, { cache: false });
+        const opts = r && Array.isArray(r.options) ? r.options.filter(o => o && typeof o.t === "string") : [];
+        if (!r || typeof r.stem !== "string" || opts.length !== 4 || opts.filter(o => o.ok === true).length !== 1) throw { code: "invalid_json" };
+        vbox.innerHTML = `<div class="q variant"><div class="q-meta"><span class="eyebrow">Fresh variant</span><span class="chip">written by Claude just now · not reviewed · not scored</span></div><p class="q-stem">${esc(r.stem)}</p><div class="opts"></div></div>`;
+        const list = vbox.querySelector(".opts"), btns = [];
+        shuffle(opts).forEach((o, k) => {
+          const bt = document.createElement("button"); bt.type = "button"; bt.className = "opt";
+          bt.innerHTML = `<span class="letter">${"ABCD"[k]}</span><span class="opt-body">${esc(o.t)}</span>`;
+          bt.addEventListener("click", () => btns.forEach(([x, xo]) => { x.disabled = true; if (xo.ok) x.classList.add("is-right"); else if (x === bt) x.classList.add("is-wrong"); if (!x.querySelector(".opt-why")) x.querySelector(".opt-body").insertAdjacentHTML("beforeend", `<span class="opt-why">${esc(String(xo.why || ""))}</span>`); }));
+          btns.push([bt, o]); list.append(bt);
+        });
+      } catch (e) { fail(vbox, e); }
+      vbtn.disabled = false;
+    });
+    return box;
+  }
+
   // ---------- Question card ----------
   // Multiple-response items (type "multi") key several options and are scored all-or-nothing:
   // the answer is right only if the selected set equals the keyed set. Their choice is an array of option indices.
@@ -263,6 +311,7 @@
         const mod = !a.ok && MODS.find(x => x.id === q.module);
         if (mod && !location.hash.startsWith(`#${mod.id}`)) res.insertAdjacentHTML("beforeend", `<a class="linkbtn review-link" href="#${mod.id}">Review Module ${mod.n}: ${esc(mod.title)} →</a>`);
         card.append(res);
+        if (askClaude && !coachOff && mode !== "exam") card.append(coachBlock(q, a));
       }
     };
     draw();

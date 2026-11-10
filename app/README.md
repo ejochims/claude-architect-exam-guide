@@ -29,3 +29,11 @@ Interactive study path for the Claude Certified Architect – Foundations exam. 
 **Exam mode.** A per-device toggle (in each lesson header and on the Exam vs. today page, stored in `localStorage` under `cca-exam-mode`) hides the "Real world today" callouts and any parenthetical aside that mentions "today" in lessons, flashcards and answer explanations. `T()` in `app.js` marks those notes at render time; the content files aren't changed.
 
 **Step keys.** Step completion is saved under `module:key`. A step without a `key` uses its position among the unkeyed steps, so removing or inserting an unkeyed step shifts the ones after it. When you remove a step, give the later steps an explicit `key` equal to their old position (as in `m09.js` and `m12.js`) so saved progress still lines up.
+
+**Today's session.** The home page leads with three parts: up to 12 due flashcards, ten mixed questions, then the next lesson steps. The mixed set (`sessionQuestions()`) takes misses and lucky guesses first, then unseen questions from finished modules spread across domains (weakest first), then the right answers given longest ago. Each part's progress is derived from timestamps already in the synced state, so there's no extra storage.
+
+**Confidence mark.** Practice questions have a "Not sure?" toggle; in a mock, a flagged question counts as not sure. `state.first[id].sure` and `state.answers[id].sure` record it. A first attempt that was right but not sure is a lucky guess and stays in the `#drill-shaky` drill until it's answered right without the mark.
+
+**Coach (`sample` capability).** After an answer, the learner can type an explanation for Claude to grade against the question's own explanations, and after a wrong answer can ask for a fresh variant. Both run on the viewer's Claude account, only on a click, and nothing returned is scored or saved; variants are labeled as unreviewed. The coach appears only when `claude.use("sample")` resolves, so the artifact must be published with `capabilities: {db: {}, user: {}, sample: {}}`. A declined or unavailable permission removes the coach for that view.
+
+**Phone layout.** At 560px and under, a bottom tab bar (Today, Practice, Cards, More) replaces the top nav and hides inside lessons, drills and mocks. Lesson headers collapse after step 1, and tables with three or more columns stack into one card per row.
