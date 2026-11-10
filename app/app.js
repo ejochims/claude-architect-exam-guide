@@ -3,7 +3,7 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [] });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], notes: {} });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false, echoPushes = [];
@@ -44,7 +44,7 @@
       for (const [id, t] of Object.entries(a[k] || {})) m[id] = Math.max(t || 0, m[id] || 0);
       out[k] = m;
     }
-    for (const k of ["answers", "cards", "lessonAns"]) {
+    for (const k of ["answers", "cards", "lessonAns", "notes"]) {
       const m = Object.assign({}, b[k] || {});
       for (const [id, v] of Object.entries(a[k] || {})) m[id] = later(v, m[id]);
       out[k] = m;
@@ -188,7 +188,42 @@
   // Runs on the viewer's own Claude account, only on a click. Where it's unavailable or declined, the coach
   // never appears and the rest of the app is unchanged. Nothing it returns is scored or saved.
   let askClaude = null, coachOff = false;
-  if (window.claude && window.claude.use) window.claude.use("sample").then(fn => { askClaude = fn || null; }).catch(() => {});
+  // "Ask about this step": a short tutor chat grounded in the open lesson's own text. The page keeps the turns;
+  // Claude remembers nothing between calls. Answers are not saved.
+  function askBlock(mod, steps, i) {
+    const box = document.createElement("section"); box.className = "ask";
+    box.innerHTML = `<div class="coach-label">Ask about this step</div>
+<p class="small">Stuck on something here? Ask, and Claude answers from this lesson's text. Answers aren't reviewed or saved.</p>
+<div class="ask-log" aria-live="polite"></div>
+<form class="ask-form"><input class="ask-in" type="text" maxlength="500" placeholder="e.g. Why can't a prompt guarantee the refund limit?" aria-label="Your question"><button class="btn ghost small-btn ask-go" type="submit" style="margin-left:0">Ask</button><button class="btn ghost small-btn ask-stop" type="button" hidden style="margin-left:0">Stop</button></form>`;
+    const log = box.querySelector(".ask-log"), form = box.querySelector(".ask-form"), input = box.querySelector(".ask-in"), goBtn = box.querySelector(".ask-go"), stopBtn = box.querySelector(".ask-stop");
+    const lesson = steps.map((st, k) => { const body = st.kind === "read" ? plainText(st.html) : st.kind === "recap" ? st.points.join(" ") : st.kind === "quiz" ? st.questions.map(q => plainText(q.stem)).join(" ") : st.intro || ""; return `${k === i ? ">>> THE STEP THE LEARNER IS ON <<<\n" : ""}Step ${k + 1}: ${st.title}\n${body}`; }).join("\n\n").slice(0, 60000);
+    const RULES = `You are the tutor inside a self-study course for the Claude Certified Architect - Foundations exam. Answer the learner's question from the lesson text below, in the lesson's own terms. Rules: plain text only, no Markdown; at most 150 words; start with the direct answer; use one concrete example when it helps. If the lesson text doesn't cover the question, say so in one sentence, then give a short general answer that begins "Beyond this lesson:". Where the exam's expected answer differs from how current products behave, give the exam's answer first and say it's the exam's framing. Don't invent flags, settings or features.\n\nModule ${mod.n}: ${mod.title}\nPrinciple: ${mod.principle}\n\n${lesson}`;
+    const turns = []; let ctl = null;
+    stopBtn.addEventListener("click", () => ctl && ctl.abort());
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const qn = input.value.trim(); if (qn.length < 3 || ctl) return;
+      const item = document.createElement("div"); item.className = "ask-item";
+      item.innerHTML = `<p class="ask-q">${esc(qn)}</p><p class="ask-a">Thinking…</p>`; log.append(item);
+      const ans = item.querySelector(".ask-a");
+      input.value = ""; goBtn.disabled = true; stopBtn.hidden = false; ctl = new AbortController();
+      turns.push({ role: "user", content: qn });
+      try {
+        const r = await askClaude([{ role: "user", content: RULES }, ...turns.slice(-8)], { cache: false, signal: ctl.signal, onText: ({ text }) => { ans.textContent = text; } });
+        ans.textContent = r.text; turns.push({ role: "assistant", content: r.text });
+      } catch (err) {
+        turns.pop();
+        const msg = coachError(err);
+        ans.textContent = (err && err.text ? err.text + " " : "") + (err && err.code === "cancelled" ? "(stopped)" : msg);
+        if (coachOff) form.remove();
+      }
+      ctl = null; goBtn.disabled = false; stopBtn.hidden = true;
+    });
+    return box;
+  }
+  if (window.claude && window.claude.use) window.claude.use("sample").then(fn => { askClaude = fn || null; onClaudeReady && onClaudeReady(); }).catch(() => {});
+  let onClaudeReady = null;
   const plainText = h => { const d = document.createElement("div"); d.innerHTML = h; return d.textContent.replace(/\s+/g, " ").trim(); };
   const coachError = e => { const c = e && e.code; if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(c)) { coachOff = true; return "Claude isn't available for this page, so the coach is off."; } return c === "rate_limited" ? "Claude is rate-limited right now. Try again in a few minutes." : c === "session_expired" ? "Sign in again to use the coach." : c === "cancelled" ? "" : "That didn't go through. Try again."; };
   const refText = q => `Task statement ${q.ts}: ${B.tasks[q.ts]}\nQuestion: ${plainText(q.stem)}\nOptions:\n${q.options.map((o, i) => `${i + 1}. [${o.ok ? "CORRECT" : "wrong"}] ${plainText(o.t)}\n   Why: ${plainText(o.why)}`).join("\n")}`;
@@ -311,6 +346,16 @@
         const mod = !a.ok && MODS.find(x => x.id === q.module);
         if (mod && !location.hash.startsWith(`#${mod.id}`)) res.insertAdjacentHTML("beforeend", `<a class="linkbtn review-link" href="#${mod.id}">Review Module ${mod.n}: ${esc(mod.title)} →</a>`);
         card.append(res);
+        if (!a.ok && mode !== "exam") {
+          const note = document.createElement("div"); note.className = "miss-note";
+          const had = (state.notes[q.id] || {}).t || "";
+          note.innerHTML = `<label class="small" for="note-${q.id}">Why did you miss it? One line, for your cram sheet.</label><input id="note-${q.id}" class="note-in" type="text" maxlength="200" value="${esc(had)}" placeholder="e.g. I picked the prompt fix for a rule that needs a guarantee"><span class="small note-saved">${had ? `<a href="#cram">On your cram sheet →</a>` : ""}</span>`;
+          const inp = note.querySelector(".note-in"), saved = note.querySelector(".note-saved");
+          const save = () => { const t = inp.value.trim(); if (t === ((state.notes[q.id] || {}).t || "")) return; state.notes[q.id] = { t, at: Date.now() }; touch(); saved.innerHTML = t ? `Saved. <a href="#cram">Open your cram sheet →</a>` : "Note removed."; };
+          inp.addEventListener("change", save);
+          inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); save(); inp.blur(); } });
+          card.append(note);
+        }
         if (askClaude && !coachOff && mode !== "exam") card.append(coachBlock(q, a));
       }
     };
@@ -569,8 +614,28 @@ ${weeks.length ? weeks.map(w => `<div class="plan-week"><div class="eyebrow">Wee
     wirePrint();
     draw();
   }
+  // Cram sheet: every question you got wrong on the first try, reduced to what to remember.
+  function viewCram() {
+    const picks = {}; for (const [id, c] of allWrongPicks()) (picks[id] = picks[id] || []).push(...(Array.isArray(c) ? c : [c]));
+    const qs = ALLQ.filter(q => (state.first[q.id] && !state.first[q.id].ok && (!q.holdout || state.readiness)) || (state.notes[q.id] || {}).t)
+      .sort((x, y) => domOfTask(y.ts).weight - domOfTask(x.ts).weight || x.ts.localeCompare(y.ts));
+    const noted = qs.filter(q => (state.notes[q.id] || {}).t).length;
+    const item = q => {
+      const traps = [...new Set((picks[q.id] || []).map(k => q.options[k] && !q.options[k].ok && q.options[k].trap).filter(Boolean))];
+      const rule = PRINC.find(pr => pr.ts === q.ts), note = (state.notes[q.id] || {}).t, stem = plainText(q.stem);
+      return `<div class="cram-item"><div class="q-meta">${taskChip(q.ts)}<span class="small">${esc(B.tasks[q.ts])}</span>${traps.map(t => `<span class="trap-badge" style="margin-top:0">Trap: ${esc(TRAPS[t].name)}</span>`).join("")}</div>
+<p class="cram-stem">${esc(stem.length > 220 ? stem.slice(0, 217) + "…" : stem)}</p>
+${q.options.filter(o => o.ok).map(o => `<p class="cram-right"><strong>Right:</strong> ${o.t} <span class="cram-why">${T(o.why)}</span></p>`).join("")}
+${note ? `<p class="cram-note"><strong>Your note:</strong> ${esc(note)}</p>` : `<p class="small cram-nonote">No note yet. Retry it and write why you missed it.</p>`}
+${rule ? `<p class="small cram-rule"><strong>Rule:</strong> ${esc(rule.rule)}</p>` : ""}</div>`;
+    };
+    app.innerHTML = `${pageHead("Cram sheet", "Your misses, reduced to what to remember", `${qs.length} question${qs.length === 1 ? "" : "s"} you got wrong on the first try, heaviest exam domains first. ${noted} carry your own note. Print it for the last few days.`)}
+<div class="read">${qs.length ? `<div class="pr-tools"><label><input type="checkbox" id="cramnoted"> Only the ones with my note</label>${printBtn()}</div>${B.domains.slice().sort((x, y) => y.weight - x.weight).map(d => { const dq = qs.filter(q => domOfTask(q.ts).id === d.id); return dq.length ? `<section class="cram-dom"><h2><span class="chip dom-${d.id}">D${d.n}</span> ${esc(d.name)} <span class="small">${dq.length}</span></h2>${dq.map(item).join("")}</section>` : ""; }).join("")}` : `<div class="panel"><p>Nothing here yet. When you get a question wrong, it lands on this sheet with the right answer and the rule behind it. Add a one-line note on why you missed it and the sheet becomes your own review list.</p><div class="row-btns"><a class="btn" href="#practice">Go to practice</a></div></div>`}</div>`;
+    wirePrint();
+    document.getElementById("cramnoted")?.addEventListener("change", e => app.querySelectorAll(".cram-item").forEach(n => { n.hidden = e.target.checked && !n.querySelector(".cram-note"); }));
+  }
   function viewMore() {
-    const links = [["#plan", "Study plan", "Your exam date and week-by-week pace"], ["#blueprint", "Blueprint", "All 30 task statements and your score on each"], ["#principles", "Principles", "The design rules behind the right answers"], ["#glossary", "Glossary", "Every term, linked to its lesson"], ["#today", "Exam vs. today", "Where the exam's answers differ from current products, and exam mode"], ["#exam-day", "Exam-day playbook", "Pacing, technique and logistics"]];
+    const links = [["#plan", "Study plan", "Your exam date and week-by-week pace"], ["#blueprint", "Blueprint", "All 30 task statements and your score on each"], ["#principles", "Principles", "The design rules behind the right answers"], ["#glossary", "Glossary", "Every term, linked to its lesson"], ["#today", "Exam vs. today", "Where the exam's answers differ from current products, and exam mode"], ["#exam-day", "Exam-day playbook", "Pacing, technique and logistics"], ["#cram", "Cram sheet", "Your misses with the right answer, the rule and your own notes"]];
     app.innerHTML = `${pageHead("More", "Reference and planning", "")}<div class="read more-list">${links.map(([h, t, d]) => `<a class="mock-card" href="${h}"><div><h2>${t}</h2><p>${d}</p></div><span aria-hidden="true">→</span></a>`).join("")}</div>`;
   }
   function viewToday() {
@@ -659,6 +724,8 @@ ${B.domains.map(d => `<section class="bp-dom">
       el.append(ol);
     }
     wireExamToggle();
+    const mountAsk = () => { if (askClaude && !coachOff && (step.kind === "read" || step.kind === "recap") && el.isConnected && !el.querySelector(".ask")) el.append(askBlock(mod, steps, i)); };
+    mountAsk(); onClaudeReady = mountAsk;
     const go = k => { location.hash = `#${id}-${k + 1}`; };
     app.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.go))));
     document.getElementById("prev").addEventListener("click", () => go(i - 1));
@@ -741,7 +808,7 @@ ${mocks.length ? `<div class="trend-wrap"><table class="trend-table"><caption>Mo
   <div>
     <div class="eyebrow">Retry my misses</div>
     <h2>${missedQs().length ? `${missedQs().length} question${missedQs().length === 1 ? "" : "s"} to retry` : "Nothing to retry yet"}</h2>
-    <p>Questions you got wrong on the first try stay here until you answer them right. Each wrong answer links to the module that teaches it.</p>
+    <p>Questions you got wrong on the first try stay here until you answer them right. Each wrong answer links to the module that teaches it. <a href="#cram">Open your cram sheet →</a></p>
   </div>
   <a class="btn ghost" href="#drill-misses">Retry →</a>
 </section>
@@ -1045,7 +1112,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     const d = h.match(/^drill-([1-6]|misses|shaky|today)$/);
     if (d) return { drill: /^\d$/.test(d[1]) ? Number(d[1]) : d[1], page: "practice" };
     if (h === "more") return { page: "more" };
-    if (["blueprint", "today", "glossary", "principles", "plan", "exam-day", "practice", "mock", "mock-result", "readiness", "cards"].includes(h)) return { page: h };
+    if (["blueprint", "today", "glossary", "principles", "plan", "exam-day", "practice", "mock", "mock-result", "readiness", "cards", "cram"].includes(h)) return { page: h };
     return { page: "path" };
   }
   function render() {
@@ -1056,10 +1123,11 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     // On narrow screens the nav scrolls sideways; keep the active link in view.
     const onLink = document.querySelector(".nav a.on"), navEl = onLink && onLink.parentElement;
     if (navEl && navEl.scrollWidth > navEl.clientWidth) navEl.scrollLeft = Math.max(0, onLink.offsetLeft - navEl.offsetLeft - (navEl.clientWidth - onLink.offsetWidth) / 2);
-    const more = ["plan", "blueprint", "today", "glossary", "principles", "exam-day", "more"].includes(r.page);
+    const more = ["plan", "blueprint", "today", "glossary", "principles", "exam-day", "more", "cram"].includes(r.page);
     document.querySelectorAll("[data-tab]").forEach(a => a.classList.toggle("on", !r.lesson && (a.dataset.tab === "more" ? more : a.dataset.tab === navKey)));
     document.documentElement.classList.toggle("focus", !!r.lesson || !!r.drill || r.page === "mock");
     if (r.page === "more") return viewMore();
+    if (r.page === "cram") return viewCram();
     if (r.lesson) viewLesson(r.lesson, r.step);
     else if (r.drill) viewDrill(r.drill);
     else if (r.page === "blueprint") viewBlueprint();
