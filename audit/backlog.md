@@ -582,3 +582,10 @@ The official guide doesn't give the proportion of multiple-response items.
 
 **Checks.** `content-check`: invariants OK. `browser-suite`: 431 checks, no problems.
 
+## Batch 23: miss notes, cram sheet, ask about this step (2026-11-10)
+
+- **Miss notes and cram sheet.** A one-line note on any wrong answer, and a printable `#cram` page of first-try misses with the right answer, the rule, the trap picked and the note.
+- **Ask about this step.** A tutor chat on read and recap steps, answered by Claude from the lesson's text.
+- **Limits.** Tutor answers are unreviewed model output, constrained by prompt only; the tests stub Claude. A copy of the app from before this batch doesn't know about notes, so an old open tab can briefly push a state without them until this version syncs again.
+- **Checks.** `content-check`: invariants OK. `browser-suite`: 445 checks, no problems, run twice.
+

@@ -115,7 +115,7 @@ async function run(viewport, colorScheme) {
   const tabVisible = () => page.evaluate(() => { const t = document.querySelector(".tabbar"); return !!t && getComputedStyle(t).display !== "none"; });
   await visit("#more");
   if ((await tabVisible()) !== (viewport.width <= 560)) problems.push(`${tag}: tab bar visibility is wrong on #more`);
-  if ((await page.locator(".more-list a").count()) !== 6) problems.push(`${tag}: More page should list 6 links`);
+  if ((await page.locator(".more-list a").count()) !== 7) problems.push(`${tag}: More page should list 7 links`);
   await visit("#m06-2");
   if (await tabVisible()) problems.push(`${tag}: tab bar should hide inside a lesson`);
   if (!(await page.locator(".l-head.compact").count())) problems.push(`${tag}: lesson header should be compact after step 1`);
@@ -128,7 +128,7 @@ async function run(viewport, colorScheme) {
     const cp = await browser.newPage({ viewport, colorScheme });
     cp.on("pageerror", e => problems.push(`${tag} coach pageerror: ${e.message}`));
     await cp.addInitScript(declined => {
-      const fn = async () => ({ text: "x", truncated: false });
+      const fn = async (input, opts) => { if (declined) throw { code: "not_granted", message: "no" }; opts && opts.onText && opts.onText({ text: "A hook is code.", delta: "A hook is code." }); return { text: "A hook is code.", truncated: false }; };
       fn.json = async prompt => { if (declined) throw { code: "not_granted", message: "no" }; return prompt.startsWith("Write one new") ? { stem: "A <b>new</b> question?", options: [{ t: "one", ok: true, why: "yes" }, { t: "two", ok: false, why: "no" }, { t: "three", ok: false, why: "no" }, { t: "four", ok: false, why: "no" }] } : { verdict: "solid", feedback: "You named the real reason.", missing: "" }; };
       window.claude = { use: async name => name === "sample" ? fn : null };
     }, declined);
@@ -148,7 +148,24 @@ async function run(viewport, colorScheme) {
       await card.locator(".q.variant .opt").first().click();
       if (!(await card.locator(".q.variant .opt.is-right").count())) problems.push(`${tag}: variant didn't reveal its answer`);
     }
-    checks += 2; await cp.close();
+    // A miss takes a one-line note, which shows up on the cram sheet.
+    await card.locator(".note-in").fill("Picked the sentinel; text is not a signal"); await card.locator(".note-in").press("Enter"); await cp.waitForTimeout(60);
+    await cp.goto(URL + "#cram"); await cp.waitForTimeout(120);
+    if (!(await cp.locator(".cram-note", { hasText: "Picked the sentinel" }).count())) problems.push(`${tag}: miss note didn't reach the cram sheet`);
+    const over = await cp.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (over > 1) problems.push(`${tag} #cram: horizontal overflow ${over}px`);
+    // "Ask about this step" answers from the stub, and disappears when Claude is declined.
+    await cp.goto(URL + "#m03-3"); await cp.waitForTimeout(150);
+    // Once Claude has been declined in this view, the ask box stays away too.
+    if (declined) { if (await cp.locator(".ask").count()) problems.push(`${tag}: ask box should stay hidden after Claude was declined`); }
+    else if (!(await cp.locator(".ask").count())) problems.push(`${tag}: ask box missing on a read step`);
+    else {
+      await cp.locator(".ask-in").fill("Why a hook and not a prompt?"); await cp.locator(".ask-go").click(); await cp.waitForTimeout(100);
+      if (!(await cp.locator(".ask-a", { hasText: "A hook is code." }).count())) problems.push(`${tag}: ask box didn't show the answer`);
+    }
+    await cp.goto(URL + "#m03-2"); await cp.waitForTimeout(120);
+    if (await cp.locator(".ask").count()) problems.push(`${tag}: ask box should not appear on a widget step`);
+    checks += 5; await cp.close();
   }
   // Exam mode hides the "Real world today" callouts and parenthetical asides; turning it off restores them.
   await visit("#m02-4");

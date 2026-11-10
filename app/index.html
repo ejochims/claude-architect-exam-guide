@@ -179,6 +179,24 @@ a.mod:hover { background: var(--surface); }
 .callout.key .callout-label { color: var(--accent-ink); }
 .callout.today { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .callout.today .callout-label::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d3); margin-right: 7px; vertical-align: 1px; }
+.miss-note { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.note-in, .ask-in { width: 100%; font: 400 15.5px/1.4 var(--sans); padding: 9px 11px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0; }
+.ask { margin-top: 30px; padding-top: 18px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+.ask p.small { margin: 0; }
+.ask-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask-form .ask-in { flex: 1 1 220px; }
+.ask-item { border-left: 3px solid var(--d4); padding: 2px 0 2px 12px; margin: 6px 0; }
+.ask-q { font: 600 15px/1.4 var(--sans); margin: 0 0 4px; }
+.ask-a { font: 400 16.5px/1.55 var(--serif); margin: 0; white-space: pre-wrap; }
+.cram-dom { margin: 24px 0 8px; }
+.cram-dom h2 { font-size: 18px; display: flex; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.cram-item { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 12px 14px; margin: 8px 0; break-inside: avoid; }
+.cram-item p { margin: 6px 0 0; }
+.cram-stem { font: 400 15.5px/1.45 var(--serif); color: var(--muted); }
+.cram-right { font: 500 15px/1.45 var(--sans); }
+.cram-why { display: block; font: 400 15px/1.5 var(--serif); margin-top: 2px; }
+.cram-note { font: 400 15.5px/1.45 var(--serif); background: var(--accent-soft); border-radius: 7px; padding: 7px 10px; }
+.cram-item code { background: var(--sunk); padding: 1px 4px; border-radius: 4px; font-size: .82em; }
 .coach { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
 .coach-label { font: 650 11.5px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--d4); }
 .coach-in { width: 100%; font: 400 16px/1.45 var(--serif); padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical; }
