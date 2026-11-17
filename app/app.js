@@ -3,7 +3,7 @@
   const B = window.BLUEPRINT, MODS = window.MODULES, L = window.LESSONS, TRAPS = window.TRAPS, BANK = window.BANK || [], TODAY = window.EXAM_VS_TODAY || [], GLOSS = window.GLOSSARY || [], PRINC = window.PRINCIPLES || [], PTHEMES = window.PRINCIPLE_THEMES || [];
   const app = document.getElementById("app");
   const KEY = "cca-study-progress-v1";
-  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], notes: {} });
+  const blank = () => ({ v: 1, updatedAt: 0, steps: {}, answers: {}, first: {}, lessonAns: {}, widgets: {}, last: null, cards: {}, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], notes: {}, resets: {} });
 
   // ---------- State and sync ----------
   let state = blank(), remoteRef = null, saveTimer = null, saving = false, dirty = false, echoPushes = [];
@@ -36,8 +36,29 @@
   // own values at each other forever. So every choice is by value, with ties broken by content.
   const later = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) > (y[k] || 0) ? x : y) : canon(x) >= canon(y) ? x : y;
   const earlier = (x, y, k = "at") => !x ? y : !y ? x : (x[k] || 0) !== (y[k] || 0) ? ((x[k] || 0) < (y[k] || 0) ? x : y) : canon(x) <= canon(y) ? x : y;
+  // Resets. Progress syncs by combining records from every device, so deleting records locally would let
+  // another device add them straight back. A reset is instead a dated marker per scope, synced like any
+  // record: every device drops the records in that scope that are older than the marker. Each marker
+  // carries its own version (v), so restoring a backup can lift it everywhere.
+  const RESET_SCOPES = ["course", "practice", "cards", "all"];
+  const resetAt = (s, k) => Math.max((((s.resets || {})[k]) || {}).at || 0, (((s.resets || {}).all) || {}).at || 0);
+  function prune(s) {
+    const c = resetAt(s, "course"), p = resetAt(s, "practice"), k = resetAt(s, "cards"), a = (((s.resets || {}).all) || {}).at || 0;
+    const dropT = (o, t) => { if (t && o) for (const id of Object.keys(o)) if ((o[id] || 0) <= t) delete o[id]; };
+    const dropAt = (o, t) => { if (t && o) for (const id of Object.keys(o)) if (((o[id] || {}).at || 0) <= t) delete o[id]; };
+    dropT(s.steps, c); dropT(s.widgets, c); dropAt(s.lessonAns, c);
+    if (c && s.last && (s.last.at || 0) <= c) s.last = null;
+    dropAt(s.answers, p);
+    if (p) { s.mocks = (s.mocks || []).filter(r => (r.at || r.startedAt || 0) > p); if (s.mock && (s.mock.startedAt || 0) <= p) s.mock = null; }
+    dropAt(s.cards, k);
+    dropAt(s.first, a); dropAt(s.notes, a);
+    if (a && s.readiness && (s.readiness.at || 0) <= a) s.readiness = null;
+    if (a && s.plan && (s.plan.at || 0) <= a) s.plan = null;
+    return s;
+  }
   function merge(a, b) {
     const out = blank();
+    for (const k of RESET_SCOPES) { const r = later((a.resets || {})[k], (b.resets || {})[k], "v"); if (r) out.resets[k] = r; }
     out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
     for (const k of ["steps", "widgets"]) {
       const m = Object.assign({}, b[k] || {});
@@ -63,8 +84,9 @@
     out.mocks = [...seen.values()].sort((x, y) => (y.at - x.at) || (y.startedAt - x.startedAt)).slice(0, 10);
     const m = later(a.mock, b.mock, "startedAt");
     out.mock = m && !seen.has(m.startedAt) ? m : null;
-    return out;
+    return prune(out);
   }
+  prune(state);
   async function initSync() {
     if (!window.claude || !window.claude.use) return;
     try {
@@ -558,14 +580,10 @@ ${weeks.length ? weeks.map(w => `<div class="plan-week"><div class="eyebrow">Wee
     document.getElementById("offdone").addEventListener("change", () => { saveOff(); viewPlan(); });
     document.getElementById("offscore").addEventListener("change", saveOff);
     const msg = document.getElementById("pmsg");
-    document.getElementById("pexport").addEventListener("click", () => {
-      const url = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" }));
-      const a = document.createElement("a"); a.href = url; a.download = `cca-progress-${isoToday()}.json`; document.body.append(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000); msg.textContent = "Downloaded.";
-    });
+    document.getElementById("pexport").addEventListener("click", () => { downloadBackup(); msg.textContent = "Downloaded."; });
     document.getElementById("pimport").addEventListener("change", e => {
       const f = e.target.files[0]; if (!f) return;
-      f.text().then(t => { const d = JSON.parse(t); if (!d || d.v !== 1 || typeof d.answers !== "object") throw new Error("format"); state = merge(state, d); touch(); viewPlan(); toast("Progress imported"); })
+      f.text().then(t => { const d = JSON.parse(t); if (!d || d.v !== 1 || typeof d.answers !== "object") throw new Error("format"); state.resets = Object.fromEntries(RESET_SCOPES.map(k => [k, { at: 0, v: Date.now() }])); state = merge(state, d); touch(); viewPlan(); toast("Progress imported"); })
         .catch(() => { msg.textContent = "That file isn't a progress backup from this app."; });
     });
   }
@@ -634,8 +652,61 @@ ${rule ? `<p class="small cram-rule"><strong>Rule:</strong> ${esc(rule.rule)}</p
     wirePrint();
     document.getElementById("cramnoted")?.addEventListener("change", e => app.querySelectorAll(".cram-item").forEach(n => { n.hidden = e.target.checked && !n.querySelector(".cram-note"); }));
   }
+  function downloadBackup() {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = `cca-progress-${isoToday()}.json`; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function viewReset() {
+    const n = o => Object.keys(o || {}).length, pl = (k, w) => `${k} ${w}${k === 1 ? "" : "s"}`;
+    const stepsDone = MODS.reduce((t, m) => t + (L[m.id] ? L[m.id].steps.filter((_, i) => stepDone(m.id, i)).length : 0), 0);
+    const firsts = Object.values(state.first || {}), fOk = firsts.filter(f => f.ok).length;
+    const opts = [
+      { k: "course", title: "Restart the course", rec: true, go: "#path",
+        now: `${pl(stepsDone, "lesson step")} done, ${pl(n(state.lessonAns), "lesson-quiz answer")}`,
+        clears: "Lesson steps, interactive exercises, lesson-quiz answers and your place in the course. Every module goes back to Start.",
+        keeps: "Your first-attempt record and readiness signal, practice and mock history, flashcards and notes.",
+        why: "Best for going through the expanded course again. Your readiness numbers stay honest, because they're still based on the first time you saw each question." },
+      { k: "practice", title: "Clear practice history", go: "#practice",
+        now: `${pl(n(state.answers), "practice answer")}, ${pl((state.mocks || []).length, "scored mock")}${state.mock ? ", 1 mock in progress" : ""}`,
+        clears: "Drill and practice answers, mock history and any mock in progress.",
+        keeps: "Your first-attempt record and readiness signal, the course, flashcards and notes.",
+        why: "Use it to work through drills and mocks with a clean slate." },
+      { k: "cards", title: "Reset flashcards", go: "#cards",
+        now: `${pl(n(state.cards), "card")} in rotation`,
+        clears: "Every card's schedule: all cards become new and due again.",
+        keeps: "Everything else.", why: "" },
+      { k: "all", title: "Erase everything", danger: true, go: "#path",
+        now: `${pl(firsts.length, "first attempt")} (${firsts.length ? Math.round(fOk / firsts.length * 100) : 0}% correct), ${pl(n(state.notes), "note")}${state.readiness ? ", your Readiness Check result" : ""}`,
+        clears: "All of the above, plus your first-attempt record, readiness signal, Readiness Check result, miss notes and study plan.",
+        keeps: "Nothing but the exam-mode setting on this device.",
+        why: "Caution: you've already seen these questions, so new “first attempts” will score higher than your real level, and readiness will look better than it is. Only use this for a true fresh start." }
+    ];
+    app.innerHTML = `${pageHead("Start over", "Reset your progress", "Choose what to reset. Each reset applies to every device you study on.")}
+<div class="read">
+<div class="panel reset-backup"><div><h3 style="margin:0 0 4px">Download a backup first</h3><p class="small" style="margin:0">If you change your mind, import it from the Plan page to bring everything back.</p></div><button class="btn ghost" type="button" id="rbackup">Download backup</button></div>
+${opts.map(o => `<section class="panel reset-opt${o.danger ? " danger" : ""}">
+  <h2>${o.title}${o.rec ? ` <span class="chip rec-chip">Recommended</span>` : ""}</h2>
+  <p class="small reset-now">Now: ${esc(o.now)}</p>
+  <p><strong>Resets:</strong> ${esc(o.clears)}</p>
+  <p><strong>Keeps:</strong> ${esc(o.keeps)}</p>
+  ${o.why ? `<p class="small">${esc(o.why)}</p>` : ""}
+  <button class="btn ${o.danger ? "danger" : "ghost"}" type="button" data-reset="${o.k}" data-go="${o.go}">${o.title}</button>
+</section>`).join("")}
+</div>`;
+    document.getElementById("rbackup").addEventListener("click", () => { downloadBackup(); toast("Backup downloaded"); });
+    app.querySelectorAll("[data-reset]").forEach(btn => btn.addEventListener("click", () => {
+      const k = btn.dataset.reset, label = btn.textContent;
+      if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "Click again to confirm"; setTimeout(() => { if (btn.isConnected) { btn.dataset.armed = ""; btn.textContent = label; } }, 6000); return; }
+      const now = Date.now();
+      state.resets = Object.assign({}, state.resets, { [k]: { at: now, v: now } });
+      prune(state); touch();
+      toast({ course: "Course restarted", practice: "Practice history cleared", cards: "Flashcards reset", all: "Everything erased" }[k]);
+      location.hash = btn.dataset.go;
+    }));
+  }
   function viewMore() {
-    const links = [["#plan", "Study plan", "Your exam date and week-by-week pace"], ["#blueprint", "Blueprint", "All 30 task statements and your score on each"], ["#principles", "Principles", "The design rules behind the right answers"], ["#glossary", "Glossary", "Every term, linked to its lesson"], ["#today", "Exam vs. today", "Where the exam's answers differ from current products, and exam mode"], ["#exam-day", "Exam-day playbook", "Pacing, technique and logistics"], ["#cram", "Cram sheet", "Your misses with the right answer, the rule and your own notes"]];
+    const links = [["#plan", "Study plan", "Your exam date and week-by-week pace"], ["#blueprint", "Blueprint", "All 30 task statements and your score on each"], ["#principles", "Principles", "The design rules behind the right answers"], ["#glossary", "Glossary", "Every term, linked to its lesson"], ["#today", "Exam vs. today", "Where the exam's answers differ from current products, and exam mode"], ["#exam-day", "Exam-day playbook", "Pacing, technique and logistics"], ["#cram", "Cram sheet", "Your misses with the right answer, the rule and your own notes"], ["#reset", "Start over", "Restart the course, clear practice or flashcards, or erase everything"]];
     app.innerHTML = `${pageHead("More", "Reference and planning", "")}<div class="read more-list">${links.map(([h, t, d]) => `<a class="mock-card" href="${h}"><div><h2>${t}</h2><p>${d}</p></div><span aria-hidden="true">→</span></a>`).join("")}</div>`;
   }
   function viewToday() {
@@ -1111,7 +1182,7 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     }
     const d = h.match(/^drill-([1-6]|misses|shaky|today)$/);
     if (d) return { drill: /^\d$/.test(d[1]) ? Number(d[1]) : d[1], page: "practice" };
-    if (h === "more") return { page: "more" };
+    if (h === "more" || h === "reset") return { page: h };
     if (["blueprint", "today", "glossary", "principles", "plan", "exam-day", "practice", "mock", "mock-result", "readiness", "cards", "cram"].includes(h)) return { page: h };
     return { page: "path" };
   }
@@ -1123,10 +1194,11 @@ ${deck.flipped ? `<div class="row-btns flash-btns"><button class="btn ghost" typ
     // On narrow screens the nav scrolls sideways; keep the active link in view.
     const onLink = document.querySelector(".nav a.on"), navEl = onLink && onLink.parentElement;
     if (navEl && navEl.scrollWidth > navEl.clientWidth) navEl.scrollLeft = Math.max(0, onLink.offsetLeft - navEl.offsetLeft - (navEl.clientWidth - onLink.offsetWidth) / 2);
-    const more = ["plan", "blueprint", "today", "glossary", "principles", "exam-day", "more", "cram"].includes(r.page);
+    const more = ["plan", "blueprint", "today", "glossary", "principles", "exam-day", "more", "cram", "reset"].includes(r.page);
     document.querySelectorAll("[data-tab]").forEach(a => a.classList.toggle("on", !r.lesson && (a.dataset.tab === "more" ? more : a.dataset.tab === navKey)));
     document.documentElement.classList.toggle("focus", !!r.lesson || !!r.drill || r.page === "mock");
     if (r.page === "more") return viewMore();
+    if (r.page === "reset") return viewReset();
     if (r.page === "cram") return viewCram();
     if (r.lesson) viewLesson(r.lesson, r.step);
     else if (r.drill) viewDrill(r.drill);
