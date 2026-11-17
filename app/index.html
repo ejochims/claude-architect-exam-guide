@@ -54,11 +54,23 @@ h1, h2, h3, h4 { font-family: var(--sans); text-wrap: balance; margin: 0; letter
 .nav { display: flex; gap: 4px; margin-left: auto; }
 .nav a { text-decoration: none; color: var(--muted); padding: 6px 10px; border-radius: 8px; font-weight: 550; }
 .nav a.on { color: var(--fg); background: var(--sunk); }
+.reset-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); text-decoration: none; white-space: nowrap; padding: 5px 8px; border-radius: 8px; }
+.reset-link:hover, .reset-link:focus-visible { color: var(--fg); background: var(--sunk); }
+.reset-link svg { width: 14px; height: 14px; flex: none; }
+.reset-backup { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.reset-opt { margin-bottom: 16px; }
+.reset-opt h2 { font-size: 18px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.reset-opt p { margin: 0 0 8px; }
+.reset-opt .reset-now { color: var(--muted); }
+.reset-opt .btn { margin-top: 6px; }
+.reset-opt.danger { box-shadow: inset 3px 0 0 var(--bad); }
+.rec-chip { background: var(--good-bg); color: var(--good); font-size: 11.5px; }
+.btn.danger { background: var(--bad); color: #fff; border-color: var(--bad); }
 .sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
 .sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
 .sync.synced i { background: var(--good); }
 .sync.saving i { background: var(--accent); }
-@media (max-width: 560px) { .brand small, .sync span { display: none; } .top-in { gap: 8px; } .nav { gap: 0; } .nav a { padding: 6px 7px; font-size: 14px; } }
+@media (max-width: 560px) { .brand small, .sync span, .reset-link span { display: none; } .top-in { gap: 8px; } .nav { gap: 0; } .nav a { padding: 6px 7px; font-size: 14px; } }
 @media (max-width: 440px) { .brand > span:last-child { display: none; } }
 /* Narrow screens: the nav scrolls sideways instead of widening the page. */
 @media (max-width: 560px) { .nav { min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; } .nav::-webkit-scrollbar { display: none; } .nav a { flex: none; } }
@@ -243,6 +255,8 @@ a.mod:hover { background: var(--surface); }
   .prose table.stack td:not(:first-child)::before { content: attr(data-th); display: block; font: 600 10.5px/1.5 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
   .top .nav { display: none; }
   .top .sync { margin-left: auto; }
+  .top .reset-link { margin-left: auto; }
+  .top .reset-link + .sync { margin-left: 0; }
   .brand > span:last-child { display: inline !important; }
   .tabbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
   .tabbar a { text-align: center; padding: 12px 4px 11px; text-decoration: none; color: var(--muted); font: 600 13px var(--sans); }
@@ -616,6 +630,7 @@ kbd { font: 600 11px var(--mono); border: 1px solid currentColor; border-radius:
       <a href="#principles" data-nav="principles">Principles</a>
       <a href="#glossary" data-nav="glossary">Glossary</a>
     </nav>
+    <a class="reset-link" href="#reset" title="Start over: reset your progress"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Start over</span></a>
     <span class="sync" id="sync" title="Where your progress is saved"><i></i><span>This device</span></span>
   </div>
 </header>

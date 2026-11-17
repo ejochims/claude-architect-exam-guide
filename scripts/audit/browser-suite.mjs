@@ -115,7 +115,7 @@ async function run(viewport, colorScheme) {
   const tabVisible = () => page.evaluate(() => { const t = document.querySelector(".tabbar"); return !!t && getComputedStyle(t).display !== "none"; });
   await visit("#more");
   if ((await tabVisible()) !== (viewport.width <= 560)) problems.push(`${tag}: tab bar visibility is wrong on #more`);
-  if ((await page.locator(".more-list a").count()) !== 7) problems.push(`${tag}: More page should list 7 links`);
+  if ((await page.locator(".more-list a").count()) !== 8) problems.push(`${tag}: More page should list 8 links`);
   await visit("#m06-2");
   if (await tabVisible()) problems.push(`${tag}: tab bar should hide inside a lesson`);
   if (!(await page.locator(".l-head.compact").count())) problems.push(`${tag}: lesson header should be compact after step 1`);
@@ -329,7 +329,39 @@ async function syncSettles() {
   await browser.close();
 }
 
+// A reset must reach every device: a second device holding the old progress must drop it rather than
+// add it back, while first attempts survive a course restart.
+async function resetSyncs() {
+  const browser = await chromium.launch();
+  const sortKeys = v => Array.isArray(v) ? v.map(sortKeys) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])])) : v;
+  const t = Date.now() - 60000, base = { v: 1, updatedAt: t, steps: { "m01:0": t, "m01:1": t }, widgets: { "m01:2": t }, answers: { "q01-1": { ok: true, choice: 0, at: t } }, first: { "q01-1": { ok: true, at: t } }, lessonAns: { "q01-1": { ok: true, choice: 0, at: t } }, cards: {}, last: { m: "m01", s: 1, at: t }, mocks: [], mock: null, readiness: null, plan: null, removedMocks: [], notes: {} };
+  let stored = sortKeys(base), saves = 0; const pages = [];
+  for (let i = 0; i < 2; i++) {
+    const p = await (await browser.newContext()).newPage(); pages.push(p);
+    p.on("pageerror", e => problems.push(`reset pageerror: ${e.message}`));
+    await p.exposeFunction("__set", d => { saves++; stored = sortKeys(d); setTimeout(() => pages.forEach(q => q.evaluate(s => window.__emit && window.__emit(s), stored).catch(() => {})), 30); });
+    await p.addInitScript(seed => {
+      const subs = []; window.__emit = s => subs.forEach(f => f({ exists: true, data: () => s }));
+      window.claude = { use: async n => n === "user" ? { id: async () => "u1" } : { doc: () => ({ set: d => window.__set(JSON.parse(JSON.stringify(d))), onSnapshot: f => { subs.push(f); } }) } };
+      if (!sessionStorage.getItem("seeded")) { localStorage.setItem("cca-study-progress-v1", JSON.stringify(seed)); sessionStorage.setItem("seeded", "1"); }
+    }, base);
+  }
+  const [a, b] = pages, read = p => p.evaluate(() => JSON.parse(localStorage.getItem("cca-study-progress-v1")));
+  await a.goto(URL + "#reset"); await a.evaluate(s => window.__emit(s), stored); await a.waitForTimeout(200);
+  const btn = a.locator('[data-reset="course"]'); await btn.click(); await btn.click(); await a.waitForTimeout(1600);
+  await b.goto(URL + "#path"); await b.evaluate(s => window.__emit(s), stored); await b.waitForTimeout(2000);
+  const s1 = saves; await b.waitForTimeout(2000); checks++;
+  if (saves > s1) problems.push(`reset: sync still saving after a course reset (${saves - s1} more saves)`);
+  for (const [name, p] of [["first device", a], ["second device", b]]) {
+    const s = await read(p);
+    if (Object.keys(s.steps).length || Object.keys(s.lessonAns).length || s.last) problems.push(`reset: ${name} still has course progress after a course reset`);
+    if (!s.first["q01-1"] || !s.answers["q01-1"]) problems.push(`reset: ${name} lost first attempts or practice answers in a course reset`);
+  }
+  await browser.close();
+}
+
 await syncSettles();
+await resetSyncs();
 await run({ width: 1280, height: 900 }, "light");
 await run({ width: 390, height: 844 }, "dark");
 console.log(`${checks} checks · ${problems.length ? `${problems.length} problems:\n  ` + problems.join("\n  ") : "no problems"}`);
